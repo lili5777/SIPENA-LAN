@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem LAN Pusjar SKMP</title>
+    <link rel="icon" href="{{ asset('gambar/lanri.png') }}" type="image/png">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -71,7 +72,7 @@
             width: 80px;
             height: 80px;
             margin: 0 auto 15px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            /* background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); */
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -670,7 +671,8 @@
         <div class="login-form">
             <div class="login-header">
                 <div class="lan-logo">
-                    <i class="fas fa-landmark"></i>
+                    {{-- <i class="fas fa-landmark"></i> --}}
+                    <img src="{{ asset('gambar/lanri.png') }}" alt="Logo LAN" width="100%">
                 </div>
                 <h2>LAN - Pusjar SKMP</h2>
                 <h3>Sistem Manajemen Pembelajaran</h3>
@@ -716,7 +718,7 @@
 
                 <div class="login-footer">
                     <p>Butuh bantuan? <a href="#">Hubungi Administrator Sistem</a></p>
-                    <p class="mt-2">© 2023 LAN (Pusjar SKMP) - Hak Cipta Dilindungi</p>
+                    <p class="mt-2">© 2025 LAN (Pusjar SKMP) - Hak Cipta Dilindungi</p>
                 </div>
             </form>
         </div>
@@ -732,7 +734,7 @@
 
             <div class="image-content">
                 <i class="fas fa-university institution-icon"></i>
-                <h3>Sistem Manajemen Pembelajaran LAN</h3>
+                <h3>Pusat Pembelajaran dan Strategi Kajian Manajemen Pemerintahan</h3>
                 <p>Platform terintegrasi untuk pengelolaan pembelajaran, kebijakan, dan strategi manajemen pemerintahan.
                 </p>
             </div>
