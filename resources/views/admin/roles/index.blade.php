@@ -3,106 +3,153 @@
 @section('title', 'Manajemen Role - Sistem Inventori Obat')
 
 @section('content')
-    <div class="page-header">
+    <!-- Page Header -->
+    <div class="page-header bg-gradient-primary rounded-3 mb-4"
+        style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
         <div class="row align-items-center">
             <div class="col">
-                <h1>Manajemen Role</h1>
+                <div class="d-flex align-items-center">
+                    <div class="icon-wrapper bg-white rounded-circle p-3 me-3 shadow">
+                        <i class="fas fa-user-tag fa-lg" style="color: #285496;"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-white mb-1">Manajemen Role</h1>
+                        <p class="text-white-50 mb-0">Kelola role dan hak akses pengguna dalam sistem</p>
+                    </div>
+                </div>
             </div>
             <div class="col-auto">
-                <a href="{{ route('roles.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i> Tambah Role
+                <a href="{{ route('roles.create') }}" class="btn btn-light btn-hover-lift shadow-sm"
+                    data-bs-toggle="tooltip" data-bs-placement="left" title="Buat role baru">
+                    <i class="fas fa-plus-circle me-2"></i> Tambah Role
                 </a>
             </div>
         </div>
     </div>
 
     <!-- Alert Section -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    <div class="alert-container mb-4">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                <div class="alert-icon flex-shrink-0">
+                    <i class="fas fa-check-circle fa-lg"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <strong>Sukses!</strong> {{ session('success') }}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                <div class="alert-icon flex-shrink-0">
+                    <i class="fas fa-exclamation-circle fa-lg"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <strong>Error!</strong> {{ session('error') }}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    </div>
 
-    <!-- Role Table -->
-    <div class="card">
-        <div class="card-header">
+    <!-- Role Table Card -->
+    <div class="card border-0 shadow-lg overflow-hidden">
+        <div class="card-header bg-white py-3 border-0">
             <div class="row align-items-center">
                 <div class="col">
-                    <h5 class="card-title mb-0">Daftar Role</h5>
+                    <h5 class="card-title mb-0 fw-semibold">
+                        <i class="fas fa-list me-2" style="color: #285496;"></i> Daftar Role
+                    </h5>
                 </div>
                 <div class="col-auto">
-                    <div class="input-group" style="max-width: 300px;">
-                        <span class="input-group-text">
-                            <i class="fas fa-search"></i>
+                    <div class="input-group search-group" style="max-width: 300px;">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search text-muted"></i>
                         </span>
-                        <input type="text" class="form-control" id="searchInput"
-                            placeholder="Cari nama role atau deskripsi...">
+                        <input type="text" class="form-control border-start-0 ps-0" id="searchInput"
+                            placeholder="Cari role atau deskripsi...">
+                        <button class="btn btn-outline-secondary" type="button" id="clearSearch" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="card-body">
-            <!-- Search Results Info -->
-            <div id="searchInfo" class="mb-3" style="display: none;">
-                <small class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Menampilkan <span id="searchCount">0</span> hasil dari pencarian
-                </small>
-            </div>
 
+        <!-- Search Results Info -->
+        <div id="searchInfo" class="alert alert-info alert-dismissible fade show m-3 mb-0" style="display: none;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-filter me-2"></i>
+                <div class="flex-grow-1">
+                    Menampilkan <span id="searchCount" class="fw-bold">0</span> hasil dari pencarian
+                </div>
+                <button type="button" class="btn-close" id="clearSearchBtn"></button>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover" id="roleTable">
+                <table class="table table-hover mb-0" id="roleTable">
                     <thead>
-                        <tr>
-                            <th width="5%">No</th>
-                            <th width="30%">Nama Role</th>
-                            <th width="45%">Deskripsi</th>
-                            <th width="20%">Aksi</th>
+                        <tr class="table-light">
+                            <th width="5%" class="ps-4">No</th>
+                            <th width="30%">Role</th>
+                            <th width="40%" class="d-none d-md-table-cell">Deskripsi</th>
+                            <th width="25%" class="text-center pe-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($roles as $index => $role)
-                            <tr data-role-id="{{ $role->id }}">
-                                <td data-label="No">{{ $index + 1 }}</td>
-                                <td data-label="Nama Role">
+                            <tr class="role-row" data-role-id="{{ $role->id }}">
+                                <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
+                                <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="role-icon me-2">
+                                        <div class="role-avatar me-3"
+                                            style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
                                             <i class="fas fa-user-tag"></i>
                                         </div>
                                         <div>
-                                            <strong>{{ $role->name }}</strong>
-                                            <div class="text-muted small">
-                                                {{ $role->users->count() ?? 0 }} user
+                                            <div class="fw-bold">{{ $role->name }}</div>
+                                            <!-- Desktop: Full info -->
+                                            <div class="text-muted small d-none d-md-block">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ $role->users_count ?? 0 }} user
+                                                <span class="mx-2">•</span>
+                                                <i class="fas fa-key me-1"></i>
+                                                {{ $role->permissions_count ?? 0 }} permissions
+                                            </div>
+                                            <!-- Mobile: Minimal info - hanya icon tanpa count -->
+                                            <div class="text-muted small d-md-none">
+                                                <i class="fas fa-user me-1"></i>
+                                                <i class="fas fa-key me-1"></i>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
-                                <td data-label="Deskripsi">
-                                    <span class="text-muted">{{ $role->description ?? 'Tidak ada deskripsi' }}</span>
+                                <td class="d-none d-md-table-cell">
+                                    <p class="mb-0 text-muted">{{ $role->description ?? 'Tidak ada deskripsi' }}</p>
                                 </td>
-                                <td data-label="Aksi">
-                                    <div class="btn-group action-btn-group" role="group">
-                                        <button class="btn btn-sm btn-info view-permissions" data-bs-toggle="modal"
-                                            data-bs-target="#permissionsModal" data-role-name="{{ $role->name }}"
+                                <td class="text-center pe-4">
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-info btn-action view-permissions"
+                                            data-bs-toggle="modal" data-bs-target="#permissionsModal"
+                                            data-role-name="{{ $role->name }}"
                                             data-permissions="{{ $role->permissions->pluck('name')->toJson() }}"
-                                            title="Lihat Hak Akses">
-                                            <i class="fas fa-key"></i>
+                                            data-bs-toggle="tooltip" title="Lihat Hak Akses">
+                                            <i class="fas fa-eye"></i>
                                         </button>
-                                        <a href="{{ route('roles.edit', $role) }}" class="btn btn-sm btn-warning"
+                                        <a href="{{ route('roles.edit', $role) }}"
+                                            class="btn btn-sm btn-outline-warning btn-action" data-bs-toggle="tooltip"
                                             title="Edit Role">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-danger delete-role"
-                                            data-id="{{ $role->id }}" data-name="{{ $role->name }}" title="Hapus Role">
-                                            <i class="fas fa-trash"></i>
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-role"
+                                            data-id="{{ $role->id }}" data-name="{{ $role->name }}"
+                                            data-users="{{ $role->users_count ?? 0 }}" data-bs-toggle="tooltip"
+                                            title="Hapus Role">
+                                            <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -111,11 +158,13 @@
                             <tr class="empty-state-row">
                                 <td colspan="4" class="text-center py-5">
                                     <div class="empty-state">
-                                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
-                                        <h5 class="text-muted mb-2">Tidak ada data role</h5>
-                                        <p class="text-muted mb-3">Belum ada role yang dibuat dalam sistem</p>
-                                        <a href="{{ route('roles.create') }}" class="btn btn-primary">
-                                            <i class="fas fa-plus me-2"></i> Tambah Role Pertama
+                                        <div class="empty-state-icon mb-3">
+                                            <i class="fas fa-user-tag fa-4x" style="color: #e9ecef;"></i>
+                                        </div>
+                                        <h5 class="text-muted mb-2">Belum ada role</h5>
+                                        <p class="text-muted mb-4">Mulai dengan membuat role pertama Anda</p>
+                                        <a href="{{ route('roles.create') }}" class="btn btn-primary btn-lg px-4">
+                                            <i class="fas fa-plus-circle me-2"></i> Buat Role Pertama
                                         </a>
                                     </div>
                                 </td>
@@ -125,644 +174,913 @@
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- Updated Permissions Modal with Simple Grouped Layout -->
-    <div class="modal fade" id="permissionsModal" tabindex="-1" aria-labelledby="permissionsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="permissionsModalLabel">
-                        <i class="fas fa-key me-2"></i>
-                        Hak Akses Role: <span id="modalRoleName"></span>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="permissionsList">
-                        <!-- Simple grouped permissions will be loaded here -->
+        @if($roles->count() > 0)
+            <div class="card-footer bg-white py-3 border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <small class="text-muted">
+                            Menampilkan {{ $roles->count() }} role
+                        </small>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">
-                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                        Konfirmasi Hapus
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center">
-                        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
-                        <p class="mb-2">Apakah Anda yakin ingin menghapus role:</p>
-                        <strong class="text-danger" id="deleteRoleName"></strong>
-                        <p class="text-warning mt-3">
-                            <i class="fas fa-exclamation-triangle me-1"></i>
-                            <small>Tindakan ini tidak dapat dibatalkan!</small>
-                        </p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Batal
-                    </button>
-                    <form id="deleteForm" method="POST" class="d-inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash me-1"></i> Hapus
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        @endif
     </div>
 @endsection
 
+<!-- Permissions Modal -->
+<div class="modal fade" id="permissionsModal" tabindex="-1" aria-labelledby="permissionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header" style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
+                <h5 class="modal-title text-white" id="permissionsModalLabel">
+                    <i class="fas fa-key me-2"></i>
+                    Hak Akses: <span id="modalRoleName"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="permissions-container p-4">
+                    <div id="permissionsList">
+                        <!-- Permissions will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center px-4 pb-4">
+                <div class="delete-icon mb-3">
+                    <i class="fas fa-exclamation-triangle fa-4x" style="color: #ff4757;"></i>
+                </div>
+                <h4 class="modal-title mb-3 fw-bold" id="deleteModalLabel">Konfirmasi Hapus</h4>
+                <p class="text-muted mb-1">Anda akan menghapus role:</p>
+                <h5 class="text-danger mb-4 fw-bold" id="deleteRoleName"></h5>
+
+                <div class="alert alert-warning mb-4" id="deleteWarning" style="display: none;">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span id="warningMessage"></span>
+                </div>
+
+                <p class="text-muted small mb-4">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Tindakan ini tidak dapat dibatalkan. Semua hak akses yang terkait akan dihapus.
+                </p>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-center">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> Batal
+                </button>
+                <form id="deleteForm" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger px-4 btn-lift">
+                        <i class="fas fa-trash-alt me-2"></i> Hapus
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Delete Role Confirmation
-            const deleteButtons = document.querySelectorAll('.delete-role');
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            const deleteForm = document.getElementById('deleteForm');
-            const deleteRoleName = document.getElementById('deleteRoleName');
-
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const roleId = this.getAttribute('data-id');
-                    const roleName = this.getAttribute('data-name');
-
-                    deleteRoleName.textContent = roleName;
-                    deleteForm.action = `{{ url('roles') }}/${roleId}`;
-                    deleteModal.show();
-                });
-            });
-
-            // Updated View Permissions Modal with Grouping
-            const viewPermissionsButtons = document.querySelectorAll('.view-permissions');
-            const permissionsModal = document.getElementById('permissionsModal');
-            const modalRoleName = document.getElementById('modalRoleName');
-            const permissionsList = document.getElementById('permissionsList');
-
-            viewPermissionsButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const roleName = this.getAttribute('data-role-name');
-                    const permissions = JSON.parse(this.getAttribute('data-permissions'));
-
-                    modalRoleName.textContent = roleName;
-
-                    if (permissions.length > 0) {
-                        // Group permissions by module
-                        const groupedPermissions = groupPermissionsByModule(permissions);
-                        permissionsList.innerHTML = generateGroupedPermissionsHTML(groupedPermissions);
-                    } else {
-                        permissionsList.innerHTML = `
-                                <div class="text-center text-muted py-4">
-                                    <i class="fas fa-ban fa-3x mb-3"></i>
-                                    <h5>Role ini belum memiliki hak akses</h5>
-                                    <p class="text-muted">Belum ada permissions yang diberikan untuk role ini</p>
-                                </div>
-                            `;
-                    }
-                });
-            });
-
-            // Function to group permissions by module
-            function groupPermissionsByModule(permissions) {
-                const grouped = {};
-
-                permissions.forEach(permission => {
-                    const parts = permission.split('.');
-                    const module = parts[0] || 'general';
-                    const action = parts[1] || permission;
-
-                    if (!grouped[module]) {
-                        grouped[module] = [];
-                    }
-
-                    grouped[module].push(action);
-                });
-
-                return grouped;
-            }
-
-            // Function to generate HTML for grouped permissions
-            function generateGroupedPermissionsHTML(groupedPermissions) {
-                const actionLabels = {
-                    'create': 'Tambah',
-                    'read': 'Lihat',
-                    'update': 'Edit',
-                    'delete': 'Hapus',
-                    'export': 'Export',
-                    'import': 'Import'
-                };
-
-                let html = `
-                        <div class="permissions-list">
-                    `;
-
-                Object.keys(groupedPermissions).forEach(module => {
-                    const actions = groupedPermissions[module];
-
-                    html += `
-                            <div class="permission-group mb-3">
-                                <div class="d-flex align-items-center">
-                                    <strong class="module-name me-3">${module.charAt(0).toUpperCase() + module.slice(1)}:</strong>
-                                    <div class="permissions-inline">
-                        `;
-
-                    actions.forEach((action, index) => {
-                        const label = actionLabels[action] || action.charAt(0).toUpperCase() + action.slice(1);
-                        const badgeClass = getBadgeClass(action);
-
-                        html += `
-                                <span class="badge ${badgeClass} permission-badge-small me-1">
-                                    ${label}
-                                </span>
-                            `;
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Initialize tooltips
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
                     });
 
-                    html += `
+                    // Delete Role Confirmation
+                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                    const deleteForm = document.getElementById('deleteForm');
+                    const deleteRoleName = document.getElementById('deleteRoleName');
+                    const deleteWarning = document.getElementById('deleteWarning');
+                    const warningMessage = document.getElementById('warningMessage');
+
+                    document.querySelectorAll('.delete-role').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const roleId = this.getAttribute('data-id');
+                            const roleName = this.getAttribute('data-name');
+                            const userCount = parseInt(this.getAttribute('data-users'));
+
+                            deleteRoleName.textContent = roleName;
+                            deleteForm.action = `{{ url('roles') }}/${roleId}`;
+
+                            // Show warning if role has users
+                            if (userCount > 0) {
+                                warningMessage.textContent = `Role ini digunakan oleh ${userCount} user. Menghapus role akan mencabut akses mereka.`;
+                                deleteWarning.style.display = 'block';
+                            } else {
+                                deleteWarning.style.display = 'none';
+                            }
+
+                            deleteModal.show();
+                        });
+                    });
+
+                    // View Permissions Modal
+                    const viewPermissionsButtons = document.querySelectorAll('.view-permissions');
+                    const modalRoleName = document.getElementById('modalRoleName');
+                    const permissionsList = document.getElementById('permissionsList');
+
+                    viewPermissionsButtons.forEach(button => {
+                        button.addEventListener('click', function () {
+                            const roleName = this.getAttribute('data-role-name');
+                            const permissions = JSON.parse(this.getAttribute('data-permissions'));
+
+                            modalRoleName.textContent = roleName;
+
+                            if (permissions.length > 0) {
+                                const groupedPermissions = groupPermissionsByModule(permissions);
+                                permissionsList.innerHTML = generateGroupedPermissionsHTML(groupedPermissions);
+                            } else {
+                                permissionsList.innerHTML = `
+                                    <div class="text-center py-5">
+                                        <div class="empty-permissions mb-4">
+                                            <i class="fas fa-ban fa-4x" style="color: #e9ecef;"></i>
+                                        </div>
+                                        <h5 class="text-muted mb-2">Belum ada hak akses</h5>
+                                        <p class="text-muted">Role ini belum memiliki permissions yang diberikan</p>
+                                    </div>
+                                `;
+                            }
+                        });
+                    });
+
+                    // Group permissions by module
+                    function groupPermissionsByModule(permissions) {
+                        const grouped = {};
+
+                        permissions.forEach(permission => {
+                            const parts = permission.split('.');
+                            const module = parts[0] ? parts[0].replace(/_/g, ' ') : 'general';
+                            const action = parts[1] || permission;
+
+                            if (!grouped[module]) {
+                                grouped[module] = [];
+                            }
+
+                            grouped[module].push({
+                                action: action,
+                                fullName: permission
+                            });
+                        });
+
+                        return grouped;
+                    }
+
+                    // Generate HTML for grouped permissions
+                    function generateGroupedPermissionsHTML(groupedPermissions) {
+                        const actionLabels = {
+                            'create': 'Tambah',
+                            'read': 'Lihat',
+                            'update': 'Edit',
+                            'delete': 'Hapus',
+                            'export': 'Export',
+                            'import': 'Import',
+                            'manage': 'Kelola',
+                            'view': 'Lihat',
+                            'edit': 'Edit',
+                            'store': 'Simpan',
+                            'destroy': 'Hapus',
+                            'index': 'Daftar',
+                            'show': 'Detail'
+                        };
+
+                        const actionIcons = {
+                            'create': 'fa-plus',
+                            'read': 'fa-eye',
+                            'update': 'fa-edit',
+                            'delete': 'fa-trash',
+                            'export': 'fa-download',
+                            'import': 'fa-upload',
+                            'manage': 'fa-cogs',
+                            'view': 'fa-eye',
+                            'edit': 'fa-edit',
+                            'store': 'fa-save',
+                            'destroy': 'fa-trash',
+                            'index': 'fa-list',
+                            'show': 'fa-eye'
+                        };
+
+                        let html = '<div class="permissions-grid">';
+
+                        Object.keys(groupedPermissions).forEach(module => {
+                            const actions = groupedPermissions[module];
+                            const moduleName = module.charAt(0).toUpperCase() + module.slice(1);
+
+                            html += `
+                                <div class="permission-module-card">
+                                    <div class="module-header">
+                                        <h6 class="mb-0">${moduleName}</h6>
+                                        <span class="badge bg-primary rounded-pill">${actions.length}</span>
+                                    </div>
+                                    <div class="permissions-list">
+                            `;
+
+                            actions.forEach(item => {
+                                const action = item.action;
+                                const label = actionLabels[action] || action.charAt(0).toUpperCase() + action.slice(1);
+                                const icon = actionIcons[action] || 'fa-check';
+
+                                html += `
+                                    <div class="permission-item">
+                                        <i class="fas ${icon} me-2" style="color: #285496;"></i>
+                                        <span>${label}</span>
+                                        <small class="text-muted ms-2 d-none d-md-inline">${item.fullName}</small>
+                                    </div>
+                                `;
+                            });
+
+                            html += `
                                     </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                        });
+
+                        html += '</div>';
+                        return html;
+                    }
+
+                    // Enhanced Search Functionality
+                    initializeSearch();
+
+                    // Auto-hide alerts
+                    const alerts = document.querySelectorAll('.alert');
+                    alerts.forEach(alert => {
+                        setTimeout(() => {
+                            if (alert.classList.contains('show')) {
+                                bootstrap.Alert.getOrCreateInstance(alert).close();
+                            }
+                        }, 5000);
+                    });
+
+                    // Add hover effects to table rows
+                    const tableRows = document.querySelectorAll('.role-row');
+                    tableRows.forEach(row => {
+                        row.addEventListener('mouseenter', function () {
+                            this.style.transform = 'translateY(-2px)';
+                            this.style.transition = 'transform 0.2s ease';
+                        });
+
+                        row.addEventListener('mouseleave', function () {
+                            this.style.transform = 'translateY(0)';
+                        });
+                    });
                 });
 
-                html += `
-                        </div>
-                    `;
+                // Search Functionality - Fixed Version
+                    function initializeSearch() {
+                        const searchInput = document.getElementById('searchInput');
+                        const clearSearchBtn = document.getElementById('clearSearch');
+                        const clearSearchBtn2 = document.getElementById('clearSearchBtn');
+                        const searchInfo = document.getElementById('searchInfo');
+                        const searchCount = document.getElementById('searchCount');
+                        const roleTable = document.getElementById('roleTable');
 
-                return html;
-            }
+                        let debounceTimer;
 
-            // Helper function to get badge class based on action
-            function getBadgeClass(action) {
-                const classes = {
-                    'create': 'bg-success',
-                    'read': 'bg-info',
-                    'update': 'bg-warning text-dark',
-                    'delete': 'bg-danger',
-                    'export': 'bg-secondary',
-                    'import': 'bg-primary'
-                };
-                return classes[action] || 'bg-primary';
-            }
+                        // Clear search button event
+                        clearSearchBtn.addEventListener('click', function () {
+                            searchInput.value = '';
+                            this.style.display = 'none';
+                            performSearch('');
+                        });
 
-            // Helper function to get icon based on action
-            function getActionIcon(action) {
-                const icons = {
-                    'create': 'fa-plus',
-                    'read': 'fa-eye',
-                    'update': 'fa-edit',
-                    'delete': 'fa-trash',
-                    'export': 'fa-download',
-                    'import': 'fa-upload'
-                };
-                return icons[action] || 'fa-check';
-            }
+                        clearSearchBtn2.addEventListener('click', function () {
+                            searchInput.value = '';
+                            clearSearchBtn.style.display = 'none';
+                            performSearch('');
+                        });
 
-            // FIXED SEARCH FUNCTIONALITY
-            initializeSearch();
+                        // Search input event
+                        searchInput.addEventListener('input', function (e) {
+                            clearTimeout(debounceTimer);
 
-            // Auto-hide alerts after 5 seconds
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    if (alert.classList.contains('show')) {
-                        bootstrap.Alert.getOrCreateInstance(alert).close();
-                    }
-                }, 5000);
-            });
-        });
+                            // Show/hide clear button
+                            if (this.value.trim() !== '') {
+                                clearSearchBtn.style.display = 'block';
+                            } else {
+                                clearSearchBtn.style.display = 'none';
+                            }
 
-        // Search functionality - FIXED VERSION
-        function initializeSearch() {
-            const searchInput = document.getElementById('searchInput');
-            const roleTable = document.getElementById('roleTable');
-            const searchInfo = document.getElementById('searchInfo');
-            const searchCount = document.getElementById('searchCount');
+                            debounceTimer = setTimeout(() => {
+                                performSearch(this.value);
+                            }, 300);
+                        });
 
-            let debounceTimer;
+                        function performSearch(searchTerm) {
+                            const term = searchTerm.toLowerCase().trim();
+                            const tbody = roleTable.querySelector('tbody');
+                            const rows = tbody.querySelectorAll('tr');
+                            let visibleCount = 0;
 
-            searchInput.addEventListener('input', function (e) {
-                clearTimeout(debounceTimer);
+                            // Remove existing highlights and restore original HTML
+                            clearHighlights();
 
-                debounceTimer = setTimeout(() => {
-                    performSearch(e.target.value);
-                }, 200);
-            });
+                            rows.forEach(row => {
+                                // Skip empty state row
+                                if (row.classList.contains('empty-state-row')) {
+                                    row.style.display = term === '' ? '' : 'none';
+                                    return;
+                                }
 
-            function performSearch(searchTerm) {
-                const term = searchTerm.toLowerCase().trim();
-                const tbody = roleTable.querySelector('tbody');
-                const rows = tbody.querySelectorAll('tr');
-                let visibleCount = 0;
+                                // Skip no-results row if exists
+                                if (row.classList.contains('no-results-row')) {
+                                    row.remove();
+                                    return;
+                                }
 
-                // Remove previous no-results message
-                const existingNoResults = tbody.querySelector('.no-results-row');
-                if (existingNoResults) {
-                    existingNoResults.remove();
-                }
+                                const cells = row.querySelectorAll('td');
 
-                rows.forEach(row => {
-                    // Skip empty state row
-                    if (row.classList.contains('empty-state-row')) {
-                        row.style.display = term === '' ? '' : 'none';
-                        return;
-                    }
+                                // Make sure we have enough cells
+                                if (cells.length < 3) {
+                                    row.style.display = 'none';
+                                    return;
+                                }
 
-                    const cells = row.querySelectorAll('td');
+                                // Get only the role name text (excluding icon and counts)
+                                const roleNameCell = cells[1];
+                                const roleNameText = getRoleNameText(roleNameCell).toLowerCase();
 
-                    // Make sure we have the right number of cells
-                    if (cells.length < 4) {
-                        return;
-                    }
+                                // Search only in role name, not in description or counts
+                                const isMatch = term === '' || roleNameText.includes(term);
 
-                    // Clear previous highlights
-                    clearHighlights(row);
+                                if (isMatch) {
+                                    row.style.display = '';
+                                    visibleCount++;
 
-                    // Get text content from relevant columns
-                    const roleName = cells[1].textContent.toLowerCase();
-                    const roleDescription = cells[2].textContent.toLowerCase();
+                                    // Highlight matching text in role name only
+                                    if (term !== '') {
+                                        highlightRoleName(roleNameCell, term);
+                                    } else {
+                                        restoreRoleName(roleNameCell);
+                                    }
+                                } else {
+                                    row.style.display = 'none';
+                                    restoreRoleName(roleNameCell);
+                                }
+                            });
 
-                    // Check if search term matches
-                    const nameMatch = roleName.includes(term);
-                    const descMatch = roleDescription.includes(term);
-                    const isMatch = term === '' || nameMatch || descMatch;
+                            // Update search info
+                            if (term === '') {
+                                searchInfo.style.display = 'none';
+                                removeNoResultsMessage();
+                            } else {
+                                searchCount.textContent = visibleCount;
+                                searchInfo.style.display = 'block';
 
-                    if (isMatch) {
-                        row.style.display = '';
-                        visibleCount++;
-
-                        // Highlight matching terms
-                        if (term !== '') {
-                            if (nameMatch) highlightText(cells[1], term);
-                            if (descMatch) highlightText(cells[2], term);
+                                if (visibleCount === 0) {
+                                    showNoResultsMessage(tbody, term);
+                                } else {
+                                    removeNoResultsMessage();
+                                }
+                            }
                         }
-                    } else {
-                        row.style.display = 'none';
+
+                        // Helper function to get only the role name text
+                        function getRoleNameText(cell) {
+                            const roleNameElement = cell.querySelector('.fw-bold');
+                            return roleNameElement ? roleNameElement.textContent : cell.textContent;
+                        }
+
+                        // Helper function to highlight only the role name
+                        function highlightRoleName(cell, term) {
+                            const roleNameElement = cell.querySelector('.fw-bold');
+                            if (!roleNameElement) return;
+
+                            // Save original HTML if not already saved
+                            if (!roleNameElement.dataset.originalHtml) {
+                                roleNameElement.dataset.originalHtml = roleNameElement.innerHTML;
+                            }
+
+                            const text = roleNameElement.textContent;
+                            const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
+                            const highlightedText = text.replace(regex, '<mark class="search-highlight">$1</mark>');
+
+                            // Update only if there's a match
+                            if (text !== highlightedText) {
+                                roleNameElement.innerHTML = highlightedText;
+                            }
+                        }
+
+                        // Helper function to restore original role name HTML
+                        function restoreRoleName(cell) {
+                            const roleNameElement = cell.querySelector('.fw-bold');
+                            if (roleNameElement && roleNameElement.dataset.originalHtml) {
+                                roleNameElement.innerHTML = roleNameElement.dataset.originalHtml;
+                                delete roleNameElement.dataset.originalHtml;
+                            }
+                        }
+
+                        function clearHighlights() {
+                            // Remove highlight marks
+                            const highlighted = document.querySelectorAll('mark.search-highlight');
+                            highlighted.forEach(mark => {
+                                const parent = mark.parentNode;
+                                if (parent && parent.classList.contains('fw-bold')) {
+                                    // Restore original HTML if available
+                                    if (parent.dataset.originalHtml) {
+                                        parent.innerHTML = parent.dataset.originalHtml;
+                                        delete parent.dataset.originalHtml;
+                                    } else {
+                                        // Fallback: replace mark with its text content
+                                        const text = document.createTextNode(mark.textContent);
+                                        mark.parentNode.replaceChild(text, mark);
+                                    }
+                                }
+                            });
+                        }
+
+                        function showNoResultsMessage(tbody, term) {
+                            // Check if message already exists
+                            const existing = tbody.querySelector('.no-results-row');
+                            if (existing) return;
+
+                            const noResultsRow = document.createElement('tr');
+                            noResultsRow.className = 'no-results-row';
+                            noResultsRow.innerHTML = `
+                    <td colspan="4" class="text-center py-5">
+                        <div class="empty-state">
+                            <div class="empty-state-icon mb-3">
+                                <i class="fas fa-search fa-4x" style="color: #e9ecef;"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">Tidak ditemukan</h5>
+                            <p class="text-muted mb-4">Tidak ada role yang cocok dengan "${term}"</p>
+                            <button class="btn btn-outline-primary btn-sm" onclick="clearSearch()">
+                                <i class="fas fa-times me-2"></i> Hapus Pencarian
+                            </button>
+                        </div>
+                    </td>
+                `;
+                            tbody.appendChild(noResultsRow);
+                        }
+
+                        function removeNoResultsMessage() {
+                            const existing = document.querySelector('.no-results-row');
+                            if (existing) {
+                                existing.remove();
+                            }
+                        }
+
+                        function escapeRegex(string) {
+                            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        }
                     }
-                });
 
-                // Show/hide search info
-                if (term === '') {
-                    searchInfo.style.display = 'none';
-                } else {
-                    searchCount.textContent = visibleCount;
-                    searchInfo.style.display = 'block';
+                    // Clear search function for button onclick
+                    function clearSearch() {
+                        const searchInput = document.getElementById('searchInput');
+                        const clearSearchBtn = document.getElementById('clearSearch');
 
-                    // Show no results message if no matches found
-                    if (visibleCount === 0) {
-                        showNoResultsMessage(tbody, term);
+                        searchInput.value = '';
+                        clearSearchBtn.style.display = 'none';
+
+                        // Dispatch input event to trigger search
+                        const event = new Event('input');
+                        searchInput.dispatchEvent(event);
+                    }
+            </script>
+
+            <style>
+               /* Add to your existing styles */
+    .search-highlight {
+        background: linear-gradient(120deg, #FFD700 0%, #FFEC8B 100%) !important;
+        padding: 2px 4px;
+        border-radius: 4px;
+        color: #333 !important;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+
+                /* Page Header */
+                .page-header {
+                    padding: 2rem;
+                    margin-bottom: 1.5rem;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 20px rgba(40, 84, 150, 0.15);
+                }
+
+                .icon-wrapper {
+                    width: 60px;
+                    height: 60px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Role Avatar */
+                .role-avatar {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 1.1rem;
+                    box-shadow: 0 4px 8px rgba(40, 84, 150, 0.2);
+                }
+
+                /* Action Buttons */
+                .btn-action {
+                    border-radius: 8px;
+                    padding: 0.375rem 0.75rem;
+                    margin: 0 2px;
+                    transition: all 0.2s ease;
+                    border-width: 2px;
+                }
+
+                .btn-action:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }
+
+                .btn-outline-info:hover {
+                    background-color: var(--info-color);
+                    border-color: var(--info-color);
+                    color: white;
+                }
+
+                .btn-outline-warning:hover {
+                    background-color: var(--warning-color);
+                    border-color: var(--warning-color);
+                    color: white;
+                }
+
+                .btn-outline-danger:hover {
+                    background-color: var(--danger-color);
+                    border-color: var(--danger-color);
+                    color: white;
+                }
+
+                .btn-lift {
+                    transition: transform 0.2s ease;
+                }
+
+                .btn-lift:hover {
+                    transform: translateY(-2px);
+                }
+
+                /* Search */
+                .search-group {
+                    border-radius: 10px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                }
+
+                .search-group .form-control:focus {
+                    box-shadow: none;
+                    border-color: #dee2e6;
+                }
+
+                .search-highlight {
+                    background-color: #fff3cd;
+                    padding: 2px 4px;
+                    border-radius: 4px;
+                    color: #856404;
+                    font-weight: 600;
+                }
+
+                /* Permissions Modal */
+                .permissions-container {
+                    max-height: 60vh;
+                    overflow-y: auto;
+                }
+
+                .permissions-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    gap: 1rem;
+                }
+
+                .permission-module-card {
+                    background: var(--light-color);
+                    border-radius: 10px;
+                    padding: 1rem;
+                    border: 1px solid #e9ecef;
+                    transition: transform 0.2s ease;
+                }
+
+                .permission-module-card:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                }
+
+                .module-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 0.75rem;
+                    padding-bottom: 0.5rem;
+                    border-bottom: 2px solid var(--primary-light);
+                }
+
+                .permission-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 0.5rem;
+                    background: white;
+                    border-radius: 6px;
+                    margin-bottom: 0.5rem;
+                    border-left: 3px solid var(--primary-color);
+                }
+
+                .permission-item:last-child {
+                    margin-bottom: 0;
+                }
+
+                /* Table Styling */
+                .table {
+                    margin-bottom: 0;
+                }
+
+                .table th {
+                    border-bottom: 2px solid var(--primary-light);
+                    font-weight: 600;
+                    color: var(--primary-color);
+                    background-color: #f8fafc;
+                    padding: 1rem;
+                }
+
+                .table td {
+                    padding: 1rem;
+                    vertical-align: middle;
+                    border-bottom: 1px solid #e9ecef;
+                }
+
+                .role-row:hover {
+                    background-color: rgba(40, 84, 150, 0.03) !important;
+                }
+
+                /* Alert Styling */
+                .alert {
+                    border-radius: 10px;
+                    border: none;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                }
+
+                .alert-icon {
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Empty State */
+                .empty-state {
+                    padding: 3rem 1rem;
+                }
+
+                .empty-state-icon {
+                    opacity: 0.5;
+                }
+
+                /* Modal Styling */
+                .modal-content {
+                    border-radius: 15px;
+                    overflow: hidden;
+                }
+
+                .modal-header {
+                    padding: 1.5rem;
+                }
+
+                .modal-body {
+                    padding: 1.5rem;
+                }
+
+                .modal-footer {
+                    padding: 1rem 1.5rem;
+                }
+
+                /* Mobile Optimizations */
+                @media (max-width: 768px) {
+                    .page-header {
+                        padding: 1.5rem;
+                    }
+
+                    .permissions-grid {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .btn-group {
+                        display: flex;
+                        gap: 0.25rem;
+                        flex-wrap: nowrap;
+                    }
+
+                    .btn-action {
+                        margin: 0;
+                        padding: 0.25rem 0.5rem;
+                        font-size: 0.8rem;
+                    }
+
+                    .table-responsive {
+                        border-radius: 10px;
+                        border: 1px solid #e9ecef;
+                    }
+
+                    .table th {
+                        font-size: 0.8rem;
+                        padding: 0.5rem;
+                    }
+
+                    .table td {
+                        font-size: 0.8rem;
+                        padding: 0.5rem;
+                    }
+
+                    .role-avatar {
+                        width: 36px;
+                        height: 36px;
+                        font-size: 0.9rem;
+                        margin-right: 0.5rem !important;
+                    }
+
+                    /* Mobile: hide description column header and cells */
+                    .table th:nth-child(3) {
+                        display: none;
+                    }
+
+                    .table td:nth-child(3) {
+                        display: none;
+                    }
+
+                    /* Mobile: adjust column widths */
+                    .table th:first-child,
+                    .table td:first-child {
+                        width: 15% !important;
+                    }
+
+                    .table th:nth-child(2),
+                    .table td:nth-child(2) {
+                        width: 50% !important;
+                    }
+
+                    .table th:last-child,
+                    .table td:last-child {
+                        width: 35% !important;
+                    }
+
+                    /* Mobile role info - minimal */
+                    .fw-bold {
+                        font-size: 0.85rem;
+                        margin-bottom: 0.1rem;
+                    }
+
+                    .text-muted.small {
+                        font-size: 0.7rem;
+                    }
+
+                    /* Hide count numbers on mobile */
+                    .text-muted.small .fa-user:after,
+                    .text-muted.small .fa-key:after {
+                        content: none;
                     }
                 }
-            }
 
-            function clearHighlights(row) {
-                const highlightedElements = row.querySelectorAll('mark');
-                highlightedElements.forEach(mark => {
-                    mark.replaceWith(mark.textContent);
-                });
-            }
+                @media (max-width: 576px) {
+                    .page-header {
+                        text-align: center;
+                        padding: 1.5rem 1rem;
+                    }
 
-            function highlightText(element, searchTerm) {
-                // Skip if element contains HTML (like the role icon)
-                const strongElement = element.querySelector('strong');
-                if (strongElement) {
-                    const text = strongElement.textContent;
-                    const highlightedText = text.replace(
-                        new RegExp(`(${escapeRegex(searchTerm)})`, 'gi'),
-                        '<mark class="bg-warning text-dark">$1</mark>'
-                    );
-                    strongElement.innerHTML = highlightedText;
-                } else {
-                    const text = element.textContent;
-                    const highlightedText = text.replace(
-                        new RegExp(`(${escapeRegex(searchTerm)})`, 'gi'),
-                        '<mark class="bg-warning text-dark">$1</mark>'
-                    );
-                    element.innerHTML = highlightedText;
+                    .icon-wrapper {
+                        margin: 0 auto 1rem;
+                    }
+
+                    .search-group {
+                        width: 100%;
+                        max-width: none;
+                        margin-top: 1rem;
+                    }
+
+                    .modal-dialog {
+                        margin: 0.5rem;
+                    }
+
+                    /* Even more compact for small phones */
+                    .role-avatar {
+                        width: 32px;
+                        height: 32px;
+                        font-size: 0.8rem;
+                    }
+
+                    .fw-bold {
+                        font-size: 0.8rem;
+                    }
+
+                    .btn-action {
+                        padding: 0.2rem 0.4rem;
+                        font-size: 0.75rem;
+                        min-width: 30px;
+                    }
+
+                    .table td {
+                        padding: 0.4rem;
+                    }
+
+                    .table th {
+                        padding: 0.4rem;
+                    }
+
+                    .page-header h1 {
+                        font-size: 1.5rem;
+                    }
+
+                    .page-header p {
+                        font-size: 0.9rem;
+                    }
                 }
-            }
 
-            function showNoResultsMessage(tbody, searchTerm) {
-                const noResultsRow = document.createElement('tr');
-                noResultsRow.className = 'no-results-row';
-                noResultsRow.innerHTML = `
-                            <td colspan="4" class="text-center py-5">
-                                <div class="empty-state">
-                                    <i class="fas fa-search fa-4x text-muted mb-3"></i>
-                                    <h5 class="text-muted mb-2">Tidak ada hasil ditemukan</h5>
-                                    <p class="text-muted mb-0">
-                                        Tidak ada role yang cocok dengan pencarian: 
-                                        <strong>"${searchTerm}"</strong>
-                                    </p>
-                                    <button class="btn btn-outline-primary btn-sm mt-2" onclick="document.getElementById('searchInput').value = ''; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
-                                        <i class="fas fa-times me-1"></i> Hapus Pencarian
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                tbody.appendChild(noResultsRow);
-            }
+                @media (max-width: 375px) {
 
-            function escapeRegex(string) {
-                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            }
-        }
-    </script>
+                    /* Extra small phones */
+                    .role-avatar {
+                        width: 28px;
+                        height: 28px;
+                        font-size: 0.7rem;
+                    }
 
-    <style>
-        /* Role Icon Styling */
-        .role-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(45deg, var(--primary-color), #5dade2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.9rem;
-        }
+                    .fw-bold {
+                        font-size: 0.75rem;
+                    }
 
-        /* Search Highlighting */
-        mark {
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-weight: 500;
-        }
+                    .btn-action {
+                        padding: 0.15rem 0.3rem;
+                        font-size: 0.7rem;
+                        min-width: 28px;
+                    }
 
-        /* Search Info */
-        #searchInfo {
-            padding: 0.5rem;
-            background-color: #f8f9fa;
-            border-radius: 0.375rem;
-            border-left: 4px solid var(--primary-color);
-        }
+                    .table td:first-child {
+                        width: 12% !important;
+                        font-size: 0.75rem;
+                    }
 
-        /* Updated Modal Styling for Simple Grouped Permissions */
-        .permissions-list {
-            padding: 0.5rem;
-        }
+                    .table td:nth-child(2) {
+                        width: 48% !important;
+                    }
 
-        .permission-group {
-            padding: 0.75rem;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-        }
+                    .table td:last-child {
+                        width: 40% !important;
+                    }
+                }
 
-        .module-name {
-            color: #495057;
-            font-size: 1rem;
-            min-width: 120px;
-        }
+                /* Animation for alerts */
+                @keyframes slideInDown {
+                    from {
+                        transform: translateY(-100%);
+                        opacity: 0;
+                    }
 
-        .permissions-inline {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
 
-        .permission-badge-small {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
+                .alert {
+                    animation: slideInDown 0.3s ease;
+                }
 
-        /* Button Group Styling */
-        .btn-group .btn {
-            border-radius: 6px;
-            margin: 0 1px;
-        }
+                /* Custom scrollbar */
+                ::-webkit-scrollbar {
+                    width: 6px;
+                    height: 6px;
+                }
 
-        .btn-group .btn:first-child {
-            margin-left: 0;
-        }
+                ::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 10px;
+                }
 
-        .btn-group .btn:last-child {
-            margin-right: 0;
-        }
+                ::-webkit-scrollbar-thumb {
+                    background: var(--primary-color);
+                    border-radius: 10px;
+                }
 
-        /* Table Improvements */
-        .table th {
-            border-top: none;
-            font-weight: 600;
-            color: var(--dark-color);
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #e3e6f0;
-        }
-
-        .table td {
-            vertical-align: middle;
-        }
-
-        /* Empty State */
-        .empty-state {
-            padding: 2rem;
-        }
-
-        .empty-state i {
-            opacity: 0.6;
-        }
-
-        /* Alert Styling */
-        .alert {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-        }
-
-        /* Search Input */
-        .input-group-text {
-            background-color: #f8f9fa;
-            border-color: #ced4da;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-        }
-
-        /* Modal Enhancements */
-        .modal-content {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid #e3e6f0;
-            background-color: #f8f9fa;
-            border-radius: 15px 15px 0 0;
-        }
-
-        .modal-footer {
-            border-top: 1px solid #e3e6f0;
-            background-color: #f8f9fa;
-            border-radius: 0 0 15px 15px;
-        }
-
-        /* Hover Effects */
-        .table tbody tr:hover {
-            background-color: rgba(52, 152, 219, 0.05);
-            transform: scale(1.01);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
-        }
-
-        /* Responsive Improvements */
-        @media (max-width: 768px) {
-            .permission-group .d-flex {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-
-            .module-name {
-                margin-bottom: 0.5rem;
-                min-width: auto;
-            }
-
-            .permissions-inline {
-                width: 100%;
-            }
-        }
-
-        /* Mobile/tablet responsive table -> card layout */
-        @media (max-width: 768px) {
-
-            /* Hide thead, we'll show labels via data-label */
-            #roleTable thead {
-                display: none;
-            }
-
-            #roleTable tbody tr {
-                display: block;
-                border: 1px solid #e9ecef;
-                border-radius: 10px;
-                padding: 0.75rem;
-                margin-bottom: 0.75rem;
-                background: #fff;
-                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
-            }
-
-            #roleTable tbody tr.empty-state-row {
-                border: none;
-                box-shadow: none;
-                padding: 0;
-                background: transparent;
-            }
-
-            #roleTable tbody tr td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.35rem 0.5rem;
-                border: none;
-            }
-
-            #roleTable tbody tr td[data-label] {
-                /* ensure multiline doesn't break layout */
-                gap: 0.5rem;
-            }
-
-            #roleTable tbody tr td:before {
-                content: attr(data-label);
-                flex: 0 0 40%;
-                font-weight: 600;
-                color: #495057;
-                margin-right: 0.75rem;
-            }
-
-            /* make the right-hand content wrap and align to the left */
-            #roleTable tbody tr td>*:last-child {
-                text-align: right;
-                flex: 1 1 auto;
-            }
-
-            /* Role name cell special: keep icon and name stacked nicely */
-            #roleTable tbody tr td[data-label="Nama Role"] .d-flex {
-                gap: 0.5rem;
-                align-items: center;
-            }
-
-            /* Action buttons full width and stacked */
-            .action-btn-group {
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                width: 100%;
-            }
-
-            .action-btn-group .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            /* Modal adjustments for mobile */
-            .modal-xl {
-                max-width: 95vw;
-            }
-
-            .permissions-grid {
-                flex-direction: column;
-                gap: 6px;
-            }
-
-            .permission-badge {
-                width: 100%;
-                justify-content: center;
-                font-size: 0.8rem;
-                padding: 6px 8px;
-            }
-
-            .module-info {
-                flex-direction: row;
-                text-align: left;
-                padding: 0.5rem;
-            }
-
-            .module-icon {
-                width: 30px;
-                height: 30px;
-                margin-bottom: 0;
-                margin-right: 0.75rem;
-                flex-shrink: 0;
-            }
-
-            /* reduce margins for small screens */
-            .card {
-                margin-bottom: 1rem;
-            }
-
-            /* ensure search input uses full width */
-            .input-group {
-                width: 100%;
-            }
-        }
-    </style>
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #1e4274;
+                }
+            </style>
 @endsection

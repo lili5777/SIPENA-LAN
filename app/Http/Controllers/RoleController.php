@@ -12,7 +12,9 @@ class RoleController extends Controller
     {
         # Ambil semua data role beserta relasi permissions-nya
         # ->with('permissions') artinya sekaligus mengambil data permission yang dimiliki role
-        $roles = Role::with('permissions')->get();
+        $roles = Role::with('permissions')
+            ->withCount(['users', 'permissions'])
+            ->get();
 
         # Kirim data roles ke view admin.roles.index untuk ditampilkan
         return view('admin.roles.index', compact('roles'));
