@@ -6,22 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('jenis_pelatihans', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('jenis_pelatihan', function (Blueprint $table) {
+            $table->id('id');
+            $table->string('kode_pelatihan', 20)->unique();
+            $table->string('nama_pelatihan', 100);
+            $table->text('deskripsi')->nullable();
+            $table->boolean('aktif')->default(true);
+            $table->timestamp('dibuat_pada')->useCurrent();
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('jenis_pelatihans');
+        Schema::dropIfExists('jenis_pelatihan');
     }
 };

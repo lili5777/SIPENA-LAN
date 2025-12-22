@@ -2,10 +2,21 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Routes untuk web (form pendaftaran)
+Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
+Route::post('/pendaftaran/store', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+Route::get('/pendaftaran/success', function () {
+    return view('pendaftaran.success'); // Asumsi ada view success.blade.php
+})->name('pendaftaran.success');
+
+// Routes untuk API (digunakan di JavaScript untuk load data dinamis)
+Route::get('/api/angkatan/{id_jenis_pelatihan}', [PendaftaranController::class, 'apiAngkatan']);
+Route::get('/api/kabupaten/{id_provinsi}', [PendaftaranController::class, 'apiKabupaten']);
 // Route Landing Page
 Route::get('/', function () {return view('welcome');})->name('home');
 Route::get('/profil', function () {return view('profil');})->name('profil');

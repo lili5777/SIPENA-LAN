@@ -6,22 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('angkatans', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('angkatan', function (Blueprint $table) {
+            $table->id('id');
+            $table->foreignId('id_jenis_pelatihan')->constrained('jenis_pelatihan');
+            $table->string('nama_angkatan', 50);
+            $table->integer('tahun');
+            $table->date('tanggal_mulai')->nullable();
+            $table->date('tanggal_selesai')->nullable();
+            $table->integer('kuota')->nullable();
+            $table->enum('status_angkatan', ['Dibuka', 'Ditutup', 'Berlangsung', 'Selesai'])->default('Dibuka');
+            $table->timestamp('dibuat_pada')->useCurrent();
+            $table->index(['id_jenis_pelatihan', 'status_angkatan'], 'idx_jenis_status');
+            $table->index('status_angkatan', 'idx_angkatan_status');
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('angkatans');
+        Schema::dropIfExists('angkatan');
     }
 };

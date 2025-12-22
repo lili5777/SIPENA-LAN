@@ -6,22 +6,44 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('pesertas', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('peserta', function (Blueprint $table) {
+            $table->id('id');
+            $table->string('nip_nrp', 50)->unique();
+            $table->string('nama_lengkap', 200);
+            $table->string('nama_panggilan', 100)->nullable();
+            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
+            $table->enum('agama', ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu']);
+            $table->string('tempat_lahir', 100);
+            $table->date('tanggal_lahir');
+            $table->text('alamat_rumah');
+            $table->string('email_pribadi', 100);
+            $table->string('nomor_hp', 20);
+            $table->enum('pendidikan_terakhir', ['SD', 'SMP', 'SMA', 'D3', 'D4', 'S1', 'S2', 'S3']);
+            $table->string('bidang_studi', 100)->nullable();
+            $table->string('bidang_keahlian', 100)->nullable();
+            $table->enum('status_perkawinan', ['Belum Menikah', 'Menikah', 'Cerai Hidup', 'Cerai Mati']);
+            $table->string('nama_pasangan', 200)->nullable();
+            $table->string('olahraga_hobi', 100)->nullable();
+            $table->enum('perokok', ['Ya', 'Tidak']);
+            $table->enum('ukuran_kaos', ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'])->nullable();
+            $table->text('kondisi_peserta')->nullable();
+            $table->string('file_ktp', 255)->nullable();
+            $table->string('file_pas_foto', 255)->nullable();
+            $table->boolean('status_aktif')->default(true);
+            $table->timestamp('dibuat_pada')->useCurrent();
+            $table->timestamp('diperbarui_pada')->useCurrent()->useCurrentOnUpdate();
+            $table->index('nip_nrp', 'idx_peserta_nip');
+            $table->index('nama_lengkap', 'idx_peserta_nama');
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('pesertas');
+        Schema::dropIfExists('peserta');
     }
 };

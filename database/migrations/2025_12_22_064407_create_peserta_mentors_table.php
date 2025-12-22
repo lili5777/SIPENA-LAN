@@ -6,22 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('peserta_mentors', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('peserta_mentor', function (Blueprint $table) {
+            $table->id('id');
+            $table->foreignId('id_pendaftaran')->constrained('pendaftaran')->onDelete('cascade');
+            $table->foreignId('id_mentor')->nullable()->constrained('mentor');
+            $table->date('tanggal_penunjukan')->nullable();
+            $table->enum('status_mentoring', ['Ditugaskan', 'Aktif', 'Selesai', 'Dibatalkan'])->default('Ditugaskan');
+            $table->text('catatan')->nullable();
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('peserta_mentors');
+        Schema::dropIfExists('peserta_mentor');
     }
 };

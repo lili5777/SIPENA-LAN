@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RolePermissionSeeder::class,
-            // akunseeder::class
+            Dataawal::class
         ]);
     }
 }
