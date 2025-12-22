@@ -901,9 +901,6 @@
                                 <label class="form-label required">Pendidikan Terakhir</label>
                                 <select name="pendidikan_terakhir" class="form-select" required>
                                     <option value="">Pilih</option>
-                                    <option value="SD">SD</option>
-                                    <option value="SMP">SMP</option>
-                                    <option value="SMA">SMA</option>
                                     <option value="D3">D3</option>
                                     <option value="D4">D4</option>
                                     <option value="S1">S1</option>
@@ -991,45 +988,30 @@
                                 <label class="form-label required">Pangkat / Golongan Ruang</label>
                                 <select name="golongan_ruang" class="form-select" required>
                                     <option value="">Pilih</option>
-                                    <option value="I/a">I/a</option>
-                                    <option value="I/b">I/b</option>
-                                    <option value="I/c">I/c</option>
-                                    <option value="I/d">I/d</option>
-                                    <option value="II/a">II/a</option>
-                                    <option value="II/b">II/b</option>
-                                    <option value="II/c">II/c</option>
-                                    <option value="II/d">II/d</option>
-                                    <option value="III/a">III/a</option>
-                                    <option value="III/b">III/b</option>
-                                    <option value="III/c">III/c</option>
-                                    <option value="III/d">III/d</option>
-                                    <option value="IV/a">IV/a</option>
-                                    <option value="IV/b">IV/b</option>
-                                    <option value="IV/c">IV/c</option>
-                                    <option value="IV/d">IV/d</option>
-                                    <option value="IV/e">IV/e</option>
+                                    <option value="Pembina Utama, IV/E">Pembina Utama, IV/E</option>
+                                    <option value="Pembina Utama Madya, IV/D">Pembina Utama Madya, IV/D</option>
+                                    <option value="Pembina Utama Muda, IV/C">Pembina Utama Muda, IV/C</option>
+                                    <option value="Pembina Tingkat I, IV/B">Pembina Tingkat I, IV/B</option>
+                                    <option value="Pembina, IV/A">Pembina, IV/A</option>
+                                    <option value="Penata Tingkat I, III/D">Penata Tingkat I, III/D</option>
+                                    <option value="Penata, III/C">Penata, III/C</option>
+                                    <option value="Penata Muda Tingkat I, III/B">Penata Muda Tingkat I, III/B</option>
+                                    <option value="Penata Muda, III/A">Penata Muda, III/A</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label class="form-label required">Eselon</label>
                                 <select name="eselon" class="form-select" required>
                                     <option value="">Pilih</option>
-                                    <option value="I.a">I.a</option>
-                                    <option value="I.b">I.b</option>
-                                    <option value="II.a">II.a</option>
-                                    <option value="II.b">II.b</option>
-                                    <option value="III.a">III.a</option>
-                                    <option value="III.b">III.b</option>
-                                    <option value="IV.a">IV.a</option>
-                                    <option value="IV.b">IV.b</option>
-                                    <option value="Non Eselon">Non Eselon</option>
+                                    <option value="II">II</option>
+                                    <option value="III/Pejabat Fungsional">III/Pejabat Fungsional</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label required">Provinsi</label>
+                                <label class="form-label required">Provinsi  (Kantor/Tempat Tugas)</label>
                                 <select name="provinsi" class="form-select" required>
                                     <option value="">Pilih Provinsi</option>
                                     <option value="11">Aceh</option>
@@ -1069,7 +1051,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label required">Kabupaten</label>
+                                <label class="form-label required">Kabupaten (Lokasi Kantor/Tempat Tugas)</label>
                                 <select name="kabupaten" class="form-select" required disabled>
                                     <option value="">Pilih Kabupaten (Pilih Provinsi Dahulu)</option>
                                 </select>
@@ -1122,9 +1104,9 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label required">Unggah Surat Pernyataan Komitmen</label>
+                            <label class="form-label ">Unggah Surat Pernyataan Komitmen</label>
                             <div class="form-file">
-                                <input type="file" name="file_surat_komitmen" class="form-file-input" accept=".pdf" required>
+                                <input type="file" name="file_surat_komitmen" class="form-file-input" accept=".pdf" >
                                 <label class="form-file-label">
                                     <i class="fas fa-cloud-upload-alt"></i><br>
                                     Klik untuk mengunggah file PDF (maks. 5MB)
@@ -1146,7 +1128,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label required">Unggah Scan Surat Tugas</label>
+                            <label class="form-label required">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang</label>
                             <div class="form-file">
                                 <input type="file" name="file_surat_tugas" class="form-file-input" accept=".pdf" required>
                                 <label class="form-file-label">
@@ -1158,9 +1140,9 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label required">Unggah Scan Surat Keterangan Kelulusan/Hasil Seleksi</label>
+                            <label class="form-label ">Unggah Scan Surat Keterangan Kelulusan/Hasil Seleksi calon peserta PKN TK.II</label>
                             <div class="form-file">
-                                <input type="file" name="file_surat_kelulusan_seleksi" class="form-file-input" accept=".pdf" required>
+                                <input type="file" name="file_surat_kelulusan_seleksi" class="form-file-input" accept=".pdf" >
                                 <label class="form-file-label">
                                     <i class="fas fa-cloud-upload-alt"></i><br>
                                     Klik untuk mengunggah file PDF (maks. 5MB)

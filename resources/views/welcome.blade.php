@@ -13,7 +13,7 @@
                     <p class="banner-text">Sistem Informasi Profesional yang menyediakan layanan terbaik untuk kebutuhan
                         informasi dan publikasi Anda. Kami berkomitmen untuk memberikan solusi inovatif dan berkualitas
                         tinggi.</p>
-                    <a href="#publication" class="banner-btn">Pelajari Lebih Lanjut</a>
+                    <a href="{{ route('pendaftaran.create') }}" class="banner-btn">Daftar Pelatihan</a>
                 </div>
             </div>
         </div>
@@ -242,16 +242,18 @@
         const bannerBtn = document.querySelector('.banner-btn');
         if (bannerBtn) {
             bannerBtn.addEventListener('click', function (e) {
-                if (this.getAttribute('href') === '#publication') {
+                // Add loading animation
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+                this.style.pointerEvents = 'none';
+                
+                if (this.getAttribute('href') === '{{ route('pendaftaran.create') }}') {
                     return; // Biarkan smooth scroll bekerja
                 }
 
                 e.preventDefault();
 
-                // Add loading animation
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-                this.style.pointerEvents = 'none';
+
 
                 // Reset after 1.5 seconds
                 setTimeout(() => {
