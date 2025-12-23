@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('golongan_ruang', 10);
             $table->string('file_sk_pangkat', 255)->nullable();
             $table->string('nomor_sk_cpns', 100)->nullable();
+            $table->string('nomor_sk_terakhir', 100)->nullable();
             $table->date('tanggal_sk_cpns')->nullable();
             $table->string('file_sk_cpns', 255)->nullable();
             $table->string('file_spmt', 255)->nullable();

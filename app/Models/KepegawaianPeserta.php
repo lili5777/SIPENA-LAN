@@ -30,6 +30,7 @@ class KepegawaianPeserta extends Model
         'golongan_ruang',
         'file_sk_pangkat',
         'nomor_sk_cpns',
+        'nomor_sk_terakhir',
         'tanggal_sk_cpns',
         'file_sk_cpns',
         'file_spmt',
