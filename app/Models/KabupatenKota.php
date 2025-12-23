@@ -10,7 +10,6 @@ class KabupatenKota extends Model
     use HasFactory;
 
     protected $table = 'kabupaten_kota';
-    // protected $primaryKey = 'id_kabupaten_kota';
     public $timestamps = false;
 
     protected $fillable = [

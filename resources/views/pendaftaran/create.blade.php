@@ -68,6 +68,14 @@
                                 <p class="training-code">Pelatihan Khusus</p>
                                 <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
                             </div>
+                            <div class="training-card" data-id="4" data-kode="PKP">
+                                <div class="training-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <h3 class="training-name">PKP</h3>
+                                <p class="training-code">Pelatihan Khusus</p>
+                                <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
+                            </div>
                         </div>
 
                         <input type="hidden" name="id_jenis_pelatihan" id="id_jenis_pelatihan">
@@ -304,7 +312,7 @@
         /* Training Cards */
         .training-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-top: 30px;
         }
@@ -739,30 +747,15 @@
             });
 
             // Step 2: Pilih Angkatan
-            function loadAngkatan(jenisId) {
+            async function loadAngkatan(jenisId) {
                 angkatanSelect.innerHTML = '<option value="">Memuat pilihan angkatan...</option>';
                 angkatanSelect.disabled = true;
                 nextToStep3Btn.disabled = true;
                 angkatanInfo.style.display = 'none';
 
-                // Simulasi data angkatan
-                setTimeout(() => {
-                    const angkatanData = {
-                        '1': [ // PKN_TK_II
-                            { id: '1', nama: 'Angkatan I', tahun: '2024', kuota: '50 peserta', status: 'Aktif' },
-                            { id: '2', nama: 'Angkatan II', tahun: '2024', kuota: '50 peserta', status: 'Aktif' }
-                        ],
-                        '2': [ // PD_CPNS
-                            { id: '3', nama: 'Batch 1', tahun: '2024', kuota: '100 peserta', status: 'Aktif' },
-                            { id: '4', nama: 'Batch 2', tahun: '2024', kuota: '100 peserta', status: 'Aktif' }
-                        ],
-                        '3': [ // PKA
-                            { id: '5', nama: 'Gelombang 1', tahun: '2024', kuota: '30 peserta', status: 'Aktif' },
-                            { id: '6', nama: 'Gelombang 2', tahun: '2024', kuota: '30 peserta', status: 'Aktif' }
-                        ]
-                    };
-
-                    const data = angkatanData[jenisId] || [];
+                try {
+                    const response = await fetch(`/api/angkatan/${jenisId}`);
+                    const data = await response.json();
 
                     if (data.length === 0) {
                         angkatanSelect.innerHTML = '<option value="">Tidak ada angkatan tersedia</option>';
@@ -773,17 +766,21 @@
                     data.forEach(angkatan => {
                         const option = document.createElement('option');
                         option.value = angkatan.id;
-                        option.textContent = `${angkatan.nama} (${angkatan.tahun})`;
-                        option.dataset.nama = angkatan.nama;
+                        option.textContent = `${angkatan.nama_angkatan} (${angkatan.tahun})`;
+                        option.dataset.nama = angkatan.nama_angkatan;
                         option.dataset.tahun = angkatan.tahun;
-                        option.dataset.kuota = angkatan.kuota || 'Tidak tersedia';
-                        option.dataset.status = angkatan.status || 'Aktif';
+                        option.dataset.kuota = angkatan.kuota;
+                        option.dataset.status = angkatan.status_angkatan;
                         angkatanSelect.appendChild(option);
                     });
 
                     angkatanSelect.disabled = false;
-                }, 500);
+                } catch (error) {
+                    console.error('Error load angkatan:', error);
+                    angkatanSelect.innerHTML = '<option value="">Error loading data</option>';
+                }
             }
+
 
             angkatanSelect.addEventListener('change', function () {
                 if (!this.value) {
@@ -838,11 +835,66 @@
                         loadFormPKN_TK_II();
                     } else if (selectedTraining.kode === 'PD_CPNS') {
                         loadFormPD_CPNS();
-                    } else if (selectedTraining.kode === 'PKA') {
+                    } else if (selectedTraining.kode === 'PKA' || selectedTraining.kode === 'PKP') {
                         loadFormPKA();
                     }
                 }, 300);
             }
+
+           async function loadProvinsi() {
+                const provinsiSelect = document.querySelector('[name="provinsi"]');
+                provinsiSelect.innerHTML = '<option value="">Memuat provinsi...</option>';
+
+                try {
+                    const response = await fetch('/proxy/provinces');
+                    const result = await response.json();
+                    console.log('Provinsi external:', result.data); // DEBUG
+
+                    provinsiSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
+                    result.data.forEach(prov => {  // ← data[] wrapper
+                        const option = document.createElement('option');
+                        option.value = prov.code;    // ✅ code (bukan id)
+                        option.textContent = prov.name;
+                        provinsiSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Provinsi error:', error);
+                    provinsiSelect.innerHTML = '<option value="">Error loading</option>';
+                }
+            }
+
+
+            async function loadKabupaten(provCode) {  // ← provCode bukan id
+                console.log('Loading kabupaten untuk code:', provCode);
+
+                const kabSelect = document.querySelector('[name="kabupaten"]');
+                if (!kabSelect) return;
+
+                kabSelect.innerHTML = '<option value="">Memuat kabupaten...</option>';
+                kabSelect.disabled = true;
+
+                try {
+                    // ✅ Dynamic URL dengan province code
+                    const response = await fetch(`/proxy/regencies/${provCode}`);
+                    const result = await response.json();
+                    console.log('Kabupaten external:', result.data); // DEBUG
+
+                    kabSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+                    kabSelect.disabled = false;
+
+                    result.data.forEach(kab => {  // ← data[] wrapper
+                        const option = document.createElement('option');
+                        option.value = kab.code;     // ✅ code (bukan id)
+                        option.textContent = kab.name;
+                        kabSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Kabupaten error:', error);
+                    kabSelect.innerHTML = '<option value="">Error loading</option>';
+                    kabSelect.disabled = false;
+                }
+            }
+
 
             function loadFormPKN_TK_II() {
                 dynamicFormContainer.innerHTML = `
@@ -1014,40 +1066,7 @@
                                 <label class="form-label required">Provinsi  (Kantor/Tempat Tugas)</label>
                                 <select name="provinsi" class="form-select" required>
                                     <option value="">Pilih Provinsi</option>
-                                    <option value="11">Aceh</option>
-                                    <option value="12">Sumatera Utara</option>
-                                    <option value="13">Sumatera Barat</option>
-                                    <option value="14">Riau</option>
-                                    <option value="15">Jambi</option>
-                                    <option value="16">Sumatera Selatan</option>
-                                    <option value="17">Bengkulu</option>
-                                    <option value="18">Lampung</option>
-                                    <option value="19">Kepulauan Bangka Belitung</option>
-                                    <option value="21">Kepulauan Riau</option>
-                                    <option value="31">DKI Jakarta</option>
-                                    <option value="32">Jawa Barat</option>
-                                    <option value="33">Jawa Tengah</option>
-                                    <option value="34">DI Yogyakarta</option>
-                                    <option value="35">Jawa Timur</option>
-                                    <option value="36">Banten</option>
-                                    <option value="51">Bali</option>
-                                    <option value="52">Nusa Tenggara Barat</option>
-                                    <option value="53">Nusa Tenggara Timur</option>
-                                    <option value="61">Kalimantan Barat</option>
-                                    <option value="62">Kalimantan Tengah</option>
-                                    <option value="63">Kalimantan Selatan</option>
-                                    <option value="64">Kalimantan Timur</option>
-                                    <option value="65">Kalimantan Utara</option>
-                                    <option value="71">Sulawesi Utara</option>
-                                    <option value="72">Sulawesi Tengah</option>
-                                    <option value="73">Sulawesi Selatan</option>
-                                    <option value="74">Sulawesi Tenggara</option>
-                                    <option value="75">Gorontalo</option>
-                                    <option value="76">Sulawesi Barat</option>
-                                    <option value="81">Maluku</option>
-                                    <option value="82">Maluku Utara</option>
-                                    <option value="91">Papua Barat</option>
-                                    <option value="94">Papua</option>
+                                    <option value="">Memuat provinsi...</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1203,8 +1222,12 @@
                             </div>
                         </div>
                     `;
+                // Load provinsi dinamis
 
-                setupFormInteractions();
+                // ✅ CRITICAL: Panggil fungsi dinamis
+                loadProvinsi();
+
+
             }
 
             function loadFormPD_CPNS() {
@@ -1303,9 +1326,7 @@
                                 <label class="form-label required">Provinsi</label>
                                 <select name="provinsi" class="form-select" required>
                                     <option value="">Pilih Provinsi</option>
-                                    <option value="11">Aceh</option>
-                                    <option value="12">Sumatera Utara</option>
-                                    <!-- Tambahkan provinsi lainnya -->
+                                    <option value="">Memuat provinsi...</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1574,12 +1595,10 @@
                         </div>
                     `;
 
-                // Show/hide mentor details based on selection
-                document.getElementById('sudah_ada_mentor').addEventListener('change', function () {
-                    document.getElementById('mentor-detail').style.display = this.value === 'Ya' ? 'block' : 'none';
-                });
+                // ✅ CRITICAL: Panggil fungsi dinamis
+                loadProvinsi();
 
-                setupFormInteractions();
+
             }
 
             function loadFormPKA() {
@@ -1669,9 +1688,7 @@
                                 <label class="form-label required">Provinsi</label>
                                 <select name="provinsi" class="form-select" required>
                                     <option value="">Pilih Provinsi</option>
-                                    <option value="11">Aceh</option>
-                                    <option value="12">Sumatera Utara</option>
-                                    <!-- Tambahkan provinsi lainnya -->
+                                    <option value="">Memuat provinsi...</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1993,7 +2010,10 @@
                         </div>
                     `;
 
-                setupFormInteractions();
+                // ✅ CRITICAL: Panggil fungsi dinamis
+                loadProvinsi();
+
+
             }
 
             function setupFormInteractions() {
@@ -2005,37 +2025,7 @@
                     });
                 });
 
-                // Provinsi-Kabupaten dependency
-                document.addEventListener('change', function (e) {
-                    if (e.target && e.target.name === 'provinsi') {
-                        const kabSelect = e.target.closest('.form-row').querySelector('select[name="kabupaten"]');
-                        if (kabSelect) {
-                            // Simulasi load kabupaten
-                            kabSelect.innerHTML = '<option value="">Memuat...</option>';
-                            kabSelect.disabled = true;
 
-                            setTimeout(() => {
-                                kabSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-                                const kabupatenList = [
-                                    'Kota Jakarta Pusat', 'Kota Jakarta Selatan', 'Kota Jakarta Timur',
-                                    'Kota Jakarta Barat', 'Kota Jakarta Utara', 'Kabupaten Bogor',
-                                    'Kota Bogor', 'Kabupaten Bekasi', 'Kota Bekasi', 'Kabupaten Tangerang',
-                                    'Kota Tangerang', 'Kota Tangerang Selatan', 'Kabupaten Bandung',
-                                    'Kota Bandung', 'Kota Surabaya', 'Kota Semarang', 'Kota Yogyakarta'
-                                ];
-
-                                kabupatenList.forEach(kab => {
-                                    const option = document.createElement('option');
-                                    option.value = kab;
-                                    option.textContent = kab;
-                                    kabSelect.appendChild(option);
-                                });
-
-                                kabSelect.disabled = false;
-                            }, 500);
-                        }
-                    }
-                });
             }
 
             // Navigation
@@ -2066,33 +2056,42 @@
                 }
             });
 
-            // Form submission
-            document.getElementById('pendaftaranForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                submitFormBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
-                submitFormBtn.disabled = true;
-
-                // Simulate form submission
-                setTimeout(() => {
-                    alert('Pendaftaran berhasil dikirim! Data Anda telah direkam.');
-                    submitFormBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pendaftaran';
-                    submitFormBtn.disabled = false;
-
-                    // Reset form after 2 seconds
-                    setTimeout(() => {
-                        moveToStep(1);
-                        document.querySelectorAll('.training-card').forEach(card => {
-                            card.classList.remove('selected');
-                        });
-                        angkatanSelect.innerHTML = '<option value="">Pilih Angkatan</option>';
-                        jenisPelatihanInput.value = '';
-                        selectedTraining = null;
-                        selectedAngkatan = null;
-                        dynamicFormContainer.innerHTML = '';
-                    }, 2000);
-                }, 2000);
+            document.addEventListener('change', function (e) {
+                if (e.target.name === 'provinsi' && e.target.value) {
+                    console.log('Provinsi dipilih:', e.target.value); // DEBUG
+                    loadKabupaten(e.target.value);
+                }
             });
+
+            // Form submission
+            // document.getElementById('pendaftaranForm').addEventListener('submit', function (e) {
+            //     e.preventDefault();
+
+            //     submitFormBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+            //     submitFormBtn.disabled = true;
+
+            //     // Simulate form submission
+            //     setTimeout(() => {
+            //         alert('Pendaftaran berhasil dikirim! Data Anda telah direkam.');
+            //         submitFormBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pendaftaran';
+            //         submitFormBtn.disabled = false;
+
+            //         // Reset form after 2 seconds
+            //         setTimeout(() => {
+            //             moveToStep(1);
+            //             document.querySelectorAll('.training-card').forEach(card => {
+            //                 card.classList.remove('selected');
+            //             });
+            //             angkatanSelect.innerHTML = '<option value="">Pilih Angkatan</option>';
+            //             jenisPelatihanInput.value = '';
+            //             selectedTraining = null;
+            //             selectedAngkatan = null;
+            //             dynamicFormContainer.innerHTML = '';
+            //         }, 2000);
+            //     }, 2000);
+            // });
         });
+
+
     </script>
 @endpush

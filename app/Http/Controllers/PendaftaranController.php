@@ -25,6 +25,14 @@ class PendaftaranController extends Controller
         $provinsi = Provinsi::all();
         $mentor = Mentor::where('status_aktif', true)->get();
 
+        if (request()->ajax()) {
+            return response()->json([
+                'jenis_pelatihan' => $jenisPelatihan,
+                'provinsi' => $provinsi,
+                'mentor' => $mentor
+            ]);
+        }
+
         return view('pendaftaran.create', compact('jenisPelatihan', 'provinsi', 'mentor'));
     }
 
@@ -33,6 +41,7 @@ class PendaftaranController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         // Validasi input umum
         $validated = $request->validate([
             'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id_jenis_pelatihan',
@@ -247,5 +256,10 @@ class PendaftaranController extends Controller
         $kabupaten = KabupatenKota::where('id_provinsi', $id_provinsi)->get();
 
         return response()->json($kabupaten);
+    }
+
+    public function apiProvinsi()
+    {
+        return response()->json(Provinsi::all());
     }
 }

@@ -16,7 +16,10 @@ Route::get('/pendaftaran/success', function () {
 
 // Routes untuk API (digunakan di JavaScript untuk load data dinamis)
 Route::get('/api/angkatan/{id_jenis_pelatihan}', [PendaftaranController::class, 'apiAngkatan']);
-Route::get('/api/kabupaten/{id_provinsi}', [PendaftaranController::class, 'apiKabupaten']);
+// Route::get('/api/kabupaten/{id_provinsi}', [PendaftaranController::class, 'apiKabupaten']);
+// Route::get('/api/provinsi', [PendaftaranController::class, 'apiProvinsi']);
+
+
 // Route Landing Page
 Route::get('/', function () {return view('welcome');})->name('home');
 Route::get('/profil', function () {return view('profil');})->name('profil');
@@ -57,4 +60,16 @@ Route::middleware('auth')->group(function () {
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{id}', [UserController::class, 'delete'])->name('users.delete')->middleware('permission:user.read'); 
     });
+});
+
+// Proxy untuk bypass CORS
+Route::get('/proxy/provinces', function () {
+    $response = file_get_contents('https://wilayah.id/api/provinces.json');
+    return response($response)->header('Content-Type', 'application/json');
+});
+
+Route::get('/proxy/regencies/{code}', function ($code) {
+    $url = "https://wilayah.id/api/regencies/{$code}.json";
+    $response = file_get_contents($url);
+    return response($response)->header('Content-Type', 'application/json');
 });
