@@ -55,7 +55,7 @@ class Dataawal extends Seeder
                 'tanggal_mulai' => '2025-01-01',
                 'tanggal_selesai' => '2025-03-31',
                 'kuota' => 50,
-                'status_angkatan' => 'Dibuka',
+                'status_angkatan' => 'Ditutup',
             ]);
 
             Angkatan::create([
