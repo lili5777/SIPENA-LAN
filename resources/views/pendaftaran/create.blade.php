@@ -853,7 +853,7 @@
                     provinsiSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
                     result.data.forEach(prov => {  // ← data[] wrapper
                         const option = document.createElement('option');
-                        option.value = prov.code;    // ✅ code (bukan id)
+                        option.value = prov.code;    
                         option.textContent = prov.name;
                         provinsiSelect.appendChild(option);
                     });

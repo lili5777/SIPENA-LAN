@@ -4,8 +4,23 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+
+Route::get('/tes', function () {
+    try {
+        Storage::disk('google')->put('test.txt', 'Hello Google Drive from Laravel!');
+        $exists = Storage::disk('google')->exists('test.txt');
+        return "✅ Google Drive Connected! File exists: " . ($exists ? 'YES' : 'NO');
+    } catch (Exception $e) {
+        return "❌ Error: " . $e->getMessage();
+    }
+});
+
+Route::get('/up', [UploadController::class, 'index'])->name('upload.index');
+Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
 
 // Routes untuk web (form pendaftaran)
 Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
