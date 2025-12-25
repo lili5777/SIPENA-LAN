@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('pendidikan_terakhir', ['SD', 'SMP', 'SMA', 'D3', 'D4', 'S1', 'S2', 'S3']);
             $table->string('bidang_studi', 100)->nullable();
             $table->string('bidang_keahlian', 100)->nullable();
-            $table->enum('status_perkawinan', ['Belum Menikah', 'Menikah', 'Cerai Hidup', 'Cerai Mati']);
+            $table->enum('status_perkawinan', ['Belum Menikah', 'Menikah', 'Duda', 'Janda']);
             $table->string('nama_pasangan', 200)->nullable();
             $table->string('olahraga_hobi', 100)->nullable();
             $table->enum('perokok', ['Ya', 'Tidak']);

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('file_surat_bebas_narkoba', 255)->nullable();
             $table->string('file_surat_pernyataan_administrasi', 255)->nullable();
             $table->string('file_sertifikat_penghargaan', 255)->nullable();
-            $table->enum('status_pendaftaran', ['Draft', 'Diajukan', 'Diverifikasi', 'Diterima', 'Ditolak'])->default('Draft');
+            $table->enum('status_pendaftaran', ['Menunggu Verifikasi', 'Diterima', 'Ditolak'])->default('Menunggu Verifikasi');
             $table->timestamp('tanggal_daftar')->useCurrent();
             $table->timestamp('tanggal_verifikasi')->nullable();
             $table->text('catatan_verifikasi')->nullable();

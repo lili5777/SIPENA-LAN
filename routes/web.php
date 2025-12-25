@@ -22,23 +22,25 @@ Route::get('/tes', function () {
 Route::get('/up', [UploadController::class, 'index'])->name('upload.index');
 Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
 
-// Routes untuk web (form pendaftaran)
-Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
-Route::post('/pendaftaran/store', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
-Route::get('/pendaftaran/success', function () {
-    return view('pendaftaran.success'); // Asumsi ada view success.blade.php
-})->name('pendaftaran.success');
-
-// Routes untuk API (digunakan di JavaScript untuk load data dinamis)
-Route::get('/api/angkatan/{id_jenis_pelatihan}', [PendaftaranController::class, 'apiAngkatan']);
-// Route::get('/api/kabupaten/{id_provinsi}', [PendaftaranController::class, 'apiKabupaten']);
-// Route::get('/api/provinsi', [PendaftaranController::class, 'apiProvinsi']);
-
 
 // Route Landing Page
 Route::get('/', function () {return view('welcome');})->name('home');
 Route::get('/profil', function () {return view('profil');})->name('profil');
 Route::get('/publikasi', function () {return view('publikasi');})->name('publikasi');
+
+
+// Routes untuk web (form pendaftaran)
+Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
+Route::post('/pendaftaran/store', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+Route::get('/pendaftaran/success', [PendaftaranController::class, 'success'])->name('pendaftaran.success');
+
+
+// Route untuk form partial
+Route::get('/form-partial/{type}', [PendaftaranController::class, 'formPartial'])->name('form.partial');
+
+
+// Routes untuk API (digunakan di JavaScript untuk load data dinamis)
+Route::get('/api/angkatan/{id_jenis_pelatihan}', [PendaftaranController::class, 'apiAngkatan']);
 
 
 // Route Authentication
@@ -77,12 +79,14 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-// Proxy untuk bypass CORS
+
+// Proxy untuk bypass CORS (API Wilayah Indonesia)
+// Provinsi
 Route::get('/proxy/provinces', function () {
     $response = file_get_contents('https://wilayah.id/api/provinces.json');
     return response($response)->header('Content-Type', 'application/json');
 });
-
+// Kota/Kabupaten
 Route::get('/proxy/regencies/{code}', function ($code) {
     $url = "https://wilayah.id/api/regencies/{$code}.json";
     $response = file_get_contents($url);

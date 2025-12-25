@@ -47,14 +47,14 @@ class KepegawaianPeserta extends Model
     }
 
     // Relasi: belongsTo ke Provinsi
-    public function provinsi()
-    {
-        return $this->belongsTo(Provinsi::class);
-    }
+    // public function provinsi()
+    // {
+    //     return $this->belongsTo(Provinsi::class);
+    // }
 
     // Relasi: belongsTo ke KabupatenKota
-    public function kabupatenKota()
-    {
-        return $this->belongsTo(KabupatenKota::class);
-    }
+    // public function kabupatenKota()
+    // {
+    //     return $this->belongsTo(KabupatenKota::class);
+    // }
 }

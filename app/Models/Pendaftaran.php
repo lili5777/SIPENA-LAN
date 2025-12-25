@@ -10,6 +10,7 @@ class Pendaftaran extends Model
     use HasFactory;
 
     protected $table = 'pendaftaran';
+    
     // protected $primaryKey = 'id_pendaftaran';
     public $timestamps = false;
 

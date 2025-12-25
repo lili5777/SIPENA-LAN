@@ -36,204 +36,512 @@ class PendaftaranController extends Controller
         return view('pendaftaran.create', compact('jenisPelatihan', 'provinsi', 'mentor'));
     }
 
+    public function formPartial($type)
+    {
+        if ($type === 'PKN_TK_II') {
+            return view('partials.form-pkn-tk-ii');
+        } elseif ($type === 'PD_CPNS') {
+            return view('partials.form-pd-cpns');
+        } elseif ($type === 'PKA') {
+            return view('partials.form-pka');
+        }
+        return response()->json(['error' => 'Form type not found'], 404);
+    }
+
     /**
      * Menyimpan data pendaftaran
      */
     public function store(Request $request)
     {
-        dd($request->all());
-        // Validasi input umum
-        $validated = $request->validate([
-            'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id_jenis_pelatihan',
-            'id_angkatan' => 'required|exists:angkatan,id_angkatan',
-            'nip_nrp' => 'required|string|max:50|unique:peserta,nip_nrp',
-            'nama_lengkap' => 'required|string|max:200',
-            'nama_panggilan' => 'nullable|string|max:100',
-            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-            'agama' => 'required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
-            'tempat_lahir' => 'required|string|max:100',
-            'tanggal_lahir' => 'required|date',
-            'alamat_rumah' => 'required|string',
-            'email_pribadi' => 'required|email|max:100',
-            'nomor_hp' => 'required|string|max:20',
-            'pendidikan_terakhir' => 'required|in:SD,SMP,SMA,D3,D4,S1,S2,S3',
-            'bidang_studi' => 'nullable|string|max:100',
-            'bidang_keahlian' => 'nullable|string|max:100',
-            'status_perkawinan' => 'nullable|in:Belum Menikah,Menikah,Cerai Hidup,Cerai Mati',
-            'nama_pasangan' => 'nullable|string|max:200',
-            'olahraga_hobi' => 'nullable|string|max:100',
-            'perokok' => 'required|in:Ya,Tidak',
-            'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-            'kondisi_peserta' => 'nullable|string',
-            'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'file_pas_foto' => 'nullable|file|mimes:jpg,png|max:2048',
-            'asal_instansi' => 'required|string|max:200',
-            'unit_kerja' => 'nullable|string|max:200',
-            'id_provinsi' => 'required|exists:provinsi,id_provinsi',
-            'id_kabupaten_kota' => 'nullable|exists:kabupaten_kota,id_kabupaten_kota',
-            'alamat_kantor' => 'required|string',
-            'nomor_telepon_kantor' => 'nullable|string|max:20',
-            'email_kantor' => 'nullable|email|max:100',
-            'jabatan' => 'required|string|max:200',
-            'pangkat' => 'nullable|string|max:50',
-            'golongan_ruang' => 'required|string|max:10',
-            'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:2048',
-            'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:2048',
-            'file_surat_tugas' => 'nullable|file|mimes:pdf|max:2048',
-            'file_surat_sehat' => 'nullable|file|mimes:pdf|max:2048',
-            'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:2048',
-            'id_mentor' => 'nullable|exists:mentor,id_mentor',
-            'nomor_rekening_mentor' => 'nullable|string|max:100',
-            'npwp_mentor' => 'nullable|string|max:50',
-            'has_mentor' => 'nullable|in:Ya,Tidak',
-        ]);
+        try {
+            // Validasi input umum
+            $validated = $request->validate(
+                [
+                    'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
+                    'id_angkatan' => 'required|exists:angkatan,id',
+                    'nip_nrp' => 'required|string|max:50|unique:peserta,nip_nrp',
+                    'nama_lengkap' => 'required|string|max:200',
+                    'nama_panggilan' => 'nullable|string|max:100',
+                    'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+                    'agama' => 'required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
+                    'tempat_lahir' => 'required|string|max:100',
+                    'tanggal_lahir' => 'required|date',
+                    'alamat_rumah' => 'required|string',
+                    'email_pribadi' => 'required|email|max:100|unique:peserta,email_pribadi',
+                    'nomor_hp' => 'required|string|max:20',
+                    'pendidikan_terakhir' => 'required|in:SD,SMP,SMA,D3,D4,S1,S2,S3',
+                    'bidang_studi' => 'nullable|string|max:100',
+                    'bidang_keahlian' => 'nullable|string|max:100',
+                    'status_perkawinan' => 'nullable|in:Belum Menikah,Menikah,Duda,Janda',
+                    'nama_pasangan' => 'nullable|string|max:200',
+                    'olahraga_hobi' => 'nullable|string|max:100',
+                    'perokok' => 'required|in:Ya,Tidak',
+                    'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                    'kondisi_peserta' => 'nullable|string',
+                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+                    'file_pas_foto' => 'nullable|file|mimes:jpg,png|max:2048',
+                    'asal_instansi' => 'required|string|max:200',
+                    'unit_kerja' => 'nullable|string|max:200',
+                    'id_provinsi' => 'required',
+                    'id_kabupaten_kota' => 'nullable',
+                    'alamat_kantor' => 'required|string',
+                    'nomor_telepon_kantor' => 'nullable|string|max:20',
+                    'email_kantor' => 'nullable|email|max:100',
+                    'jabatan' => 'required|string|max:200',
+                    'pangkat' => 'nullable|string|max:50',
+                    'golongan_ruang' => 'required|string|max:10',
+                    'eselon' => 'nullable|in:I.a,I.b,II.a,II.b,III.a,III.b,IV.a,IV.b,Non Eselon',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_spmt' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_skp' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:2048',
+                    'nomor_sk_cpns' => 'nullable|string|max:100',
+                    'tanggal_sk_cpns' => 'nullable|date',
+                    'tanggal_sk_jabatan' => 'nullable|date',
+                    'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
+                    'nama_mentor' => 'nullable|string|max:200',
+                    'jabatan_mentor' => 'nullable|string|max:200',
+                    'nomor_rekening_mentor' => 'nullable|string|max:100',
+                    'npwp_mentor' => 'nullable|string|max:50',
+                    'has_mentor' => 'nullable|in:Ya,Tidak',
+                    'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
+                ],
+                [
+                    'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
+                    'id_jenis_pelatihan.exists'   => 'Jenis pelatihan tidak valid.',
 
-        // Validasi tambahan berdasarkan jenis pelatihan
-        $jenisPelatihan = JenisPelatihan::find($request->id_jenis_pelatihan);
-        $kode = $jenisPelatihan->kode_pelatihan;
+                    'id_angkatan.required' => 'Angkatan wajib dipilih.',
+                    'id_angkatan.exists'   => 'Angkatan tidak valid.',
 
-        if ($kode === 'PKN_TK_II' || $kode === 'PKA') {
-            $validated += $request->validate([
-                'eselon' => 'nullable|in:I.a,I.b,II.a,II.b,III.a,III.b,IV.a,IV.b,Non Eselon',
-                'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:2048',
-                'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
-                'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:2048',
-                'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:2048',
-            ]);
-        }
+                    'nip_nrp.required' => 'NIP/NRP wajib diisi.',
+                    'nip_nrp.string'   => 'NIP/NRP harus berupa teks.',
+                    'nip_nrp.max'      => 'NIP/NRP maksimal 50 karakter.',
+                    'nip_nrp.unique'   => 'NIP/NRP sudah terdaftar.',
 
-        if ($kode === 'PKN_TK_II') {
-            $validated += $request->validate([
-                'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:2048',
-            ]);
-        }
+                    'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+                    'nama_lengkap.string'   => 'Nama lengkap harus berupa teks.',
+                    'nama_lengkap.max'      => 'Nama lengkap maksimal 200 karakter.',
 
-        if ($kode === 'PD_CPNS') {
-            $validated += $request->validate([
-                'nomor_sk_cpns' => 'nullable|string|max:100',
-                'tanggal_sk_cpns' => 'nullable|date',
-                'file_sk_cpns' => 'nullable|file|mimes:pdf|max:2048',
-                'file_spmt' => 'nullable|file|mimes:pdf|max:2048',
-                'file_skp' => 'nullable|file|mimes:pdf|max:2048',
-                'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:2048',
-                'pangkat' => 'required|string|max:50',
-                'file_ktp' => 'nullable|file|mimes:pdf|max:2048',
-                'has_mentor' => 'nullable|in:Ya,Tidak',
-                'nomor_rekening_mentor' => 'nullable|string|max:100',
-                'npwp_mentor' => 'nullable|string|max:50',
-            ]);
-        }
+                    'nama_panggilan.string' => 'Nama panggilan harus berupa teks.',
+                    'nama_panggilan.max'    => 'Nama panggilan maksimal 100 karakter.',
 
-        if ($kode === 'PKA') {
-            $validated += $request->validate([
-                'tanggal_sk_jabatan' => 'nullable|date',
-                'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
-                'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:2048',
-                'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:2048',
-                'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:2048',
-                'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:2048',
-                'file_ktp' => 'nullable|file|mimes:pdf|max:2048',
-                'nomor_rekening_mentor' => 'nullable|string|max:100',
-                'npwp_mentor' => 'nullable|string|max:50',
-            ]);
-        }
+                    'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
+                    'jenis_kelamin.in'       => 'Jenis kelamin harus Laki-laki atau Perempuan.',
 
-        // Simpan file uploads (sama seperti sebelumnya)
-        $fileFields = [
-            'file_ktp', 'file_pas_foto', 'file_sk_jabatan', 'file_sk_pangkat', 'file_surat_tugas',
-            'file_surat_kesediaan', 'file_pakta_integritas', 'file_surat_komitmen',
-            'file_surat_kelulusan_seleksi', 'file_surat_sehat', 'file_surat_bebas_narkoba',
-            'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan',
-            'file_sk_cpns', 'file_spmt', 'file_skp', 'file_persetujuan_mentor'
-        ];
+                    'agama.required' => 'Agama wajib dipilih.',
+                    'agama.in'       => 'Agama yang dipilih tidak valid.',
 
-        $files = [];
-        foreach ($fileFields as $field) {
-            if ($request->hasFile($field)) {
-                $files[$field] = $request->file($field)->store('uploads/pendaftaran', 'public');
+                    'tempat_lahir.required' => 'Tempat lahir wajib diisi.',
+                    'tempat_lahir.string'   => 'Tempat lahir harus berupa teks.',
+                    'tempat_lahir.max'      => 'Tempat lahir maksimal 100 karakter.',
+
+                    'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
+                    'tanggal_lahir.date'     => 'Tanggal lahir tidak valid.',
+
+                    'alamat_rumah.required' => 'Alamat rumah wajib diisi.',
+                    'alamat_rumah.string'   => 'Alamat rumah harus berupa teks.',
+
+                    'email_pribadi.required' => 'Email pribadi wajib diisi.',
+                    'email_pribadi.email'    => 'Format email pribadi tidak valid.',
+                    'email_pribadi.max'      => 'Email pribadi maksimal 100 karakter.',
+                    'email_pribadi.unique'   => 'Email pribadi sudah digunakan.',
+
+                    'nomor_hp.required' => 'Nomor HP wajib diisi.',
+                    'nomor_hp.string'   => 'Nomor HP harus berupa teks.',
+                    'nomor_hp.max'      => 'Nomor HP maksimal 20 karakter.',
+
+                    'pendidikan_terakhir.required' => 'Pendidikan terakhir wajib dipilih.',
+                    'pendidikan_terakhir.in'       => 'Pendidikan terakhir yang dipilih tidak valid.',
+
+                    'bidang_studi.string' => 'Bidang studi harus berupa teks.',
+                    'bidang_studi.max'    => 'Bidang studi maksimal 100 karakter.',
+
+                    'bidang_keahlian.string' => 'Bidang keahlian harus berupa teks.',
+                    'bidang_keahlian.max'    => 'Bidang keahlian maksimal 100 karakter.',
+
+                    'status_perkawinan.in' => 'Status perkawinan yang dipilih tidak valid.',
+
+                    'nama_pasangan.string' => 'Nama pasangan harus berupa teks.',
+                    'nama_pasangan.max'    => 'Nama pasangan maksimal 200 karakter.',
+
+                    'olahraga_hobi.string' => 'Olahraga/hobi harus berupa teks.',
+                    'olahraga_hobi.max'    => 'Olahraga/hobi maksimal 100 karakter.',
+
+                    'perokok.required' => 'Status perokok wajib dipilih.',
+                    'perokok.in'       => 'Status perokok harus Ya atau Tidak.',
+
+                    'ukuran_kaos.in' => 'Ukuran kaos yang dipilih tidak valid.',
+
+                    'kondisi_peserta.string' => 'Kondisi peserta harus berupa teks.',
+
+                    'file_ktp.file'  => 'File KTP harus berupa berkas.',
+                    'file_ktp.mimes' => 'File KTP harus berformat pdf, jpg, atau png.',
+                    'file_ktp.max'   => 'File KTP maksimal 2 MB.',
+
+                    'file_pas_foto.file'  => 'Pas foto harus berupa berkas.',
+                    'file_pas_foto.mimes' => 'Pas foto harus berformat jpg atau png.',
+                    'file_pas_foto.max'   => 'Pas foto maksimal 2 MB.',
+
+                    'asal_instansi.required' => 'Asal instansi wajib diisi.',
+                    'asal_instansi.string'   => 'Asal instansi harus berupa teks.',
+                    'asal_instansi.max'      => 'Asal instansi maksimal 200 karakter.',
+
+                    'unit_kerja.string' => 'Unit kerja harus berupa teks.',
+                    'unit_kerja.max'    => 'Unit kerja maksimal 200 karakter.',
+
+                    'id_provinsi.required' => 'Provinsi wajib dipilih.',
+
+                    'alamat_kantor.required' => 'Alamat kantor wajib diisi.',
+                    'alamat_kantor.string'   => 'Alamat kantor harus berupa teks.',
+
+                    'nomor_telepon_kantor.string' => 'Nomor telepon kantor harus berupa teks.',
+                    'nomor_telepon_kantor.max'    => 'Nomor telepon kantor maksimal 20 karakter.',
+
+                    'email_kantor.email' => 'Format email kantor tidak valid.',
+                    'email_kantor.max'   => 'Email kantor maksimal 100 karakter.',
+
+                    'jabatan.required' => 'Jabatan wajib diisi.',
+                    'jabatan.string'   => 'Jabatan harus berupa teks.',
+                    'jabatan.max'      => 'Jabatan maksimal 200 karakter.',
+
+                    'pangkat.string' => 'Pangkat harus berupa teks.',
+                    'pangkat.max'    => 'Pangkat maksimal 50 karakter.',
+
+                    'golongan_ruang.required' => 'Golongan ruang wajib diisi.',
+                    'golongan_ruang.string'   => 'Golongan ruang harus berupa teks.',
+                    'golongan_ruang.max'      => 'Golongan ruang maksimal 10 karakter.',
+
+                    'eselon.in' => 'Eselon yang dipilih tidak valid.',
+
+                    'file_sk_jabatan.file'  => 'SK jabatan harus berupa berkas.',
+                    'file_sk_jabatan.mimes' => 'SK jabatan harus berformat pdf.',
+                    'file_sk_jabatan.max'   => 'SK jabatan maksimal 2 MB.',
+
+                    'file_sk_pangkat.file'  => 'SK pangkat harus berupa berkas.',
+                    'file_sk_pangkat.mimes' => 'SK pangkat harus berformat pdf.',
+                    'file_sk_pangkat.max'   => 'SK pangkat maksimal 2 MB.',
+
+                    'file_surat_tugas.file'  => 'Surat tugas harus berupa berkas.',
+                    'file_surat_tugas.mimes' => 'Surat tugas harus berformat pdf.',
+                    'file_surat_tugas.max'   => 'Surat tugas maksimal 2 MB.',
+
+                    'file_surat_sehat.file'  => 'Surat sehat harus berupa berkas.',
+                    'file_surat_sehat.mimes' => 'Surat sehat harus berformat pdf.',
+                    'file_surat_sehat.max'   => 'Surat sehat maksimal 2 MB.',
+
+                    'file_surat_bebas_narkoba.file'  => 'Surat bebas narkoba harus berupa berkas.',
+                    'file_surat_bebas_narkoba.mimes' => 'Surat bebas narkoba harus berformat pdf.',
+                    'file_surat_bebas_narkoba.max'   => 'Surat bebas narkoba maksimal 2 MB.',
+
+                    'file_pakta_integritas.file'  => 'Pakta integritas harus berupa berkas.',
+                    'file_pakta_integritas.mimes' => 'Pakta integritas harus berformat pdf.',
+                    'file_pakta_integritas.max'   => 'Pakta integritas maksimal 2 MB.',
+
+                    'file_surat_kesediaan.file'  => 'Surat kesediaan harus berupa berkas.',
+                    'file_surat_kesediaan.mimes' => 'Surat kesediaan harus berformat pdf.',
+                    'file_surat_kesediaan.max'   => 'Surat kesediaan maksimal 2 MB.',
+
+                    'file_surat_komitmen.file'  => 'Surat komitmen harus berupa berkas.',
+                    'file_surat_komitmen.mimes' => 'Surat komitmen harus berformat pdf.',
+                    'file_surat_komitmen.max'   => 'Surat komitmen maksimal 2 MB.',
+
+                    'file_surat_kelulusan_seleksi.file'  => 'Surat kelulusan seleksi harus berupa berkas.',
+                    'file_surat_kelulusan_seleksi.mimes' => 'Surat kelulusan seleksi harus berformat pdf.',
+                    'file_surat_kelulusan_seleksi.max'   => 'Surat kelulusan seleksi maksimal 2 MB.',
+
+                    'file_surat_pernyataan_administrasi.file'  => 'Surat pernyataan administrasi harus berupa berkas.',
+                    'file_surat_pernyataan_administrasi.mimes' => 'Surat pernyataan administrasi harus berformat pdf.',
+                    'file_surat_pernyataan_administrasi.max'   => 'Surat pernyataan administrasi maksimal 2 MB.',
+
+                    'file_sertifikat_penghargaan.file'  => 'Sertifikat penghargaan harus berupa berkas.',
+                    'file_sertifikat_penghargaan.mimes' => 'Sertifikat penghargaan harus berformat pdf.',
+                    'file_sertifikat_penghargaan.max'   => 'Sertifikat penghargaan maksimal 2 MB.',
+
+                    'file_sk_cpns.file'  => 'SK CPNS harus berupa berkas.',
+                    'file_sk_cpns.mimes' => 'SK CPNS harus berformat pdf.',
+                    'file_sk_cpns.max'   => 'SK CPNS maksimal 2 MB.',
+
+                    'file_spmt.file'  => 'SPMT harus berupa berkas.',
+                    'file_spmt.mimes' => 'SPMT harus berformat pdf.',
+                    'file_spmt.max'   => 'SPMT maksimal 2 MB.',
+
+                    'file_skp.file'  => 'SKP harus berupa berkas.',
+                    'file_skp.mimes' => 'SKP harus berformat pdf.',
+                    'file_skp.max'   => 'SKP maksimal 2 MB.',
+
+                    'file_persetujuan_mentor.file'  => 'Persetujuan mentor harus berupa berkas.',
+                    'file_persetujuan_mentor.mimes' => 'Persetujuan mentor harus berformat pdf.',
+                    'file_persetujuan_mentor.max'   => 'Persetujuan mentor maksimal 2 MB.',
+
+                    'nomor_sk_cpns.string' => 'Nomor SK CPNS harus berupa teks.',
+                    'nomor_sk_cpns.max'    => 'Nomor SK CPNS maksimal 100 karakter.',
+
+                    'tanggal_sk_cpns.date' => 'Tanggal SK CPNS tidak valid.',
+
+                    'tanggal_sk_jabatan.date' => 'Tanggal SK jabatan tidak valid.',
+
+                    'tahun_lulus_pkp_pim_iv.integer' => 'Tahun lulus PKP/PIM IV harus berupa angka.',
+
+                    'nama_mentor.string' => 'Nama mentor harus berupa teks.',
+                    'nama_mentor.max'    => 'Nama mentor maksimal 200 karakter.',
+
+                    'jabatan_mentor.string' => 'Jabatan mentor harus berupa teks.',
+                    'jabatan_mentor.max'    => 'Jabatan mentor maksimal 200 karakter.',
+
+                    'nomor_rekening_mentor.string' => 'Nomor rekening mentor harus berupa teks.',
+                    'nomor_rekening_mentor.max'    => 'Nomor rekening mentor maksimal 100 karakter.',
+
+                    'npwp_mentor.string' => 'NPWP mentor harus berupa teks.',
+                    'npwp_mentor.max'    => 'NPWP mentor maksimal 50 karakter.',
+
+                    'has_mentor.in' => 'Pilihan memiliki mentor harus Ya atau Tidak.',
+                    'sudah_ada_mentor.in' => 'Pilihan sudah ada mentor harus Ya atau Tidak.',
+                ]
+            );
+
+            // Ambil jenis pelatihan untuk validasi tambahan
+            $jenisPelatihan = JenisPelatihan::find($request->id_jenis_pelatihan);
+            $kode = $jenisPelatihan->kode_pelatihan;
+
+            // Validasi tambahan berdasarkan jenis pelatihan
+            $additionalRules = [];
+
+            if ($kode === 'PKN_TK_II') {
+                $additionalRules = [
+                    'eselon' => 'required|in:II,III/Pejabat Fungsional',
+                    'file_pakta_integritas' => 'required|file|mimes:pdf|max:2048',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_sk_jabatan' => 'required|file|mimes:pdf|max:2048',
+                    'file_sk_pangkat' => 'required|file|mimes:pdf|max:2048',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:2048',
+                ];
             }
-        }
 
-        // Simpan data Peserta (sama seperti sebelumnya)
-        $peserta = Peserta::create([
-            'nip_nrp' => $request->nip_nrp,
-            'nama_lengkap' => $request->nama_lengkap,
-            'nama_panggilan' => $request->nama_panggilan,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'agama' => $request->agama,
-            'tempat_lahir' => $request->tempat_lahir,
-            'tanggal_lahir' => $request->tanggal_lahir,
-            'alamat_rumah' => $request->alamat_rumah,
-            'email_pribadi' => $request->email_pribadi,
-            'nomor_hp' => $request->nomor_hp,
-            'pendidikan_terakhir' => $request->pendidikan_terakhir,
-            'bidang_studi' => $request->bidang_studi,
-            'bidang_keahlian' => $request->bidang_keahlian,
-            'status_perkawinan' => $request->status_perkawinan,
-            'nama_pasangan' => $request->nama_pasangan,
-            'olahraga_hobi' => $request->olahraga_hobi,
-            'perokok' => $request->perokok,
-            'ukuran_kaos' => $request->ukuran_kaos,
-            'kondisi_peserta' => $request->kondisi_peserta,
-            'file_ktp' => $files['file_ktp'] ?? null,
-            'file_pas_foto' => $files['file_pas_foto'] ?? null,
-            'status_aktif' => true,
-        ]);
+            if ($kode === 'PD_CPNS') {
+                $additionalRules = [
+                    'nomor_sk_cpns' => 'required|string|max:100',
+                    'tanggal_sk_cpns' => 'required|date',
+                    'file_sk_cpns' => 'required|file|mimes:pdf|max:2048',
+                    'file_spmt' => 'required|file|mimes:pdf|max:2048',
+                    'file_skp' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_kesediaan' => 'required|file|mimes:pdf|max:2048',
+                    'pangkat' => 'required|string|max:50',
+                    // 'file_ktp' => 'required|file|mimes:pdf|max:2048',
+                    'sudah_ada_mentor' => 'required|in:Ya,Tidak',
+                    'nomor_rekening_mentor' => 'nullable|string|max:100',
+                    'npwp_mentor' => 'nullable|string|max:50',
+                ];
 
-        // Simpan data KepegawaianPeserta (sama seperti sebelumnya)
-        $kepegawaian = KepegawaianPeserta::create([
-            'id_peserta' => $peserta->id_peserta,
-            'asal_instansi' => $request->asal_instansi,
-            'unit_kerja' => $request->unit_kerja,
-            'id_provinsi' => $request->id_provinsi,
-            'id_kabupaten_kota' => $request->id_kabupaten_kota,
-            'alamat_kantor' => $request->alamat_kantor,
-            'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
-            'email_kantor' => $request->email_kantor,
-            'jabatan' => $request->jabatan,
-            'eselon' => $request->eselon ?? null,
-            'tanggal_sk_jabatan' => $request->tanggal_sk_jabatan ?? null,
-            'file_sk_jabatan' => $files['file_sk_jabatan'] ?? null,
-            'pangkat' => $request->pangkat ?? null,
-            'golongan_ruang' => $request->golongan_ruang,
-            'file_sk_pangkat' => $files['file_sk_pangkat'] ?? null,
-            'nomor_sk_cpns' => $request->nomor_sk_cpns ?? null,
-            'tanggal_sk_cpns' => $request->tanggal_sk_cpns ?? null,
-            'file_sk_cpns' => $files['file_sk_cpns'] ?? null,
-            'file_spmt' => $files['file_spmt'] ?? null,
-            'file_skp' => $files['file_skp'] ?? null,
-            'tahun_lulus_pkp_pim_iv' => $request->tahun_lulus_pkp_pim_iv ?? null,
-        ]);
+                // Jika sudah ada mentor, validasi field mentor
+                if ($request->sudah_ada_mentor === 'Ya') {
+                    $additionalRules['nama_mentor'] = 'required|string|max:200';
+                    $additionalRules['jabatan_mentor'] = 'required|string|max:200';
+                }
+            }
 
-        // Simpan data Pendaftaran (sama seperti sebelumnya)
-        $pendaftaran = Pendaftaran::create([
-            'id_peserta' => $peserta->id_peserta,
-            'id_jenis_pelatihan' => $request->id_jenis_pelatihan,
-            'id_angkatan' => $request->id_angkatan,
-            'file_surat_tugas' => $files['file_surat_tugas'] ?? null,
-            'file_surat_kesediaan' => $files['file_surat_kesediaan'] ?? null,
-            'file_pakta_integritas' => $files['file_pakta_integritas'] ?? null,
-            'file_surat_komitmen' => $files['file_surat_komitmen'] ?? null,
-            'file_surat_kelulusan_seleksi' => $files['file_surat_kelulusan_seleksi'] ?? null,
-            'file_surat_sehat' => $files['file_surat_sehat'] ?? null,
-            'file_surat_bebas_narkoba' => $files['file_surat_bebas_narkoba'] ?? null,
-            'file_surat_pernyataan_administrasi' => $files['file_surat_pernyataan_administrasi'] ?? null,
-            'file_sertifikat_penghargaan' => $files['file_sertifikat_penghargaan'] ?? null,
-            'status_pendaftaran' => 'Draft',
-            'tanggal_daftar' => now(),
-        ]);
+            if ($kode === 'PKA' || $kode === 'PKP') {
+                $additionalRules = [
+                    'eselon' => 'required|in:III,IV',
+                    'tanggal_sk_jabatan' => 'required|date',
+                    'tahun_lulus_pkp_pim_iv' => 'required|integer',
+                    'file_surat_kesediaan' => 'required|file|mimes:pdf|max:2048',
+                    'file_pakta_integritas' => 'required|file|mimes:pdf|max:2048',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_surat_kelulusan_seleksi' => 'required|file|mimes:pdf|max:2048',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:2048',
+                    'file_ktp' => 'required|file|mimes:pdf,jpg,png|max:2048',
+                ];
+            }
 
-        // Simpan data PesertaMentor jika ada
-        if ($request->id_mentor) {
-            PesertaMentor::create([
-                'id_pendaftaran' => $pendaftaran->id_pendaftaran,
-                'id_mentor' => $request->id_mentor,
-                'tanggal_penunjukan' => now(),
-                'status_mentoring' => 'Ditugaskan',
+            // Jalankan validasi tambahan
+            if (!empty($additionalRules)) {
+                $request->validate($additionalRules);
+            }
+
+            
+
+            // Simpan file uploads
+            $fileFields = [
+                'file_ktp',
+                'file_pas_foto',
+                'file_sk_jabatan',
+                'file_sk_pangkat',
+                'file_surat_tugas',
+                'file_surat_kesediaan',
+                'file_pakta_integritas',
+                'file_surat_komitmen',
+                'file_surat_kelulusan_seleksi',
+                'file_surat_sehat',
+                'file_surat_bebas_narkoba',
+                'file_surat_pernyataan_administrasi',
+                'file_sertifikat_penghargaan',
+                'file_sk_cpns',
+                'file_spmt',
+                'file_skp',
+                'file_persetujuan_mentor'
+            ];
+
+            $files = [];
+            foreach ($fileFields as $field) {
+                if ($request->hasFile($field)) {
+                    $fileName = time() . '_' . $field . '.' . $request->file($field)->getClientOriginalExtension();
+                    $path = $request->file($field)->storeAs('uploads/pendaftaran', $fileName, 'public');
+                    $files[$field] = $path;
+                }
+            }
+
+            // dd($request->all());
+
+            // var_dump('Request data:', $request->all());
+            // Simpan data Peserta
+            $peserta = Peserta::create([
+                'nip_nrp' => $request->nip_nrp,
+                'nama_lengkap' => $request->nama_lengkap,
+                'nama_panggilan' => $request->nama_panggilan,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'agama' => $request->agama,
+                'tempat_lahir' => $request->tempat_lahir,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'alamat_rumah' => $request->alamat_rumah,
+                'email_pribadi' => $request->email_pribadi,
+                'nomor_hp' => $request->nomor_hp,
+                'pendidikan_terakhir' => $request->pendidikan_terakhir,
+                'bidang_studi' => $request->bidang_studi,
+                'bidang_keahlian' => $request->bidang_keahlian,
+                'status_perkawinan' => $request->status_perkawinan,
+                'nama_pasangan' => $request->nama_pasangan,
+                'olahraga_hobi' => $request->olahraga_hobi,
+                'perokok' => $request->perokok,
+                'ukuran_kaos' => $request->ukuran_kaos,
+                'kondisi_peserta' => $request->kondisi_peserta,
+                'file_ktp' => $files['file_ktp'] ?? null,
+                'file_pas_foto' => $files['file_pas_foto'] ?? null,
+                'status_aktif' => true,
             ]);
-        }
 
-        return redirect()->route('pendaftaran.success')->with('success', 'Pendaftaran berhasil disimpan!');
+
+            // Simpan data KepegawaianPeserta
+            $kepegawaian = KepegawaianPeserta::create([
+                'id_peserta' => $peserta->id,
+                'asal_instansi' => $request->asal_instansi,
+                'unit_kerja' => $request->unit_kerja,
+                'id_provinsi' => $request->id_provinsi,
+                'id_kabupaten_kota' => $request->id_kabupaten_kota,
+                'alamat_kantor' => $request->alamat_kantor,
+                'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
+                'email_kantor' => $request->email_kantor,
+                'jabatan' => $request->jabatan,
+                'eselon' => $request->eselon ?? null,
+                'tanggal_sk_jabatan' => $request->tanggal_sk_jabatan ?? null,
+                'file_sk_jabatan' => $files['file_sk_jabatan'] ?? null,
+                'pangkat' => $request->pangkat ?? null,
+                'golongan_ruang' => $request->golongan_ruang,
+                'file_sk_pangkat' => $files['file_sk_pangkat'] ?? null,
+                'nomor_sk_cpns' => $request->nomor_sk_cpns ?? null,
+                'tanggal_sk_cpns' => $request->tanggal_sk_cpns ?? null,
+                'file_sk_cpns' => $files['file_sk_cpns'] ?? null,
+                'file_spmt' => $files['file_spmt'] ?? null,
+                'file_skp' => $files['file_skp'] ?? null,
+                'tahun_lulus_pkp_pim_iv' => $request->tahun_lulus_pkp_pim_iv ?? null,
+            ]);
+
+            // Simpan data Pendaftaran
+            $pendaftaran = Pendaftaran::create([
+                'id_peserta' => $peserta->id,
+                'id_jenis_pelatihan' => $request->id_jenis_pelatihan,
+                'id_angkatan' => $request->id_angkatan,
+                'file_surat_tugas' => $files['file_surat_tugas'] ?? null,
+                'file_surat_kesediaan' => $files['file_surat_kesediaan'] ?? null,
+                'file_pakta_integritas' => $files['file_pakta_integritas'] ?? null,
+                'file_surat_komitmen' => $files['file_surat_komitmen'] ?? null,
+                'file_surat_kelulusan_seleksi' => $files['file_surat_kelulusan_seleksi'] ?? null,
+                'file_surat_sehat' => $files['file_surat_sehat'] ?? null,
+                'file_surat_bebas_narkoba' => $files['file_surat_bebas_narkoba'] ?? null,
+                'file_surat_pernyataan_administrasi' => $files['file_surat_pernyataan_administrasi'] ?? null,
+                'file_sertifikat_penghargaan' => $files['file_sertifikat_penghargaan'] ?? null,
+                'file_persetujuan_mentor' => $files['file_persetujuan_mentor'] ?? null,
+                'status_pendaftaran' => 'Menunggu Verifikasi',
+                'tanggal_daftar' => now(),
+            ]);
+
+            // Simpan data mentor jika ada
+            if ($request->nama_mentor) {
+                // Cari atau buat mentor baru
+                $mentor = Mentor::firstOrCreate(
+                    ['nama_mentor' => $request->nama_mentor],
+                    [
+                        'jabatan_mentor' => $request->jabatan_mentor,
+                        'nomor_rekening_mentor' => $request->nomor_rekening_mentor,
+                        'npwp_mentor' => $request->npwp_mentor,
+                        'status_aktif' => true,
+                    ]
+                );
+
+                // Simpan hubungan peserta-mentor
+                PesertaMentor::create([
+                    'id_pendaftaran' => $pendaftaran->id,
+                    'id_mentor' => $mentor->id_mentor,
+                    'tanggal_penunjukan' => now(),
+                    'status_mentoring' => 'Ditugaskan',
+                ]);
+            }
+
+            // Response untuk AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pendaftaran berhasil disimpan!',
+                    'redirect_url' => route('pendaftaran.success'),
+                    'data' => [
+                        'pendaftaran_id' => $pendaftaran->id_pendaftaran,
+                        'nomor_pendaftaran' => 'REG-' . str_pad($pendaftaran->id_pendaftaran, 6, '0', STR_PAD_LEFT),
+                    ]
+                ], 200);
+            }
+
+            return redirect()->route('pendaftaran.success')
+                ->with('success', 'Pendaftaran berhasil disimpan!')
+                ->with('pendaftaran_id', $pendaftaran->id_pendaftaran);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Response error untuk AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            return redirect()
+                ->route('pendaftaran.create')
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('validation_failed', true);
+        } catch (\Exception $e) {
+            // Response error untuk AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()
+                ->route('pendaftaran.create')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -249,17 +557,10 @@ class PendaftaranController extends Controller
     }
 
     /**
-     * API untuk mendapatkan kabupaten berdasarkan provinsi
+     * Success page setelah pendaftaran
      */
-    public function apiKabupaten($id_provinsi)
-    {
-        $kabupaten = KabupatenKota::where('id_provinsi', $id_provinsi)->get();
-
-        return response()->json($kabupaten);
+    public function success(){
+        return view('pendaftaran.success');
     }
-
-    public function apiProvinsi()
-    {
-        return response()->json(Provinsi::all());
-    }
+    
 }

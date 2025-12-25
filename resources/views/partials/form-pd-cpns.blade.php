@@ -1,0 +1,567 @@
+<div class="form-section-header">
+    <i class="fas fa-user-graduate"></i> Form Kesediaan PD CPNS
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Nama Lengkap dan Gelar</label>
+        <input type="text" name="nama_lengkap" class="form-input @error('nama_lengkap') error @enderror"
+            value="{{ old('nama_lengkap') }}" required>
+        @error('nama_lengkap')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">NIP</label>
+        <input type="text" name="nip_nrp" class="form-input @error('nip_nrp') error @enderror" value="{{ old('nip_nrp') }}"
+            required>
+        @error('nip_nrp')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label">Nama Panggilan</label>
+        <input type="text" name="nama_panggilan" class="form-input @error('nama_panggilan') error @enderror"
+            value="{{ old('nama_panggilan') }}">
+        @error('nama_panggilan')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Jenis Kelamin</label>
+        <select name="jenis_kelamin" class="form-select @error('jenis_kelamin') error @enderror" required>
+            <option value="">Pilih</option>
+            <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+            <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+        </select>
+        @error('jenis_kelamin')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Agama</label>
+        <select name="agama" class="form-select @error('agama') error @enderror" required>
+            <option value="">Pilih</option>
+            <option value="Islam" {{ old('agama') == 'Islam' ? 'selected' : '' }}>Islam</option>
+            <option value="Kristen" {{ old('agama') == 'Kristen' ? 'selected' : '' }}>Kristen</option>
+            <option value="Katolik" {{ old('agama') == 'Katolik' ? 'selected' : '' }}>Katolik</option>
+            <option value="Hindu" {{ old('agama') == 'Hindu' ? 'selected' : '' }}>Hindu</option>
+            <option value="Buddha" {{ old('agama') == 'Buddha' ? 'selected' : '' }}>Buddha</option>
+            <option value="Konghucu" {{ old('agama') == 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
+        </select>
+        @error('agama')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Email</label>
+        <input type="email" name="email_pribadi" class="form-input @error('email_pribadi') error @enderror" value="{{ old('email_pribadi') }}"
+            required>
+        @error('email_pribadi')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">No HP (yang terhubung Whatsapp)</label>
+        <input type="tel" name="nomor_hp" class="form-input @error('nomor_hp') error @enderror" value="{{ old('nomor_hp') }}"
+            required>
+        @error('nomor_hp')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Tempat Lahir (sesuai KTP)</label>
+        <input type="text" name="tempat_lahir" class="form-input @error('tempat_lahir') error @enderror"
+            value="{{ old('tempat_lahir') }}" required>
+        @error('tempat_lahir')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Tanggal Lahir</label>
+        <input type="date" name="tanggal_lahir" class="form-input @error('tanggal_lahir') error @enderror"
+            value="{{ old('tanggal_lahir') }}" required>
+        @error('tanggal_lahir')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label required">Alamat Rumah</label>
+    <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror"
+        required>{{ old('alamat_rumah') }}</textarea>
+    @error('alamat_rumah')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-group">
+    <label class="form-label required">Alamat Kantor</label>
+    <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror"
+        required>{{ old('alamat_kantor') }}</textarea>
+    @error('alamat_kantor')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-section-header">
+    <i class="fas fa-building"></i> Data Instansi
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Asal Instansi</label>
+        <input type="text" name="asal_instansi" class="form-input @error('asal_instansi') error @enderror"
+            placeholder="Contoh: Dinas Kesehatan" value="{{ old('asal_instansi') }}" required>
+        @error('asal_instansi')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Jabatan</label>
+        <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
+            value="{{ old('jabatan') }}" required>
+        @error('jabatan')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Provinsi</label>
+        <select name="id_provinsi" class="form-select @error('id_provinsi') error @enderror" required>
+            <option value="">Pilih Provinsi</option>
+            <option value="">Memuat provinsi...</option>
+        </select>
+        @error('id_provinsi')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Kabupaten/Kota</label>
+        <select name="id_kabupaten_kota" class="form-select @error('id_kabupaten_kota') error @enderror" required disabled>
+            <option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>
+        </select>
+        @error('id_kabupaten_kota')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">Alamat Instansi</label>
+    <textarea name="alamat_instansi"
+        class="form-textarea @error('alamat_instansi') error @enderror">{{ old('alamat_instansi') }}</textarea>
+    @error('alamat_instansi')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Golongan Ruang</label>
+        <select name="golongan_ruang" class="form-select @error('golongan_ruang') error @enderror" required>
+            <option value="">Pilih</option>
+            <option value="III/C" {{ old('golongan_ruang') == 'III/C' ? 'selected' : '' }}>III/C</option>
+            <option value="III/B" {{ old('golongan_ruang') == 'III/B' ? 'selected' : '' }}>III/B</option>
+            <option value="III/A" {{ old('golongan_ruang') == 'III/A' ? 'selected' : '' }}>III/A</option>
+            <option value="II/C" {{ old('golongan_ruang') == 'II/C' ? 'selected' : '' }}>II/C</option>
+            <option value="II/A" {{ old('golongan_ruang') == 'II/A' ? 'selected' : '' }}>II/A</option>
+        </select>
+        @error('golongan_ruang')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Pangkat</label>
+        <select name="pangkat" class="form-select @error('pangkat') error @enderror" required>
+            <option value="">Pilih</option>
+            <option value="Penata" {{ old('pangkat') == 'Penata' ? 'selected' : '' }}>Penata</option>
+            <option value="Penata Muda Tingkat I" {{ old('pangkat') == 'Penata Muda Tingkat I' ? 'selected' : '' }}>Penata
+                Muda Tingkat I</option>
+            <option value="Penata Muda" {{ old('pangkat') == 'Penata Muda' ? 'selected' : '' }}>Penata Muda</option>
+            <option value="Pengatur" {{ old('pangkat') == 'Pengatur' ? 'selected' : '' }}>Pengatur</option>
+            <option value="Pengatur Muda" {{ old('pangkat') == 'Pengatur Muda' ? 'selected' : '' }}>Pengatur Muda</option>
+        </select>
+        @error('pangkat')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Nomor SK CPNS</label>
+        <input type="text" name="nomor_sk_cpns" class="form-input @error('nomor_sk_cpns') error @enderror"
+            value="{{ old('nomor_sk_cpns') }}" required>
+        @error('nomor_sk_cpns')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Tanggal SK CPNS</label>
+        <input type="date" name="tanggal_sk_cpns" class="form-input @error('tanggal_sk_cpns') error @enderror"
+            value="{{ old('tanggal_sk_cpns') }}" required>
+        @error('tanggal_sk_cpns')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-section-header">
+    <i class="fas fa-graduation-cap"></i> Data Pendidikan
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Pendidikan Terakhir</label>
+        <select name="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') error @enderror" required>
+            <option value="">Pilih</option>
+            <option value="SMA" {{ old('pendidikan_terakhir') == 'SMA' ? 'selected' : '' }}>SMA</option>
+            <option value="D3" {{ old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3</option>
+            <option value="S1" {{ old('pendidikan_terakhir') == 'S1' ? 'selected' : '' }}>S1</option>
+            <option value="S2" {{ old('pendidikan_terakhir') == 'S2' ? 'selected' : '' }}>S2</option>
+            <option value="S3" {{ old('pendidikan_terakhir') == 'S3' ? 'selected' : '' }}>S3</option>
+        </select>
+        @error('pendidikan_terakhir')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Bidang Studi Pendidikan Terakhir</label>
+        <input type="text" name="bidang_studi" class="form-input @error('bidang_studi') error @enderror"
+            value="{{ old('bidang_studi') }}" required>
+        @error('bidang_studi')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Bidang Keahlian/Kepakaran</label>
+        <input type="text" name="bidang_keahlian" class="form-input @error('bidang_keahlian') error @enderror"
+            value="{{ old('bidang_keahlian') }}" required>
+        @error('bidang_keahlian')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-section-header">
+    <i class="fas fa-heart"></i> Data Lainnya
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Olahraga Kegemaran/Hobi</label>
+        <input type="text" name="olahraga_hobi" class="form-input @error('olahraga_hobi') error @enderror"
+            value="{{ old('olahraga_hobi') }}" required>
+        @error('olahraga_hobi')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Apakah Saudara/i adalah perokok?</label>
+        <select name="perokok" class="form-select @error('perokok') error @enderror" required>
+            <option value="">Pilih</option>
+            <option value="Ya" {{ old('perokok') == 'Ya' ? 'selected' : '' }}>Ya</option>
+            <option value="Tidak" {{ old('perokok') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
+        </select>
+        @error('perokok')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label">Kondisi Peserta</label>
+        <textarea name="kondisi_peserta"
+            class="form-textarea @error('kondisi_peserta') error @enderror">{{ old('kondisi_peserta') }}</textarea>
+        @error('kondisi_peserta')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Status Perkawinan</label>
+        <select name="status_perkawinan" class="form-select @error('status_perkawinan') error @enderror" required>
+            <option value="">Pilih</option>
+            <option value="Belum Menikah" {{ old('status_perkawinan') == 'Belum Menikah' ? 'selected' : '' }}>Belum
+                Menikah</option>
+            <option value="Menikah" {{ old('status_perkawinan') == 'Menikah' ? 'selected' : '' }}>Menikah</option>
+            <option value="Duda" {{ old('status_perkawinan') == 'Duda' ? 'selected' : '' }}>Duda</option>
+            <option value="Janda" {{ old('status_perkawinan') == 'Janda' ? 'selected' : '' }}>Janda</option>
+        </select>
+        @error('status_perkawinan')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label">Nama Istri/Suami</label>
+        <input type="text" name="nama_pasangan" class="form-input @error('nama_pasangan') error @enderror"
+            value="{{ old('nama_pasangan') }}">
+        @error('nama_pasangan')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label">Ukuran Kaos olahraga</label>
+        <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
+            <option value="">Pilih</option>
+            <option value="S" {{ old('ukuran_kaos') == 'S' ? 'selected' : '' }}>S</option>
+            <option value="M" {{ old('ukuran_kaos') == 'M' ? 'selected' : '' }}>M</option>
+            <option value="L" {{ old('ukuran_kaos') == 'L' ? 'selected' : '' }}>L</option>
+            <option value="XL" {{ old('ukuran_kaos') == 'XL' ? 'selected' : '' }}>XL</option>
+            <option value="XXL" {{ old('ukuran_kaos') == 'XXL' ? 'selected' : '' }}>XXL</option>
+            <option value="XXXL" {{ old('ukuran_kaos') == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+        </select>
+        @error('ukuran_kaos')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-section-header">
+    <i class="fas fa-user-graduate"></i> Data Mentor
+</div>
+
+<div class="form-group">
+    <label class="form-label required">Apakah sudah ada penunjukan Mentor?</label>
+    <select name="sudah_ada_mentor" id="sudah_ada_mentor" class="form-select @error('sudah_ada_mentor') error @enderror"
+        required>
+        <option value="">Pilih</option>
+        <option value="Ya" {{ old('sudah_ada_mentor') == 'Ya' ? 'selected' : '' }}>Ya</option>
+        <option value="Tidak" {{ old('sudah_ada_mentor') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
+    </select>
+    @error('sudah_ada_mentor')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div id="mentor-detail" style="display: {{ old('sudah_ada_mentor') == 'Ya' ? 'block' : 'none' }};">
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Nama Mentor</label>
+            <input type="text" name="nama_mentor" class="form-input @error('nama_mentor') error @enderror"
+                value="{{ old('nama_mentor') }}">
+            @error('nama_mentor')
+                <small class="text-danger">{{ $message }}</small>
+            @enderror
+        </div>
+        <div class="form-group">
+            <label class="form-label">Jabatan Mentor</label>
+            <input type="text" name="jabatan_mentor" class="form-input @error('jabatan_mentor') error @enderror"
+                value="{{ old('jabatan_mentor') }}">
+            @error('jabatan_mentor')
+                <small class="text-danger">{{ $message }}</small>
+            @enderror
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Nomor Rekening Mentor</label>
+            <input type="text" name="nomor_rekening_mentor"
+                class="form-input @error('nomor_rekening_mentor') error @enderror"
+                placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya" value="{{ old('nomor_rekening_mentor') }}">
+            @error('nomor_rekening_mentor')
+                <small class="text-danger">{{ $message }}</small>
+            @enderror
+        </div>
+        <div class="form-group">
+            <label class="form-label">NPWP Mentor</label>
+            <input type="text" name="npwp_mentor" class="form-input @error('npwp_mentor') error @enderror"
+                value="{{ old('npwp_mentor') }}">
+            @error('npwp_mentor')
+                <small class="text-danger">{{ $message }}</small>
+            @enderror
+        </div>
+    </div>
+</div>
+
+<div class="form-section-header">
+    <i class="fas fa-file-upload"></i> Dokumen Pendukung
+</div>
+
+<div class="form-group">
+    <label class="form-label required">Unggah Scan atau Foto KTP yang berlaku</label>
+    <div class="form-file">
+        <input type="file" name="file_ktp" class="form-file-input @error('file_ktp') error @enderror" accept=".pdf" {{ old('file_ktp') ? '' : 'required' }}>
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file PDF (maks. 5MB)
+        </label>
+        <div class="form-file-name">
+            @if(old('file_ktp'))
+                File sudah diupload sebelumnya
+            @endif
+        </div>
+    </div>
+    @error('file_ktp')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label required">Unggah scan SK CPNS</label>
+        <div class="form-file">
+            <input type="file" name="file_sk_cpns" class="form-file-input @error('file_sk_cpns') error @enderror"
+                accept=".pdf" {{ old('file_sk_cpns') ? '' : 'required' }}>
+            <label class="form-file-label">
+                <i class="fas fa-cloud-upload-alt"></i><br>
+                Klik untuk mengunggah file PDF (maks. 5MB)
+            </label>
+            <div class="form-file-name">
+                @if(old('file_sk_cpns'))
+                    File sudah diupload sebelumnya
+                @endif
+            </div>
+        </div>
+        @error('file_sk_cpns')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Unggah scan SPMT</label>
+        <div class="form-file">
+            <input type="file" name="file_spmt" class="form-file-input @error('file_spmt') error @enderror"
+                accept=".pdf" {{ old('file_spmt') ? '' : 'required' }}>
+            <label class="form-file-label">
+                <i class="fas fa-cloud-upload-alt"></i><br>
+                Klik untuk mengunggah file PDF (maks. 5MB)
+            </label>
+            <div class="form-file-name">
+                @if(old('file_spmt'))
+                    File sudah diupload sebelumnya
+                @endif
+            </div>
+        </div>
+        @error('file_spmt')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label required">Unggah scan Surat Penyataan Kesediaan</label>
+    <div class="form-file">
+        <input type="file" name="file_surat_kesediaan"
+            class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf" {{ old('file_surat_kesediaan') ? '' : 'required' }}>
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file PDF (maks. 5MB)
+        </label>
+        <div class="form-file-name">
+            @if(old('file_surat_kesediaan'))
+                File sudah diupload sebelumnya
+            @endif
+        </div>
+    </div>
+    @error('file_surat_kesediaan')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-group">
+    <label class="form-label required">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang
+        berwenang</label>
+    <div class="form-file">
+        <input type="file" name="file_surat_tugas" class="form-file-input @error('file_surat_tugas') error @enderror"
+            accept=".pdf" {{ old('file_surat_tugas') ? '' : 'required' }}>
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file PDF (maks. 5MB)
+        </label>
+        <div class="form-file-name">
+            @if(old('file_surat_tugas'))
+                File sudah diupload sebelumnya
+            @endif
+        </div>
+    </div>
+    @error('file_surat_tugas')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-group">
+    <label class="form-label">Sasaran Kinerja Pegawai (SKP)</label>
+    <div class="form-file">
+        <input type="file" name="file_skp" class="form-file-input @error('file_skp') error @enderror" accept=".pdf">
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file PDF (maks. 5MB)
+        </label>
+        <div class="form-file-name">
+            @if(old('file_skp'))
+                File sudah diupload sebelumnya
+            @endif
+        </div>
+    </div>
+    @error('file_skp')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-group">
+    <label class="form-label required">Unggah Pas Foto peserta</label>
+    <div class="form-file">
+        <input type="file" name="file_pas_foto" class="form-file-input @error('file_pas_foto') error @enderror"
+            accept=".jpg,.jpeg,.png" {{ old('file_pas_foto') ? '' : 'required' }}>
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file JPG/PNG (maks. 2MB)
+        </label>
+        <div class="form-file-name">
+            @if(old('file_pas_foto'))
+                File sudah diupload sebelumnya
+            @endif
+        </div>
+    </div>
+    @error('file_pas_foto')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-group">
+    <label class="form-label">Unggah Surat Keterangan Berbadan Sehat</label>
+    <div class="form-file">
+        <input type="file" name="file_surat_sehat" class="form-file-input @error('file_surat_sehat') error @enderror"
+            accept=".pdf">
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file PDF (maks. 5MB)
+        </label>
+        <div class="form-file-name">
+            @if(old('file_surat_sehat'))
+                File sudah diupload sebelumnya
+            @endif
+        </div>
+    </div>
+    @error('file_surat_sehat')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mentorSelect = document.getElementById('sudah_ada_mentor');
+        const mentorDetail = document.getElementById('mentor-detail');
+
+        mentorSelect.addEventListener('change', function () {
+            if (this.value === 'Ya') {
+                mentorDetail.style.display = 'block';
+            } else {
+                mentorDetail.style.display = 'none';
+            }
+        });
+    });
+</script>

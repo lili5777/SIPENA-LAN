@@ -78,7 +78,8 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="id_jenis_pelatihan" id="id_jenis_pelatihan">
+                        <input type="hidden" name="id_jenis_pelatihan" id="id_jenis_pelatihan"
+                            value="{{ old('id_jenis_pelatihan', '') }}">
                     </div>
 
                     <!-- Step 2: Pilih Angkatan -->
@@ -95,9 +96,13 @@
                         <div class="angkatan-container">
                             <div class="form-group">
                                 <label for="id_angkatan" class="form-label">Angkatan *</label>
-                                <select name="id_angkatan" id="id_angkatan" class="form-select" required disabled>
+                                <select name="id_angkatan" id="id_angkatan"
+                                    class="form-select @error('id_angkatan') error @enderror" required disabled>
                                     <option value="">Memuat pilihan angkatan...</option>
                                 </select>
+                                @error('id_angkatan')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
                                 <div class="form-hint">Harap tunggu hingga daftar angkatan dimuat</div>
                             </div>
 
@@ -414,6 +419,13 @@
             background: white;
         }
 
+        .form-select.error,
+        .form-input.error,
+        .form-textarea.error {
+            border-color: var(--danger-color) !important;
+            box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1) !important;
+        }
+
         .form-select:focus,
         .form-input:focus,
         .form-textarea:focus {
@@ -466,6 +478,14 @@
             margin-top: 10px;
             font-size: 0.9rem;
             color: var(--gray-color);
+        }
+
+        /* Error Styling */
+        .text-danger {
+            color: var(--danger-color) !important;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
         }
 
         /* Angkatan Info */
@@ -691,7 +711,9 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Elements
+            // ============================================
+            // VARIABLES & ELEMENTS
+            // ============================================
             const step1Content = document.getElementById('step1-content');
             const step2Content = document.getElementById('step2-content');
             const step3Content = document.getElementById('step3-content');
@@ -713,7 +735,51 @@
             let selectedTraining = null;
             let selectedAngkatan = null;
 
-            // Step 1: Pilih Pelatihan
+            // ============================================
+            // HANDLE OLD VALUES (IF VALIDATION FAILED)
+            // ============================================
+            window.oldValues = @json(old(), JSON_PRETTY_PRINT);
+            const validationFailed = @json($errors->any() ? true : false);
+
+            // Jika ada validation errors, auto-select training yang dipilih sebelumnya
+            if (validationFailed && window.oldValues.id_jenis_pelatihan) {
+                // Tunggu DOM siap
+                setTimeout(() => {
+                    const oldTrainingId = window.oldValues.id_jenis_pelatihan;
+                    const trainingCard = document.querySelector(`[data-id="${oldTrainingId}"]`);
+
+                    if (trainingCard) {
+                        // Auto-select training card
+                        trainingCard.click();
+
+                        // Tunggu angkatan load
+                        setTimeout(() => {
+                            if (window.oldValues.id_angkatan) {
+                                const angkatanSelect = document.getElementById('id_angkatan');
+
+                                // Cek berulang sampai options tersedia
+                                const checkAngkatan = setInterval(() => {
+                                    if (angkatanSelect.options.length > 1) {
+                                        clearInterval(checkAngkatan);
+                                        angkatanSelect.value = window.oldValues.id_angkatan;
+                                        angkatanSelect.dispatchEvent(new Event('change'));
+
+                                        // Load form setelah semua ready
+                                        setTimeout(() => {
+                                            loadDynamicForm();
+                                            moveToStep(3);
+                                        }, 500);
+                                    }
+                                }, 100);
+                            }
+                        }, 500);
+                    }
+                }, 100);
+            }
+
+            // ============================================
+            // STEP 1: PILIH PELATIHAN
+            // ============================================
             document.querySelectorAll('.training-card').forEach(card => {
                 card.addEventListener('click', function () {
                     // Remove selected class from all cards
@@ -746,7 +812,9 @@
                 });
             });
 
-            // Step 2: Pilih Angkatan
+            // ============================================
+            // STEP 2: PILIH ANGKATAN
+            // ============================================
             async function loadAngkatan(jenisId) {
                 angkatanSelect.innerHTML = '<option value="">Memuat pilihan angkatan...</option>';
                 angkatanSelect.disabled = true;
@@ -775,12 +843,21 @@
                     });
 
                     angkatanSelect.disabled = false;
+
+                    // Jika ada old value, set value
+                    if (window.oldValues && window.oldValues.id_angkatan) {
+                        setTimeout(() => {
+                            angkatanSelect.value = window.oldValues.id_angkatan;
+                            if (angkatanSelect.value) {
+                                angkatanSelect.dispatchEvent(new Event('change'));
+                            }
+                        }, 100);
+                    }
                 } catch (error) {
                     console.error('Error load angkatan:', error);
                     angkatanSelect.innerHTML = '<option value="">Error loading data</option>';
                 }
             }
-
 
             angkatanSelect.addEventListener('change', function () {
                 if (!this.value) {
@@ -821,7 +898,9 @@
                 nextToStep3Btn.disabled = false;
             });
 
-            // Step 3: Load Dynamic Form
+            // ============================================
+            // STEP 3: LOAD DYNAMIC FORM
+            // ============================================
             function loadDynamicForm() {
                 dynamicFormContainer.innerHTML = `
                         <div class="form-loading">
@@ -832,1188 +911,101 @@
 
                 setTimeout(() => {
                     if (selectedTraining.kode === 'PKN_TK_II') {
-                        loadFormPKN_TK_II();
+                        loadFormPartial('PKN_TK_II');
                     } else if (selectedTraining.kode === 'PD_CPNS') {
-                        loadFormPD_CPNS();
+                        loadFormPartial('PD_CPNS');
                     } else if (selectedTraining.kode === 'PKA' || selectedTraining.kode === 'PKP') {
-                        loadFormPKA();
+                        loadFormPartial('PKA');
                     }
                 }, 300);
             }
 
-           async function loadProvinsi() {
-                const provinsiSelect = document.querySelector('[name="provinsi"]');
+            async function loadFormPartial(formType) {
+                try {
+                    const response = await fetch(`/form-partial/${formType}`);
+                    const html = await response.text();
+                    dynamicFormContainer.innerHTML = html;
+
+                    // Load provinsi setelah form dimuat
+                    loadProvinsi();
+                    setupFormInteractions();
+
+                    // Set old values jika ada
+                    setOldValuesToForm();
+
+                } catch (error) {
+                    console.error('Error loading form partial:', error);
+                    dynamicFormContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i>
+                                Gagal memuat formulir. Silakan coba lagi.
+                            </div>
+                        `;
+                }
+            }
+
+            async function loadProvinsi() {
+                const provinsiSelect = document.querySelector('[name="id_provinsi"]');
+                if (!provinsiSelect) return;
+
                 provinsiSelect.innerHTML = '<option value="">Memuat provinsi...</option>';
 
                 try {
                     const response = await fetch('/proxy/provinces');
                     const result = await response.json();
-                    console.log('Provinsi external:', result.data); // DEBUG
 
                     provinsiSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
-                    result.data.forEach(prov => {  // ← data[] wrapper
+                    result.data.forEach(prov => {
                         const option = document.createElement('option');
-                        option.value = prov.code;    
+                        option.value = prov.id || prov.code;
                         option.textContent = prov.name;
                         provinsiSelect.appendChild(option);
                     });
+
+                    // Set old value jika ada
+                    if (window.oldValues && window.oldValues.id_provinsi) {
+                        provinsiSelect.value = window.oldValues.id_provinsi;
+                        // Trigger change event untuk load kabupaten
+                        setTimeout(() => {
+                            provinsiSelect.dispatchEvent(new Event('change'));
+                        }, 100);
+                    }
                 } catch (error) {
                     console.error('Provinsi error:', error);
                     provinsiSelect.innerHTML = '<option value="">Error loading</option>';
                 }
             }
 
-
-            async function loadKabupaten(provCode) {  // ← provCode bukan id
-                console.log('Loading kabupaten untuk code:', provCode);
-
-                const kabSelect = document.querySelector('[name="kabupaten"]');
+            async function loadKabupaten(provId) {
+                const kabSelect = document.querySelector('[name="id_kabupaten_kota"]');
                 if (!kabSelect) return;
 
                 kabSelect.innerHTML = '<option value="">Memuat kabupaten...</option>';
                 kabSelect.disabled = true;
 
                 try {
-                    // ✅ Dynamic URL dengan province code
-                    const response = await fetch(`/proxy/regencies/${provCode}`);
+                    const response = await fetch(`/proxy/regencies/${provId}`);
                     const result = await response.json();
-                    console.log('Kabupaten external:', result.data); // DEBUG
 
                     kabSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
                     kabSelect.disabled = false;
 
-                    result.data.forEach(kab => {  // ← data[] wrapper
+                    result.data.forEach(kab => {
                         const option = document.createElement('option');
-                        option.value = kab.code;     // ✅ code (bukan id)
+                        option.value = kab.id || kab.code;
                         option.textContent = kab.name;
                         kabSelect.appendChild(option);
                     });
+
+                    // Set old value jika ada
+                    if (window.oldValues && window.oldValues.id_kabupaten_kota) {
+                        kabSelect.value = window.oldValues.id_kabupaten_kota;
+                    }
                 } catch (error) {
                     console.error('Kabupaten error:', error);
                     kabSelect.innerHTML = '<option value="">Error loading</option>';
                     kabSelect.disabled = false;
                 }
-            }
-
-
-            function loadFormPKN_TK_II() {
-                dynamicFormContainer.innerHTML = `
-                        <div class="form-section-header">
-                            <i class="fas fa-user-tie"></i> Data Pribadi
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Nama Lengkap (Berikut Gelar Pendidikan)</label>
-                                <input type="text" name="nama_lengkap" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">NIP/NRP</label>
-                                <input type="text" name="nip_nrp" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Jenis Kelamin</label>
-                                <select name="jenis_kelamin" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Laki-laki">Laki-laki</option>
-                                    <option value="Perempuan">Perempuan</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Tempat Lahir</label>
-                                <input type="text" name="tempat_lahir" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Tanggal Lahir</label>
-                                <input type="date" name="tanggal_lahir" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Alamat Rumah</label>
-                            <textarea name="alamat_rumah" class="form-textarea" required></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Email Pribadi</label>
-                                <input type="email" name="email_pribadi" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Nomor HP/WhatsApp</label>
-                                <input type="tel" name="nomor_hp" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Pendidikan Terakhir</label>
-                                <select name="pendidikan_terakhir" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="D3">D3</option>
-                                    <option value="D4">D4</option>
-                                    <option value="S1">S1</option>
-                                    <option value="S2">S2</option>
-                                    <option value="S3">S3</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Bidang Studi Pendidikan Terakhir</label>
-                                <input type="text" name="bidang_studi" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Bidang Keahlian</label>
-                                <input type="text" name="bidang_keahlian" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Agama</label>
-                                <select name="agama" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Islam">Islam</option>
-                                    <option value="Kristen">Kristen</option>
-                                    <option value="Katolik">Katolik</option>
-                                    <option value="Hindu">Hindu</option>
-                                    <option value="Buddha">Buddha</option>
-                                    <option value="Konghucu">Konghucu</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Nama Istri/Suami</label>
-                                <input type="text" name="nama_pasangan" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Olahraga Kegemaran</label>
-                                <input type="text" name="olahraga_hobi" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Apakah Anda merokok?</label>
-                                <select name="perokok" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Ya">Ya</option>
-                                    <option value="Tidak">Tidak</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Ukuran Kaos Olahraga/Celana Training</label>
-                                <select name="ukuran_kaos" class="form-select">
-                                    <option value="">Pilih</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="L">L</option>
-                                    <option value="XL">XL</option>
-                                    <option value="XXL">XXL</option>
-                                    <option value="XXXL">XXXL</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-section-header">
-                            <i class="fas fa-building"></i> Data Kepegawaian
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Asal Instansi</label>
-                                <input type="text" name="asal_instansi" class="form-input" placeholder="Contoh: Lembaga Administrasi Negara" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Unit Kerja Peserta</label>
-                                <input type="text" name="unit_kerja" class="form-input" placeholder="Contoh: Sekretariat Daerah Kota Makassar" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Jabatan</label>
-                                <input type="text" name="jabatan" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Pangkat / Golongan Ruang</label>
-                                <select name="golongan_ruang" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Pembina Utama, IV/E">Pembina Utama, IV/E</option>
-                                    <option value="Pembina Utama Madya, IV/D">Pembina Utama Madya, IV/D</option>
-                                    <option value="Pembina Utama Muda, IV/C">Pembina Utama Muda, IV/C</option>
-                                    <option value="Pembina Tingkat I, IV/B">Pembina Tingkat I, IV/B</option>
-                                    <option value="Pembina, IV/A">Pembina, IV/A</option>
-                                    <option value="Penata Tingkat I, III/D">Penata Tingkat I, III/D</option>
-                                    <option value="Penata, III/C">Penata, III/C</option>
-                                    <option value="Penata Muda Tingkat I, III/B">Penata Muda Tingkat I, III/B</option>
-                                    <option value="Penata Muda, III/A">Penata Muda, III/A</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Eselon</label>
-                                <select name="eselon" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="II">II</option>
-                                    <option value="III/Pejabat Fungsional">III/Pejabat Fungsional</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Provinsi  (Kantor/Tempat Tugas)</label>
-                                <select name="provinsi" class="form-select" required>
-                                    <option value="">Pilih Provinsi</option>
-                                    <option value="">Memuat provinsi...</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Kabupaten (Lokasi Kantor/Tempat Tugas)</label>
-                                <select name="kabupaten" class="form-select" required disabled>
-                                    <option value="">Pilih Kabupaten (Pilih Provinsi Dahulu)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Alamat Kantor</label>
-                            <textarea name="alamat_kantor" class="form-textarea" required></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Nomor Telepon Kantor</label>
-                                <input type="tel" name="nomor_telepon_kantor" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Email Kantor</label>
-                                <input type="email" name="email_kantor" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-section-header">
-                            <i class="fas fa-file-upload"></i> Dokumen Pendukung
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Unggah Bukti SK Jabatan Terakhir (Definitif)</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_sk_jabatan" class="form-file-input" accept=".pdf" required>
-                                    <label class="form-file-label">
-                                        <i class="fas fa-cloud-upload-alt"></i><br>
-                                        Klik untuk mengunggah file PDF (maks. 5MB)
-                                    </label>
-                                    <div class="form-file-name"></div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Unggah Bukti SK Pangkat/Golongan Ruang Terakhir</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_sk_pangkat" class="form-file-input" accept=".pdf" required>
-                                    <label class="form-file-label">
-                                        <i class="fas fa-cloud-upload-alt"></i><br>
-                                        Klik untuk mengunggah file PDF (maks. 5MB)
-                                    </label>
-                                    <div class="form-file-name"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label ">Unggah Surat Pernyataan Komitmen</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_komitmen" class="form-file-input" accept=".pdf" >
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Scan Pakta Integritas</label>
-                            <div class="form-file">
-                                <input type="file" name="file_pakta_integritas" class="form-file-input" accept=".pdf" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_tugas" class="form-file-input" accept=".pdf" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label ">Unggah Scan Surat Keterangan Kelulusan/Hasil Seleksi calon peserta PKN TK.II</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_kelulusan_seleksi" class="form-file-input" accept=".pdf" >
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Unggah Surat Keterangan Berbadan Sehat</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_surat_sehat" class="form-file-input" accept=".pdf" required>
-                                    <label class="form-file-label">
-                                        <i class="fas fa-cloud-upload-alt"></i><br>
-                                        Klik untuk mengunggah file PDF (maks. 5MB)
-                                    </label>
-                                    <div class="form-file-name"></div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Unggah Surat Keterangan Bebas Narkoba</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_surat_bebas_narkoba" class="form-file-input" accept=".pdf" required>
-                                    <label class="form-file-label">
-                                        <i class="fas fa-cloud-upload-alt"></i><br>
-                                        Klik untuk mengunggah file PDF (maks. 5MB)
-                                    </label>
-                                    <div class="form-file-name"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Upload Pasfoto peserta berwarna</label>
-                            <div class="form-file">
-                                <input type="file" name="file_pas_foto" class="form-file-input" accept=".jpg,.jpeg,.png" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file JPG/PNG (maks. 2MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-section-header">
-                            <i class="fas fa-user-graduate"></i> Data Mentor
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Nama Mentor (jika sudah ditentukan)</label>
-                                <input type="text" name="nama_mentor" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Jabatan Mentor</label>
-                                <input type="text" name="jabatan_mentor" class="form-input">
-                            </div>
-                        </div>
-                    `;
-                // Load provinsi dinamis
-
-                // ✅ CRITICAL: Panggil fungsi dinamis
-                loadProvinsi();
-
-
-            }
-
-            function loadFormPD_CPNS() {
-                dynamicFormContainer.innerHTML = `
-                        <div class="form-section-header">
-                            <i class="fas fa-user-graduate"></i> Form Kesediaan PD CPNS
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Nama Lengkap dan Gelar</label>
-                                <input type="text" name="nama_lengkap" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">NIP</label>
-                                <input type="text" name="nip" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Nama Panggilan</label>
-                                <input type="text" name="nama_panggilan" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Jenis Kelamin</label>
-                                <select name="jenis_kelamin" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Laki-laki">Laki-laki</option>
-                                    <option value="Perempuan">Perempuan</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Agama</label>
-                                <select name="agama" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Islam">Islam</option>
-                                    <option value="Kristen">Kristen</option>
-                                    <option value="Katolik">Katolik</option>
-                                    <option value="Hindu">Hindu</option>
-                                    <option value="Buddha">Buddha</option>
-                                    <option value="Konghucu">Konghucu</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Email</label>
-                                <input type="email" name="email" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">No HP (yang terhubung Whatsapp)</label>
-                                <input type="tel" name="no_hp" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Tempat Lahir (sesuai KTP)</label>
-                                <input type="text" name="tempat_lahir" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Tanggal Lahir</label>
-                                <input type="date" name="tanggal_lahir" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Alamat Rumah</label>
-                            <textarea name="alamat_rumah" class="form-textarea" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Alamat Kantor</label>
-                            <textarea name="alamat_kantor" class="form-textarea" required></textarea>
-                        </div>
-
-                        <div class="form-section-header">
-                            <i class="fas fa-building"></i> Data Instansi
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Asal Instansi</label>
-                                <input type="text" name="asal_instansi" class="form-input" placeholder="Contoh: Dinas Kesehatan" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Jabatan</label>
-                                <input type="text" name="jabatan" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Provinsi</label>
-                                <select name="provinsi" class="form-select" required>
-                                    <option value="">Pilih Provinsi</option>
-                                    <option value="">Memuat provinsi...</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Kabupaten/Kota</label>
-                                <select name="kabupaten" class="form-select" required disabled>
-                                    <option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Alamat Instansi</label>
-                            <textarea name="alamat_instansi" class="form-textarea"></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Golongan Ruang</label>
-                                <select name="golongan_ruang" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="III/C">III/C</option>
-                                    <option value="III/B">III/B</option>
-                                    <option value="III/A">III/A</option>
-                                    <option value="II/C">II/C</option>
-                                    <option value="II/A">II/A</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Pangkat</label>
-                                <select name="pangkat" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Penata">Penata</option>
-                                    <option value="Penata Muda Tingkat I">Penata Muda Tingkat I</option>
-                                    <option value="Penata Muda">Penata Muda</option>
-                                    <option value="Pengatur">Pengatur</option>
-                                    <option value="Pengatur Muda">Pengatur Muda</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Nomor SK CPNS</label>
-                                <input type="text" name="nomor_sk_cpns" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Tanggal SK CPNS</label>
-                                <input type="date" name="tanggal_sk_cpns" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <!-- Data lainnya untuk PD CPNS -->
-                        <div class="form-section-header">
-                            <i class="fas fa-graduation-cap"></i> Data Pendidikan
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Pendidikan Terakhir</label>
-                                <select name="pendidikan_terakhir" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="SMA">SMA</option>
-                                    <option value="D3">D3</option>
-                                    <option value="S1">S1</option>
-                                    <option value="S2">S2</option>
-                                    <option value="S3">S3</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Bidang Studi Pendidikan Terakhir</label>
-                                <input type="text" name="bidang_studi" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Bidang Keahlian/Kepakaran</label>
-                                <input type="text" name="bidang_keahlian" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-section-header">
-                            <i class="fas fa-heart"></i> Data Lainnya
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Olahraga Kegemaran/Hobi</label>
-                                <input type="text" name="olahraga_hobi" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Apakah Saudara/i adalah perokok?</label>
-                                <select name="perokok" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Ya">Ya</option>
-                                    <option value="Tidak">Tidak</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Kondisi Peserta</label>
-                                <textarea name="kondisi_peserta" class="form-textarea"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Status Perkawinan</label>
-                                <select name="status_perkawinan" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Belum Menikah">Belum Menikah</option>
-                                    <option value="Menikah">Menikah</option>
-                                    <option value="Duda">Duda</option>
-                                    <option value="Janda">Janda</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Nama Istri/Suami</label>
-                                <input type="text" name="nama_pasangan" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Ukuran Kaos olahraga</label>
-                                <select name="ukuran_kaos" class="form-select">
-                                    <option value="">Pilih</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="L">L</option>
-                                    <option value="XL">XL</option>
-                                    <option value="XXL">XXL</option>
-                                    <option value="XXXL">XXXL</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-section-header">
-                            <i class="fas fa-user-graduate"></i> Data Mentor
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Apakah sudah ada penunjukan Mentor?</label>
-                            <select name="sudah_ada_mentor" id="sudah_ada_mentor" class="form-select" required>
-                                <option value="">Pilih</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak">Tidak</option>
-                            </select>
-                        </div>
-
-                        <div id="mentor-detail" style="display: none;">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Nama Mentor</label>
-                                    <input type="text" name="nama_mentor" class="form-input">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Jabatan Mentor</label>
-                                    <input type="text" name="jabatan_mentor" class="form-input">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Nomor Rekening Mentor</label>
-                                    <input type="text" name="nomor_rekening_mentor" class="form-input" placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NPWP Mentor</label>
-                                    <input type="text" name="npwp_mentor" class="form-input">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section-header">
-                            <i class="fas fa-file-upload"></i> Dokumen Pendukung
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Scan atau Foto KTP yang berlaku</label>
-                            <div class="form-file">
-                                <input type="file" name="file_ktp" class="form-file-input" accept=".pdf" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Unggah scan SK CPNS</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_sk_cpns" class="form-file-input" accept=".pdf" required>
-                                    <label class="form-file-label">
-                                        <i class="fas fa-cloud-upload-alt"></i><br>
-                                        Klik untuk mengunggah file PDF (maks. 5MB)
-                                    </label>
-                                    <div class="form-file-name"></div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Unggah scan SPMT</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_spmt" class="form-file-input" accept=".pdf" required>
-                                    <label class="form-file-label">
-                                        <i class="fas fa-cloud-upload-alt"></i><br>
-                                        Klik untuk mengunggah file PDF (maks. 5MB)
-                                    </label>
-                                    <div class="form-file-name"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah scan Surat Penyataan Kesediaan</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_kesediaan" class="form-file-input" accept=".pdf" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Scan Surat Tugas  mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_tugas" class="form-file-input" accept=".pdf" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Sasaran Kinerja Pegawai (SKP)</label>
-                            <div class="form-file">
-                                <input type="file" name="file_skp" class="form-file-input" accept=".pdf">
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Pas Foto peserta</label>
-                            <div class="form-file">
-                                <input type="file" name="file_pas_foto" class="form-file-input" accept=".jpg,.jpeg,.png" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file JPG/PNG (maks. 2MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label ">Unggah Surat Keterangan Berbadan Sehat</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_sehat" class="form-file-input" accept=".pdf">
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-                    `;
-
-                // ✅ CRITICAL: Panggil fungsi dinamis
-                loadProvinsi();
-
-
-            }
-
-            function loadFormPKA() {
-                dynamicFormContainer.innerHTML = `
-                        <div class="form-section-header">
-                            <i class="fas fa-chalkboard-teacher"></i> Form kesediaan PKA
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">NIP/NRP</label>
-                                <input type="text" name="nip_nrp" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Nama lengkap gelar</label>
-                                <input type="text" name="nama_lengkap" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <!-- Data Pribadi PKA - lengkap sesuai dokumen -->
-                        <div class="form-section-header">
-                            <i class="fas fa-user"></i> Data Pribadi
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Jenis Kelamin</label>
-                                <select name="jenis_kelamin" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Laki-laki">Laki-laki</option>
-                                    <option value="Perempuan">Perempuan</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Agama</label>
-                                <select name="agama" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Islam">Islam</option>
-                                    <option value="Kristen">Kristen</option>
-                                    <option value="Katolik">Katolik</option>
-                                    <option value="Hindu">Hindu</option>
-                                    <option value="Buddha">Buddha</option>
-                                    <option value="Konghucu">Konghucu</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Tempat lahir</label>
-                                <input type="text" name="tempat_lahir" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Tanggal lahir</label>
-                                <input type="date" name="tanggal_lahir" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Alamat rumah</label>
-                            <textarea name="alamat_rumah" class="form-textarea" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Alamat kantor</label>
-                            <textarea name="alamat_kantor" class="form-textarea" required></textarea>
-                        </div>
-
-                        <!-- Data Kepegawaian PKA -->
-                        <div class="form-section-header">
-                            <i class="fas fa-building"></i> Data Kepegawaian
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Asal instansi</label>
-                                <input type="text" name="asal_instansi" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Instansi Detail/Unit Kerja</label>
-                                <input type="text" name="unit_kerja" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Provinsi</label>
-                                <select name="provinsi" class="form-select" required>
-                                    <option value="">Pilih Provinsi</option>
-                                    <option value="">Memuat provinsi...</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Kabupaten/Kota</label>
-                                <select name="kabupaten" class="form-select" required disabled>
-                                    <option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Jabatan</label>
-                                <input type="text" name="jabatan" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Eselon</label>
-                                <select name="eselon" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="III">III</option>
-                                    <option value="IV">IV</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Scan fotokopi kelulusan/hasil seleksi calon peserta PKA / Sertifikat/Piagam Penghargaan Terbaik</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_kelulusan_seleksi" class="form-file-input" accept=".pdf" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Tahun Lulus PKP/PIM IV</label>
-                                <input type="number" name="tahun_lulus_pkp_pim_iv" class="form-input" min="1900" max="2099" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Pangkat / Golongan Ruang</label>
-                                <select name="golongan_ruang" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Pembina Utama, IV/Ea">Pembina Utama, IV/E</option>
-                                    <option value="Pembina Utama Madya, IV/D">Pembina Utama Madya, IV/D</option>
-                                    <option value="Pembina Utama Muda, IV/C">Pembina Utama Muda, IV/C</option>
-                                    <option value="Pembina Tingkat I, IV/B">Pembina Tingkat I, IV/B</option>
-                                    <option value="Pembina, IV/A">Pembina, IV/A</option>
-                                    <option value="Penata Tingkat I, III/D">Penata Tingkat I, III/D</option>
-                                    <option value="Penata, III/C">Penata, III/C</option>
-                                    <option value="Penata Muda Tingkat I, III/B">Penata Muda Tingkat I, III/B</option>
-                                    <option value="Penata Muda, III/A">Penata Muda, III/A</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">No WA</label>
-                                <input type="tel" name="no_wa" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Email pribadi</label>
-                                <input type="email" name="email_pribadi" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <!-- Data Pendidikan PKA -->
-                        <div class="form-section-header">
-                            <i class="fas fa-graduation-cap"></i> Data Pendidikan
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Pendidikan terakhir</label>
-                                <select name="pendidikan_terakhir" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="D3">D3</option>
-                                    <option value="S1">S1</option>
-                                    <option value="S2">S2</option>
-                                    <option value="S3">S3</option>
-                                </select>
-                            </div>
-                            <div class="form-group required">
-                                <label class="form-label">Bidang Studi Pendidikan Terakhir</label>
-                                <input type="text" name="bidang_studi" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <!-- Data Lainnya PKA -->
-                        <div class="form-section-header">
-                            <i class="fas fa-heart"></i> Data Lainnya
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Status Perkawinan</label>
-                                <select name="status_perkawinan" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Belum Menikah">Belum Menikah</option>
-                                    <option value="Menikah">Menikah</option>
-                                    <option value="Duda">Duda</option>
-                                    <option value="Janda">Janda</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Nama Istri/Suami</label>
-                                <input type="text" name="nama_pasangan" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Apakah Saudara Merokok ?</label>
-                                <select name="perokok" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="Ya">Ya</option>
-                                    <option value="Tidak">Tidak</option>
-                                </select>
-                            </div>
-                            <div class="form-group required">
-                                <label class="form-label">Olahraga Kegemaran/Hobi</label>
-                                <input type="text" name="olahraga_hobi" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <!-- Dokumen PKA -->
-                        <div class="form-section-header">
-                            <i class="fas fa-file-upload"></i> Dokumen Pendukung
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Foto KTP</label>
-                            <div class="form-file">
-                                <input type="file" name="file_ktp" class="form-file-input" accept=".jpg,.jpeg,.png" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file JPG/PNG (maks. 2MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Nomor SK Jabatan Terakhir</label>
-                                <input type="text" name="nomor_sk_terakhir" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Tanggal SK Jabatan Terakhir</label>
-                                <input type="date" name="tanggal_sk_jabatan" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required">Unggah Bukti SK Jabatan Terakhir (Definitif)</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_sk_jabatan" class="form-file-input" accept=".jpg,.jpeg,.png" required>
-                                    <label class="form-file-label">
-                                        <i class="fas fa-cloud-upload-alt"></i><br>
-                                        Klik untuk mengunggah file JPG/PNG (maks. 2MB)
-                                    </label>
-                                    <div class="form-file-name"></div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label required">Unggah Bukti SK Pangkat / Golongan Ruang Terakhir</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_sk_pangkat" class="form-file-input" accept=".jpg,.jpeg,.png" required>
-                                    <label class="form-file-label">
-                                        <i class="fas fa-cloud-upload-alt"></i><br>
-                                        Klik untuk mengunggah file JPG/PNG (maks. 2MB)
-                                    </label>
-                                    <div class="form-file-name"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Scan Formulir Kesediaan</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_kesediaan" class="form-file-input" accept=".jpg,.jpeg,.png" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file JPG/PNG (maks. 2MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Scan Pakta Integritas</label>
-                            <div class="form-file">
-                                <input type="file" name="file_pakta_integritas" class="form-file-input" accept=".pdf" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_tugas" class="form-file-input" accept=".pdf" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Nomor Telepon Kantor</label>
-                                <input type="tel" name="nomor_telepon_kantor" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">E-mail Kantor</label>
-                                <input type="email" name="email_kantor" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required">Unggah Pas Foto peserta</label>
-                            <div class="form-file">
-                                <input type="file" name="file_pas_foto" class="form-file-input" accept=".jpg,.jpeg,.png" required>
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file JPG/PNG (maks. 2MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <!-- Data Mentor PKA -->
-                        <div class="form-section-header">
-                            <i class="fas fa-user-graduate"></i> Data Mentor
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Nama Mentor</label>
-                                <input type="text" name="nama_mentor" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Jabatan Mentor</label>
-                                <input type="text" name="jabatan_mentor" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label ">Nomor Rekening Mentor</label>
-                                <input type="text" name="nomor_rekening_mentor" class="form-input" placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">NPWP Mentor</label>
-                                <input type="text" name="npwp_mentor" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label ">Unggah Form Persetujuan Mentor</label>
-                            <div class="form-file">
-                                <input type="file" name="file_persetujuan_mentor" class="form-file-input" accept=".pdf" >
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <!-- Dokumen Tambahan PKA -->
-                        <div class="form-group">
-                            <label class="form-label ">Unggah Surat Berbadan Sehat</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_sehat" class="form-file-input" accept=".pdf" >
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label ">Unggah Surat Pernyataan Tidak Sedang mempertanggungjawabkan Penyelesaian Administrasi</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_pernyataan_administrasi" class="form-file-input" accept=".pdf" >
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label ">Unggah Surat Keterangan bebas narkoba</label>
-                            <div class="form-file">
-                                <input type="file" name="file_surat_bebas_narkoba" class="form-file-input" accept=".pdf" >
-                                <label class="form-file-label">
-                                    <i class="fas fa-cloud-upload-alt"></i><br>
-                                    Klik untuk mengunggah file PDF (maks. 5MB)
-                                </label>
-                                <div class="form-file-name"></div>
-                            </div>
-                        </div>
-                    `;
-
-                // ✅ CRITICAL: Panggil fungsi dinamis
-                loadProvinsi();
-
-
             }
 
             function setupFormInteractions() {
@@ -2025,10 +1017,48 @@
                     });
                 });
 
+                // Event listener untuk provinsi change
+                document.addEventListener('change', function (e) {
+                    if (e.target.name === 'id_provinsi' && e.target.value) {
+                        loadKabupaten(e.target.value);
+                    }
 
+                    // Handle mentor show/hide untuk PD CPNS
+                    if (e.target.name === 'sudah_ada_mentor') {
+                        const mentorDetail = document.getElementById('mentor-detail');
+                        if (mentorDetail) {
+                            if (e.target.value === 'Ya') {
+                                mentorDetail.style.display = 'block';
+                            } else {
+                                mentorDetail.style.display = 'none';
+                            }
+                        }
+                    }
+                });
             }
 
-            // Navigation
+            function setOldValuesToForm() {
+                if (!window.oldValues) return;
+
+                setTimeout(() => {
+                    Object.keys(window.oldValues).forEach(fieldName => {
+                        const field = document.querySelector(`[name="${fieldName}"]`);
+                        if (field && field.type !== 'file') {
+                            if (field.type === 'checkbox' || field.type === 'radio') {
+                                field.checked = window.oldValues[fieldName] == field.value;
+                            } else if (field.tagName === 'SELECT') {
+                                field.value = window.oldValues[fieldName];
+                            } else {
+                                field.value = window.oldValues[fieldName];
+                            }
+                        }
+                    });
+                }, 200);
+            }
+
+            // ============================================
+            // NAVIGATION
+            // ============================================
             function moveToStep(step) {
                 // Update indicators
                 [step1Indicator, step2Indicator, step3Indicator].forEach(indicator => {
@@ -2056,42 +1086,339 @@
                 }
             });
 
-            document.addEventListener('change', function (e) {
-                if (e.target.name === 'provinsi' && e.target.value) {
-                    console.log('Provinsi dipilih:', e.target.value); // DEBUG
-                    loadKabupaten(e.target.value);
+            // ============================================
+            // AJAX FORM SUBMISSION
+            // ============================================
+            document.getElementById('pendaftaranForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                console.log('Form submission via AJAX started...');
+
+                const submitBtn = document.getElementById('submit-form');
+                const originalText = submitBtn.innerHTML;
+
+                // Show loading state
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+                submitBtn.disabled = true;
+
+                // Validasi client-side sederhana
+                const requiredFields = this.querySelectorAll('[required]');
+                let hasEmptyRequired = false;
+
+                // Clear previous client-side errors
+                document.querySelectorAll('.client-error').forEach(el => el.remove());
+
+                requiredFields.forEach(field => {
+                    if (!field.value && field.type !== 'file') {
+                        hasEmptyRequired = true;
+                        field.classList.add('error');
+
+                        const formGroup = field.closest('.form-group');
+                        if (formGroup) {
+                            const errorMsg = document.createElement('small');
+                            errorMsg.className = 'text-danger client-error';
+                            errorMsg.textContent = 'Field ini wajib diisi';
+                            formGroup.appendChild(errorMsg);
+                        }
+                    }
+                });
+
+                if (hasEmptyRequired) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+
+                    // Scroll ke error pertama
+                    const firstError = document.querySelector('.error');
+                    if (firstError) {
+                        firstError.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+
+                    return false;
+                }
+
+                // Collect form data
+                const formData = new FormData(this);
+
+                // Add CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                try {
+                    // Kirim request AJAX
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Success - redirect ke halaman sukses
+                        showSuccessMessage('Pendaftaran berhasil dikirim!');
+
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url || '/pendaftaran/success';
+                        }, 1500);
+
+                    } else {
+                        // Validation errors
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+
+                        // Clear previous errors
+                        document.querySelectorAll('.server-error').forEach(el => el.remove());
+                        document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+                        // Clear file label error styles
+                        document.querySelectorAll('.form-file-label').forEach(label => {
+                            label.style.borderColor = '';
+                            label.style.background = '';
+                        });
+
+                        // Display new errors
+                        if (data.errors) {
+                            console.log('Validation errors:', data.errors);
+
+                            Object.keys(data.errors).forEach(field => {
+                                let input = document.querySelector(`[name="${field}"]`);
+
+                                // Jika tidak ketemu, coba dengan nama field yang berbeda
+                                if (!input) {
+                                    input = document.querySelector(`[name="${field}[]"]`);
+                                }
+
+                                if (!input) {
+                                    input = document.querySelector(`#${field}`);
+                                }
+
+                                if (input) {
+                                    input.classList.add('error');
+
+                                    // Untuk file inputs, juga highlight label
+                                    if (input.type === 'file') {
+                                        const fileLabel = input.closest('.form-file')?.querySelector('.form-file-label');
+                                        if (fileLabel) {
+                                            fileLabel.style.borderColor = 'var(--danger-color)';
+                                            fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
+                                        }
+                                    }
+
+                                    // Cari form group
+                                    let formGroup = input.closest('.form-group');
+                                    if (!formGroup) {
+                                        formGroup = input.closest('.checkbox-group') ||
+                                            input.closest('.form-check') ||
+                                            input.parentElement;
+                                    }
+
+                                    if (formGroup) {
+                                        // Hapus error message sebelumnya
+                                        const existingError = formGroup.querySelector('.server-error');
+                                        if (existingError) existingError.remove();
+
+                                        // Tambahkan error message baru
+                                        const errorMsg = document.createElement('small');
+                                        errorMsg.className = 'text-danger server-error';
+                                        errorMsg.textContent = data.errors[field][0];
+                                        formGroup.appendChild(errorMsg);
+                                    }
+                                } else {
+                                    console.warn(`Field "${field}" not found in DOM`);
+                                    showErrorMessage(data.errors[field][0]);
+                                }
+                            });
+
+                            // Scroll ke error pertama
+                            const firstError = document.querySelector('.error');
+                            if (firstError) {
+                                setTimeout(() => {
+                                    firstError.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'center'
+                                    });
+                                }, 300);
+                            }
+                        } else if (data.message) {
+                            // General error message
+                            showErrorMessage(data.message);
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('AJAX Error:', error);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    showErrorMessage('Terjadi kesalahan jaringan. Silakan coba lagi.');
                 }
             });
 
-            // Form submission
-            // document.getElementById('pendaftaranForm').addEventListener('submit', function (e) {
-            //     e.preventDefault();
+            // ============================================
+            // HELPER FUNCTIONS
+            // ============================================
+            function showSuccessMessage(message) {
+                // Hapus notifikasi sebelumnya
+                document.querySelectorAll('.notification').forEach(el => el.remove());
 
-            //     submitFormBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
-            //     submitFormBtn.disabled = true;
+                const notification = document.createElement('div');
+                notification.className = 'notification success';
+                notification.innerHTML = `
+                        <div class="notification-content">
+                            <i class="fas fa-check-circle"></i>
+                            <span>${message}</span>
+                        </div>
+                    `;
 
-            //     // Simulate form submission
-            //     setTimeout(() => {
-            //         alert('Pendaftaran berhasil dikirim! Data Anda telah direkam.');
-            //         submitFormBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pendaftaran';
-            //         submitFormBtn.disabled = false;
+                document.body.appendChild(notification);
 
-            //         // Reset form after 2 seconds
-            //         setTimeout(() => {
-            //             moveToStep(1);
-            //             document.querySelectorAll('.training-card').forEach(card => {
-            //                 card.classList.remove('selected');
-            //             });
-            //             angkatanSelect.innerHTML = '<option value="">Pilih Angkatan</option>';
-            //             jenisPelatihanInput.value = '';
-            //             selectedTraining = null;
-            //             selectedAngkatan = null;
-            //             dynamicFormContainer.innerHTML = '';
-            //         }, 2000);
-            //     }, 2000);
-            // });
+                // Animasi masuk
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+
+                // Hapus setelah 3 detik
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            function showErrorMessage(message) {
+                // Hapus notifikasi sebelumnya
+                document.querySelectorAll('.notification').forEach(el => el.remove());
+
+                const notification = document.createElement('div');
+                notification.className = 'notification error';
+                notification.innerHTML = `
+                        <div class="notification-content">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>${message}</span>
+                        </div>
+                    `;
+
+                document.body.appendChild(notification);
+
+                // Animasi masuk
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+
+                // Hapus setelah 5 detik
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 5000);
+            }
+
+            // Tambahkan CSS untuk notifikasi
+            const notificationStyles = `
+                    .notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 9999;
+                        min-width: 300px;
+                        max-width: 400px;
+                        background: white;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        padding: 15px 20px;
+                        transform: translateX(400px);
+                        transition: transform 0.3s ease;
+                    }
+
+                    .notification.show {
+                        transform: translateX(0);
+                    }
+
+                    .notification.success {
+                        border-left: 4px solid var(--success-color);
+                    }
+
+                    .notification.error {
+                        border-left: 4px solid var(--danger-color);
+                    }
+
+                    .notification-content {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                    }
+
+                    .notification-content i {
+                        font-size: 1.2rem;
+                    }
+
+                    .notification.success .notification-content i {
+                        color: var(--success-color);
+                    }
+
+                    .notification.error .notification-content i {
+                        color: var(--danger-color);
+                    }
+
+                    .notification-content span {
+                        flex: 1;
+                        font-size: 0.95rem;
+                    }
+                `;
+
+            // Inject styles
+            const styleSheet = document.createElement("style");
+            styleSheet.textContent = notificationStyles;
+            document.head.appendChild(styleSheet);
+
+            // Tambahkan event listener untuk clear error saat input
+            document.addEventListener('input', function (e) {
+                if (e.target.matches('input, select, textarea')) {
+                    e.target.classList.remove('error');
+
+                    // Hapus error messages terkait
+                    const formGroup = e.target.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = formGroup.querySelector('.server-error, .client-error');
+                        if (errorMsg) errorMsg.remove();
+                    }
+
+                    // Reset file label styling
+                    if (e.target.type === 'file') {
+                        const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = '';
+                            fileLabel.style.background = '';
+                        }
+                    }
+                }
+            });
+
+            // Tambahkan event listener untuk clear error saat file change
+            document.addEventListener('change', function (e) {
+                if (e.target.matches('input[type="file"]')) {
+                    e.target.classList.remove('error');
+
+                    const formGroup = e.target.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = formGroup.querySelector('.server-error, .client-error');
+                        if (errorMsg) errorMsg.remove();
+                    }
+
+                    const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
+                    if (fileLabel) {
+                        fileLabel.style.borderColor = '';
+                        fileLabel.style.background = '';
+                    }
+                }
+            });
         });
-
-
     </script>
 @endpush

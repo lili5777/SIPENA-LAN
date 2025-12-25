@@ -13,8 +13,8 @@ return new class extends Migration
             $table->foreignId('id_peserta')->constrained('peserta')->onDelete('cascade');
             $table->string('asal_instansi', 200);
             $table->string('unit_kerja', 200)->nullable();
-            $table->foreignId('id_provinsi')->constrained('provinsi');
-            $table->foreignId('id_kabupaten_kota')->nullable()->constrained('kabupaten_kota');
+            $table->integer('id_provinsi');
+            $table->integer('id_kabupaten_kota')->nullable();
             $table->text('alamat_kantor');
             $table->string('nomor_telepon_kantor', 20)->nullable();
             $table->string('email_kantor', 100)->nullable();
