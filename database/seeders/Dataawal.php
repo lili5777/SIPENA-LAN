@@ -37,6 +37,12 @@ class Dataawal extends Seeder
                 'deskripsi' => 'Pelatihan Kepemimpinan Administrator',
                 'aktif' => true,
             ],
+            [
+                'kode_pelatihan' => 'PKP',
+                'nama_pelatihan' => 'PKP',
+                'deskripsi' => 'Pelatihan Kepemimpinan Pengawas',
+                'aktif' => true,
+            ],
         ];
 
         foreach ($jenisPelatihanData as $data) {

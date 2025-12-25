@@ -19,11 +19,11 @@ return new class extends Migration
             $table->string('nomor_telepon_kantor', 20)->nullable();
             $table->string('email_kantor', 100)->nullable();
             $table->string('jabatan', 200);
-            $table->enum('eselon', ['I.a', 'I.b', 'II.a', 'II.b', 'III.a', 'III.b', 'IV.a', 'IV.b', 'Non Eselon'])->nullable();
+            $table->string('eselon', 20)->nullable();
             $table->date('tanggal_sk_jabatan')->nullable();
             $table->string('file_sk_jabatan', 255)->nullable();
-            $table->string('pangkat', 50);
-            $table->string('golongan_ruang', 10);
+            $table->string('pangkat', 50)->nullable();
+            $table->string('golongan_ruang', 50);
             $table->string('file_sk_pangkat', 255)->nullable();
             $table->string('nomor_sk_cpns', 100)->nullable();
             $table->string('nomor_sk_terakhir', 100)->nullable();

@@ -240,20 +240,20 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Provinsi (Kantor/Tempat Tugas)</label>
-        <select name="provinsi" class="form-select @error('provinsi') error @enderror" required>
+        <select name="id_provinsi" class="form-select @error('id_provinsi') error @enderror" required>
             <option value="">Pilih Provinsi</option>
             <option value="">Memuat provinsi...</option>
         </select>
-        @error('provinsi')
+        @error('id_provinsi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
         <label class="form-label required">Kabupaten (Lokasi Kantor/Tempat Tugas)</label>
-        <select name="kabupaten" class="form-select @error('kabupaten') error @enderror" required disabled>
+        <select name="id_kabupaten_kota" class="form-select @error('id_kabupaten_kota') error @enderror" required disabled>
             <option value="">Pilih Kabupaten (Pilih Provinsi Dahulu)</option>
         </select>
-        @error('kabupaten')
+        @error('id_kabupaten_kota')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>

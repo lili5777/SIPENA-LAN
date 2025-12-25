@@ -13,6 +13,7 @@ use App\Models\Pendaftaran;
 use App\Models\PesertaMentor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class PendaftaranController extends Controller
 {
@@ -22,8 +23,8 @@ class PendaftaranController extends Controller
     public function create()
     {
         $jenisPelatihan = JenisPelatihan::where('aktif', true)->get();
-        $provinsi = Provinsi::all();
         $mentor = Mentor::where('status_aktif', true)->get();
+        $provinsi = Provinsi::all();
 
         if (request()->ajax()) {
             return response()->json([
@@ -59,7 +60,7 @@ class PendaftaranController extends Controller
                 [
                     'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
                     'id_angkatan' => 'required|exists:angkatan,id',
-                    'nip_nrp' => 'required|string|max:50|unique:peserta,nip_nrp',
+                    'nip_nrp' => 'required|string|max:50',
                     'nama_lengkap' => 'required|string|max:200',
                     'nama_panggilan' => 'nullable|string|max:100',
                     'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
@@ -89,8 +90,8 @@ class PendaftaranController extends Controller
                     'email_kantor' => 'nullable|email|max:100',
                     'jabatan' => 'required|string|max:200',
                     'pangkat' => 'nullable|string|max:50',
-                    'golongan_ruang' => 'required|string|max:10',
-                    'eselon' => 'nullable|in:I.a,I.b,II.a,II.b,III.a,III.b,IV.a,IV.b,Non Eselon',
+                    'golongan_ruang' => 'required|string|max:50',
+                    'eselon' => 'nullable|string|max:20',
                     'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:2048',
                     'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:2048',
                     'file_surat_tugas' => 'nullable|file|mimes:pdf|max:2048',
@@ -222,7 +223,7 @@ class PendaftaranController extends Controller
                     'golongan_ruang.string'   => 'Golongan ruang harus berupa teks.',
                     'golongan_ruang.max'      => 'Golongan ruang maksimal 10 karakter.',
 
-                    'eselon.in' => 'Eselon yang dipilih tidak valid.',
+                    'eselon.string' => 'Eselon harus berupa teks.',
 
                     'file_sk_jabatan.file'  => 'SK jabatan harus berupa berkas.',
                     'file_sk_jabatan.mimes' => 'SK jabatan harus berformat pdf.',
@@ -319,7 +320,7 @@ class PendaftaranController extends Controller
 
             if ($kode === 'PKN_TK_II') {
                 $additionalRules = [
-                    'eselon' => 'required|in:II,III/Pejabat Fungsional',
+                    'eselon' => 'required|string|max:20',
                     'file_pakta_integritas' => 'required|file|mimes:pdf|max:2048',
                     'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
                     'file_sk_jabatan' => 'required|file|mimes:pdf|max:2048',
@@ -352,16 +353,26 @@ class PendaftaranController extends Controller
 
             if ($kode === 'PKA' || $kode === 'PKP') {
                 $additionalRules = [
-                    'eselon' => 'required|in:III,IV',
+                    'eselon' => 'required|string|max:20',
                     'tanggal_sk_jabatan' => 'required|date',
                     'tahun_lulus_pkp_pim_iv' => 'required|integer',
                     'file_surat_kesediaan' => 'required|file|mimes:pdf|max:2048',
                     'file_pakta_integritas' => 'required|file|mimes:pdf|max:2048',
                     'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_kelulusan_seleksi' => 'required|file|mimes:pdf|max:2048',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
                     'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:2048',
                     'file_ktp' => 'required|file|mimes:pdf,jpg,png|max:2048',
                 ];
+            }
+
+            $exists = Peserta::where('nip_nrp', $request->nip_nrp)
+                ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
+                ->exists();
+
+            if ($exists) {
+                throw ValidationException::withMessages([
+                    'nip_nrp' => ['Peserta dengan NIP/NRP ini sudah terdaftar pada jenis pelatihan yang sama.'],
+                ]);
             }
 
             // Jalankan validasi tambahan

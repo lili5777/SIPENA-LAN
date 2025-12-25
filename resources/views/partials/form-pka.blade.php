@@ -1,5 +1,5 @@
 <div class="form-section-header">
-    <i class="fas fa-chalkboard-teacher"></i> Form kesediaan PKA
+    <i class="fas fa-chalkboard-teacher"></i> Form kesediaan PKA/PKP
 </div>
 
 <div class="form-row">
@@ -97,7 +97,7 @@
     <div class="form-group">
         <label class="form-label required">Asal instansi</label>
         <input type="text" name="asal_instansi" class="form-input @error('asal_instansi') error @enderror" 
-               value="{{ old('asal_instansi') }}" required>
+               value="{{ old('asal_instansi') }}" required placeholder="Contoh : Pemerintah Kabupaten Sorong">
         @error('asal_instansi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -105,7 +105,7 @@
     <div class="form-group">
         <label class="form-label required">Instansi Detail/Unit Kerja</label>
         <input type="text" name="unit_kerja" class="form-input @error('unit_kerja') error @enderror" 
-               value="{{ old('unit_kerja') }}" required>
+               value="{{ old('unit_kerja') }}" required placeholder="Contoh: Dinas Pendidikan Kota Makassar">
         @error('unit_kerja')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -115,20 +115,20 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Provinsi</label>
-        <select name="provinsi" class="form-select @error('provinsi') error @enderror" required>
+        <select name="id_provinsi" class="form-select @error('id_provinsi') error @enderror" required>
             <option value="">Pilih Provinsi</option>
             <option value="">Memuat provinsi...</option>
         </select>
-        @error('provinsi')
+        @error('id_provinsi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
         <label class="form-label required">Kabupaten/Kota</label>
-        <select name="kabupaten" class="form-select @error('kabupaten') error @enderror" required disabled>
+        <select name="id_kabupaten_kota" class="form-select @error('id_kabupaten_kota') error @enderror" required disabled>
             <option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>
         </select>
-        @error('kabupaten')
+        @error('id_kabupaten_kota')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
@@ -157,7 +157,7 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label required">Unggah Scan fotokopi kelulusan/hasil seleksi calon peserta PKA / Sertifikat/Piagam Penghargaan Terbaik</label>
+    <label class="form-label ">Unggah Scan fotokopi kelulusan/hasil seleksi calon peserta PKA / Sertifikat/Piagam Penghargaan Terbaik (Jika Anda Eselon IV)</label>
     <div class="form-file">
         <input type="file" name="file_surat_kelulusan_seleksi" class="form-file-input @error('file_surat_kelulusan_seleksi') error @enderror" 
                accept=".pdf" {{ old('file_surat_kelulusan_seleksi') ? '' : 'required' }}>
@@ -178,9 +178,9 @@
 
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label required">Tahun Lulus PKP/PIM IV</label>
+        <label class="form-label ">Tahun Lulus PKP/PIM IV</label>
         <input type="number" name="tahun_lulus_pkp_pim_iv" class="form-input @error('tahun_lulus_pkp_pim_iv') error @enderror" 
-               min="1900" max="2099" value="{{ old('tahun_lulus_pkp_pim_iv') }}" required>
+               min="1900" max="2099" value="{{ old('tahun_lulus_pkp_pim_iv') }}" >
         @error('tahun_lulus_pkp_pim_iv')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -208,9 +208,9 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">No WA</label>
-        <input type="tel" name="no_wa" class="form-input @error('no_wa') error @enderror" 
-               value="{{ old('no_wa') }}" required>
-        @error('no_wa')
+        <input type="tel" name="nomor_hp" class="form-input @error('nomor_hp') error @enderror" 
+               value="{{ old('nomor_hp') }}" required>
+        @error('nomor_hp')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
@@ -353,10 +353,10 @@
         <label class="form-label required">Unggah Bukti SK Jabatan Terakhir (Definitif)</label>
         <div class="form-file">
             <input type="file" name="file_sk_jabatan" class="form-file-input @error('file_sk_jabatan') error @enderror" 
-                   accept=".jpg,.jpeg,.png" {{ old('file_sk_jabatan') ? '' : 'required' }}>
+                   accept=".pdf" {{ old('file_sk_jabatan') ? '' : 'required' }}>
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file JPG/PNG (maks. 2MB)
+                Klik untuk mengunggah file PDF (maks. 2MB)
             </label>
             <div class="form-file-name">
                 @if(old('file_sk_jabatan'))
@@ -372,10 +372,10 @@
         <label class="form-label required">Unggah Bukti SK Pangkat / Golongan Ruang Terakhir</label>
         <div class="form-file">
             <input type="file" name="file_sk_pangkat" class="form-file-input @error('file_sk_pangkat') error @enderror" 
-                   accept=".jpg,.jpeg,.png" {{ old('file_sk_pangkat') ? '' : 'required' }}>
+                   accept=".pdf" {{ old('file_sk_pangkat') ? '' : 'required' }}>
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file JPG/PNG (maks. 2MB)
+                Klik untuk mengunggah file PDF (maks. 2MB)
             </label>
             <div class="form-file-name">
                 @if(old('file_sk_pangkat'))
@@ -390,13 +390,14 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label required">Unggah Scan Formulir Kesediaan</label>
+    <label class="form-label required">Unggah Scan Formulir Kesediaan (file dapat diunduh di <a href="https://bit.ly/3VtcljN">Disini</a>)</label>
+
     <div class="form-file">
         <input type="file" name="file_surat_kesediaan" class="form-file-input @error('file_surat_kesediaan') error @enderror" 
-               accept=".jpg,.jpeg,.png" {{ old('file_surat_kesediaan') ? '' : 'required' }}>
+               accept=".pdf" {{ old('file_surat_kesediaan') ? '' : 'required' }}>
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file JPG/PNG (maks. 2MB)
+            Klik untuk mengunggah file PDF (maks. 2MB)
         </label>
         <div class="form-file-name">
             @if(old('file_surat_kesediaan'))
@@ -410,7 +411,8 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label required">Unggah Scan Pakta Integritas</label>
+    <label class="form-label required">Unggah Scan Pakta Integritas (Formulir menggunakan Kop Instansi
+    file dapat diunduh di <a href="https://bit.ly/3VtcljN">Disini</a>)</label>
     <div class="form-file">
         <input type="file" name="file_pakta_integritas" class="form-file-input @error('file_pakta_integritas') error @enderror" 
                accept=".pdf" {{ old('file_pakta_integritas') ? '' : 'required' }}>
@@ -430,7 +432,8 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label required">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang</label>
+    <label class="form-label required">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang (jika surat tugas sudah ada, namun jika belum maka WAJIB disertakan  pada masa klasikal di Puslatbang
+    KMP)</label>
     <div class="form-file">
         <input type="file" name="file_surat_tugas" class="form-file-input @error('file_surat_tugas') error @enderror" 
                accept=".pdf" {{ old('file_surat_tugas') ? '' : 'required' }}>
@@ -571,10 +574,10 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label">Unggah Surat Pernyataan Tidak Sedang mempertanggungjawabkan Penyelesaian Administrasi</label>
+    <label class="form-label required">Unggah Surat Pernyataan Tidak Sedang mempertanggungjawabkan Penyelesaian Administrasi</label>
     <div class="form-file">
         <input type="file" name="file_surat_pernyataan_administrasi" class="form-file-input @error('file_surat_pernyataan_administrasi') error @enderror" 
-               accept=".pdf">
+               accept=".pdf" required>
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file PDF (maks. 5MB)
