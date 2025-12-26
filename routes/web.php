@@ -92,3 +92,5 @@ Route::get('/proxy/regencies/{code}', function ($code) {
     $response = file_get_contents($url);
     return response($response)->header('Content-Type', 'application/json');
 });
+
+Route::get('/api/mentors', [PendaftaranController::class, 'getMentors'])->name('api.mentors');

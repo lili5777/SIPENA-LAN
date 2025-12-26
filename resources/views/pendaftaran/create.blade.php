@@ -1009,6 +1009,105 @@
             }
 
             function setupFormInteractions() {
+                // Mentor functionality
+                function setupMentorForm() {
+                    const mentorSelect = document.getElementById('sudah_ada_mentor');
+                    const mentorContainer = document.getElementById('mentor-container');
+                    const mentorModeSelect = document.getElementById('mentor_mode');
+                    const selectMentorForm = document.getElementById('select-mentor-form');
+                    const addMentorForm = document.getElementById('add-mentor-form');
+                    const mentorDropdown = document.getElementById('id_mentor');
+
+                    // Toggle mentor container
+                    mentorSelect.addEventListener('change', function () {
+                        if (this.value === 'Ya') {
+                            mentorContainer.style.display = 'block';
+
+                            // Load mentors jika belum dimuat
+                            if (mentorDropdown.options.length <= 1) {
+                                loadMentors();
+                            }
+                        } else {
+                            mentorContainer.style.display = 'none';
+                        }
+                    });
+
+                    // Toggle between select and add forms
+                    mentorModeSelect.addEventListener('change', function () {
+                        if (this.value === 'pilih') {
+                            selectMentorForm.style.display = 'block';
+                            addMentorForm.style.display = 'none';
+
+                            // Load mentors if not loaded
+                            if (mentorDropdown.options.length <= 1) {
+                                loadMentors();
+                            }
+                        } else {
+                            selectMentorForm.style.display = 'none';
+                            addMentorForm.style.display = 'block';
+                        }
+                    });
+
+                    // Handle mentor selection
+                    mentorDropdown.addEventListener('change', function () {
+                        if (this.value) {
+                            const selectedOption = this.options[this.selectedIndex];
+                            const mentorData = JSON.parse(selectedOption.dataset.mentor || '{}');
+
+                            // Populate fields
+                            document.getElementById('nama_mentor_select').value = mentorData.nama_mentor || '';
+                            document.getElementById('jabatan_mentor_select').value = mentorData.jabatan_mentor || '';
+                            document.getElementById('nomor_rekening_mentor_select').value = mentorData.nomor_rekening_mentor || '';
+                            document.getElementById('npwp_mentor_select').value = mentorData.npwp_mentor || '';
+                        }
+                    });
+                }
+
+                // Load mentors from API
+                async function loadMentors() {
+                    const mentorDropdown = document.getElementById('id_mentor');
+
+                    if (!mentorDropdown) return;
+
+                    mentorDropdown.innerHTML = '<option value="">Memuat daftar mentor...</option>';
+                    mentorDropdown.disabled = true;
+
+                    try {
+                        const response = await fetch('/api/mentors');
+                        const data = await response.json();
+
+                        mentorDropdown.innerHTML = '<option value="">Pilih Mentor</option>';
+                        mentorDropdown.disabled = false;
+
+                        data.forEach(mentor => {
+                            const option = document.createElement('option');
+                            option.value = mentor.id_mentor || mentor.id;
+                            option.textContent = `${mentor.nama_mentor} - ${mentor.jabatan_mentor}`;
+
+                            // Store mentor data as JSON in dataset
+                            option.dataset.mentor = JSON.stringify({
+                                nama_mentor: mentor.nama_mentor,
+                                jabatan_mentor: mentor.jabatan_mentor,
+                                nomor_rekening_mentor: mentor.nomor_rekening,
+                                npwp_mentor: mentor.npwp_mentor
+                            });
+
+                            mentorDropdown.appendChild(option);
+                        });
+
+                        // Set old value if exists
+                        if (window.oldValues && window.oldValues.id_mentor) {
+                            mentorDropdown.value = window.oldValues.id_mentor;
+                            if (mentorDropdown.value) {
+                                mentorDropdown.dispatchEvent(new Event('change'));
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading mentors:', error);
+                        mentorDropdown.innerHTML = '<option value="">Error loading mentors</option>';
+                        mentorDropdown.disabled = false;
+                    }
+                }
                 // File input handlers
                 document.querySelectorAll('.form-file-input').forEach(input => {
                     input.addEventListener('change', function () {
@@ -1024,17 +1123,20 @@
                     }
 
                     // Handle mentor show/hide untuk PD CPNS
-                    if (e.target.name === 'sudah_ada_mentor') {
-                        const mentorDetail = document.getElementById('mentor-detail');
-                        if (mentorDetail) {
-                            if (e.target.value === 'Ya') {
-                                mentorDetail.style.display = 'block';
-                            } else {
-                                mentorDetail.style.display = 'none';
-                            }
-                        }
-                    }
+                    // if (e.target.name === 'sudah_ada_mentor') {
+                    //     const mentorDetail = document.getElementById('mentor-detail');
+                    //     if (mentorDetail) {
+                    //         if (e.target.value === 'Ya') {
+                    //             mentorDetail.style.display = 'block';
+                    //         } else {
+                    //             mentorDetail.style.display = 'none';
+                    //         }
+                    //     }
+                    // }
                 });
+
+                // Setup mentor form
+                setupMentorForm();
             }
 
             function setOldValuesToForm() {
