@@ -13,12 +13,9 @@ return new class extends Migration
             $table->string('nama_mentor', 200);
             $table->string('jabatan_mentor', 200)->nullable();
             $table->string('nomor_rekening', 100)->nullable();
-            $table->string('nama_bank', 50)->nullable();
-            $table->string('atas_nama_rekening', 200)->nullable();
             $table->string('npwp_mentor', 50)->nullable();
             $table->string('email_mentor', 100)->nullable();
             $table->string('nomor_hp_mentor', 20)->nullable();
-            $table->string('file_persetujuan_mentor', 255)->nullable();
             $table->boolean('status_aktif')->default(true);
             $table->timestamp('dibuat_pada')->useCurrent();
             $table->engine = 'InnoDB';

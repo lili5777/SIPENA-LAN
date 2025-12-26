@@ -27,6 +27,7 @@ class Pendaftaran extends Model
         'file_surat_bebas_narkoba',
         'file_surat_pernyataan_administrasi',
         'file_sertifikat_penghargaan',
+        'file_persetujuan_mentor',
         'status_pendaftaran',
         'tanggal_daftar',
         'tanggal_verifikasi',

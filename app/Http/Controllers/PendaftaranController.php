@@ -24,17 +24,15 @@ class PendaftaranController extends Controller
     {
         $jenisPelatihan = JenisPelatihan::where('aktif', true)->get();
         $mentor = Mentor::where('status_aktif', true)->get();
-        $provinsi = Provinsi::all();
 
         if (request()->ajax()) {
             return response()->json([
                 'jenis_pelatihan' => $jenisPelatihan,
-                'provinsi' => $provinsi,
                 'mentor' => $mentor
             ]);
         }
 
-        return view('pendaftaran.create', compact('jenisPelatihan', 'provinsi', 'mentor'));
+        return view('pendaftaran.create', compact('jenisPelatihan', 'mentor'));
     }
 
     public function formPartial($type)
@@ -347,7 +345,7 @@ class PendaftaranController extends Controller
 
                 // Jika sudah ada mentor dan mode pilih
                 if ($request->sudah_ada_mentor === 'Ya' && $request->mentor_mode === 'pilih') {
-                    $additionalRules['id_mentor'] = 'required|exists:mentor,id_mentor';
+                    $additionalRules['id_mentor'] = 'required|exists:mentor,id';
                 }
 
                 // Jika sudah ada mentor dan mode tambah
@@ -374,10 +372,11 @@ class PendaftaranController extends Controller
             }
 
             $exists = Peserta::where('nip_nrp', $request->nip_nrp)
-                ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
+                ->exists();
+            $exists2 = Pendaftaran::where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
                 ->exists();
 
-            if ($exists) {
+            if ($exists && $exists2) {
                 throw ValidationException::withMessages([
                     'nip_nrp' => ['Peserta dengan NIP/NRP ini sudah terdaftar pada jenis pelatihan yang sama.'],
                 ]);
@@ -506,7 +505,7 @@ class PendaftaranController extends Controller
                     $mentor = Mentor::create([
                         'nama_mentor' => $request->nama_mentor_baru,
                         'jabatan_mentor' => $request->jabatan_mentor_baru,
-                        'nomor_rekening_mentor' => $request->nomor_rekening_mentor_baru,
+                        'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                         'npwp_mentor' => $request->npwp_mentor_baru,
                         'status_aktif' => true,
                     ]);
@@ -516,18 +515,11 @@ class PendaftaranController extends Controller
                     // Simpan hubungan peserta-mentor
                     PesertaMentor::create([
                         'id_pendaftaran' => $pendaftaran->id,
-                        'id_mentor' => $mentor->id_mentor,
+                        'id_mentor' => $mentor->id,
                         'tanggal_penunjukan' => now(),
                         'status_mentoring' => 'Ditugaskan',
                     ]);
 
-                    // Simpan data mentor ke peserta
-                    $peserta->update([
-                        'nama_mentor' => $mentor->nama_mentor,
-                        'jabatan_mentor' => $mentor->jabatan_mentor,
-                        'nomor_rekening_mentor' => $mentor->nomor_rekening_mentor,
-                        'npwp_mentor' => $mentor->npwp_mentor,
-                    ]);
                 }
             }
 

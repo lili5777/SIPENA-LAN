@@ -130,7 +130,7 @@
     <div class="form-group">
         <label class="form-label required">Jabatan</label>
         <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
-            value="{{ old('jabatan') }}" required>
+            value="{{ old('jabatan') }}" required placeholder="Contoh : Perencana Ahli Pertama">
         @error('jabatan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -228,7 +228,7 @@
         <label class="form-label required">Pendidikan Terakhir</label>
         <select name="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="SMA" {{ old('pendidikan_terakhir') == 'SMA' ? 'selected' : '' }}>SMA</option>
+            <option value="SMU" {{ old('pendidikan_terakhir') == 'SMU' ? 'selected' : '' }}>SMU</option>
             <option value="D3" {{ old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3</option>
             <option value="S1" {{ old('pendidikan_terakhir') == 'S1' ? 'selected' : '' }}>S1</option>
             <option value="S2" {{ old('pendidikan_terakhir') == 'S2' ? 'selected' : '' }}>S2</option>
@@ -241,7 +241,7 @@
     <div class="form-group">
         <label class="form-label required">Bidang Studi Pendidikan Terakhir</label>
         <input type="text" name="bidang_studi" class="form-input @error('bidang_studi') error @enderror"
-            value="{{ old('bidang_studi') }}" required>
+            value="{{ old('bidang_studi') }}" required placeholder="Contoh : Ilmu Hukum">
         @error('bidang_studi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -249,7 +249,7 @@
     <div class="form-group">
         <label class="form-label required">Bidang Keahlian/Kepakaran</label>
         <input type="text" name="bidang_keahlian" class="form-input @error('bidang_keahlian') error @enderror"
-            value="{{ old('bidang_keahlian') }}" required>
+            value="{{ old('bidang_keahlian') }}" required placeholder="Contoh : Manajemen Pemerintahan ">
         @error('bidang_keahlian')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -554,11 +554,11 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label required">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang
-        berwenang</label>
+    <label class="form-label ">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang
+        berwenang (jika belum maka WAJIB disertakan saat masa klasikal)</label>
     <div class="form-file">
         <input type="file" name="file_surat_tugas" class="form-file-input @error('file_surat_tugas') error @enderror"
-            accept=".pdf" {{ old('file_surat_tugas') ? '' : 'required' }}>
+            accept=".pdf" {{ old('file_surat_tugas') }}>
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file PDF (maks. 5MB)
@@ -594,7 +594,7 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label required">Unggah Pas Foto peserta</label>
+    <label class="form-label required">Unggah Pas Foto peserta (untuk digunakan di name tag peserta)</label>
     <div class="form-file">
         <input type="file" name="file_pas_foto" class="form-file-input @error('file_pas_foto') error @enderror"
             accept=".jpg,.jpeg,.png" {{ old('file_pas_foto') ? '' : 'required' }}>

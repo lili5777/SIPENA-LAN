@@ -17,12 +17,9 @@ class Mentor extends Model
         'nama_mentor',
         'jabatan_mentor',
         'nomor_rekening',
-        'nama_bank',
-        'atas_nama_rekening',
         'npwp_mentor',
         'email_mentor',
         'nomor_hp_mentor',
-        'file_persetujuan_mentor',
         'status_aktif',
     ];
 
