@@ -5,8 +5,8 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">NIP/NRP</label>
-        <input type="text" name="nip_nrp" class="form-input @error('nip_nrp') error @enderror" 
-               value="{{ old('nip_nrp') }}" required>
+        <input type="text" name="nip_nrp" class="form-input @error('nip_nrp') error @enderror" value="{{ old('nip_nrp') }}"
+            required>
         @error('nip_nrp')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -303,6 +303,204 @@
 </div>
 
 <div class="form-section-header">
+    <i class="fas fa-user-graduate"></i> Data Mentor
+</div>
+
+{{-- <div class="form-row">
+    <div class="form-group">
+        <label class="form-label">Nama Mentor</label>
+        <input type="text" name="nama_mentor" class="form-input @error('nama_mentor') error @enderror"
+            value="{{ old('nama_mentor') }}">
+        @error('nama_mentor')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label">Jabatan Mentor</label>
+        <input type="text" name="jabatan_mentor" class="form-input @error('jabatan_mentor') error @enderror"
+            value="{{ old('jabatan_mentor') }}">
+        @error('jabatan_mentor')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label">Nomor Rekening Mentor</label>
+        <input type="text" name="nomor_rekening_mentor"
+            class="form-input @error('nomor_rekening_mentor') error @enderror"
+            placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya" value="{{ old('nomor_rekening_mentor') }}">
+        @error('nomor_rekening_mentor')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label">NPWP Mentor</label>
+        <input type="text" name="npwp_mentor" class="form-input @error('npwp_mentor') error @enderror"
+            value="{{ old('npwp_mentor') }}">
+        @error('npwp_mentor')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div> --}}
+
+<div class="form-group">
+    <label class="form-label required">Apakah sudah ada penunjukan Mentor?</label>
+    <select name="sudah_ada_mentor" id="sudah_ada_mentor" class="form-select @error('sudah_ada_mentor') error @enderror"
+        required>
+        <option value="">Pilih</option>
+        <option value="Ya" {{ old('sudah_ada_mentor') == 'Ya' ? 'selected' : '' }}>Ya</option>
+        <option value="Tidak" {{ old('sudah_ada_mentor') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
+    </select>
+    @error('sudah_ada_mentor')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div id="mentor-container" style="display: {{ old('sudah_ada_mentor') == 'Ya' ? 'block' : 'none' }};">
+    <div class="form-group">
+        <label class="form-label required">Pilih Mentor atau Tambah Baru</label>
+        <div class="mentor-options">
+            <select name="mentor_mode" id="mentor_mode" class="form-select @error('mentor_mode') error @enderror">
+                <option value="">Pilih Menu</option>
+                <option value="pilih" {{ old('mentor_mode') == 'pilih' ? 'selected' : '' }}>Daftar mentor
+                </option>
+                <option value="tambah" {{ old('mentor_mode') == 'tambah' ? 'selected' : '' }}>Tambah mentor(Jika tidak ada
+                    di daftar mentor)</option>
+            </select>
+        </div>
+        @error('mentor_mode')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+
+    <!-- Form untuk memilih mentor yang sudah ada -->
+    <div id="select-mentor-form" style="display: {{ old('mentor_mode') == 'pilih' ? 'block' : 'none' }};">
+        <div class="form-group">
+            <label class="form-label required">Pilih Mentor</label>
+            <select name="id_mentor" id="id_mentor" class="form-select @error('id_mentor') error @enderror">
+                <option value="">Pilih Mentor...</option>
+                <!-- Data mentor akan dimuat via AJAX -->
+            </select>
+            @error('id_mentor')
+                <small class="text-danger">{{ $message }}</small>
+            @enderror
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Nama Mentor</label>
+                <input type="text" name="nama_mentor" id="nama_mentor_select"
+                    class="form-input @error('nama_mentor') error @enderror" value="{{ old('nama_mentor') }}" readonly>
+                @error('nama_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Jabatan Mentor</label>
+                <input type="text" name="jabatan_mentor" id="jabatan_mentor_select"
+                    class="form-input @error('jabatan_mentor') error @enderror" value="{{ old('jabatan_mentor') }}"
+                    readonly>
+                @error('jabatan_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Nomor Rekening Mentor</label>
+                <input type="text" name="nomor_rekening_mentor" id="nomor_rekening_mentor_select"
+                    class="form-input @error('nomor_rekening_mentor') error @enderror"
+                    placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
+                    value="{{ old('nomor_rekening_mentor') }}" readonly>
+                @error('nomor_rekening_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label">NPWP Mentor</label>
+                <input type="text" name="npwp_mentor" id="npwp_mentor_select"
+                    class="form-input @error('npwp_mentor') error @enderror" value="{{ old('npwp_mentor') }}" readonly>
+                @error('npwp_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
+    </div>
+
+    <!-- Form untuk menambah mentor baru -->
+    <div id="add-mentor-form" style="display: {{ old('mentor_mode') == 'tambah' ? 'block' : 'none' }};">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            Silakan lengkapi data mentor baru
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Nama Mentor</label>
+                <input type="text" name="nama_mentor_baru" id="nama_mentor_baru"
+                    class="form-input @error('nama_mentor_baru') error @enderror" value="{{ old('nama_mentor_baru') }}">
+                @error('nama_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Jabatan Mentor</label>
+                <input type="text" name="jabatan_mentor_baru" id="jabatan_mentor_baru"
+                    class="form-input @error('jabatan_mentor_baru') error @enderror"
+                    value="{{ old('jabatan_mentor_baru') }}">
+                @error('jabatan_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Nomor Rekening Mentor</label>
+                <input type="text" name="nomor_rekening_mentor_baru" id="nomor_rekening_mentor_baru"
+                    class="form-input @error('nomor_rekening_mentor_baru') error @enderror"
+                    placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
+                    value="{{ old('nomor_rekening_mentor_baru') }}">
+                @error('nomor_rekening_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label">NPWP Mentor</label>
+                <input type="text" name="npwp_mentor_baru" id="npwp_mentor_baru"
+                    class="form-input @error('npwp_mentor_baru') error @enderror" value="{{ old('npwp_mentor_baru') }}">
+                @error('npwp_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">Unggah Form Persetujuan Mentor</label>
+    <div class="form-file">
+        <input type="file" name="file_persetujuan_mentor"
+            class="form-file-input @error('file_persetujuan_mentor') error @enderror" accept=".pdf">
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file PDF (maks. 5MB)
+        </label>
+        <div class="form-file-name">
+            @if(old('file_persetujuan_mentor'))
+                File sudah diupload sebelumnya
+            @endif
+        </div>
+    </div>
+    @error('file_persetujuan_mentor')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<div class="form-section-header">
     <i class="fas fa-file-upload"></i> Dokumen Pendukung
 </div>
 
@@ -491,67 +689,6 @@
     @enderror
 </div>
 
-<div class="form-section-header">
-    <i class="fas fa-user-graduate"></i> Data Mentor
-</div>
-
-<div class="form-row">
-    <div class="form-group">
-        <label class="form-label">Nama Mentor</label>
-        <input type="text" name="nama_mentor" class="form-input @error('nama_mentor') error @enderror" 
-               value="{{ old('nama_mentor') }}">
-        @error('nama_mentor')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-    <div class="form-group">
-        <label class="form-label">Jabatan Mentor</label>
-        <input type="text" name="jabatan_mentor" class="form-input @error('jabatan_mentor') error @enderror" 
-               value="{{ old('jabatan_mentor') }}">
-        @error('jabatan_mentor')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-</div>
-
-<div class="form-row">
-    <div class="form-group">
-        <label class="form-label">Nomor Rekening Mentor</label>
-        <input type="text" name="nomor_rekening_mentor" class="form-input @error('nomor_rekening_mentor') error @enderror" 
-               placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya" value="{{ old('nomor_rekening_mentor') }}">
-        @error('nomor_rekening_mentor')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-    <div class="form-group">
-        <label class="form-label">NPWP Mentor</label>
-        <input type="text" name="npwp_mentor" class="form-input @error('npwp_mentor') error @enderror" 
-               value="{{ old('npwp_mentor') }}">
-        @error('npwp_mentor')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="form-label">Unggah Form Persetujuan Mentor</label>
-    <div class="form-file">
-        <input type="file" name="file_persetujuan_mentor" class="form-file-input @error('file_persetujuan_mentor') error @enderror" 
-               accept=".pdf">
-        <label class="form-file-label">
-            <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file PDF (maks. 5MB)
-        </label>
-        <div class="form-file-name">
-            @if(old('file_persetujuan_mentor'))
-                File sudah diupload sebelumnya
-            @endif
-        </div>
-    </div>
-    @error('file_persetujuan_mentor')
-        <small class="text-danger">{{ $message }}</small>
-    @enderror
-</div>
 
 <div class="form-group">
     <label class="form-label">Unggah Surat Berbadan Sehat</label>
@@ -612,3 +749,22 @@
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
+
+<style>
+    .alert {
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid;
+    }
+
+    .alert-info {
+        background-color: rgba(66, 153, 225, 0.1);
+        border-color: var(--accent-color);
+        color: var(--secondary-color);
+    }
+
+    .alert i {
+        margin-right: 10px;
+    }
+</style>

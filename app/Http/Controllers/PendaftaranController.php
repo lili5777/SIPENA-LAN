@@ -57,25 +57,25 @@ class PendaftaranController extends Controller
     {
         try {
             // Cek apakah peserta dengan NIP/NRP yang sama sudah terdaftar pada jenis pelatihan yang sama
-            $vall = Peserta::where('nip_nrp', $request->nip_nrp)->first();
-            if ($vall) {
-                $exists = Pendaftaran::where('id_peserta', $vall->id)
-                    ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
-                    ->exists();
+            // $vall = Peserta::where('nip_nrp', $request->nip_nrp)->first();
+            // if ($vall) {
+            //     $exists = Pendaftaran::where('id_peserta', $vall->id)
+            //         ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
+            //         ->exists();
 
-                if ($exists) {
-                    throw ValidationException::withMessages([
-                        'nip_nrp' => ['Peserta dengan NIP/NRP ini sudah terdaftar pada jenis pelatihan yang sama.'],
-                    ]);
-                }
-            }
+            //     if ($exists) {
+            //         throw ValidationException::withMessages([
+            //             'nip_nrp' => ['Peserta dengan NIP/NRP ini sudah terdaftar pada jenis pelatihan yang sama.'],
+            //         ]);
+            //     }
+            // }
 
             // Validasi input umum
             $validated = $request->validate(
                 [
                     'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
                     'id_angkatan' => 'required|exists:angkatan,id',
-                    'nip_nrp' => 'required|string|max:50',
+                    'nip_nrp' => 'required|string|max:50|unique:peserta,nip_nrp',
                     'nama_lengkap' => 'required|string|max:200',
                     'nama_panggilan' => 'nullable|string|max:100',
                     'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
@@ -357,19 +357,7 @@ class PendaftaranController extends Controller
                     'npwp_mentor' => 'nullable|string|max:50',
                 ];
 
-                // Jika sudah ada mentor dan mode pilih
-                if ($request->sudah_ada_mentor === 'Ya') {
-                    $additionalRules['mentor_mode'] = 'required|in:pilih,tambah';
-
-                    if ($request->mentor_mode === 'pilih') {
-                        $additionalRules['id_mentor'] = 'required|exists:mentor,id';
-                    } elseif ($request->mentor_mode === 'tambah') {
-                        $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
-                        $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
-                        $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:100';
-                        $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
-                    }
-                }
+               
             }
 
             if ($kode === 'PKA' || $kode === 'PKP') {
@@ -383,7 +371,22 @@ class PendaftaranController extends Controller
                     'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
                     'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:2048',
                     'file_ktp' => 'required|file|mimes:pdf,jpg,png|max:2048',
+                    'sudah_ada_mentor' => 'required|in:Ya,Tidak',
                 ];
+            }
+
+            // Jika sudah ada mentor dan mode pilih
+            if ($request->sudah_ada_mentor === 'Ya') {
+                $additionalRules['mentor_mode'] = 'required|in:pilih,tambah';
+
+                if ($request->mentor_mode === 'pilih') {
+                    $additionalRules['id_mentor'] = 'required|exists:mentor,id';
+                } elseif ($request->mentor_mode === 'tambah') {
+                    $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
+                    $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
+                    $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:100';
+                    $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
+                }
             }
 
             

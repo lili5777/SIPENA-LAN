@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('peserta', function (Blueprint $table) {
             $table->id('id');
-            $table->string('nip_nrp', 50)->unique();
+            $table->string('nip_nrp', 50);
             $table->string('nama_lengkap', 200);
             $table->string('nama_panggilan', 100)->nullable();
             $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);

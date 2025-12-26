@@ -1018,6 +1018,11 @@
                     const addMentorForm = document.getElementById('add-mentor-form');
                     const mentorDropdown = document.getElementById('id_mentor');
 
+                    // Hanya setup jika elemen mentor ada
+                    if (!mentorSelect || !mentorContainer) {
+                        return; // Keluar jika bukan form PD_CPNS
+                    }
+
                     // Toggle mentor container
                     mentorSelect.addEventListener('change', function () {
                         if (this.value === 'Ya') {
