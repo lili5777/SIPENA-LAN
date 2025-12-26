@@ -26,12 +26,12 @@ class Angkatan extends Model
     // Relasi: belongsTo ke JenisPelatihan
     public function jenisPelatihan()
     {
-        return $this->belongsTo(JenisPelatihan::class);
+        return $this->belongsTo(JenisPelatihan::class, 'id_jenis_pelatihan');
     }
 
     // Relasi: hasMany ke Pendaftaran
     public function pendaftaran()
     {
-        return $this->hasMany(Pendaftaran::class);
+        return $this->hasMany(Pendaftaran::class, 'id_angkatan');
     }
 }

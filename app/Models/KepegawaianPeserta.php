@@ -43,7 +43,7 @@ class KepegawaianPeserta extends Model
     // Relasi: belongsTo ke Peserta
     public function peserta()
     {
-        return $this->belongsTo(Peserta::class);
+        return $this->belongsTo(Peserta::class, 'id_peserta');
     }
 
 }

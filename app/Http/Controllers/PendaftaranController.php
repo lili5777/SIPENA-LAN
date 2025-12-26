@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\JenisPelatihan;
 use App\Models\Angkatan;
-use App\Models\Provinsi;
-use App\Models\KabupatenKota;
 use App\Models\Mentor;
 use App\Models\Peserta;
 use App\Models\KepegawaianPeserta;
@@ -24,16 +22,19 @@ class PendaftaranController extends Controller
     {
         $jenisPelatihan = JenisPelatihan::where('aktif', true)->get();
         $mentor = Mentor::where('status_aktif', true)->get();
-
         if (request()->ajax()) {
             return response()->json([
                 'jenis_pelatihan' => $jenisPelatihan,
                 'mentor' => $mentor
             ]);
         }
-
         return view('pendaftaran.create', compact('jenisPelatihan', 'mentor'));
     }
+
+
+    /**
+     * Menampilkan partial form berdasarkan jenis pelatihan
+     */
 
     public function formPartial($type)
     {
@@ -47,12 +48,28 @@ class PendaftaranController extends Controller
         return response()->json(['error' => 'Form type not found'], 404);
     }
 
+
+
     /**
      * Menyimpan data pendaftaran
      */
     public function store(Request $request)
     {
         try {
+            // Cek apakah peserta dengan NIP/NRP yang sama sudah terdaftar pada jenis pelatihan yang sama
+            $vall = Peserta::where('nip_nrp', $request->nip_nrp)->first();
+            if ($vall) {
+                $exists = Pendaftaran::where('id_peserta', $vall->id)
+                    ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
+                    ->exists();
+
+                if ($exists) {
+                    throw ValidationException::withMessages([
+                        'nip_nrp' => ['Peserta dengan NIP/NRP ini sudah terdaftar pada jenis pelatihan yang sama.'],
+                    ]);
+                }
+            }
+
             // Validasi input umum
             $validated = $request->validate(
                 [
@@ -68,7 +85,7 @@ class PendaftaranController extends Controller
                     'alamat_rumah' => 'required|string',
                     'email_pribadi' => 'required|email|max:100|unique:peserta,email_pribadi',
                     'nomor_hp' => 'required|string|max:20',
-                    'pendidikan_terakhir' => 'required|in:SD,SMP,SMA,D3,D4,S1,S2,S3',
+                    'pendidikan_terakhir' => 'required|in:SD,SMP,SMU,D3,D4,S1,S2,S3',
                     'bidang_studi' => 'nullable|string|max:100',
                     'bidang_keahlian' => 'nullable|string|max:100',
                     'status_perkawinan' => 'nullable|in:Belum Menikah,Menikah,Duda,Janda',
@@ -126,7 +143,6 @@ class PendaftaranController extends Controller
                     'nip_nrp.required' => 'NIP/NRP wajib diisi.',
                     'nip_nrp.string'   => 'NIP/NRP harus berupa teks.',
                     'nip_nrp.max'      => 'NIP/NRP maksimal 50 karakter.',
-                    'nip_nrp.unique'   => 'NIP/NRP sudah terdaftar.',
 
                     'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
                     'nama_lengkap.string'   => 'Nama lengkap harus berupa teks.',
@@ -336,24 +352,23 @@ class PendaftaranController extends Controller
                     'file_skp' => 'nullable|file|mimes:pdf|max:2048',
                     'file_surat_kesediaan' => 'required|file|mimes:pdf|max:2048',
                     'pangkat' => 'required|string|max:50',
-                    // 'file_ktp' => 'required|file|mimes:pdf|max:2048',
                     'sudah_ada_mentor' => 'required|in:Ya,Tidak',
                     'nomor_rekening_mentor' => 'nullable|string|max:100',
                     'npwp_mentor' => 'nullable|string|max:50',
-                    'mentor_mode' => 'required_if:sudah_ada_mentor,Ya|in:pilih,tambah',
                 ];
 
                 // Jika sudah ada mentor dan mode pilih
-                if ($request->sudah_ada_mentor === 'Ya' && $request->mentor_mode === 'pilih') {
-                    $additionalRules['id_mentor'] = 'required|exists:mentor,id';
-                }
+                if ($request->sudah_ada_mentor === 'Ya') {
+                    $additionalRules['mentor_mode'] = 'required|in:pilih,tambah';
 
-                // Jika sudah ada mentor dan mode tambah
-                if ($request->sudah_ada_mentor === 'Ya' && $request->mentor_mode === 'tambah') {
-                    $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
-                    $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
-                    $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:100';
-                    $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
+                    if ($request->mentor_mode === 'pilih') {
+                        $additionalRules['id_mentor'] = 'required|exists:mentor,id';
+                    } elseif ($request->mentor_mode === 'tambah') {
+                        $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
+                        $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
+                        $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:100';
+                        $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
+                    }
                 }
             }
 
@@ -371,16 +386,7 @@ class PendaftaranController extends Controller
                 ];
             }
 
-            $exists = Peserta::where('nip_nrp', $request->nip_nrp)
-                ->exists();
-            $exists2 = Pendaftaran::where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
-                ->exists();
-
-            if ($exists && $exists2) {
-                throw ValidationException::withMessages([
-                    'nip_nrp' => ['Peserta dengan NIP/NRP ini sudah terdaftar pada jenis pelatihan yang sama.'],
-                ]);
-            }
+            
 
             // Jalankan validasi tambahan
             if (!empty($additionalRules)) {

@@ -26,12 +26,12 @@ class PesertaMentor extends Model
     // Relasi: belongsTo ke Pendaftaran
     public function pendaftaran()
     {
-        return $this->belongsTo(Pendaftaran::class);
+        return $this->belongsTo(Pendaftaran::class, 'id_pendaftaran');
     }
 
     // Relasi: belongsTo ke Mentor
     public function mentor()
     {
-        return $this->belongsTo(Mentor::class);
+        return $this->belongsTo(Mentor::class, 'id_mentor');
     }
 }

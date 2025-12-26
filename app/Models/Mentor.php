@@ -26,6 +26,6 @@ class Mentor extends Model
     // Relasi: hasMany ke PesertaMentor
     public function pesertaMentor()
     {
-        return $this->hasMany(PesertaMentor::class);
+        return $this->hasMany(PesertaMentor::class, 'id_mentor');
     }
 }

@@ -23,12 +23,12 @@ class JenisPelatihan extends Model
     // Relasi: hasMany ke Angkatan
     public function angkatan()
     {
-        return $this->hasMany(Angkatan::class);
+        return $this->hasMany(Angkatan::class, 'id_jenis_pelatihan');
     }
 
     // Relasi: hasMany ke Pendaftaran
     public function pendaftaran()
     {
-        return $this->hasMany(Pendaftaran::class);
+        return $this->hasMany(Pendaftaran::class, 'id_jenis_pelatihan');
     }
 }

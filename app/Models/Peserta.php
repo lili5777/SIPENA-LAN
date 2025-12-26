@@ -43,18 +43,18 @@ class Peserta extends Model
     // Relasi: hasOne ke KepegawaianPeserta
     public function kepegawaianPeserta()
     {
-        return $this->hasOne(KepegawaianPeserta::class);
+        return $this->hasOne(KepegawaianPeserta::class,'id_peserta');
     }
 
     // Relasi: hasMany ke Pendaftaran
     public function pendaftaran()
     {
-        return $this->hasMany(Pendaftaran::class);
+        return $this->hasMany(Pendaftaran::class, 'id_peserta');
     }
 
     // Relasi: hasMany ke LogAktivitas
     public function logAktivitas()
     {
-        return $this->hasMany(LogAktivitas::class);
+        return $this->hasMany(LogAktivitas::class, 'id_peserta');
     }
 }
