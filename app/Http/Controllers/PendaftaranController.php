@@ -555,7 +555,6 @@ class PendaftaranController extends Controller
                 }
             }
 
-            // dd($pendaftaran->load(['peserta', 'jenisPelatihan', 'angkatan']));
 
 
             // 10. RESPONSE
@@ -607,6 +606,7 @@ class PendaftaranController extends Controller
     }
 
 
+
     /**
      * Success page setelah pendaftaran
      */
@@ -614,7 +614,7 @@ class PendaftaranController extends Controller
     {
         $pendaftaran_id = $request->session()->get('pendaftaran_id') ?? $request->get('id');;
         
-        
+
         if ($pendaftaran_id) {
             $pendaftaran = Pendaftaran::with(['peserta', 'jenisPelatihan', 'angkatan'])
                 ->where('id', $pendaftaran_id)  // id = PK Laravel
