@@ -600,7 +600,7 @@
             accept=".jpg,.jpeg,.png" {{ old('file_pas_foto') ? '' : 'required' }}>
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file JPG/PNG (maks. 2MB)
+            Klik untuk mengunggah file JPG/PNG (maks. 5MB)
         </label>
         <div class="form-file-name">
             @if(old('file_pas_foto'))

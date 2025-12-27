@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('nomor_telepon_kantor', 20)->nullable();
             $table->string('email_kantor', 100)->nullable();
             $table->string('jabatan', 200);
-            $table->string('eselon', 20)->nullable();
+            $table->string('eselon', 50)->nullable();
             $table->date('tanggal_sk_jabatan')->nullable();
             $table->string('file_sk_jabatan', 255)->nullable();
             $table->string('pangkat', 50)->nullable();

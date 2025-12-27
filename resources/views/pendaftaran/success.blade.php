@@ -20,20 +20,25 @@
                         <h3><i class="fas fa-info-circle"></i> Informasi Pendaftaran</h3>
                         <div class="info-details">
                             <div class="info-item">
+                                <span class="info-label">Nama Peserta:</span>
+                                <span class="info-value">{{ $pendaftaran->peserta->nama }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Jenis Pelatihan:</span>
+                                <span class="info-value">{{ $pendaftaran->jenisPelatihan->nama }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Angkatan:</span>
+                                <span class="info-value">{{ $pendaftaran->angkatan->nama }}</span>
+                            </div>
+                            <div class="info-item">
                                 <span class="info-label">Status:</span>
                                 <span class="info-value badge badge-warning">Menunggu Verifikasi</span>
                             </div>
                             <div class="info-item">
-                                <span class="info-label">Tanggal Pendaftaran:</span>
-                                <span class="info-value">{{ now()->format('d F Y H:i') }}</span>
+                                <span class="info-label">Tanggal:</span>
+                                <span class="info-value">{{ $pendaftaran->created_at->format('d F Y H:i') }}</span>
                             </div>
-                            @if(session('pendaftaran_id'))
-                                <div class="info-item">
-                                    <span class="info-label">Nomor Pendaftaran:</span>
-                                    <span
-                                        class="info-value">REG-{{ str_pad(session('pendaftaran_id'), 6, '0', STR_PAD_LEFT) }}</span>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 </div>

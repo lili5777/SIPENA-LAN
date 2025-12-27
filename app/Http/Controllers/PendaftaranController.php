@@ -56,26 +56,28 @@ class PendaftaranController extends Controller
     public function store(Request $request)
     {
         try {
-            // Cek apakah peserta dengan NIP/NRP yang sama sudah terdaftar pada jenis pelatihan yang sama
-            // $vall = Peserta::where('nip_nrp', $request->nip_nrp)->first();
-            // if ($vall) {
-            //     $exists = Pendaftaran::where('id_peserta', $vall->id)
-            //         ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
-            //         ->exists();
+            // 1. CEK PESERTA BERDASARKAN NIP/NRP
+            $peserta = Peserta::where('nip_nrp', $request->nip_nrp)->first();
 
-            //     if ($exists) {
-            //         throw ValidationException::withMessages([
-            //             'nip_nrp' => ['Peserta dengan NIP/NRP ini sudah terdaftar pada jenis pelatihan yang sama.'],
-            //         ]);
-            //     }
-            // }
+            // 2. CEK SUDAH DAFTAR DI JENIS PELATIHAN SAMA
+            if ($peserta) {
+                $exists = Pendaftaran::where('id_peserta', $peserta->id)
+                    ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
+                    ->exists();
 
-            // Validasi input umum
+                if ($exists) {
+                    throw ValidationException::withMessages([
+                        'nip_nrp' => ['Peserta dengan NIP/NRP ini sudah terdaftar pada jenis pelatihan yang sama.'],
+                    ]);
+                }
+            }
+
+            // 3. VALIDASI INPUT UMUM (TANPA unique nip_nrp & email_pribadi)
             $validated = $request->validate(
                 [
                     'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
                     'id_angkatan' => 'required|exists:angkatan,id',
-                    'nip_nrp' => 'required|string|max:50|unique:peserta,nip_nrp',
+                    'nip_nrp' => 'required|string|max:50',
                     'nama_lengkap' => 'required|string|max:200',
                     'nama_panggilan' => 'nullable|string|max:100',
                     'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
@@ -83,7 +85,7 @@ class PendaftaranController extends Controller
                     'tempat_lahir' => 'required|string|max:100',
                     'tanggal_lahir' => 'required|date',
                     'alamat_rumah' => 'required|string',
-                    'email_pribadi' => 'required|email|max:100|unique:peserta,email_pribadi',
+                    'email_pribadi' => 'required|email|max:100',
                     'nomor_hp' => 'required|string|max:20',
                     'pendidikan_terakhir' => 'required|in:SD,SMP,SMU,D3,D4,S1,S2,S3',
                     'bidang_studi' => 'nullable|string|max:100',
@@ -94,8 +96,8 @@ class PendaftaranController extends Controller
                     'perokok' => 'required|in:Ya,Tidak',
                     'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                     'kondisi_peserta' => 'nullable|string',
-                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-                    'file_pas_foto' => 'nullable|file|mimes:jpg,png|max:2048',
+                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:5120',
+                    'file_pas_foto' => 'nullable|file|mimes:jpg,png|max:5120',
                     'asal_instansi' => 'required|string|max:200',
                     'unit_kerja' => 'nullable|string|max:200',
                     'id_provinsi' => 'required',
@@ -106,29 +108,29 @@ class PendaftaranController extends Controller
                     'jabatan' => 'required|string|max:200',
                     'pangkat' => 'nullable|string|max:50',
                     'golongan_ruang' => 'required|string|max:50',
-                    'eselon' => 'nullable|string|max:20',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_spmt' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_skp' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:2048',
+                    'eselon' => 'nullable|string|max:50',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_spmt' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_skp' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:5120',
                     'nomor_sk_cpns' => 'nullable|string|max:100',
                     'tanggal_sk_cpns' => 'nullable|date',
                     'tanggal_sk_jabatan' => 'nullable|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
                     'nama_mentor' => 'nullable|string|max:200',
                     'jabatan_mentor' => 'nullable|string|max:200',
-                    'nomor_rekening_mentor' => 'nullable|string|max:100',
+                    'nomor_rekening_mentor' => 'nullable|string|max:200',
                     'npwp_mentor' => 'nullable|string|max:50',
                     'has_mentor' => 'nullable|in:Ya,Tidak',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
@@ -170,7 +172,6 @@ class PendaftaranController extends Controller
                     'email_pribadi.required' => 'Email pribadi wajib diisi.',
                     'email_pribadi.email'    => 'Format email pribadi tidak valid.',
                     'email_pribadi.max'      => 'Email pribadi maksimal 100 karakter.',
-                    'email_pribadi.unique'   => 'Email pribadi sudah digunakan.',
 
                     'nomor_hp.required' => 'Nomor HP wajib diisi.',
                     'nomor_hp.string'   => 'Nomor HP harus berupa teks.',
@@ -202,11 +203,11 @@ class PendaftaranController extends Controller
 
                     'file_ktp.file'  => 'File KTP harus berupa berkas.',
                     'file_ktp.mimes' => 'File KTP harus berformat pdf, jpg, atau png.',
-                    'file_ktp.max'   => 'File KTP maksimal 2 MB.',
+                    'file_ktp.max'   => 'File KTP maksimal 5 MB.',
 
                     'file_pas_foto.file'  => 'Pas foto harus berupa berkas.',
                     'file_pas_foto.mimes' => 'Pas foto harus berformat jpg atau png.',
-                    'file_pas_foto.max'   => 'Pas foto maksimal 2 MB.',
+                    'file_pas_foto.max'   => 'Pas foto maksimal 5 MB.',
 
                     'asal_instansi.required' => 'Asal instansi wajib diisi.',
                     'asal_instansi.string'   => 'Asal instansi harus berupa teks.',
@@ -241,63 +242,63 @@ class PendaftaranController extends Controller
 
                     'file_sk_jabatan.file'  => 'SK jabatan harus berupa berkas.',
                     'file_sk_jabatan.mimes' => 'SK jabatan harus berformat pdf.',
-                    'file_sk_jabatan.max'   => 'SK jabatan maksimal 2 MB.',
+                    'file_sk_jabatan.max'   => 'SK jabatan maksimal 5 MB.',
 
                     'file_sk_pangkat.file'  => 'SK pangkat harus berupa berkas.',
                     'file_sk_pangkat.mimes' => 'SK pangkat harus berformat pdf.',
-                    'file_sk_pangkat.max'   => 'SK pangkat maksimal 2 MB.',
+                    'file_sk_pangkat.max'   => 'SK pangkat maksimal 5 MB.',
 
                     'file_surat_tugas.file'  => 'Surat tugas harus berupa berkas.',
                     'file_surat_tugas.mimes' => 'Surat tugas harus berformat pdf.',
-                    'file_surat_tugas.max'   => 'Surat tugas maksimal 2 MB.',
+                    'file_surat_tugas.max'   => 'Surat tugas maksimal 5 MB.',
 
                     'file_surat_sehat.file'  => 'Surat sehat harus berupa berkas.',
                     'file_surat_sehat.mimes' => 'Surat sehat harus berformat pdf.',
-                    'file_surat_sehat.max'   => 'Surat sehat maksimal 2 MB.',
+                    'file_surat_sehat.max'   => 'Surat sehat maksimal 5 MB.',
 
                     'file_surat_bebas_narkoba.file'  => 'Surat bebas narkoba harus berupa berkas.',
                     'file_surat_bebas_narkoba.mimes' => 'Surat bebas narkoba harus berformat pdf.',
-                    'file_surat_bebas_narkoba.max'   => 'Surat bebas narkoba maksimal 2 MB.',
+                    'file_surat_bebas_narkoba.max'   => 'Surat bebas narkoba maksimal 5 MB.',
 
                     'file_pakta_integritas.file'  => 'Pakta integritas harus berupa berkas.',
                     'file_pakta_integritas.mimes' => 'Pakta integritas harus berformat pdf.',
-                    'file_pakta_integritas.max'   => 'Pakta integritas maksimal 2 MB.',
+                    'file_pakta_integritas.max'   => 'Pakta integritas maksimal 5 MB.',
 
                     'file_surat_kesediaan.file'  => 'Surat kesediaan harus berupa berkas.',
                     'file_surat_kesediaan.mimes' => 'Surat kesediaan harus berformat pdf.',
-                    'file_surat_kesediaan.max'   => 'Surat kesediaan maksimal 2 MB.',
+                    'file_surat_kesediaan.max'   => 'Surat kesediaan maksimal 5 MB.',
 
                     'file_surat_komitmen.file'  => 'Surat komitmen harus berupa berkas.',
                     'file_surat_komitmen.mimes' => 'Surat komitmen harus berformat pdf.',
-                    'file_surat_komitmen.max'   => 'Surat komitmen maksimal 2 MB.',
+                    'file_surat_komitmen.max'   => 'Surat komitmen maksimal 5 MB.',
 
                     'file_surat_kelulusan_seleksi.file'  => 'Surat kelulusan seleksi harus berupa berkas.',
                     'file_surat_kelulusan_seleksi.mimes' => 'Surat kelulusan seleksi harus berformat pdf.',
-                    'file_surat_kelulusan_seleksi.max'   => 'Surat kelulusan seleksi maksimal 2 MB.',
+                    'file_surat_kelulusan_seleksi.max'   => 'Surat kelulusan seleksi maksimal 5 MB.',
 
                     'file_surat_pernyataan_administrasi.file'  => 'Surat pernyataan administrasi harus berupa berkas.',
                     'file_surat_pernyataan_administrasi.mimes' => 'Surat pernyataan administrasi harus berformat pdf.',
-                    'file_surat_pernyataan_administrasi.max'   => 'Surat pernyataan administrasi maksimal 2 MB.',
+                    'file_surat_pernyataan_administrasi.max'   => 'Surat pernyataan administrasi maksimal 5 MB.',
 
                     'file_sertifikat_penghargaan.file'  => 'Sertifikat penghargaan harus berupa berkas.',
                     'file_sertifikat_penghargaan.mimes' => 'Sertifikat penghargaan harus berformat pdf.',
-                    'file_sertifikat_penghargaan.max'   => 'Sertifikat penghargaan maksimal 2 MB.',
+                    'file_sertifikat_penghargaan.max'   => 'Sertifikat penghargaan maksimal 5 MB.',
 
                     'file_sk_cpns.file'  => 'SK CPNS harus berupa berkas.',
                     'file_sk_cpns.mimes' => 'SK CPNS harus berformat pdf.',
-                    'file_sk_cpns.max'   => 'SK CPNS maksimal 2 MB.',
+                    'file_sk_cpns.max'   => 'SK CPNS maksimal 5 MB.',
 
                     'file_spmt.file'  => 'SPMT harus berupa berkas.',
                     'file_spmt.mimes' => 'SPMT harus berformat pdf.',
-                    'file_spmt.max'   => 'SPMT maksimal 2 MB.',
+                    'file_spmt.max'   => 'SPMT maksimal 5 MB.',
 
                     'file_skp.file'  => 'SKP harus berupa berkas.',
                     'file_skp.mimes' => 'SKP harus berformat pdf.',
-                    'file_skp.max'   => 'SKP maksimal 2 MB.',
+                    'file_skp.max'   => 'SKP maksimal 5 MB.',
 
                     'file_persetujuan_mentor.file'  => 'Persetujuan mentor harus berupa berkas.',
                     'file_persetujuan_mentor.mimes' => 'Persetujuan mentor harus berformat pdf.',
-                    'file_persetujuan_mentor.max'   => 'Persetujuan mentor maksimal 2 MB.',
+                    'file_persetujuan_mentor.max'   => 'Persetujuan mentor maksimal 5 MB.',
 
                     'nomor_sk_cpns.string' => 'Nomor SK CPNS harus berupa teks.',
                     'nomor_sk_cpns.max'    => 'Nomor SK CPNS maksimal 100 karakter.',
@@ -315,7 +316,7 @@ class PendaftaranController extends Controller
                     'jabatan_mentor.max'    => 'Jabatan mentor maksimal 200 karakter.',
 
                     'nomor_rekening_mentor.string' => 'Nomor rekening mentor harus berupa teks.',
-                    'nomor_rekening_mentor.max'    => 'Nomor rekening mentor maksimal 100 karakter.',
+                    'nomor_rekening_mentor.max'    => 'Nomor rekening mentor maksimal 200 karakter.',
 
                     'npwp_mentor.string' => 'NPWP mentor harus berupa teks.',
                     'npwp_mentor.max'    => 'NPWP mentor maksimal 50 karakter.',
@@ -325,21 +326,19 @@ class PendaftaranController extends Controller
                 ]
             );
 
-            // Ambil jenis pelatihan untuk validasi tambahan
+            // 4. AMBIL JENIS PELATIHAN UNTUK VALIDASI TAMBAHAN
             $jenisPelatihan = JenisPelatihan::find($request->id_jenis_pelatihan);
             $kode = $jenisPelatihan->kode_pelatihan;
-
-            // Validasi tambahan berdasarkan jenis pelatihan
             $additionalRules = [];
 
             if ($kode === 'PKN_TK_II') {
                 $additionalRules = [
-                    'eselon' => 'required|string|max:20',
-                    'file_pakta_integritas' => 'required|file|mimes:pdf|max:2048',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_sk_jabatan' => 'required|file|mimes:pdf|max:2048',
-                    'file_sk_pangkat' => 'required|file|mimes:pdf|max:2048',
-                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:2048',
+                    'eselon' => 'required|string|max:50',
+                    'file_pakta_integritas' => 'required|file|mimes:pdf|max:5120',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_sk_jabatan' => 'required|file|mimes:pdf|max:5120',
+                    'file_sk_pangkat' => 'required|file|mimes:pdf|max:5120',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:5120',
                 ];
             }
 
@@ -347,13 +346,13 @@ class PendaftaranController extends Controller
                 $additionalRules = [
                     'nomor_sk_cpns' => 'required|string|max:100',
                     'tanggal_sk_cpns' => 'required|date',
-                    'file_sk_cpns' => 'required|file|mimes:pdf|max:2048',
-                    'file_spmt' => 'required|file|mimes:pdf|max:2048',
-                    'file_skp' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_kesediaan' => 'required|file|mimes:pdf|max:2048',
+                    'file_sk_cpns' => 'required|file|mimes:pdf|max:5120',
+                    'file_spmt' => 'required|file|mimes:pdf|max:5120',
+                    'file_skp' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_kesediaan' => 'required|file|mimes:pdf|max:5120',
                     'pangkat' => 'required|string|max:50',
                     'sudah_ada_mentor' => 'required|in:Ya,Tidak',
-                    'nomor_rekening_mentor' => 'nullable|string|max:100',
+                    'nomor_rekening_mentor' => 'nullable|string|max:200',
                     'npwp_mentor' => 'nullable|string|max:50',
                 ];
 
@@ -362,15 +361,15 @@ class PendaftaranController extends Controller
 
             if ($kode === 'PKA' || $kode === 'PKP') {
                 $additionalRules = [
-                    'eselon' => 'required|string|max:20',
+                    'eselon' => 'required|string|max:50',
                     'tanggal_sk_jabatan' => 'required|date',
                     'tahun_lulus_pkp_pim_iv' => 'required|integer',
-                    'file_surat_kesediaan' => 'required|file|mimes:pdf|max:2048',
-                    'file_pakta_integritas' => 'required|file|mimes:pdf|max:2048',
-                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:2048',
-                    'file_ktp' => 'required|file|mimes:pdf,jpg,png|max:2048',
+                    'file_surat_kesediaan' => 'required|file|mimes:pdf|max:5120',
+                    'file_pakta_integritas' => 'required|file|mimes:pdf|max:5120',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_ktp' => 'required|file|mimes:pdf,jpg,png|max:5120',
                     'sudah_ada_mentor' => 'required|in:Ya,Tidak',
                 ];
             }
@@ -384,21 +383,19 @@ class PendaftaranController extends Controller
                 } elseif ($request->mentor_mode === 'tambah') {
                     $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
                     $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
-                    $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:100';
+                    $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
                 }
             }
-
-            
 
             // Jalankan validasi tambahan
             if (!empty($additionalRules)) {
                 $request->validate($additionalRules);
             }
 
-            
 
-            // Simpan file uploads
+
+            // 5. SIMPAN FILE UPLOADS
             $fileFields = [
                 'file_ktp',
                 'file_pas_foto',
@@ -428,62 +425,88 @@ class PendaftaranController extends Controller
                 }
             }
 
-            // dd($request->all());
 
-            // var_dump('Request data:', $request->all());
-            // Simpan data Peserta
-            $peserta = Peserta::create([
-                'nip_nrp' => $request->nip_nrp,
-                'nama_lengkap' => $request->nama_lengkap,
-                'nama_panggilan' => $request->nama_panggilan,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'agama' => $request->agama,
-                'tempat_lahir' => $request->tempat_lahir,
-                'tanggal_lahir' => $request->tanggal_lahir,
-                'alamat_rumah' => $request->alamat_rumah,
-                'email_pribadi' => $request->email_pribadi,
-                'nomor_hp' => $request->nomor_hp,
-                'pendidikan_terakhir' => $request->pendidikan_terakhir,
-                'bidang_studi' => $request->bidang_studi,
-                'bidang_keahlian' => $request->bidang_keahlian,
-                'status_perkawinan' => $request->status_perkawinan,
-                'nama_pasangan' => $request->nama_pasangan,
-                'olahraga_hobi' => $request->olahraga_hobi,
-                'perokok' => $request->perokok,
-                'ukuran_kaos' => $request->ukuran_kaos,
-                'kondisi_peserta' => $request->kondisi_peserta,
-                'file_ktp' => $files['file_ktp'] ?? null,
-                'file_pas_foto' => $files['file_pas_foto'] ?? null,
-                'status_aktif' => true,
-            ]);
+            // 6. SIMPAN/UPDATE PESERTA (REUSE JIKA SUDAH ADA)
+            if (!$peserta) {
+                // Buat peserta baru
+                $peserta = Peserta::create([
+                    'nip_nrp' => $request->nip_nrp,
+                    'nama_lengkap' => $request->nama_lengkap,
+                    'nama_panggilan' => $request->nama_panggilan,
+                    'jenis_kelamin' => $request->jenis_kelamin,
+                    'agama' => $request->agama,
+                    'tempat_lahir' => $request->tempat_lahir,
+                    'tanggal_lahir' => $request->tanggal_lahir,
+                    'alamat_rumah' => $request->alamat_rumah,
+                    'email_pribadi' => $request->email_pribadi,
+                    'nomor_hp' => $request->nomor_hp,
+                    'pendidikan_terakhir' => $request->pendidikan_terakhir,
+                    'bidang_studi' => $request->bidang_studi,
+                    'bidang_keahlian' => $request->bidang_keahlian,
+                    'status_perkawinan' => $request->status_perkawinan,
+                    'nama_pasangan' => $request->nama_pasangan,
+                    'olahraga_hobi' => $request->olahraga_hobi,
+                    'perokok' => $request->perokok,
+                    'ukuran_kaos' => $request->ukuran_kaos,
+                    'kondisi_peserta' => $request->kondisi_peserta,
+                    'file_ktp' => $files['file_ktp'] ?? null,
+                    'file_pas_foto' => $files['file_pas_foto'] ?? null,
+                    'status_aktif' => true,
+                ]);
+            } else {
+                $peserta->update([
+                    'nama_lengkap' => $request->nama_lengkap,
+                    'nama_panggilan' => $request->nama_panggilan,
+                    'jenis_kelamin' => $request->jenis_kelamin,
+                    'agama' => $request->agama,
+                    'tempat_lahir' => $request->tempat_lahir,
+                    'tanggal_lahir' => $request->tanggal_lahir,
+                    'alamat_rumah' => $request->alamat_rumah,
+                    'email_pribadi' => $request->email_pribadi,
+                    'nomor_hp' => $request->nomor_hp,
+                    'pendidikan_terakhir' => $request->pendidikan_terakhir,
+                    'bidang_studi' => $request->bidang_studi,
+                    'bidang_keahlian' => $request->bidang_keahlian,
+                    'status_perkawinan' => $request->status_perkawinan,
+                    'nama_pasangan' => $request->nama_pasangan,
+                    'olahraga_hobi' => $request->olahraga_hobi,
+                    'perokok' => $request->perokok,
+                    'ukuran_kaos' => $request->ukuran_kaos,
+                    'kondisi_peserta' => $request->kondisi_peserta,
+                    'file_ktp' => $files['file_ktp'] ?? $peserta->file_ktp,
+                    'file_pas_foto' => $files['file_pas_foto'] ?? $peserta->file_pas_foto,
+                ]);
+            }
 
 
-            // Simpan data KepegawaianPeserta
-            $kepegawaian = KepegawaianPeserta::create([
-                'id_peserta' => $peserta->id,
-                'asal_instansi' => $request->asal_instansi,
-                'unit_kerja' => $request->unit_kerja,
-                'id_provinsi' => $request->id_provinsi,
-                'id_kabupaten_kota' => $request->id_kabupaten_kota,
-                'alamat_kantor' => $request->alamat_kantor,
-                'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
-                'email_kantor' => $request->email_kantor,
-                'jabatan' => $request->jabatan,
-                'eselon' => $request->eselon ?? null,
-                'tanggal_sk_jabatan' => $request->tanggal_sk_jabatan ?? null,
-                'file_sk_jabatan' => $files['file_sk_jabatan'] ?? null,
-                'pangkat' => $request->pangkat ?? null,
-                'golongan_ruang' => $request->golongan_ruang,
-                'file_sk_pangkat' => $files['file_sk_pangkat'] ?? null,
-                'nomor_sk_cpns' => $request->nomor_sk_cpns ?? null,
-                'tanggal_sk_cpns' => $request->tanggal_sk_cpns ?? null,
-                'file_sk_cpns' => $files['file_sk_cpns'] ?? null,
-                'file_spmt' => $files['file_spmt'] ?? null,
-                'file_skp' => $files['file_skp'] ?? null,
-                'tahun_lulus_pkp_pim_iv' => $request->tahun_lulus_pkp_pim_iv ?? null,
-            ]);
+            // 7. SIMPAN/UPDATE KEPEGAWAIAN PESERTA (updateOrCreate)
+            KepegawaianPeserta::updateOrCreate(
+                ['id_peserta' => $peserta->id],
+                [
+                    'asal_instansi' => $request->asal_instansi,
+                    'unit_kerja' => $request->unit_kerja,
+                    'id_provinsi' => $request->id_provinsi,
+                    'id_kabupaten_kota' => $request->id_kabupaten_kota,
+                    'alamat_kantor' => $request->alamat_kantor,
+                    'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
+                    'email_kantor' => $request->email_kantor,
+                    'jabatan' => $request->jabatan,
+                    'pangkat' => $request->pangkat ?? null,
+                    'golongan_ruang' => $request->golongan_ruang,
+                    'eselon' => $request->eselon ?? null,
+                    'tanggal_sk_jabatan' => $request->tanggal_sk_jabatan ?? null,
+                    'file_sk_jabatan' => $files['file_sk_jabatan'] ?? null,
+                    'file_sk_pangkat' => $files['file_sk_pangkat'] ?? null,
+                    'nomor_sk_cpns' => $request->nomor_sk_cpns ?? null,
+                    'tanggal_sk_cpns' => $request->tanggal_sk_cpns ?? null,
+                    'file_sk_cpns' => $files['file_sk_cpns'] ?? null,
+                    'file_spmt' => $files['file_spmt'] ?? null,
+                    'file_skp' => $files['file_skp'] ?? null,
+                    'tahun_lulus_pkp_pim_iv' => $request->tahun_lulus_pkp_pim_iv ?? null,
+                ]
+            );
 
-            // Simpan data Pendaftaran
+            // 8. SIMPAN PENDAFTARAN BARU
             $pendaftaran = Pendaftaran::create([
                 'id_peserta' => $peserta->id,
                 'id_jenis_pelatihan' => $request->id_jenis_pelatihan,
@@ -502,7 +525,7 @@ class PendaftaranController extends Controller
                 'tanggal_daftar' => now(),
             ]);
 
-            // Simpan data mentor jika ada
+            // 9. SIMPAN MENTOR JIKA ADA
             if ($request->sudah_ada_mentor === 'Ya') {
                 $mentor = null;
 
@@ -533,22 +556,22 @@ class PendaftaranController extends Controller
             }
 
 
-            // Response untuk AJAX
+            // 10. RESPONSE
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Pendaftaran berhasil disimpan!',
                     'redirect_url' => route('pendaftaran.success'),
                     'data' => [
-                        'pendaftaran_id' => $pendaftaran->id_pendaftaran,
-                        'nomor_pendaftaran' => 'REG-' . str_pad($pendaftaran->id_pendaftaran, 6, '0', STR_PAD_LEFT),
+                        'pendaftaran_id' => $pendaftaran->id,
+                        'nomor_pendaftaran' => 'REG-' . str_pad($pendaftaran->id, 6, '0', STR_PAD_LEFT),
                     ]
                 ], 200);
             }
 
             return redirect()->route('pendaftaran.success')
                 ->with('success', 'Pendaftaran berhasil disimpan!')
-                ->with('pendaftaran_id', $pendaftaran->id_pendaftaran);
+                ->with('pendaftaran_id', $pendaftaran->id);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Response error untuk AJAX
             if ($request->ajax() || $request->wantsJson()) {
@@ -602,8 +625,21 @@ class PendaftaranController extends Controller
     /**
      * Success page setelah pendaftaran
      */
-    public function success(){
-        return view('pendaftaran.success');
+    public function success(Request $request)
+    {
+        // Ambil data dari session flash
+        $success = $request->session()->get('success');
+        $pendaftaran_id = $request->session()->get('pendaftaran_id');
+
+        // Kalau tidak ada pendaftaran_id, redirect ke home
+        if (!$pendaftaran_id) {
+            return redirect()->route('home')->with('error', 'Data pendaftaran tidak ditemukan.');
+        }
+
+        // Load data pendaftaran lengkap untuk ditampilkan
+        $pendaftaran = Pendaftaran::with(['peserta', 'jenisPelatihan', 'angkatan'])
+            ->findOrFail($pendaftaran_id);
+
+        return view('pendaftaran.success', compact('pendaftaran', 'success'));
     }
-    
 }

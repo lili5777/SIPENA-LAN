@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id('id');
             $table->string('nama_mentor', 200);
             $table->string('jabatan_mentor', 200)->nullable();
-            $table->string('nomor_rekening', 100)->nullable();
+            $table->string('nomor_rekening', 200)->nullable();
             $table->string('npwp_mentor', 50)->nullable();
             $table->string('email_mentor', 100)->nullable();
             $table->string('nomor_hp_mentor', 20)->nullable();

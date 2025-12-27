@@ -160,7 +160,7 @@
     <label class="form-label ">Unggah Scan fotokopi kelulusan/hasil seleksi calon peserta PKA / Sertifikat/Piagam Penghargaan Terbaik (Jika Anda Eselon IV)</label>
     <div class="form-file">
         <input type="file" name="file_surat_kelulusan_seleksi" class="form-file-input @error('file_surat_kelulusan_seleksi') error @enderror" 
-               accept=".pdf" {{ old('file_surat_kelulusan_seleksi') ? '' : 'required' }}>
+               accept=".pdf" {{ old('file_surat_kelulusan_seleksi') }}>
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file PDF (maks. 5MB)
@@ -305,45 +305,6 @@
 <div class="form-section-header">
     <i class="fas fa-user-graduate"></i> Data Mentor
 </div>
-
-{{-- <div class="form-row">
-    <div class="form-group">
-        <label class="form-label">Nama Mentor</label>
-        <input type="text" name="nama_mentor" class="form-input @error('nama_mentor') error @enderror"
-            value="{{ old('nama_mentor') }}">
-        @error('nama_mentor')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-    <div class="form-group">
-        <label class="form-label">Jabatan Mentor</label>
-        <input type="text" name="jabatan_mentor" class="form-input @error('jabatan_mentor') error @enderror"
-            value="{{ old('jabatan_mentor') }}">
-        @error('jabatan_mentor')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-</div>
-
-<div class="form-row">
-    <div class="form-group">
-        <label class="form-label">Nomor Rekening Mentor</label>
-        <input type="text" name="nomor_rekening_mentor"
-            class="form-input @error('nomor_rekening_mentor') error @enderror"
-            placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya" value="{{ old('nomor_rekening_mentor') }}">
-        @error('nomor_rekening_mentor')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-    <div class="form-group">
-        <label class="form-label">NPWP Mentor</label>
-        <input type="text" name="npwp_mentor" class="form-input @error('npwp_mentor') error @enderror"
-            value="{{ old('npwp_mentor') }}">
-        @error('npwp_mentor')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-</div> --}}
 
 <div class="form-group">
     <label class="form-label required">Apakah sudah ada penunjukan Mentor?</label>
@@ -511,7 +472,7 @@
                accept=".jpg,.jpeg,.png" {{ old('file_ktp') ? '' : 'required' }}>
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file JPG/PNG (maks. 2MB)
+            Klik untuk mengunggah file JPG/PNG (maks. 5MB)
         </label>
         <div class="form-file-name">
             @if(old('file_ktp'))
@@ -554,7 +515,7 @@
                    accept=".pdf" {{ old('file_sk_jabatan') ? '' : 'required' }}>
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file PDF (maks. 2MB)
+                Klik untuk mengunggah file PDF (maks. 5MB)
             </label>
             <div class="form-file-name">
                 @if(old('file_sk_jabatan'))
@@ -573,7 +534,7 @@
                    accept=".pdf" {{ old('file_sk_pangkat') ? '' : 'required' }}>
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file PDF (maks. 2MB)
+                Klik untuk mengunggah file PDF (maks. 5MB)
             </label>
             <div class="form-file-name">
                 @if(old('file_sk_pangkat'))
@@ -595,7 +556,7 @@
                accept=".pdf" {{ old('file_surat_kesediaan') ? '' : 'required' }}>
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file PDF (maks. 2MB)
+            Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
             @if(old('file_surat_kesediaan'))
@@ -676,7 +637,7 @@
                accept=".jpg,.jpeg,.png" {{ old('file_pas_foto') ? '' : 'required' }}>
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file JPG/PNG (maks. 2MB)
+            Klik untuk mengunggah file JPG/PNG (maks. 5MB)
         </label>
         <div class="form-file-name">
             @if(old('file_pas_foto'))

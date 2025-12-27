@@ -65,7 +65,7 @@
                                     <i class="fas fa-chalkboard-teacher"></i>
                                 </div>
                                 <h3 class="training-name">PKA</h3>
-                                <p class="training-code">Pelatihan Khusus</p>
+                                <p class="training-code">Pelatihan Administrator</p>
                                 <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
                             </div>
                             <div class="training-card" data-id="4" data-kode="PKP">
@@ -73,7 +73,7 @@
                                     <i class="fas fa-user-shield"></i>
                                 </div>
                                 <h3 class="training-name">PKP</h3>
-                                <p class="training-code">Pelatihan Khusus</p>
+                                <p class="training-code">Pelatihan Pengawas</p>
                                 <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
                             </div>
                         </div>
