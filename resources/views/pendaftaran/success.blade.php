@@ -21,23 +21,19 @@
                         <div class="info-details">
                             <div class="info-item">
                                 <span class="info-label">Nama Peserta:</span>
-                                <span class="info-value">{{ $pendaftaran->peserta->nama }}</span>
+                                <span class="info-value">{{ $pendaftaran->peserta->nama_lengkap }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Jenis Pelatihan:</span>
-                                <span class="info-value">{{ $pendaftaran->jenisPelatihan->nama }}</span>
+                                <span class="info-value">{{ $pendaftaran->jenisPelatihan->nama_pelatihan }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Angkatan:</span>
-                                <span class="info-value">{{ $pendaftaran->angkatan->nama }}</span>
+                                <span class="info-value">{{ $pendaftaran->angkatan->nama_angkatan }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Status:</span>
                                 <span class="info-value badge badge-warning">Menunggu Verifikasi</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Tanggal:</span>
-                                <span class="info-value">{{ $pendaftaran->created_at->format('d F Y H:i') }}</span>
                             </div>
                         </div>
                     </div>

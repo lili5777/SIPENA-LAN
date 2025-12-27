@@ -1269,9 +1269,10 @@
                     if (data.success) {
                         // Success - redirect ke halaman sukses
                         showSuccessMessage('Pendaftaran berhasil dikirim!');
+                        const urlWithId = data.redirect_url + '?id=' + data.pendaftaran_id;
 
                         setTimeout(() => {
-                            window.location.href = data.redirect_url || '/pendaftaran/success';
+                            window.location.href = urlWithId;
                         }, 1500);
 
                     } else {

@@ -555,19 +555,22 @@ class PendaftaranController extends Controller
                 }
             }
 
+            // dd($pendaftaran->load(['peserta', 'jenisPelatihan', 'angkatan']));
+
 
             // 10. RESPONSE
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Pendaftaran berhasil disimpan!',
-                    'redirect_url' => route('pendaftaran.success'),
-                    'data' => [
-                        'pendaftaran_id' => $pendaftaran->id,
-                        'nomor_pendaftaran' => 'REG-' . str_pad($pendaftaran->id, 6, '0', STR_PAD_LEFT),
-                    ]
+                    'pendaftaran_id' => $pendaftaran->id,  // ← Real ID
+                    'redirect_url' => route('pendaftaran.success')
                 ], 200);
             }
+
+
+            // Simpan ke session untuk redirect biasa (non-AJAX)
+            session(['pendaftaran_id' => $pendaftaran->id]);
 
             return redirect()->route('pendaftaran.success')
                 ->with('success', 'Pendaftaran berhasil disimpan!')
@@ -603,6 +606,31 @@ class PendaftaranController extends Controller
         }
     }
 
+
+    /**
+     * Success page setelah pendaftaran
+     */
+    public function success(Request $request)
+    {
+        $pendaftaran_id = $request->session()->get('pendaftaran_id') ?? $request->get('id');;
+        
+        
+        if ($pendaftaran_id) {
+            $pendaftaran = Pendaftaran::with(['peserta', 'jenisPelatihan', 'angkatan'])
+                ->where('id', $pendaftaran_id)  // id = PK Laravel
+                ->firstOrFail();
+
+        } else {
+                return redirect()->route('home')->with('error', 'Data pendaftaran tidak ditemukan.');
+            
+        }
+
+        return view('pendaftaran.success', compact('pendaftaran'));
+    }
+
+
+
+
     /**
      * API untuk mendapatkan angkatan berdasarkan jenis pelatihan
      */
@@ -622,24 +650,5 @@ class PendaftaranController extends Controller
         return response()->json($mentors);
     }
 
-    /**
-     * Success page setelah pendaftaran
-     */
-    public function success(Request $request)
-    {
-        // Ambil data dari session flash
-        $success = $request->session()->get('success');
-        $pendaftaran_id = $request->session()->get('pendaftaran_id');
-
-        // Kalau tidak ada pendaftaran_id, redirect ke home
-        if (!$pendaftaran_id) {
-            return redirect()->route('home')->with('error', 'Data pendaftaran tidak ditemukan.');
-        }
-
-        // Load data pendaftaran lengkap untuk ditampilkan
-        $pendaftaran = Pendaftaran::with(['peserta', 'jenisPelatihan', 'angkatan'])
-            ->findOrFail($pendaftaran_id);
-
-        return view('pendaftaran.success', compact('pendaftaran', 'success'));
-    }
+    
 }
