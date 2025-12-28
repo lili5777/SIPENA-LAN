@@ -554,7 +554,6 @@
     <style>
         /* Color Variables */
         :root {
-            --primary-color: #285496;
             --primary-light: rgba(40, 84, 150, 0.1);
             --primary-gradient: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);
             --danger-color: #ff4757;

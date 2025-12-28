@@ -206,6 +206,38 @@
             animation: float 20s infinite linear;
         }
 
+        /* Tombol Outlined */
+        .btn-outline-secondary {
+            background-color: transparent;
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
+            height: 44px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(44, 90, 160, 0.2);
+        }
+
+        /* Spacing untuk button group */
+        .text-center.mt-3 {
+            margin-top: 15px;
+        }
+
+        .d-grid.gap-2 {
+            gap: 12px !important;
+        }
+
         .institution-icon {
             font-size: 80px;
             margin-bottom: 20px;
@@ -335,6 +367,14 @@
         }
 
         @media (max-width: 768px) {
+            .btn-outline-secondary {
+                height: 42px;
+                font-size: 13px;
+            }
+            
+            .btn-outline-secondary i {
+                font-size: 14px;
+            }
             .login-container {
                 flex-direction: column;
                 max-width: 100%;
@@ -413,6 +453,11 @@
         @media (max-width: 576px) {
             body {
                 padding: 15px;
+            }
+            
+            .btn-outline-secondary {
+                height: 40px;
+                font-size: 12px;
             }
 
             .login-container {
@@ -717,6 +762,10 @@
                 </button>
 
                 <div class="login-footer">
+                    <div class="d-grid gap-2 mb-3">
+                        <a href="{{ url('/') }}" class="btn btn-outline-secondary"> Kembali ke Beranda
+                        </a>
+                    </div>
                     <p>Butuh bantuan? <a href="#">Hubungi Administrator Sistem</a></p>
                     <p class="mt-2">© 2025 LAN (Pusjar SKMP) - Hak Cipta Dilindungi</p>
                 </div>

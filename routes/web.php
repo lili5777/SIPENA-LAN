@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Master\PesertaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PendaftaranController;
@@ -77,6 +78,12 @@ Route::middleware('auth')->group(function () {
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{id}', [UserController::class, 'delete'])->name('users.delete')->middleware('permission:user.read'); 
     });
+
+    // Route Peserta PKN
+    // Peserta PKN TK II
+    Route::get('/peserta/pkn-tk2', [PesertaController::class, 'index'])->name('peserta.pkn-tk2');
+    Route::get('/peserta/detail/{id}', [PesertaController::class, 'getDetail'])->name('peserta.detail');
+    Route::post('/peserta/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('peserta.update-status');
 });
 
 

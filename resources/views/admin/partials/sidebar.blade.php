@@ -27,21 +27,30 @@
                 <i class="fas fa-chevron-right menu-arrow"></i>
             </a>
             <div class="submenu">
-                <a href="" class="submenu-link">
+                {{-- <a href="" class="submenu-link">
                     <i class="fas fa-building me-2"></i> Unit Kerja
                 </a>
                 <a href="" class="submenu-link">
                     <i class="fas fa-handshake me-2"></i> Mitra Kerja
+                </a> --}}
+                <a href="{{ route('peserta.pkn-tk2') }}" class="submenu-link">
+                    <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
+                </a>
+                <a href="}" class="submenu-link">
+                    <i class="fas fa-user-tie me-2"></i> Peserta PD CPNS
                 </a>
                 <a href="" class="submenu-link">
-                    <i class="fas fa-user-graduate me-2"></i> Peserta
+                    <i class="fas fa-users-gear me-2"></i> Peserta PKA
                 </a>
                 <a href="" class="submenu-link">
+                    <i class="fas fa-user-check me-2"></i> Peserta PKP
+                </a>
+                {{-- <a href="" class="submenu-link">
                     <i class="fas fa-book me-2"></i> Materi Pelatihan
                 </a>
                 <a href="" class="submenu-link">
                     <i class="fas fa-chalkboard-teacher me-2"></i> Instruktur
-                </a>
+                </a> --}}
             </div>
         </div>
 
