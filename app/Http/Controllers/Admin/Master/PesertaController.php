@@ -19,45 +19,39 @@ class PesertaController extends Controller
      */
     public function index(Request $request)
     {
-        // Ambil ID untuk PKN TK II (asumsi id = 1)
         $jenisPelatihanId = 1;
 
-        // Query untuk mendapatkan peserta yang mendaftar PKN TK II
-        $pendaftaran = Pendaftaran::with([
+        $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
+            ->where('status_angkatan', 'Dibuka')
+            ->orderBy('tahun', 'desc')
+            ->get();
+
+        $pendaftaranQuery = Pendaftaran::with([
             'peserta',
             'peserta.kepegawaianPeserta',
             'angkatan',
             'pesertaMentor.mentor'
         ])
             ->where('id_jenis_pelatihan', $jenisPelatihanId)
-            ->latest('tanggal_daftar')
-            ->get();
+            // ✅ SELALU exclude data kotor
+            ->whereNotNull('id_angkatan')
+            ->where('id_angkatan', '!=', 0);
 
-        // Jika ada filter angkatan
-        if ($request->has('angkatan')) {
-            $pendaftaran = Pendaftaran::with([
-                'peserta',
-                'peserta.kepegawaianPeserta',
-                'angkatan',
-                'pesertaMentor.mentor'
-            ])
-                ->where('id_jenis_pelatihan', $jenisPelatihanId)
-                ->where('id_angkatan', $request->angkatan)
-                ->latest('tanggal_daftar')
-                ->get();
+        // ✅ Filter spesifik angkatan SAJA jika dipilih
+        if ($request->filled('angkatan') && $request->angkatan != '' && $request->angkatan != 'semua') {
+            $pendaftaranQuery->where('id_angkatan', $request->angkatan);
         }
+        // Kalau 'semua' atau kosong → ambil SEMUA angkatan valid
 
-        // Ambil data angkatan untuk filter dropdown
-        $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
-            ->where('status_angkatan', 'aktif')
-            ->orderBy('tahun', 'desc')
-            ->get();
+        $pendaftaran = $pendaftaranQuery->latest('tanggal_daftar')->get();
 
-        // Ambil jenis pelatihan untuk judul
         $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
 
         return view('admin.peserta.pkn.index', compact('pendaftaran', 'angkatanList', 'jenisPelatihan'));
     }
+
+
+
 
     /**
      * Get peserta detail for modal.
