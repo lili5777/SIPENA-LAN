@@ -421,9 +421,14 @@ class PendaftaranController extends Controller
             $files = [];
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
+                    // Membuat nama file yang unik
                     $fileName = time() . '_' . $field . '.' . $request->file($field)->getClientOriginalExtension();
-                    $path = $request->file($field)->storeAs('uploads/pendaftaran', $fileName, 'public');
-                    $files[$field] = $path;
+
+                    // Pindahkan file ke folder public/upload
+                    $path = $request->file($field)->move(public_path('uploads'), $fileName);
+
+                    // Simpan path file
+                    $files[$field] = 'uploads/' . $fileName;
                 }
             }
 

@@ -1414,7 +1414,8 @@
             function openDocumentViewer(url, title) {
                 // For now, open in new tab
                 // In production, you might want to use a modal with PDF viewer
-                window.open(url, '_blank');
+                const cleanUrl = url.startsWith('uploads/') ? '/' + url : url;
+                window.open(cleanUrl, '_blank');
 
                 // Optional: Show a toast notification
                 showToast('info', `Membuka dokumen: ${title}`);
