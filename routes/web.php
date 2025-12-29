@@ -84,6 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/peserta/pkn-tk2', [PesertaController::class, 'index'])->name('peserta.pkn-tk2');
     Route::get('/peserta/detail/{id}', [PesertaController::class, 'getDetail'])->name('peserta.detail');
     Route::post('/peserta/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('peserta.update-status');
+    Route::get('/peserta/tambah-peserta-pkn-tk2', [PesertaController::class, 'create'])->name('peserta.tambah-peserta-pkn-tk2');
 });
 
 

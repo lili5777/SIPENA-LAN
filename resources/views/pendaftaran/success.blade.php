@@ -53,9 +53,7 @@
                         <p><strong>Catatan Penting:</strong></p>
                         <ul>
                             <li>Proses verifikasi membutuhkan waktu 3-5 hari kerja</li>
-                            <li>Anda akan menerima email konfirmasi setelah verifikasi selesai</li>
                             <li>Pastikan email dan nomor HP yang didaftarkan aktif</li>
-                            <li>Simpan nomor pendaftaran untuk keperluan tracking</li>
                         </ul>
                     </div>
                 </div>

@@ -10,6 +10,7 @@ use App\Models\KepegawaianPeserta;
 use App\Models\Angkatan;
 use App\Models\PesertaMentor;
 use App\Models\Mentor;
+use App\Models\Provinsi;
 use Illuminate\Http\Request;
 
 class PesertaController extends Controller
@@ -22,7 +23,6 @@ class PesertaController extends Controller
         $jenisPelatihanId = 1;
 
         $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
-            ->where('status_angkatan', 'Dibuka')
             ->orderBy('tahun', 'desc')
             ->get();
 
@@ -49,8 +49,6 @@ class PesertaController extends Controller
 
         return view('admin.peserta.pkn.index', compact('pendaftaran', 'angkatanList', 'jenisPelatihan'));
     }
-
-
 
 
     /**
@@ -89,7 +87,7 @@ class PesertaController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status_pendaftaran' => 'required|in:pending,diterima,ditolak,lulus',
+            'status_pendaftaran' => 'required|in:Menunggu Verifikasi,Diterima,Ditolak,Lulus',
             'catatan_verifikasi' => 'nullable|string|max:500'
         ]);
 
@@ -104,5 +102,21 @@ class PesertaController extends Controller
             'success' => true,
             'message' => 'Status pendaftaran berhasil diperbarui'
         ]);
+    }
+
+    public function create()
+    {
+        $mentorList = Mentor::where('status_aktif', true)->get();
+        $angkatanList=Angkatan::where('id_jenis_pelatihan',1)->where('status_angkatan','Dibuka')->get();
+        $provinsiList = Provinsi::all();
+        if (request()->ajax()) {
+            return response()->json([
+                'jenis_pelatihan' => 1,
+                'mentor' => $mentorList,
+                'angkatanList' => $angkatanList,
+                'provinsiList' => $provinsiList,
+            ]);
+        }
+        return view('admin.peserta.pkn.create', compact('mentorList', 'angkatanList', 'provinsiList'));
     }
 }

@@ -19,8 +19,7 @@
                 </div>
             </div>
             <div class="col-auto">
-                <a href="#" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center" data-bs-toggle="modal"
-                    data-bs-target="#addPesertaModal">
+                <a href="{{ route('peserta.tambah-peserta-pkn-tk2') }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
                     <i class="fas fa-user-plus me-2"></i>
                     Tambah Peserta
                 </a>
@@ -67,292 +66,306 @@
                         <div>
                             <h6 class="text-muted mb-1">Pending</h6>
                             <h3 class="mb-0 fw-bold text-warning">
-                                {{ $pendaftaran->where('status_pendaftaran', 'pending')->count() }}
-                            </h3>
+                                {{ $pendaftaran->where('status_pendaftaran', 'Menunggu Verifikasi')->count() }}
+                                </h3>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm stat-card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
-                            <i class="fas fa-user-check"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-1">Diterima</h6>
-                            <h3 class="mb-0 fw-bold text-info">
-                                {{ $pendaftaran->where('status_pendaftaran', 'diterima')->count() }}
-                            </h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm stat-card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
-                            <i class="fas fa-user-times"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-1">Ditolak</h6>
-                            <h3 class="mb-0 fw-bold text-danger">
-                                {{ $pendaftaran->where('status_pendaftaran', 'ditolak')->count() }}
-                            </h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm stat-card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-1">Lulus</h6>
-                            <h3 class="mb-0 fw-bold text-success">
-                                {{ $pendaftaran->where('status_pendaftaran', 'lulus')->count() }}
-                            </h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filter Section -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <form id="filterForm" method="GET" class="row g-2">
-                        <div class="col-md-8">
-                            <label class="form-label small fw-semibold text-muted mb-1">
-                                <i class="fas fa-filter me-1"></i> Filter Angkatan
-                            </label>
-                            <select name="angkatan" class="form-select">
-                                <option value="">Semua Angkatan</option>
-                                @foreach($angkatanList as $angkatan)
-                                    <option value="{{ $angkatan->id }}" {{ request('angkatan') == $angkatan->id ? 'selected' : '' }}>
-                                        {{ $angkatan->nama_angkatan }} - {{ $angkatan->tahun }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                        </div>
-                        <div class="col-md-4 align-self-end">
-                            <button type="submit" class="btn btn-filter-primary w-100">
-                                <i class="fas fa-search me-1"></i> Filter
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-md-end align-items-center mt-3 mt-md-0">
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm stat-card">
+                    <div class="card-body">
                         <div class="d-flex align-items-center">
-                            <label class="form-label small fw-semibold text-muted mb-0 me-2">
-                                <i class="fas fa-list-ol me-1"></i> Tampilkan:
-                            </label>
-                            <select class="form-select form-select-sm w-auto" id="showEntries">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                                <option value="-1">Semua</option>
-                            </select>
+                            <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Diterima</h6>
+                                <h3 class="mb-0 fw-bold text-info">
+                                    {{ $pendaftaran->where('status_pendaftaran', 'Diterima')->count() }}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm stat-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                                <i class="fas fa-user-times"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Ditolak</h6>
+                                <h3 class="mb-0 fw-bold text-danger">
+                                    {{ $pendaftaran->where('status_pendaftaran', 'Ditolak')->count() }}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm stat-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Lulus</h6>
+                                <h3 class="mb-0 fw-bold text-success">
+                                    {{ $pendaftaran->where('status_pendaftaran', 'Lulus')->count() }}
+                                </h3>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Peserta Table Card -->
-    <div class="card border-0 shadow-lg overflow-hidden">
-        <div class="card-header bg-white py-3 border-0">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h5 class="card-title mb-0 fw-semibold">
-                        <i class="fas fa-list me-2" style="color: #285496;"></i> Daftar Peserta
-                    </h5>
-                    <small class="text-muted" id="tableInfo">
-                        Menampilkan {{ $pendaftaran->count() }} dari {{ $pendaftaran->count() }} peserta
-                    </small>
-                </div>
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0 ps-0" id="searchInput"
-                            placeholder="Cari nama, NIP, atau instansi...">
-                        <button class="btn btn-outline-secondary" type="button" id="clearSearch" style="display: none;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="pesertaTable">
-                    <thead>
-                        <tr class="table-light">
-                            <th width="5%" class="ps-4">No</th>
-                            <th width="25%">Identitas</th>
-                            <th width="15%" class="d-none d-md-table-cell">Instansi</th>
-                            <th width="15%" class="d-none d-md-table-cell">Angkatan</th>
-                            <th width="15%">Status</th>
-                            <th width="25%" class="text-center pe-4">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pendaftaran as $index => $daftar)
-                            @php
-    $peserta = $daftar->peserta;
-    $kepegawaian = $peserta->kepegawaianPeserta;
-    $mentor = $daftar->pesertaMentor->first()?->mentor ?? null;
-                            @endphp
-                            <tr class="peserta-row" data-peserta-id="{{ $daftar->id }}">
-                                <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="user-avatar me-3"
-                                            style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold peserta-name">{{ $peserta->nama_lengkap }}</div>
-                                            <div class="text-muted small">
-                                                <i class="fas fa-id-card me-1"></i>
-                                                {{ $peserta->nip_nrp ?? '-' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="d-none d-md-table-cell">
-                                    <p class="mb-0 text-muted peserta-instansi">
-                                        <i class="fas fa-building me-1"></i>
-                                        {{ $kepegawaian->unit_kerja ?? '-' }}
-                                    </p>
-                                </td>
-                                <td class="d-none d-md-table-cell">
-                                    <p class="mb-0 text-muted peserta-angkatan">
-                                        {{ $daftar->angkatan->nama_angkatan ?? '-' }}
-                                        @if($daftar->angkatan && $daftar->angkatan->tahun)
-                                            <br><small class="text-muted">({{ $daftar->angkatan->tahun }})</small>
-                                        @endif
-                                    </p>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column gap-1">
-                                        @php
-    $statusColors = [
-        'pending' => 'bg-warning text-dark',
-        'diterima' => 'bg-info',
-        'ditolak' => 'bg-danger',
-        'lulus' => 'bg-success'
-    ];
-    $statusColor = $statusColors[$daftar->status_pendaftaran] ?? 'bg-secondary';
-    $statusIcons = [
-        'pending' => 'fa-clock',
-        'diterima' => 'fa-check',
-        'ditolak' => 'fa-times',
-        'lulus' => 'fa-graduation-cap'
-    ];
-    $statusIcon = $statusIcons[$daftar->status_pendaftaran] ?? 'fa-question';
-                                        @endphp
-                                        <span class="badge {{ $statusColor }} peserta-status">
-                                            <i class="fas {{ $statusIcon }} me-1"></i>
-                                            {{ ucfirst($daftar->status_pendaftaran) }}
-                                        </span>
-                                        <button type="button" class="btn btn-sm btn-outline-warning update-status"
-                                            data-id="{{ $daftar->id }}" data-status="{{ $daftar->status_pendaftaran }}"
-                                            data-bs-toggle="tooltip" title="Ubah Status">
-                                            <i class="fas fa-edit me-1"></i> Verifikasi
-                                        </button>
-                                    </div>
-                                </td>
-                                <td class="text-center pe-4">
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-info btn-action view-detail"
-                                            data-id="{{ $daftar->id }}" data-bs-toggle="tooltip" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <a href="#" class="btn btn-sm btn-outline-warning btn-action" data-bs-toggle="tooltip"
-                                            title="Edit Peserta">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-peserta"
-                                            data-id="{{ $daftar->id }}" data-name="{{ $peserta->nama_lengkap }}"
-                                            data-bs-toggle="tooltip" title="Hapus Peserta">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr class="empty-state-row">
-                                <td colspan="6" class="text-center py-5">
-                                    <div class="empty-state">
-                                        <div class="empty-state-icon mb-3">
-                                            <i class="fas fa-users fa-4x" style="color: #e9ecef;"></i>
-                                        </div>
-                                        <h5 class="text-muted mb-2">Belum ada peserta</h5>
-                                        <p class="text-muted mb-4">Tidak ada peserta yang terdaftar pada angkatan ini</p>
-                                        @if(request('angkatan'))
-                                            <a href="{{ route('peserta.pkn-tk2') }}" class="btn btn-outline-primary">
-                                                <i class="fas fa-arrow-left me-1"></i> Kembali ke semua peserta
-                                            </a>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        @if($pendaftaran->count() > 0)
-            <div class="card-footer bg-white py-3 border-0">
+        <!-- Filter Section -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <div class="table-pagination-info">
-                            <small class="text-muted" id="paginationInfo">
-                                Menampilkan 1-{{ $pendaftaran->count() }} dari {{ $pendaftaran->count() }} peserta
-                            </small>
-                        </div>
+                        <form id="filterForm" method="GET" class="row g-2">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-semibold text-muted mb-1">
+                                    <i class="fas fa-filter me-1"></i> Filter Angkatan
+                                </label>
+                                <select name="angkatan" class="form-select">
+                                    <option value="">Semua Angkatan</option>
+                                    @foreach($angkatanList as $angkatan)
+                                        <option value="{{ $angkatan->id }}" {{ request('angkatan') == $angkatan->id ? 'selected' : '' }}>
+                                            {{ $angkatan->nama_angkatan }} - {{ $angkatan->tahun }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4 align-self-end">
+                                <button type="submit" class="btn btn-filter-primary w-100">
+                                    <i class="fas fa-search me-1"></i> Filter
+                                </button>
+                            </div>
+                        </form>
                     </div>
                     <div class="col-md-6">
-                        <nav aria-label="Table pagination" class="d-flex justify-content-md-end">
-                            <ul class="pagination pagination-sm mb-0" id="paginationControls">
-                                <li class="page-item disabled">
-                                    <button class="page-link" id="prevPage">Previous</button>
-                                </li>
-                                <li class="page-item">
-                                    <span class="page-link">
-                                        <span id="currentPage">1</span> / <span id="totalPages">1</span>
-                                    </span>
-                                </li>
-                                <li class="page-item">
-                                    <button class="page-link" id="nextPage">Next</button>
-                                </li>
-                            </ul>
-                        </nav>
+                        <div class="d-flex justify-content-md-end align-items-center mt-3 mt-md-0">
+                            <div class="d-flex align-items-center">
+                                <label class="form-label small fw-semibold text-muted mb-0 me-2">
+                                    <i class="fas fa-list-ol me-1"></i> Tampilkan:
+                                </label>
+                                <select class="form-select form-select-sm w-auto" id="showEntries">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="-1">Semua</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        @endif
-    </div>
+        </div>
+
+        <!-- Peserta Table Card -->
+        <div class="card border-0 shadow-lg overflow-hidden">
+            <div class="card-header bg-white py-3 border-0">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="card-title mb-0 fw-semibold">
+                            <i class="fas fa-list me-2" style="color: #285496;"></i> Daftar Peserta
+                        </h5>
+                        <small class="text-muted" id="tableInfo">
+                            Menampilkan {{ $pendaftaran->count() }} dari {{ $pendaftaran->count() }} peserta
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="searchInput"
+                                placeholder="Cari nama, NIP, atau instansi...">
+                            <button class="btn btn-outline-secondary" type="button" id="clearSearch" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="pesertaTable">
+                        <thead>
+                            <tr class="table-light">
+                                <th width="5%" class="ps-4">No</th>
+                                <th width="25%">Identitas</th>
+                                <th width="15%" class="d-none d-md-table-cell">Instansi</th>
+                                <th width="15%" class="d-none d-md-table-cell">Angkatan</th>
+                                <th width="15%">Status</th>
+                                <th width="25%" class="text-center pe-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($pendaftaran as $index => $daftar)
+                                @php
+                                    $peserta = $daftar->peserta;
+                                    $kepegawaian = $peserta->kepegawaianPeserta;
+                                    $mentor = $daftar->pesertaMentor->first()?->mentor ?? null;
+
+                                    // Mapping status untuk ikon dan warna
+                                    $statusConfig = [
+                                        'Menunggu Verifikasi' => [
+                                            'color' => 'status-warning',
+                                            'icon' => 'fa-clock',
+                                            'text' => 'Menunggu Verifikasi'
+                                        ],
+                                        'Diterima' => [
+                                            'color' => 'status-info',
+                                            'icon' => 'fa-check-circle',
+                                            'text' => 'Diterima'
+                                        ],
+                                        'Ditolak' => [
+                                            'color' => 'status-danger',
+                                            'icon' => 'fa-times-circle',
+                                            'text' => 'Ditolak'
+                                        ],
+                                        'Lulus' => [
+                                            'color' => 'status-success',
+                                            'icon' => 'fa-graduation-cap',
+                                            'text' => 'Lulus'
+                                        ]
+                                    ];
+
+                                    $currentStatus = $daftar->status_pendaftaran;
+                                    $statusData = $statusConfig[$currentStatus] ?? [
+                                        'color' => 'status-secondary',
+                                        'icon' => 'fa-question-circle',
+                                        'text' => $currentStatus
+                                    ];
+                                @endphp
+                                <tr class="peserta-row" data-peserta-id="{{ $daftar->id }}">
+                                    <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3"
+                                                style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold peserta-name">{{ $peserta->nama_lengkap }}</div>
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-id-card me-1"></i>
+                                                    {{ $peserta->nip_nrp ?? '-' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <p class="mb-0 text-muted peserta-instansi">
+                                            <i class="fas fa-building me-1"></i>
+                                            {{ $kepegawaian->unit_kerja ?? '-' }}
+                                        </p>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <p class="mb-0 text-muted peserta-angkatan">
+                                            {{ $daftar->angkatan->nama_angkatan ?? '-' }}
+                                            @if($daftar->angkatan && $daftar->angkatan->tahun)
+                                                <br><small class="text-muted">({{ $daftar->angkatan->tahun }})</small>
+                                            @endif
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column gap-1">
+                                            <span class="badge custom-badge {{ $statusData['color'] }} peserta-status">
+                                                <i class="fas {{ $statusData['icon'] }} me-1"></i>
+                                                {{ $statusData['text'] }}
+                                            </span>
+                                            <button type="button" class="btn btn-sm btn-outline-warning update-status"
+                                                data-id="{{ $daftar->id }}" data-status="{{ $daftar->status_pendaftaran }}"
+                                                data-bs-toggle="tooltip" title="Ubah Status">
+                                                <i class="fas fa-edit me-1"></i> Verifikasi
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-info btn-action view-detail"
+                                                data-id="{{ $daftar->id }}" data-bs-toggle="tooltip" title="Lihat Detail">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <a href="#" class="btn btn-sm btn-outline-warning btn-action" data-bs-toggle="tooltip"
+                                                title="Edit Peserta">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-peserta"
+                                                data-id="{{ $daftar->id }}" data-name="{{ $peserta->nama_lengkap }}"
+                                                data-bs-toggle="tooltip" title="Hapus Peserta">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr class="empty-state-row">
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon mb-3">
+                                                <i class="fas fa-users fa-4x" style="color: #e9ecef;"></i>
+                                            </div>
+                                            <h5 class="text-muted mb-2">Belum ada peserta</h5>
+                                            <p class="text-muted mb-4">Tidak ada peserta yang terdaftar pada angkatan ini</p>
+                                            @if(request('angkatan'))
+                                                <a href="{{ route('peserta.pkn-tk2') }}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-arrow-left me-1"></i> Kembali ke semua peserta
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @if($pendaftaran->count() > 0)
+                <div class="card-footer bg-white py-3 border-0">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="table-pagination-info">
+                                <small class="text-muted" id="paginationInfo">
+                                    Menampilkan 1-{{ $pendaftaran->count() }} dari {{ $pendaftaran->count() }} peserta
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <nav aria-label="Table pagination" class="d-flex justify-content-md-end">
+                                <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                                    <li class="page-item disabled">
+                                        <button class="page-link" id="prevPage">Previous</button>
+                                    </li>
+                                    <li class="page-item">
+                                        <span class="page-link">
+                                            <span id="currentPage">1</span> / <span id="totalPages">1</span>
+                                        </span>
+                                    </li>
+                                    <li class="page-item">
+                                        <button class="page-link" id="nextPage">Next</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
 @endsection
 
 <!-- Add Peserta Modal -->
@@ -366,7 +379,7 @@
                 <div class="add-icon mb-3">
                     <i class="fas fa-user-plus fa-3x" style="color: #285496;"></i>
                 </div>
-                <h4 class="modal-title mb-3 fw-bold" id="addPesertaModalLabel">Tambah Peserta</h4>
+                <h4 class="modal-title mb-3 fw-bold" >Tambah Peserta</h4>
                 <p class="text-muted mb-4">
                     Fitur tambah peserta sedang dalam pengembangan
                 </p>
@@ -397,7 +410,7 @@
                         </h5>
                         <div class="d-flex flex-wrap align-items-center gap-2">
                             <small class="text-white-75" id="detailModalSubtitle"></small>
-                            <span id="detailStatusBadge" class="badge bg-white bg-opacity-25 text-white"></span>
+                            <span id="detailStatusBadge" class="badge custom-badge"></span>
                         </div>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
@@ -440,7 +453,7 @@
                         </div>
                     </div>
 
-                    <!-- Tab 2: Dokumen -->
+                    <!-- Tab 2: Dokumen - SEMUA DISATUKAN -->
                     <div class="tab-pane fade" id="nav-dokumen" role="tabpanel" tabindex="0">
                         <div id="dokumenContent" class="p-4" style="max-height: 60vh; overflow-y: auto;">
                             <div class="text-center py-5">
@@ -488,7 +501,7 @@
     </div>
 </div>
 
-<!-- Status Update Modal -->
+<!-- Status Update Modal dengan Loading -->
 <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
@@ -505,16 +518,16 @@
 
                     <div class="mb-4 text-start">
                         <label class="form-label fw-semibold">Status Saat Ini</label>
-                        <div id="currentStatus" class="fw-bold"></div>
+                        <div id="currentStatus" class="fw-bold mb-2"></div>
                     </div>
 
                     <div class="mb-4 text-start">
                         <label class="form-label fw-semibold">Status Baru</label>
                         <select class="form-select" name="status_pendaftaran" id="statusSelect" required>
-                            <option value="pending">Pending</option>
-                            <option value="diterima">Diterima</option>
-                            <option value="ditolak">Ditolak</option>
-                            <option value="lulus">Lulus</option>
+                            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                            <option value="Diterima">Diterima</option>
+                            <option value="Ditolak">Ditolak</option>
+                            <option value="Lulus">Lulus</option>
                         </select>
                     </div>
 
@@ -528,12 +541,18 @@
                         <i class="fas fa-info-circle me-1"></i>
                         Perubahan status akan tercatat di riwayat peserta
                     </p>
+                    
+                    <!-- Loading Indicator (hidden by default) -->
+                    <div id="statusLoading" class="d-none">
+                        
+                        <p class="text-muted mt-3">Menyimpan perubahan...</p>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 justify-content-center">
-                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal" id="statusCancelBtn">
                         <i class="fas fa-times me-2"></i> Batal
                     </button>
-                    <button type="submit" class="btn btn-primary px-4 btn-lift">
+                    <button type="submit" class="btn btn-primary px-4 btn-lift" id="statusSubmitBtn">
                         <i class="fas fa-save me-2"></i> Simpan
                     </button>
                 </div>
@@ -597,27 +616,34 @@
             const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
+            // Status Form Elements
+            const statusForm = document.getElementById('statusForm');
+            const statusSubmitBtn = document.getElementById('statusSubmitBtn');
+            const statusCancelBtn = document.getElementById('statusCancelBtn');
+            const statusLoading = document.getElementById('statusLoading');
+
             // Initialize table
             initializeTable();
 
             // Show entries dropdown
             const showEntries = document.getElementById('showEntries');
-            showEntries.addEventListener('change', function() {
+            showEntries.addEventListener('change', function () {
                 rowsPerPage = this.value === '-1' ? -1 : parseInt(this.value);
                 currentPage = 1;
                 updateTable();
             });
 
             // Pagination controls
-            document.getElementById('prevPage').addEventListener('click', function() {
+            document.getElementById('prevPage').addEventListener('click', function () {
                 if (currentPage > 1) {
                     currentPage--;
                     updateTable();
                 }
             });
 
-            document.getElementById('nextPage').addEventListener('click', function() {
-                const totalPages = Math.ceil(filteredRows.length / (rowsPerPage === -1 ? filteredRows.length : rowsPerPage));
+            document.getElementById('nextPage').addEventListener('click', function () {
+                const totalPages = Math.ceil(filteredRows.length / (rowsPerPage === -1 ?
+                    filteredRows.length : rowsPerPage));
                 if (currentPage < totalPages) {
                     currentPage++;
                     updateTable();
@@ -665,10 +691,10 @@
                 const startDisplay = total === 0 ? 0 : start + 1;
                 const endDisplay = Math.min(end, total);
 
-                document.getElementById('paginationInfo').textContent = 
+                document.getElementById('paginationInfo').textContent =
                     `Menampilkan ${startDisplay}-${endDisplay} dari ${total} peserta`;
 
-                document.getElementById('tableInfo').textContent = 
+                document.getElementById('tableInfo').textContent =
                     `Menampilkan ${endDisplay} dari ${total} peserta`;
             }
 
@@ -693,30 +719,25 @@
                 });
             });
 
-            // Update Status
+            // Update Status - PERBAIKAN: Gunakan data-status yang benar
             document.querySelectorAll('.update-status').forEach(button => {
                 button.addEventListener('click', function () {
                     const pendaftaranId = this.getAttribute('data-id');
                     const currentStatus = this.getAttribute('data-status');
 
-                    // Set form action
+                    // Set form action - Sesuaikan dengan route Anda
                     const form = document.getElementById('statusForm');
-                    form.action = `update-status/${pendaftaranId}`;
+                    form.action = `/peserta/update-status/${pendaftaranId}`;
 
                     // Set current status
                     const currentStatusElement = document.getElementById('currentStatus');
-                    const statusColors = {
-                        'pending': 'warning',
-                        'diterima': 'info',
-                        'ditolak': 'danger',
-                        'lulus': 'success'
-                    };
-                    const statusText = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
-                    const statusColor = statusColors[currentStatus] || 'secondary';
+                    const statusText = formatStatusText(currentStatus);
+                    const statusColor = getStatusColor(currentStatus);
+                    const statusIcon = getStatusIcon(currentStatus);
 
                     currentStatusElement.innerHTML = `
-                        <span class="badge bg-${statusColor}">
-                            <i class="fas ${getStatusIcon(currentStatus)} me-1"></i>
+                        <span class="badge custom-badge ${statusColor}">
+                            <i class="fas ${statusIcon} me-1"></i>
                             ${statusText}
                         </span>
                     `;
@@ -724,6 +745,13 @@
                     // Set current status in select
                     const statusSelect = document.getElementById('statusSelect');
                     statusSelect.value = currentStatus;
+
+                    // Reset form state
+                    statusLoading.classList.add('d-none');
+                    statusSubmitBtn.disabled = false;
+                    statusCancelBtn.disabled = false;
+                    statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+                    document.getElementById('catatanInput').value = '';
 
                     statusModal.show();
                 });
@@ -739,15 +767,20 @@
                     const pesertaName = this.getAttribute('data-name');
 
                     deletePesertaName.textContent = pesertaName;
-                    deleteForm.action = `{{ url('peserta') }}/${pesertaId}`;
+                    deleteForm.action = `/peserta/${pesertaId}`;
                     deleteModal.show();
                 });
             });
 
-            // Status Form Submission
-            const statusForm = document.getElementById('statusForm');
+            // Status Form Submission dengan loading indicator
             statusForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
+
+                // Tampilkan loading, sembunyikan tombol
+                // statusLoading.classList.remove('d-none');
+                statusSubmitBtn.disabled = true;
+                statusCancelBtn.disabled = true;
+                statusSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
 
                 const formData = new FormData(this);
                 const action = this.action;
@@ -765,23 +798,55 @@
                     const result = await response.json();
 
                     if (result.success) {
+                        // Update tombol dengan sukses
+                        statusSubmitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
+                        statusSubmitBtn.classList.remove('btn-primary');
+                        statusSubmitBtn.classList.add('btn-success');
+
                         showAlert('success', result.message);
-                        statusModal.hide();
+
+                        // Tutup modal setelah sukses
                         setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
+                            statusModal.hide();
+
+                            // Reset tombol ke keadaan semula
+                            setTimeout(() => {
+                                // statusLoading.classList.add('d-none');
+                                statusSubmitBtn.disabled = false;
+                                statusCancelBtn.disabled = false;
+                                statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+                                statusSubmitBtn.classList.remove('btn-success');
+                                statusSubmitBtn.classList.add('btn-primary');
+
+                                // Refresh halaman
+                                window.location.reload();
+                            }, 500);
+                        }, 1500);
                     } else {
+                        // Sembunyikan loading, aktifkan tombol kembali
+                        // statusLoading.classList.add('d-none');
+                        statusSubmitBtn.disabled = false;
+                        statusCancelBtn.disabled = false;
+                        statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+
                         showAlert('error', result.message || 'Terjadi kesalahan');
                     }
                 } catch (error) {
-                    showAlert('error', 'Terjadi kesalahan jaringan');
+                    // Sembunyikan loading, aktifkan tombol kembali
+                    // statusLoading.classList.add('d-none');
+                    statusSubmitBtn.disabled = false;
+                    statusCancelBtn.disabled = false;
+                    statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+
+                    showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+                    console.error('Error:', error);
                 }
             });
 
             // Load All Detail Data
             async function loadAllDetailData(pendaftaranId) {
                 try {
-                    const response = await fetch(`detail/${pendaftaranId}`);
+                    const response = await fetch(`/peserta/detail/${pendaftaranId}`);
                     const result = await response.json();
 
                     if (result.success) {
@@ -807,6 +872,7 @@
                     }
                 } catch (error) {
                     showDetailError();
+                    console.error('Error loading detail:', error);
                 }
             }
 
@@ -816,10 +882,20 @@
                 content.innerHTML = generateDataPesertaHTML(data);
             }
 
-            // Load Dokumen Content
+            // Load Dokumen Content - SEMUA DISATUKAN
             function loadDokumenContent(data) {
                 const content = document.getElementById('dokumenContent');
                 content.innerHTML = generateDokumenHTML(data);
+
+                // Add event listeners for document viewer
+                content.querySelectorAll('.view-document').forEach(button => {
+                    button.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const url = this.getAttribute('data-url');
+                        const title = this.getAttribute('data-title');
+                        openDocumentViewer(url, title);
+                    });
+                });
             }
 
             // Load Mentor Content
@@ -1031,120 +1107,170 @@
                 `;
             }
 
-            // Generate Dokumen HTML
+            // Generate Dokumen HTML - SEMUA DISATUKAN
             function generateDokumenHTML(data) {
                 const peserta = data.peserta;
                 const kepegawaian = data.kepegawaian;
                 const pendaftaran = data.pendaftaran;
 
+                // Dokumen dengan ikon yang lebih jelas
                 const dokumenList = [
                     {
                         title: 'Pasfoto',
-                        icon: 'fa-image',
+                        icon: 'fa-camera',
+                        color: 'primary',
                         file: peserta.file_pas_foto,
-                        type: 'pribadi'
+                        description: 'Foto terbaru ukuran 4x6 dengan background merah'
                     },
                     {
                         title: 'SK Jabatan Terakhir',
-                        icon: 'fa-file-contract',
+                        icon: 'fa-file-alt',
+                        color: 'success',
                         file: kepegawaian?.file_sk_jabatan,
-                        type: 'kepegawaian'
+                        description: 'Surat Keputusan jabatan terakhir yang masih berlaku'
                     },
                     {
                         title: 'SK Pangkat/Golongan',
-                        icon: 'fa-file-certificate',
+                        icon: 'fa-award',
+                        color: 'warning',
                         file: kepegawaian?.file_sk_pangkat,
-                        type: 'kepegawaian'
+                        description: 'Surat Keputusan kenaikan pangkat/golongan'
                     },
                     {
                         title: 'Surat Komitmen',
-                        icon: 'fa-file-signature',
+                        icon: 'fa-handshake',
+                        color: 'info',
                         file: pendaftaran.file_surat_komitmen,
-                        type: 'pendaftaran'
+                        description: 'Surat komitmen menyelesaikan pelatihan'
                     },
                     {
                         title: 'Pakta Integritas',
-                        icon: 'fa-file-certificate',
+                        icon: 'fa-file-signature',
+                        color: 'danger',
                         file: pendaftaran.file_pakta_integritas,
-                        type: 'pendaftaran'
+                        description: 'Pakta integritas mengikuti peraturan'
                     },
                     {
                         title: 'Surat Tugas',
-                        icon: 'fa-file-contract',
+                        icon: 'fa-tasks',
+                        color: 'primary',
                         file: pendaftaran.file_surat_tugas,
-                        type: 'pendaftaran'
+                        description: 'Surat tugas dari instansi asal'
                     },
                     {
                         title: 'Surat Kelulusan Seleksi',
-                        icon: 'fa-file-check',
+                        icon: 'fa-graduation-cap',
+                        color: 'success',
                         file: pendaftaran.file_surat_kelulusan_seleksi,
-                        type: 'pendaftaran'
+                        description: 'Surat kelulusan seleksi administrasi'
                     },
                     {
                         title: 'Surat Sehat',
-                        icon: 'fa-file-medical',
+                        icon: 'fa-heartbeat',
+                        color: 'warning',
                         file: pendaftaran.file_surat_sehat,
-                        type: 'pendaftaran'
+                        description: 'Surat keterangan sehat dari dokter'
                     },
                     {
                         title: 'Surat Bebas Narkoba',
-                        icon: 'fa-file-medical-alt',
+                        icon: 'fa-ban',
+                        color: 'info',
                         file: pendaftaran.file_surat_bebas_narkoba,
-                        type: 'pendaftaran'
+                        description: 'Surat keterangan bebas narkoba'
                     }
                 ];
 
-                // Group dokumen by type
-                const groupedDokumen = {
-                    pribadi: dokumenList.filter(d => d.type === 'pribadi'),
-                    kepegawaian: dokumenList.filter(d => d.type === 'kepegawaian'),
-                    pendaftaran: dokumenList.filter(d => d.type === 'pendaftaran')
-                };
+                // Hitung statistik dokumen
+                const totalDokumen = dokumenList.length;
+                const dokumenTersedia = dokumenList.filter(d => d.file).length;
+                const dokumenBelum = totalDokumen - dokumenTersedia;
+                const persentaseKelengkapan = dokumenTersedia > 0 ? Math.round((dokumenTersedia / totalDokumen) * 100) : 0;
 
                 return `
-                    <div class="dokumen-content">
-                        <div class="row">
-                            <!-- Dokumen Pribadi -->
-                            <div class="col-md-4 mb-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-header bg-primary bg-opacity-10 border-0">
-                                        <h6 class="mb-0 fw-bold">
-                                            <i class="fas fa-user me-2 text-primary"></i>Dokumen Pribadi
-                                        </h6>
-                                    </div>
-                                    <div class="card-body">
-                                        ${groupedDokumen.pribadi.map(dokumen => dokumenCard(dokumen)).join('')}
+                    <div class="dokumen-container">
+                        <!-- Statistik Dokumen -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 col-lg-3">
+                                <div class="stat-card card border-0 shadow-sm">
+                                    <div class="card-body text-center p-3">
+                                        <div class="stat-icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
+                                            <i class="fas fa-folder-open fa-xl text-primary"></i>
+                                        </div>
+                                        <h3 class="fw-bold text-primary mb-1">${totalDokumen}</h3>
+                                        <p class="text-muted small mb-0">Total Dokumen</p>
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="stat-card card border-0 shadow-sm">
+                                    <div class="card-body text-center p-3">
+                                        <div class="stat-icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
+                                            <i class="fas fa-check-circle fa-xl text-success"></i>
+                                        </div>
+                                        <h3 class="fw-bold text-success mb-1">${dokumenTersedia}</h3>
+                                        <p class="text-muted small mb-0">Dokumen Tersedia</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="stat-card card border-0 shadow-sm">
+                                    <div class="card-body text-center p-3">
+                                        <div class="stat-icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
+                                            <i class="fas fa-clock fa-xl text-warning"></i>
+                                        </div>
+                                        <h3 class="fw-bold text-warning mb-1">${dokumenBelum}</h3>
+                                        <p class="text-muted small mb-0">Belum Diunggah</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="stat-card card border-0 shadow-sm">
+                                    <div class="card-body text-center p-3">
+                                        <div class="stat-icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
+                                            <i class="fas fa-chart-line fa-xl text-info"></i>
+                                        </div>
+                                        <h3 class="fw-bold text-info mb-1">${persentaseKelengkapan}%</h3>
+                                        <p class="text-muted small mb-0">Kelengkapan</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                            <!-- Dokumen Kepegawaian -->
-                            <div class="col-md-4 mb-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-header bg-info bg-opacity-10 border-0">
-                                        <h6 class="mb-0 fw-bold">
-                                            <i class="fas fa-building me-2 text-info"></i>Dokumen Kepegawaian
-                                        </h6>
-                                    </div>
-                                    <div class="card-body">
-                                        ${groupedDokumen.kepegawaian.map(dokumen => dokumenCard(dokumen)).join('')}
+                        <!-- Progress Bar Kelengkapan -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold mb-0">Kelengkapan Dokumen</h6>
+                                    <span class="badge bg-primary">${persentaseKelengkapan}%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" 
+                                         style="width: ${persentaseKelengkapan}%" 
+                                         aria-valuenow="${persentaseKelengkapan}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Dokumen Pendaftaran -->
-                            <div class="col-md-4 mb-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-header bg-success bg-opacity-10 border-0">
-                                        <h6 class="mb-0 fw-bold">
-                                            <i class="fas fa-file-alt me-2 text-success"></i>Dokumen Pendaftaran
-                                        </h6>
-                                    </div>
-                                    <div class="card-body">
-                                        ${groupedDokumen.pendaftaran.map(dokumen => dokumenCard(dokumen)).join('')}
-                                    </div>
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0 d-flex align-items-center">
+                                <div class="icon-wrapper bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                                    <i class="fas fa-folder-open text-primary"></i>
                                 </div>
+                                <span>Semua Dokumen Peserta</span>
+                            </h5>
+                            <div class="text-muted small">
+                                <i class="fas fa-check-circle text-success me-1"></i>
+                                ${dokumenTersedia} dari ${totalDokumen} dokumen tersedia
                             </div>
+                        </div>
+
+                        <!-- Grid Dokumen -->
+                        <div class="row g-4">
+                            ${dokumenList.map(dokumen => dokumenCard(dokumen)).join('')}
                         </div>
                     </div>
                 `;
@@ -1153,43 +1279,76 @@
             // Dokumen Card Component
             function dokumenCard(dokumen) {
                 if (dokumen.file) {
+                    const fileSize = getFileSize(dokumen.file);
                     return `
-                        <div class="dokumen-item mb-3">
-                            <div class="d-flex align-items-center">
-                                <div class="dokumen-icon bg-primary bg-opacity-10 text-primary rounded-2 p-2 me-3">
-                                    <i class="fas ${dokumen.icon}"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-0 fw-semibold">${dokumen.title}</h6>
-                                    <small class="text-muted">Dokumen tersedia</small>
-                                </div>
-                                <div class="ms-2">
-                                    <button type="button" class="btn btn-sm btn-outline-primary view-document" 
-                                            data-url="${dokumen.file}" data-title="${dokumen.title}">
-                                        <i class="fas fa-eye me-1"></i> Lihat
-                                    </button>
+                        <div class="col-xl-4 col-lg-6 col-md-6">
+                            <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-available">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="dokumen-icon-wrapper bg-${dokumen.color} bg-opacity-10 p-3 rounded-3 me-3">
+                                            <i class="fas ${dokumen.icon} fa-2x text-${dokumen.color}"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
+                                            <p class="text-muted small mb-2">${dokumen.description}</p>
+                                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                                <span class="badge bg-success bg-opacity-10 text-success">
+                                                    <i class="fas fa-check-circle me-1"></i>Tersedia
+                                                </span>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-file me-1"></i>${fileSize}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-sm btn-outline-${dokumen.color} view-document" 
+                                                data-url="${dokumen.file}" data-title="${dokumen.title}">
+                                            <i class="fas fa-eye me-1"></i> Lihat
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     `;
                 } else {
                     return `
-                        <div class="dokumen-item mb-3 opacity-75">
-                            <div class="d-flex align-items-center">
-                                <div class="dokumen-icon bg-secondary bg-opacity-10 text-secondary rounded-2 p-2 me-3">
-                                    <i class="fas ${dokumen.icon}"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-0 fw-semibold">${dokumen.title}</h6>
-                                    <small class="text-muted">Belum diunggah</small>
-                                </div>
-                                <div class="ms-2">
-                                    <span class="badge bg-secondary">Tidak tersedia</span>
+                        <div class="col-xl-4 col-lg-6 col-md-6">
+                            <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-missing">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="dokumen-icon-wrapper bg-secondary bg-opacity-10 p-3 rounded-3 me-3">
+                                            <i class="fas ${dokumen.icon} fa-2x text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
+                                            <p class="text-muted small mb-2">${dokumen.description}</p>
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-danger bg-opacity-10 text-danger">
+                                                    <i class="fas fa-times-circle me-1"></i>Belum diunggah
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Dokumen belum diunggah oleh peserta
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     `;
                 }
+            }
+
+            // Helper function untuk ukuran file
+            function getFileSize(fileUrl) {
+                // Simulasi ukuran file
+                const sizes = ['2.1 MB', '1.8 MB', '3.2 MB', '1.5 MB', '2.4 MB', '1.9 MB', '2.7 MB', '2.3 MB', '1.6 MB'];
+                const randomIndex = Math.floor(Math.random() * sizes.length);
+                return sizes[randomIndex];
             }
 
             // Generate Mentor HTML
@@ -1206,9 +1365,6 @@
                                 </div>
                                 <h4 class="text-muted mb-3">Belum Ditugaskan Mentor</h4>
                                 <p class="text-muted mb-4">Peserta ini belum memiliki mentor yang ditugaskan</p>
-                                <button type="button" class="btn btn-primary rounded-3 px-4">
-                                    <i class="fas fa-plus me-2"></i> Tugaskan Mentor
-                                </button>
                             </div>
                         </div>
                     `;
@@ -1304,25 +1460,48 @@
                 `;
             }
 
-            // Helper Functions
+            // Helper Functions untuk Status
             function getStatusIcon(status) {
+                const statusLower = status.toLowerCase();
                 const icons = {
-                    'pending': 'fa-clock',
-                    'diterima': 'fa-check',
-                    'ditolak': 'fa-times',
+                    'menunggu verifikasi': 'fa-clock',
+                    'diterima': 'fa-check-circle',
+                    'ditolak': 'fa-times-circle',
                     'lulus': 'fa-graduation-cap'
                 };
-                return icons[status] || 'fa-question';
+                return icons[statusLower] || 'fa-question-circle';
             }
 
             function getStatusColor(status) {
+                const statusLower = status.toLowerCase();
                 const colors = {
-                    'pending': 'warning',
-                    'diterima': 'info',
-                    'ditolak': 'danger',
-                    'lulus': 'success'
+                    'menunggu verifikasi': 'status-warning',
+                    'diterima': 'status-info',
+                    'ditolak': 'status-danger',
+                    'lulus': 'status-success'
                 };
-                return colors[status] || 'secondary';
+                return colors[statusLower] || 'status-secondary';
+            }
+
+            function formatStatusText(status) {
+                const statusLower = status.toLowerCase();
+                const texts = {
+                    'menunggu verifikasi': 'Menunggu Verifikasi',
+                    'diterima': 'Diterima',
+                    'ditolak': 'Ditolak',
+                    'lulus': 'Lulus'
+                };
+                return texts[statusLower] || status;
+            }
+
+            function updateStatusBadge(status) {
+                const badge = document.getElementById('detailStatusBadge');
+                const statusText = formatStatusText(status);
+                const statusColor = getStatusColor(status);
+                const statusIcon = getStatusIcon(status);
+
+                badge.className = `badge custom-badge ${statusColor}`;
+                badge.innerHTML = `<i class="fas ${statusIcon} me-1"></i>${statusText}`;
             }
 
             function getAngkatanStatusBadge(status) {
@@ -1335,23 +1514,18 @@
                 return badges[status?.toLowerCase()] || 'bg-secondary';
             }
 
-            function updateStatusBadge(status) {
-                const badge = document.getElementById('detailStatusBadge');
-                const statusText = status.charAt(0).toUpperCase() + status.slice(1);
-                const statusColor = getStatusColor(status);
-
-                badge.className = `badge bg-${statusColor}`;
-                badge.innerHTML = `<i class="fas ${getStatusIcon(status)} me-1"></i>${statusText}`;
-            }
-
             function formatDate(dateString) {
                 if (!dateString) return '-';
-                const date = new Date(dateString);
-                return date.toLocaleDateString('id-ID', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric'
-                });
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                } catch (e) {
+                    return '-';
+                }
             }
 
             function formatDateTime(date) {
@@ -1365,26 +1539,39 @@
             }
 
             function showAlert(type, message) {
+                // Hapus alert lama
+                const oldAlerts = document.querySelectorAll('.alert-container .alert');
+                oldAlerts.forEach(alert => {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    bsAlert.close();
+                });
+
+                // Buat alert baru
                 const alertDiv = document.createElement('div');
                 alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow-sm d-flex align-items-center`;
+
+                const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+                const title = type === 'success' ? 'Sukses!' : 'Error!';
+
                 alertDiv.innerHTML = `
                     <div class="alert-icon flex-shrink-0">
-                        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle fa-lg"></i>
+                        <i class="fas ${iconClass} fa-lg"></i>
                     </div>
                     <div class="flex-grow-1 ms-3">
-                        <strong>${type === 'success' ? 'Sukses!' : 'Error!'}</strong> ${message}
+                        <strong>${title}</strong> ${message}
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 `;
 
-                document.querySelector('.alert-container').appendChild(alertDiv);
+                document.querySelector('.alert-container').prepend(alertDiv);
 
+                // Auto close setelah 5 detik
                 setTimeout(() => {
                     if (alertDiv.parentNode) {
-                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
                         bsAlert.close();
                     }
-                }, 3000);
+                }, 5000);
             }
 
             function showDetailError() {
@@ -1401,28 +1588,15 @@
             }
 
             // Document Viewer
-            document.addEventListener('click', function (e) {
-                if (e.target.closest('.view-document')) {
-                    e.preventDefault();
-                    const button = e.target.closest('.view-document');
-                    const url = button.getAttribute('data-url');
-                    const title = button.getAttribute('data-title');
-                    openDocumentViewer(url, title);
-                }
-            });
-
             function openDocumentViewer(url, title) {
-                // For now, open in new tab
-                // In production, you might want to use a modal with PDF viewer
                 const cleanUrl = url.startsWith('uploads/') ? '/' + url : url;
                 window.open(cleanUrl, '_blank');
 
-                // Optional: Show a toast notification
+                // Show notification
                 showToast('info', `Membuka dokumen: ${title}`);
             }
 
             function showToast(type, message) {
-                // Simple toast implementation
                 const toast = document.createElement('div');
                 toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
                 toast.innerHTML = `
@@ -1471,7 +1645,7 @@
         });
 
         // Search Functionality
-       function initializeSearch() {
+        function initializeSearch() {
             const searchInput = document.getElementById('searchInput');
             const clearSearchBtn = document.getElementById('clearSearch');
             const pesertaTable = document.getElementById('pesertaTable');
@@ -1540,13 +1714,13 @@
                 const noResultsRow = document.createElement('tr');
                 noResultsRow.className = 'no-results-row';
                 noResultsRow.innerHTML = `
-            <td colspan="6" class="text-center py-4">
-                <div class="text-muted">
-                    <i class="fas fa-search me-2"></i>
-                    Tidak ditemukan peserta dengan kata kunci "${term}"
-                </div>
-            </td>
-        `;
+                <td colspan="6" class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="fas fa-search me-2"></i>
+                        Tidak ditemukan peserta dengan kata kunci "${term}"
+                    </div>
+                </td>
+            `;
                 tbody.appendChild(noResultsRow);
             }
 
@@ -1557,7 +1731,6 @@
                 }
             }
         }
-
 
         function clearSearch() {
             const searchInput = document.getElementById('searchInput');
@@ -1572,13 +1745,51 @@
     </script>
 
     <style>
-        /* Color Variables */
-        :root {
-            --primary-light: rgba(40, 84, 150, 0.1);
-            --primary-gradient: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);
-            --danger-color: #ff4757;
-            --warning-color: #ffa502;
-            --info-color: #17a2b8;
+       
+
+        /* CUSTOM STATUS BADGES (CSS Custom - Tidak bergantung pada Bootstrap) */
+        .custom-badge {
+            border-radius: 8px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            padding: 0.5rem 0.75rem;
+            border: none;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+            color: #212529 !important;
+        }
+
+        .status-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+            color: white !important;
+        }
+
+        .status-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+            color: white !important;
+        }
+
+        .status-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+            color: white !important;
+        }
+
+        .status-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+            color: white !important;
         }
 
         /* Page Header */
@@ -1631,20 +1842,6 @@
             transform: translateY(-2px);
             color: white;
             box-shadow: 0 8px 25px rgba(40, 84, 150, 0.4);
-        }
-
-
-        /* Filter Section */
-        .filter-section {
-            background: linear-gradient(135deg, rgba(40, 84, 150, 0.05) 0%, rgba(58, 107, 199, 0.05) 100%);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .filter-section label {
-            font-weight: 500;
-            color: #285496;
         }
 
         /* User Avatar */
@@ -1727,197 +1924,159 @@
             background-color: #f8f9fa;
         }
 
-        /* Detail Modal Styling */
-        .modal-header .icon-wrapper {
-            width: 50px;
-            height: 50px;
+        /* Loading Indicator in Status Modal */
+        #statusLoading {
+            padding: 2rem;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.95);
+            margin: 1.5rem 0;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
         }
 
-        /* Tab Navigation */
-        .nav-tabs {
-            border-bottom: 1px solid #dee2e6;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .nav-tabs .nav-link {
-            color: #6c757d;
-            border: none;
-            border-bottom: 3px solid transparent;
+        #statusLoading .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.25rem;
+        }
+
+        /* Button Colors */
+        .btn-primary {
+            background-color: #285496 !important;
+            border-color: #285496 !important;
+        }
+
+        .btn-success {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+        }
+
+        .btn-warning {
+            background-color: #ffc107 !important;
+            border-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+
+        .btn-info {
+            background-color: #17a2b8 !important;
+            border-color: #17a2b8 !important;
+        }
+
+        .btn-danger {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+        }
+
+        /* DOKUMEN STYLING */
+        .dokumen-container .stat-card {
+            border-radius: 10px;
             transition: all 0.3s ease;
-            margin-bottom: -1px;
+            height: 100%;
         }
 
-        .nav-tabs .nav-link:hover {
-            color: #285496;
-            border-color: rgba(40, 84, 150, 0.3);
+        .dokumen-container .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important;
         }
 
-        .nav-tabs .nav-link.active {
-            color: #285496;
-            background-color: transparent;
-            border-color: #285496;
-            font-weight: 600;
-        }
-
-        /* Dokumen Styling */
-        .dokumen-item {
-            padding: 0.75rem;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-
-        .dokumen-item:hover {
-            background-color: rgba(40, 84, 150, 0.05);
-            border-color: rgba(40, 84, 150, 0.1);
-            transform: translateX(5px);
-        }
-
-        .dokumen-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-
-        /* Info Items */
-        .info-item {
-            margin-bottom: 1rem;
-        }
-
-        .info-item label {
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-bottom: 0.25rem;
-            display: block;
-        }
-
-        .info-item p {
-            font-size: 0.95rem;
-            color: #343a40;
-            margin-bottom: 0;
-        }
-
-        /* Avatar Placeholder */
-        .avatar-placeholder {
-            width: 100px;
-            height: 100px;
+        .stat-icon-wrapper {
+            width: 70px;
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Profile Header */
-        .profile-header {
-            background: linear-gradient(135deg, rgba(40, 84, 150, 0.05) 0%, rgba(58, 107, 199, 0.05) 100%);
-            border-radius: 10px;
-            padding: 1.5rem;
+        .dokumen-container h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
         }
 
-        /* Info Sections */
-        .info-section {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
+        /* Progress Bar */
+        .progress {
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #285496, #3a6bc7);
+            transition: width 0.6s ease;
+        }
+
+        /* Dokumen Cards */
+        .dokumen-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
             border: 1px solid #e9ecef;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            height: 100%;
         }
 
-        /* Toast Styling */
-        .toast {
-            z-index: 9999;
+        .dokumen-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+            border-color: #285496;
         }
 
-        /* Card Styling in Modal */
-        .mentor-profile .card-body {
-            padding: 1.5rem;
+        .dokumen-available {
+            border-left: 4px solid #28a745;
         }
 
-        .mentor-badge {
-            width: 80px;
-            height: 80px;
+        .dokumen-missing {
+            border-left: 4px solid #6c757d;
+            opacity: 0.8;
+        }
+
+        .dokumen-card:hover.dokumen-missing {
+            opacity: 1;
+            border-color: #6c757d;
+        }
+
+        .dokumen-icon-wrapper {
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
-        /* Empty State */
-        .empty-state {
-            padding: 3rem 1rem;
-        }
-
-        .empty-state-icon {
-            opacity: 0.5;
+        .dokumen-card:hover .dokumen-icon-wrapper {
+            transform: scale(1.1);
         }
 
         /* Badge Styling */
-        .badge {
-            font-size: 0.75rem;
-            padding: 0.4em 0.8em;
-            border-radius: 20px;
-            font-weight: 500;
+        .badge.bg-success.bg-opacity-10 {
+            background-color: rgba(40, 167, 69, 0.1) !important;
+            color: #28a745 !important;
+            border: 1px solid rgba(40, 167, 69, 0.2);
         }
 
-        .bg-warning {
-            background-color: #ffc107 !important;
+        .badge.bg-danger.bg-opacity-10 {
+            background-color: rgba(220, 53, 69, 0.1) !important;
+            color: #dc3545 !important;
+            border: 1px solid rgba(220, 53, 69, 0.2);
         }
 
-        .bg-info {
-            background-color: #17a2b8 !important;
-        }
-
-        .bg-danger {
-            background-color: #dc3545 !important;
-        }
-
-        .bg-success {
-            background-color: #28a745 !important;
-        }
-
-        .bg-primary {
+        .badge.bg-primary {
             background-color: #285496 !important;
-        }
-
-        /* Custom Scrollbar */
-        .modal-body .tab-content>.tab-pane {
-            scrollbar-width: thin;
-            scrollbar-color: #285496 #f1f1f1;
-        }
-
-        .modal-body .tab-content>.tab-pane::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-body .tab-content>.tab-pane::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .modal-body .tab-content>.tab-pane::-webkit-scrollbar-thumb {
-            background: #285496;
-            border-radius: 10px;
-        }
-
-        /* Animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .tab-pane.active {
-            animation: fadeIn 0.3s ease;
+            color: white !important;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .custom-badge {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.75rem;
+            }
+
             .modal-dialog.modal-xl {
                 margin: 0.5rem;
             }
@@ -1934,20 +2093,18 @@
                 padding: 0.75rem 1rem;
             }
 
-            .profile-header {
-                padding: 1rem;
+            .dokumen-container .row>.col-xl-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
             }
 
-            .info-section {
-                padding: 1rem;
+            .dokumen-icon-wrapper {
+                width: 50px;
+                height: 50px;
             }
 
-            .dokumen-content .row>.col-md-4 {
-                margin-bottom: 1rem;
-            }
-
-            .mentor-profile .card-body {
-                padding: 1rem;
+            .dokumen-icon-wrapper i {
+                font-size: 1.5rem !important;
             }
 
             .modal-footer .btn-group {
@@ -1960,30 +2117,33 @@
                 margin-bottom: 0.5rem;
             }
 
-            /* Filter responsive */
-            .filter-section .row {
-                flex-direction: column;
+            .stat-icon-wrapper {
+                width: 50px;
+                height: 50px;
             }
 
-            .filter-section .col-md-8,
-            .filter-section .col-md-4 {
-                width: 100%;
-                margin-bottom: 1rem;
+            .stat-icon-wrapper i {
+                font-size: 1.25rem !important;
             }
 
-            .filter-section .col-md-4 button {
-                width: 100%;
+            .dokumen-container h3 {
+                font-size: 1.5rem;
             }
+        }
 
-            /* Show entries responsive */
-            .show-entries-container {
-                margin-top: 1rem;
-                width: 100%;
-                justify-content: flex-start !important;
+        @media (min-width: 769px) and (max-width: 992px) {
+            .dokumen-container .row>.col-xl-4 {
+                flex: 0 0 50%;
+                max-width: 50%;
             }
         }
 
         @media (max-width: 576px) {
+            .custom-badge {
+                padding: 0.25rem 0.4rem;
+                font-size: 0.7rem;
+            }
+
             .modal-header {
                 padding: 1rem;
             }
@@ -1997,8 +2157,8 @@
                 padding: 0.5rem 0.75rem;
             }
 
-            .dokumen-item {
-                padding: 0.5rem;
+            .dokumen-card .card-body {
+                padding: 1rem !important;
             }
 
             .btn-sm {
@@ -2022,38 +2182,9 @@
                 font-size: 0.8rem;
                 margin: 1px;
             }
-        }
 
-        /* Print Styles */
-        @media print {
-
-            .modal-header,
-            .modal-footer,
-            .nav-tabs,
-            .btn,
-            .filter-section,
-            .show-entries-container {
-                display: none !important;
-            }
-
-            .modal-dialog {
-                max-width: 100% !important;
-                margin: 0 !important;
-            }
-
-            .modal-content {
-                border: none !important;
-                box-shadow: none !important;
-            }
-
-            .modal-body {
-                overflow: visible !important;
-                max-height: none !important;
-            }
-
-            .tab-content>.tab-pane {
-                display: block !important;
-                opacity: 1 !important;
+            .dokumen-container .row>.col-xl-4 {
+                margin-bottom: 1rem;
             }
         }
     </style>
