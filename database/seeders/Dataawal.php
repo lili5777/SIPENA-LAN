@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\Angkatan;
 use App\Models\JenisPelatihan;
+use App\Models\Kabupaten;
 use App\Models\KabupatenKota;
 use App\Models\Mentor;
 use App\Models\Provinsi;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Http;
 
 class Dataawal extends Seeder
 {
@@ -75,6 +77,33 @@ class Dataawal extends Seeder
             ]);
         }
 
+
+        // Ambil data provinsi
+        $response = Http::get('https://wilayah.id/api/provinces.json')->json();
+        $provinces = $response['data']; // Akses key 'data' dulu
+
+        foreach ($provinces as $province) {
+            Provinsi::create([
+                'code' => $province['code'],
+                'name' => $province['name'],
+            ]);
+        }
+
+        // Ambil data kabupaten
+        $provinces = Provinsi::all();
+
+        foreach ($provinces as $province) {
+            $response = Http::get("https://wilayah.id/api/regencies/{$province->code}.json")->json();
+            $regencies = $response['data']; // Akses key 'data' juga di sini
+
+            foreach ($regencies as $regency) {
+                Kabupaten::create([
+                    'code' => $regency['code'],
+                    'name' => $regency['name'],
+                    'province_id' => $province->id,
+                ]);
+            }
+        }
        
         // Data contoh mentor untuk mendukung pendaftaran
         // Buat beberapa mentor dengan detail lengkap berdasarkan field di form (e.g., nama, jabatan, rekening, NPWP)

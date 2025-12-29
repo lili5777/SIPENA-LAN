@@ -962,6 +962,30 @@
                                         <p class="fw-semibold mb-0">${kepegawaian?.email_kantor || '-'}</p>
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="text-muted small">Alamat Kantor</label>
+                                        <p class="fw-semibold mb-0">${kepegawaian?.alamat_kantor || '-'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="text-muted small">Nomor Telepon Kantor</label>
+                                        <p class="fw-semibold mb-0">${kepegawaian?.nomor_telepon_kantor || '-'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="text-muted small">Provinsi</label>
+                                        <p class="fw-semibold mb-0">${data.provinsi?.name || '-'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="text-muted small">Kabupaten/Kota</label>
+                                        <p class="fw-semibold mb-0">${data.kabupaten?.name || '-'}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -971,6 +995,12 @@
                                 <i class="fas fa-info-circle me-2 text-primary"></i>Informasi Tambahan
                             </h6>
                             <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="info-item">
+                                        <label class="text-muted small">Status</label>
+                                        <p class="fw-semibold mb-0">${peserta.status_perkawinan || '-'}</p>
+                                    </div>
+                                </div>
                                 <div class="col-md-4">
                                     <div class="info-item">
                                         <label class="text-muted small">Nama Pasangan</label>

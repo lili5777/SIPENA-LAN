@@ -1126,18 +1126,6 @@
                     if (e.target.name === 'id_provinsi' && e.target.value) {
                         loadKabupaten(e.target.value);
                     }
-
-                    // Handle mentor show/hide untuk PD CPNS
-                    // if (e.target.name === 'sudah_ada_mentor') {
-                    //     const mentorDetail = document.getElementById('mentor-detail');
-                    //     if (mentorDetail) {
-                    //         if (e.target.value === 'Ya') {
-                    //             mentorDetail.style.display = 'block';
-                    //         } else {
-                    //             mentorDetail.style.display = 'none';
-                    //         }
-                    //     }
-                    // }
                 });
 
                 // Setup mentor form

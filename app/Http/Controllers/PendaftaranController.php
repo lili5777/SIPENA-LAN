@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\JenisPelatihan;
 use App\Models\Angkatan;
+use App\Models\Kabupaten;
 use App\Models\Mentor;
 use App\Models\Peserta;
 use App\Models\KepegawaianPeserta;
 use App\Models\Pendaftaran;
 use App\Models\PesertaMentor;
+use App\Models\Provinsi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -480,13 +482,21 @@ class PendaftaranController extends Controller
 
 
             // 7. SIMPAN/UPDATE KEPEGAWAIAN PESERTA (updateOrCreate)
+            $provinsi = Provinsi::where('code', $request->id_provinsi)->first();
+            $kabupaten = $request->id_kabupaten_kota ? Kabupaten::where('code', $request->id_kabupaten_kota)->first() : null;
+
+            if (!$provinsi) {
+                throw ValidationException::withMessages([
+                    'id_provinsi' => ['Provinsi tidak ditemukan di database']
+                ]);
+            }
             KepegawaianPeserta::updateOrCreate(
                 ['id_peserta' => $peserta->id],
                 [
                     'asal_instansi' => $request->asal_instansi,
                     'unit_kerja' => $request->unit_kerja,
-                    'id_provinsi' => $request->id_provinsi,
-                    'id_kabupaten_kota' => $request->id_kabupaten_kota,
+                    'id_provinsi' => $provinsi->id,
+                    'id_kabupaten_kota' => $kabupaten?->id,
                     'alamat_kantor' => $request->alamat_kantor,
                     'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
                     'email_kantor' => $request->email_kantor,

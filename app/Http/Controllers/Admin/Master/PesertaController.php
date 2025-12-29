@@ -61,6 +61,8 @@ class PesertaController extends Controller
         $pendaftaran = Pendaftaran::with([
             'peserta',
             'peserta.kepegawaianPeserta',
+            'peserta.kepegawaianPeserta.provinsi',
+            'peserta.kepegawaianPeserta.kabupaten',
             'angkatan',
             'pesertaMentor.mentor',
             'jenisPelatihan'
@@ -73,6 +75,8 @@ class PesertaController extends Controller
                 'pendaftaran' => $pendaftaran,
                 'peserta' => $pendaftaran->peserta,
                 'kepegawaian' => $pendaftaran->peserta->kepegawaianPeserta,
+                'provinsi' => $pendaftaran->peserta->kepegawaianPeserta->provinsi, 
+                'kabupaten' => $pendaftaran->peserta->kepegawaianPeserta->kabupaten,
                 'angkatan' => $pendaftaran->angkatan,
                 'mentor' => $pendaftaran->pesertaMentor->first()?->mentor ?? null
             ]

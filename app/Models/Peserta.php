@@ -11,7 +11,6 @@ class Peserta extends Model
 
     protected $table = 'peserta';
     public $timestamps = false;
-    // protected $primaryKey = 'id_peserta';
 
     protected $fillable = [
         'nip_nrp',
