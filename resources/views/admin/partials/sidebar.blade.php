@@ -33,16 +33,17 @@
                 <a href="" class="submenu-link">
                     <i class="fas fa-handshake me-2"></i> Mitra Kerja
                 </a> --}}
-                <a href="{{ route('peserta.pkn-tk2') }}" class="submenu-link">
+                <!-- Menu Sidebar / Navbar -->
+                <a href="{{ route('peserta.index', ['jenis' => 'pkn']) }}" class="submenu-link">
                     <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
                 </a>
-                <a href="}" class="submenu-link">
+                <a href="{{ route('peserta.index', ['jenis' => 'cpns']) }}" class="submenu-link">
                     <i class="fas fa-user-tie me-2"></i> Peserta PD CPNS
                 </a>
-                <a href="" class="submenu-link">
+                <a href="{{ route('peserta.index', ['jenis' => 'pka']) }}" class="submenu-link">
                     <i class="fas fa-users-gear me-2"></i> Peserta PKA
                 </a>
-                <a href="" class="submenu-link">
+                <a href="{{ route('peserta.index', ['jenis' => 'pkp']) }}" class="submenu-link">
                     <i class="fas fa-user-check me-2"></i> Peserta PKP
                 </a>
                 {{-- <a href="" class="submenu-link">

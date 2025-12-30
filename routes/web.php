@@ -80,14 +80,40 @@ Route::middleware('auth')->group(function () {
     });
 
     // Route Peserta PKN
-    // Peserta PKN TK II
-    Route::get('/peserta/pkn-tk2', [PesertaController::class, 'index'])->name('peserta.pkn-tk2');
-    Route::get('/peserta/detail/{id}', [PesertaController::class, 'getDetail'])->name('peserta.detail');
-    Route::post('/peserta/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('peserta.update-status');
-    Route::get('/peserta/tambah-peserta-pkn-tk2', [PesertaController::class, 'create'])->name('peserta.tambah-peserta-pkn-tk2');
-    Route::post('/peserta/store', [PesertaController::class, 'store'])->name('peserta.store');
-    Route::get('/peserta/{id}/edit', [PesertaController::class, 'edit'])->name('peserta.edit');
-    Route::put('/peserta/{id}', [PesertaController::class, 'update'])->name('peserta.update');
+    // Peserta Controller
+    Route::prefix('peserta')->name('peserta.')->group(function () {
+        // Route utama dengan parameter jenis
+        Route::get('/{jenis}', [PesertaController::class, 'index'])
+            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->name('index');
+
+        // Route create dengan parameter jenis
+        Route::get('/{jenis}/create', [PesertaController::class, 'create'])
+            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->name('create');
+
+        // Route edit dengan parameter jenis
+        Route::get('/{jenis}/{id}/edit', [PesertaController::class, 'edit'])
+            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->name('edit');
+
+        // Route update dengan parameter jenis
+        Route::put('/{jenis}/{id}', [PesertaController::class, 'update'])
+            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->name('update');
+
+        // Route destroy dengan parameter jenis
+        Route::delete('/{jenis}/{id}', [PesertaController::class, 'destroy'])
+            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->name('destroy');
+
+        // Route store (tidak perlu parameter jenis karena dari session)
+        Route::post('/store', [PesertaController::class, 'store'])->name('store');
+
+        // Route yang tidak butuh parameter jenis
+        Route::get('/detail/{id}', [PesertaController::class, 'getDetail'])->name('detail');
+        Route::post('/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('update-status');
+    });
 });
 
 

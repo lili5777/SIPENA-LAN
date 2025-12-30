@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="col-auto">
-                <a href="{{ route('peserta.tambah-peserta-pkn-tk2') }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
+                <a href="{{ route('peserta.create', ['jenis' => request()->route('jenis')]) }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
                     <i class="fas fa-user-plus me-2"></i>
                     Tambah Peserta
                 </a>
@@ -214,104 +214,105 @@
                         </thead>
                         <tbody>
                             @forelse($pendaftaran as $index => $daftar)
-                                                            @php
-                                $peserta = $daftar->peserta;
-                                $kepegawaian = $peserta->kepegawaianPeserta;
-                                $mentor = $daftar->pesertaMentor->first()?->mentor ?? null;
+                                                                                                                    @php
+    $peserta = $daftar->peserta;
+    $kepegawaian = $peserta->kepegawaianPeserta;
+    $mentor = $daftar->pesertaMentor->first()?->mentor ?? null;
 
-                                // Mapping status untuk ikon dan warna
-                                $statusConfig = [
-                                    'Menunggu Verifikasi' => [
-                                        'color' => 'status-warning',
-                                        'icon' => 'fa-clock',
-                                        'text' => 'Menunggu Verifikasi'
-                                    ],
-                                    'Diterima' => [
-                                        'color' => 'status-info',
-                                        'icon' => 'fa-check-circle',
-                                        'text' => 'Diterima'
-                                    ],
-                                    'Ditolak' => [
-                                        'color' => 'status-danger',
-                                        'icon' => 'fa-times-circle',
-                                        'text' => 'Ditolak'
-                                    ],
-                                    'Lulus' => [
-                                        'color' => 'status-success',
-                                        'icon' => 'fa-graduation-cap',
-                                        'text' => 'Lulus'
-                                    ]
-                                ];
+    // Mapping status untuk ikon dan warna
+    $statusConfig = [
+        'Menunggu Verifikasi' => [
+            'color' => 'status-warning',
+            'icon' => 'fa-clock',
+            'text' => 'Menunggu Verifikasi'
+        ],
+        'Diterima' => [
+            'color' => 'status-info',
+            'icon' => 'fa-check-circle',
+            'text' => 'Diterima'
+        ],
+        'Ditolak' => [
+            'color' => 'status-danger',
+            'icon' => 'fa-times-circle',
+            'text' => 'Ditolak'
+        ],
+        'Lulus' => [
+            'color' => 'status-success',
+            'icon' => 'fa-graduation-cap',
+            'text' => 'Lulus'
+        ]
+    ];
 
-                                $currentStatus = $daftar->status_pendaftaran;
-                                $statusData = $statusConfig[$currentStatus] ?? [
-                                    'color' => 'status-secondary',
-                                    'icon' => 'fa-question-circle',
-                                    'text' => $currentStatus
-                                ];
-                                                            @endphp
-                                                            <tr class="peserta-row" data-peserta-id="{{ $daftar->id }}">
-                                                                <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
-                                                                <td>
-                                                                    <div class="d-flex align-items-center">
-                                                                        <div class="user-avatar me-3"
-                                                                            style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
-                                                                            <i class="fas fa-user"></i>
-                                                                        </div>
-                                                                        <div>
-                                                                            <div class="fw-bold peserta-name">{{ $peserta->nama_lengkap }}</div>
-                                                                            <div class="text-muted small">
-                                                                                <i class="fas fa-id-card me-1"></i>
-                                                                                {{ $peserta->nip_nrp ?? '-' }}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </td>
-                                                                <td class="d-none d-md-table-cell">
-                                                                    <p class="mb-0 text-muted peserta-instansi">
-                                                                        <i class="fas fa-building me-1"></i>
-                                                                        {{ $kepegawaian->unit_kerja ?? '-' }}
-                                                                    </p>
-                                                                </td>
-                                                                <td class="d-none d-md-table-cell">
-                                                                    <p class="mb-0 text-muted peserta-angkatan">
-                                                                        {{ $daftar->angkatan->nama_angkatan ?? '-' }}
-                                                                        @if($daftar->angkatan && $daftar->angkatan->tahun)
-                                                                            <br><small class="text-muted">({{ $daftar->angkatan->tahun }})</small>
-                                                                        @endif
-                                                                    </p>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="d-flex flex-column gap-1">
-                                                                        <span class="badge custom-badge {{ $statusData['color'] }} peserta-status">
-                                                                            <i class="fas {{ $statusData['icon'] }} me-1"></i>
-                                                                            {{ $statusData['text'] }}
-                                                                        </span>
-                                                                        <button type="button" class="btn btn-sm btn-outline-warning update-status"
-                                                                            data-id="{{ $daftar->id }}" data-status="{{ $daftar->status_pendaftaran }}"
-                                                                            data-bs-toggle="tooltip" title="Ubah Status">
-                                                                            <i class="fas fa-edit me-1"></i> Verifikasi
-                                                                        </button>
-                                                                    </div>
-                                                                </td>
-                                                                <td class="text-center pe-4">
-                                                                    <div class="btn-group" role="group">
-                                                                        <button type="button" class="btn btn-sm btn-outline-info btn-action view-detail"
-                                                                            data-id="{{ $daftar->id }}" data-bs-toggle="tooltip" title="Lihat Detail">
-                                                                            <i class="fas fa-eye"></i>
-                                                                        </button>
-                                                                        <a href="{{ route('peserta.edit', $daftar->id) }}" class="btn btn-sm btn-outline-warning btn-action"
-                                                                            data-bs-toggle="tooltip" title="Edit Peserta">
-                                                                            <i class="fas fa-edit"></i>
-                                                                        </a>
-                                                                        <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-peserta"
-                                                                            data-id="{{ $daftar->id }}" data-name="{{ $peserta->nama_lengkap }}"
-                                                                            data-bs-toggle="tooltip" title="Hapus Peserta">
-                                                                            <i class="fas fa-trash-alt"></i>
-                                                                        </button>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
+    $currentStatus = $daftar->status_pendaftaran;
+    $statusData = $statusConfig[$currentStatus] ?? [
+        'color' => 'status-secondary',
+        'icon' => 'fa-question-circle',
+        'text' => $currentStatus
+    ];
+                                                                                                                    @endphp
+                                                                                                                    <tr class="peserta-row" data-peserta-id="{{ $daftar->id }}">
+                                                                                                                        <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
+                                                                                                                        <td>
+                                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                                <div class="user-avatar me-3"
+                                                                                                                                    style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
+                                                                                                                                    <i class="fas fa-user"></i>
+                                                                                                                                </div>
+                                                                                                                                <div>
+                                                                                                                                    <div class="fw-bold peserta-name">{{ $peserta->nama_lengkap }}</div>
+                                                                                                                                    <div class="text-muted small">
+                                                                                                                                        <i class="fas fa-id-card me-1"></i>
+                                                                                                                                        {{ $peserta->nip_nrp ?? '-' }}
+                                                                                                                                    </div>
+                                                                                                                                </div>
+                                                                                                                            </div>
+                                                                                                                        </td>
+                                                                                                                        <td class="d-none d-md-table-cell">
+                                                                                                                            <p class="mb-0 text-muted peserta-instansi">
+                                                                                                                                <i class="fas fa-building me-1"></i>
+                                                                                                                                {{ $kepegawaian->unit_kerja ?? '-' }}
+                                                                                                                            </p>
+                                                                                                                        </td>
+                                                                                                                        <td class="d-none d-md-table-cell">
+                                                                                                                            <p class="mb-0 text-muted peserta-angkatan">
+                                                                                                                                {{ $daftar->angkatan->nama_angkatan ?? '-' }}
+                                                                                                                                @if($daftar->angkatan && $daftar->angkatan->tahun)
+                                                                                                                                    <br><small class="text-muted">({{ $daftar->angkatan->tahun }})</small>
+                                                                                                                                @endif
+                                                                                                                            </p>
+                                                                                                                        </td>
+                                                                                                                        <td>
+                                                                                                                            <div class="d-flex flex-column gap-1">
+                                                                                                                                <span class="badge custom-badge {{ $statusData['color'] }} peserta-status">
+                                                                                                                                    <i class="fas {{ $statusData['icon'] }} me-1"></i>
+                                                                                                                                    {{ $statusData['text'] }}
+                                                                                                                                </span>
+                                                                                                                                <button type="button" class="btn btn-sm btn-outline-warning update-status"
+                                                                                                                                    data-id="{{ $daftar->id }}" data-status="{{ $daftar->status_pendaftaran }}"
+                                                                                                                                    data-bs-toggle="tooltip" title="Ubah Status">
+                                                                                                                                    <i class="fas fa-edit me-1"></i> Verifikasi
+                                                                                                                                </button>
+                                                                                                                            </div>
+                                                                                                                        </td>
+                                                                                                                        <td class="text-center pe-4">
+                                                                                                                            <div class="btn-group" role="group">
+                                                                                                                                <button type="button" class="btn btn-sm btn-outline-info btn-action view-detail"
+                                                                                                                                    data-id="{{ $daftar->id }}" data-bs-toggle="tooltip" title="Lihat Detail">
+                                                                                                                                    <i class="fas fa-eye"></i>
+                                                                                                                                </button>
+                                                                                                                                <a href="{{ route('peserta.edit', ['jenis' => request()->route('jenis'), 'id' => $daftar->id]) }}" class="btn btn-sm btn-outline-warning btn-action"
+                                                                                                                                    data-bs-toggle="tooltip" title="Edit Peserta">
+                                                                                                                                    <i class="fas fa-edit"></i>
+                                                                                                                                </a>
+                                                                                                                                <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-peserta"
+                                                                                                                                    data-id="{{ $daftar->id }}" data-name="{{ $peserta->nama_lengkap }}"
+                                                                                                                                    data-jenis="{{ request()->route('jenis') }}"
+                                                                                                                                    data-bs-toggle="tooltip" title="Hapus Peserta">
+                                                                                                                                    <i class="fas fa-trash-alt"></i>
+                                                                                                                                </button>
+                                                                                                                            </div>
+                                                                                                                        </td>
+                                                                                                                    </tr>
                             @empty
                                 <tr class="empty-state-row">
                                     <td colspan="6" class="text-center py-5">
@@ -322,7 +323,7 @@
                                             <h5 class="text-muted mb-2">Belum ada peserta</h5>
                                             <p class="text-muted mb-4">Tidak ada peserta yang terdaftar pada angkatan ini</p>
                                             @if(request('angkatan'))
-                                                <a href="{{ route('peserta.pkn-tk2') }}" class="btn btn-outline-primary">
+                                                <a href="{{ route('peserta.index', ['jenis' => request()->route('jenis')]) }}" class="btn btn-outline-primary">
                                                     <i class="fas fa-arrow-left me-1"></i> Kembali ke semua peserta
                                                 </a>
                                             @endif
@@ -723,7 +724,8 @@
             document.querySelectorAll('.update-status').forEach(button => {
                 button.addEventListener('click', function () {
                     const pendaftaranId = this.getAttribute('data-id');
-                    const currentStatus = this.getAttribute('data-status');
+                    const currentStatus = this.getAttribute('data-status'); 
+                    const jenis = "{{ request()->route('jenis') }}";
 
                     // Set form action - Sesuaikan dengan route Anda
                     const form = document.getElementById('statusForm');
@@ -765,9 +767,10 @@
                 button.addEventListener('click', function () {
                     const pesertaId = this.getAttribute('data-id');
                     const pesertaName = this.getAttribute('data-name');
+                    const jenis = this.getAttribute('data-jenis');
 
                     deletePesertaName.textContent = pesertaName;
-                    deleteForm.action = `/peserta/${pesertaId}`;
+                    deleteForm.action = `/peserta/${jenis}/${pesertaId}`;
                     deleteModal.show();
                 });
             });
@@ -1745,7 +1748,7 @@
     </script>
 
     <style>
-       
+
 
         /* CUSTOM STATUS BADGES (CSS Custom - Tidak bergantung pada Bootstrap) */
         .custom-badge {

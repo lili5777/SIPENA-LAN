@@ -20,9 +20,25 @@ class PesertaController extends Controller
     /**
      * Display a listing of peserta PKN TK II.
      */
-    public function index(Request $request)
+    private $jenisMapping = [
+        'pkn' => ['id' => 1, 'nama' => 'PKN TK II'],
+        'cpns' => ['id' => 2, 'nama' => 'PD CPNS'],
+        'pka' => ['id' => 3, 'nama' => 'PKA'],
+        'pkp' => ['id' => 4, 'nama' => 'PKP']
+    ];
+
+    private function getJenisData($jenis)
     {
-        $jenisPelatihanId = 1;
+        if (!array_key_exists($jenis, $this->jenisMapping)) {
+            abort(404);
+        }
+        return $this->jenisMapping[$jenis];
+    }
+
+    public function index(Request $request, $jenis)
+    {
+        $jenisData = $this->getJenisData($jenis);
+        $jenisPelatihanId = $jenisData['id'];
 
         $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
             ->orderBy('tahun', 'desc')
@@ -35,22 +51,25 @@ class PesertaController extends Controller
             'pesertaMentor.mentor'
         ])
             ->where('id_jenis_pelatihan', $jenisPelatihanId)
-            // ✅ SELALU exclude data kotor
             ->whereNotNull('id_angkatan')
             ->where('id_angkatan', '!=', 0);
 
-        // ✅ Filter spesifik angkatan SAJA jika dipilih
         if ($request->filled('angkatan') && $request->angkatan != '' && $request->angkatan != 'semua') {
             $pendaftaranQuery->where('id_angkatan', $request->angkatan);
         }
-        // Kalau 'semua' atau kosong → ambil SEMUA angkatan valid
 
         $pendaftaran = $pendaftaranQuery->latest('tanggal_daftar')->get();
-
         $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
 
-        return view('admin.peserta.pkn.index', compact('pendaftaran', 'angkatanList', 'jenisPelatihan'));
+        return view("admin.peserta.{$jenis}.index", compact(
+            'pendaftaran',
+            'angkatanList',
+            'jenisPelatihan',
+            'jenis'
+        ));
     }
+
+  
 
 
     /**
@@ -107,10 +126,17 @@ class PesertaController extends Controller
     }
 
     // Method untuk create form
-    public function create()
+    public function create(Request $request, $jenis = null)
     {
+        if (!$jenis) {
+            $jenis = $request->jenis ?? session('jenis_pelatihan');
+        }
+
+        $jenisData = $this->getJenisData($jenis);
+        $jenisPelatihanId = $jenisData['id'];
+
         $mentorList = Mentor::where('status_aktif', true)->get();
-        $angkatanList = Angkatan::where('id_jenis_pelatihan', 1)
+        $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
             ->where('status_angkatan', 'Dibuka')
             ->get();
         $provinsiList = Provinsi::all();
@@ -118,9 +144,12 @@ class PesertaController extends Controller
 
         $isEdit = false;
 
-        if (request()->ajax()) {
+        session(['jenis_pelatihan' => $jenis]);
+
+
+        if ($request->ajax()) {
             return response()->json([
-                'jenis_pelatihan' => 1,
+                'jenis_pelatihan' => $jenisPelatihanId,
                 'mentor' => $mentorList,
                 'angkatanList' => $angkatanList,
                 'provinsiList' => $provinsiList,
@@ -128,18 +157,21 @@ class PesertaController extends Controller
             ]);
         }
 
-        return view('admin.peserta.pkn.create', compact(
+        return view("admin.peserta.{$jenis}.create", compact(
             'mentorList',
             'angkatanList',
             'provinsiList',
             'kabupatenList',
-            'isEdit'
+            'isEdit',
+            'jenis'
         ));
     }
 
     // Method untuk edit form
-    public function edit($id)
+    public function edit(Request $request, $jenis, $id)
     {
+        $jenisData = $this->getJenisData($jenis);
+
         $pendaftaran = Pendaftaran::with([
             'peserta',
             'peserta.kepegawaianPeserta',
@@ -149,316 +181,50 @@ class PesertaController extends Controller
             'pesertaMentor.mentor'
         ])->findOrFail($id);
 
+        // Verifikasi jenis pelatihan sesuai
+        if ($pendaftaran->id_jenis_pelatihan != $jenisData['id']) {
+            abort(404, 'Data tidak ditemukan untuk jenis pelatihan ini');
+        }
+
         $mentorList = Mentor::where('status_aktif', true)->get();
-        $angkatanList = Angkatan::where('id_jenis_pelatihan', 1)->where('status_angkatan', 'Dibuka')->get();
+        $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisData['id'])
+            ->where('status_angkatan', 'Dibuka')->get();
         $provinsiList = Provinsi::all();
         $kabupatenList = Kabupaten::all();
 
         $isEdit = true;
 
-        return view('admin.peserta.pkn.create', compact(
+        return view("admin.peserta.{$jenis}.create", compact(
             'pendaftaran',
             'mentorList',
             'angkatanList',
             'provinsiList',
             'kabupatenList',
-            'isEdit'
+            'isEdit',
+            'jenis'
         ));
-    }
 
-    // Method untuk update
-    public function update(Request $request, $id)
-    {
-        try {
-            $pendaftaran = Pendaftaran::with(['peserta', 'peserta.kepegawaianPeserta'])
-                ->findOrFail($id);
-
-            $peserta = $pendaftaran->peserta;
-            $kepegawaian = $peserta->kepegawaianPeserta;
-
-            // Validasi untuk update
-            $validated = $request->validate([
-                // Data pribadi
-                'nip_nrp' => 'required|string|max:50',
-                'nama_lengkap' => 'required|string|max:200',
-                'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-                'agama' => 'required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
-                'tempat_lahir' => 'required|string|max:100',
-                'tanggal_lahir' => 'required|date',
-                'alamat_rumah' => 'required|string',
-                'email_pribadi' => 'required|email|max:100',
-                'nomor_hp' => 'required|string|max:20',
-                'pendidikan_terakhir' => 'required|in:SD,SMP,SMU,D3,D4,S1,S2,S3',
-                'bidang_studi' => 'nullable|string|max:100',
-                'bidang_keahlian' => 'nullable|string|max:100',
-                'status_perkawinan' => 'nullable|in:Belum Menikah,Menikah,Duda,Janda',
-                'nama_pasangan' => 'nullable|string|max:200',
-                'olahraga_hobi' => 'nullable|string|max:100',
-                'perokok' => 'required|in:Ya,Tidak',
-                'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-
-                // Data kepegawaian
-                'asal_instansi' => 'required|string|max:200',
-                'unit_kerja' => 'nullable|string|max:200',
-                'id_provinsi' => 'required',
-                'id_kabupaten_kota' => 'nullable',
-                'alamat_kantor' => 'required|string',
-                'nomor_telepon_kantor' => 'nullable|string|max:20',
-                'email_kantor' => 'nullable|email|max:100',
-                'jabatan' => 'required|string|max:200',
-                'golongan_ruang' => 'required|string|max:50',
-                'eselon' => 'required|string|max:50',
-
-                // Dokumen (opsional untuk update)
-                'file_pas_foto' => 'nullable|file|mimes:jpg,png|max:5120',
-                'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:5120',
-                'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:5120',
-                'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_sehat' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:5120',
-
-                // Mentor
-                'sudah_ada_mentor' => 'required|in:Ya,Tidak',
-            ], [
-                'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
-                'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
-                'agama.required' => 'Agama wajib dipilih.',
-                'tempat_lahir.required' => 'Tempat lahir wajib diisi.',
-                'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
-                'alamat_rumah.required' => 'Alamat rumah wajib diisi.',
-                'email_pribadi.required' => 'Email pribadi wajib diisi.',
-                'email_pribadi.email' => 'Format email tidak valid.',
-                'nomor_hp.required' => 'Nomor HP wajib diisi.',
-                'pendidikan_terakhir.required' => 'Pendidikan terakhir wajib dipilih.',
-                'perokok.required' => 'Status perokok wajib dipilih.',
-
-                'asal_instansi.required' => 'Asal instansi wajib diisi.',
-                'jabatan.required' => 'Jabatan wajib diisi.',
-                'golongan_ruang.required' => 'Golongan ruang wajib diisi.',
-                'eselon.required' => 'Eselon wajib diisi.',
-                'alamat_kantor.required' => 'Alamat kantor wajib diisi.',
-                'id_provinsi.required' => 'Provinsi wajib dipilih.',
-
-                'sudah_ada_mentor.required' => 'Status mentor wajib dipilih.',
-            ]);
-            // Update angkatan jika berubah
-            if ($request->id_angkatan != $pendaftaran->id_angkatan) {
-                $pendaftaran->id_angkatan = $request->id_angkatan;
-                $pendaftaran->save();
-            }
-
-            // Tambahan validasi jika sudah ada mentor
-            if ($request->sudah_ada_mentor === 'Ya') {
-                $request->validate([
-                    'mentor_mode' => 'required|in:pilih,tambah',
-                ], [
-                    'mentor_mode.required' => 'Pilih mode mentor.',
-                ]);
-
-                if ($request->mentor_mode === 'pilih') {
-                    $request->validate([
-                        'id_mentor' => 'required|exists:mentor,id',
-                    ], [
-                        'id_mentor.required' => 'Pilih mentor dari daftar.',
-                    ]);
-                } else if ($request->mentor_mode === 'tambah') {
-                    $request->validate([
-                        'nama_mentor_baru' => 'required|string|max:200',
-                        'jabatan_mentor_baru' => 'required|string|max:200',
-                    ], [
-                        'nama_mentor_baru.required' => 'Nama mentor baru wajib diisi.',
-                        'jabatan_mentor_baru.required' => 'Jabatan mentor baru wajib diisi.',
-                    ]);
-                }
-            }
-
-            // Update data peserta
-            $peserta->update([
-                'nip_nrp' => $request->nip_nrp,
-                'nama_lengkap' => $request->nama_lengkap,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'agama' => $request->agama,
-                'tempat_lahir' => $request->tempat_lahir,
-                'tanggal_lahir' => $request->tanggal_lahir,
-                'alamat_rumah' => $request->alamat_rumah,
-                'email_pribadi' => $request->email_pribadi,
-                'nomor_hp' => $request->nomor_hp,
-                'pendidikan_terakhir' => $request->pendidikan_terakhir,
-                'bidang_studi' => $request->bidang_studi,
-                'bidang_keahlian' => $request->bidang_keahlian,
-                'status_perkawinan' => $request->status_perkawinan,
-                'nama_pasangan' => $request->nama_pasangan,
-                'olahraga_hobi' => $request->olahraga_hobi,
-                'perokok' => $request->perokok,
-                'ukuran_kaos' => $request->ukuran_kaos,
-            ]);
-
-            // Update file pas foto jika ada
-            if ($request->hasFile('file_pas_foto')) {
-                $fileName = time() . '_pasfoto.' . $request->file('file_pas_foto')->getClientOriginalExtension();
-                $path = $request->file('file_pas_foto')->move(public_path('uploads'), $fileName);
-                $peserta->file_pas_foto = 'uploads/' . $fileName;
-                $peserta->save();
-            }
-
-            // Update data kepegawaian
-            $provinsi = Provinsi::find($request->id_provinsi);
-            $kabupaten = $request->id_kabupaten_kota ?
-                Kabupaten::find($request->id_kabupaten_kota) : null;
-
-            if (!$provinsi) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Provinsi tidak ditemukan.'
-                ], 422);
-            }
-
-            if ($kepegawaian) {
-                $kepegawaian->update([
-                    'asal_instansi' => $request->asal_instansi,
-                    'unit_kerja' => $request->unit_kerja,
-                    'id_provinsi' => $provinsi->id ?? null,
-                    'id_kabupaten_kota' => $kabupaten->id ?? null,
-                    'alamat_kantor' => $request->alamat_kantor,
-                    'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
-                    'email_kantor' => $request->email_kantor,
-                    'jabatan' => $request->jabatan,
-                    'golongan_ruang' => $request->golongan_ruang,
-                    'eselon' => $request->eselon,
-                ]);
-            } else {
-                KepegawaianPeserta::create([
-                    'id_peserta' => $peserta->id,
-                    'asal_instansi' => $request->asal_instansi,
-                    'unit_kerja' => $request->unit_kerja,
-                    'id_provinsi' => $provinsi->id,
-                    'id_kabupaten_kota' => $kabupaten?->id,
-                    'alamat_kantor' => $request->alamat_kantor,
-                    'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
-                    'email_kantor' => $request->email_kantor,
-                    'jabatan' => $request->jabatan,
-                    'golongan_ruang' => $request->golongan_ruang,
-                    'eselon' => $request->eselon,
-                ]);
-            }
-
-            // Update file SK jika ada
-            if ($request->hasFile('file_sk_jabatan')) {
-                $fileName = time() . '_sk_jabatan.' . $request->file('file_sk_jabatan')->getClientOriginalExtension();
-                $path = $request->file('file_sk_jabatan')->move(public_path('uploads'), $fileName);
-                $kepegawaian->file_sk_jabatan = 'uploads/' . $fileName;
-                $kepegawaian->save();
-            }
-
-            if ($request->hasFile('file_sk_pangkat')) {
-                $fileName = time() . '_sk_pangkat.' . $request->file('file_sk_pangkat')->getClientOriginalExtension();
-                $path = $request->file('file_sk_pangkat')->move(public_path('uploads'), $fileName);
-                $kepegawaian->file_sk_pangkat = 'uploads/' . $fileName;
-                $kepegawaian->save();
-            }
-
-            // Update dokumen pendaftaran
-            $dokumenFields = [
-                'file_surat_komitmen',
-                'file_pakta_integritas',
-                'file_surat_tugas',
-                'file_surat_kelulusan_seleksi',
-                'file_surat_sehat',
-                'file_surat_bebas_narkoba'
-            ];
-
-            foreach ($dokumenFields as $field) {
-                if ($request->hasFile($field)) {
-                    $fileName = time() . '_' . $field . '.' . $request->file($field)->getClientOriginalExtension();
-                    $path = $request->file($field)->move(public_path('uploads'), $fileName);
-                    $pendaftaran->$field = 'uploads/' . $fileName;
-                }
-            }
-            $pendaftaran->save();
-
-            // Update mentor
-            $pesertaMentor = PesertaMentor::where('id_pendaftaran', $pendaftaran->id)->first();
-
-            if ($request->sudah_ada_mentor === 'Ya') {
-                $mentor = null;
-
-                if ($request->mentor_mode === 'pilih' && $request->id_mentor) {
-                    $mentor = Mentor::find($request->id_mentor);
-                } elseif ($request->mentor_mode === 'tambah') {
-                    $mentor = Mentor::create([
-                        'nama_mentor' => $request->nama_mentor_baru,
-                        'jabatan_mentor' => $request->jabatan_mentor_baru,
-                        'nomor_rekening' => $request->nomor_rekening_mentor_baru,
-                        'npwp_mentor' => $request->npwp_mentor_baru,
-                        'status_aktif' => true,
-                    ]);
-                }
-
-                if ($mentor) {
-                    if ($pesertaMentor) {
-                        $pesertaMentor->update([
-                            'id_mentor' => $mentor->id,
-                            'status_mentoring' => 'Ditugaskan',
-                        ]);
-                    } else {
-                        PesertaMentor::create([
-                            'id_pendaftaran' => $pendaftaran->id,
-                            'id_mentor' => $mentor->id,
-                            'tanggal_penunjukan' => now(),
-                            'status_mentoring' => 'Ditugaskan',
-                        ]);
-                    }
-                }
-            } else {
-                // Hapus mentor jika ada
-                if ($pesertaMentor) {
-                    $pesertaMentor->delete();
-                }
-            }
-
-            // Response
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Data peserta berhasil diperbarui!',
-                    'redirect_url' => route('peserta.pkn-tk2')
-                ], 200);
-            }
-
-            return redirect()->route('peserta.pkn-tk2')
-                ->with('success', 'Data peserta berhasil diperbarui!');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
-                    'errors' => $e->errors()
-                ], 422);
-            }
-
-            return redirect()->back()
-                ->withErrors($e->validator)
-                ->withInput();
-        } catch (\Exception $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
-        }
     }
 
     public function store(Request $request)
     {
         try {
+            // Ambil jenis dari session atau request
+            $jenis = $request->jenis ?? session('jenis_pelatihan');
+
+            if (!$jenis) {
+                throw ValidationException::withMessages([
+                    'jenis_pelatihan' => ['Jenis pelatihan tidak ditemukan'],
+                ]);
+            }
+
+            $jenisData = $this->getJenisData($jenis);
+            $jenisPelatihanId = $jenisData['id'];
+
+            // Set id_jenis_pelatihan dari mapping
+            $request->merge(['id_jenis_pelatihan' => $jenisPelatihanId]);
+
+
             // 1. CEK PESERTA BERDASARKAN NIP/NRP
             $peserta = Peserta::where('nip_nrp', $request->nip_nrp)->first();
 
@@ -730,7 +496,7 @@ class PesertaController extends Controller
             );
 
             // 4. AMBIL JENIS PELATIHAN UNTUK VALIDASI TAMBAHAN
-            $jenisPelatihan = JenisPelatihan::find($request->id_jenis_pelatihan);
+            $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
             $kode = $jenisPelatihan->kode_pelatihan;
             $additionalRules = [];
 
@@ -923,7 +689,7 @@ class PesertaController extends Controller
             // 8. SIMPAN PENDAFTARAN BARU
             $pendaftaran = Pendaftaran::create([
                 'id_peserta' => $peserta->id,
-                'id_jenis_pelatihan' => $request->id_jenis_pelatihan,
+                'id_jenis_pelatihan' => $jenisPelatihanId,
                 'id_angkatan' => $request->id_angkatan,
                 'file_surat_tugas' => $files['file_surat_tugas'] ?? null,
                 'file_surat_kesediaan' => $files['file_surat_kesediaan'] ?? null,
@@ -975,8 +741,8 @@ class PesertaController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Pendaftaran berhasil disimpan!',
-                    'pendaftaran_id' => $pendaftaran->id,  // ← Real ID
-                    'redirect_url' => route('peserta.pkn-tk2')
+                    'pendaftaran_id' => $pendaftaran->id,
+                    'redirect_url' => route('peserta.index', ['jenis' => $jenis])
                 ], 200);
             }
 
@@ -984,9 +750,10 @@ class PesertaController extends Controller
             // Simpan ke session untuk redirect biasa (non-AJAX)
             session(['pendaftaran_id' => $pendaftaran->id]);
 
-            return redirect()->route('peserta.pkn-tk2')
+            return redirect()->route('peserta.index', ['jenis' => $jenis])
                 ->with('success', 'Pendaftaran berhasil disimpan!')
                 ->with('pendaftaran_id', $pendaftaran->id);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Response error untuk AJAX
             if ($request->ajax() || $request->wantsJson()) {
@@ -998,7 +765,7 @@ class PesertaController extends Controller
             }
 
             return redirect()
-                ->route('peserta.tambah-peserta-pkn-tk2')
+                ->back()
                 ->withErrors($e->validator)
                 ->withInput()
                 ->with('validation_failed', true);
@@ -1012,9 +779,411 @@ class PesertaController extends Controller
             }
 
             return redirect()
-                ->route('peserta.tambah-peserta-pkn-tk2')
+                ->back()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
                 ->withInput();
+        }
+    }
+
+    // Method untuk update
+    public function update(Request $request, $jenis, $id)
+    {
+        try {
+            $jenisData = $this->getJenisData($jenis);
+            $jenisPelatihanId = $jenisData['id'];
+
+            $pendaftaran = Pendaftaran::with(['peserta', 'peserta.kepegawaianPeserta'])
+                ->findOrFail($id);
+
+            // Verifikasi jenis pelatihan sesuai
+            if ($pendaftaran->id_jenis_pelatihan != $jenisPelatihanId) {
+                abort(404, 'Data tidak ditemukan untuk jenis pelatihan ini');
+            }
+
+            $peserta = $pendaftaran->peserta;
+            $kepegawaian = $peserta->kepegawaianPeserta;
+
+            // Validasi untuk update
+            $validated = $request->validate([
+                // Data pribadi
+                'nip_nrp' => 'required|string|max:50',
+                'nama_lengkap' => 'required|string|max:200',
+                'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+                'agama' => 'required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
+                'tempat_lahir' => 'required|string|max:100',
+                'tanggal_lahir' => 'required|date',
+                'alamat_rumah' => 'required|string',
+                'email_pribadi' => 'required|email|max:100',
+                'nomor_hp' => 'required|string|max:20',
+                'pendidikan_terakhir' => 'required|in:SD,SMP,SMU,D3,D4,S1,S2,S3',
+                'bidang_studi' => 'nullable|string|max:100',
+                'bidang_keahlian' => 'nullable|string|max:100',
+                'status_perkawinan' => 'nullable|in:Belum Menikah,Menikah,Duda,Janda',
+                'nama_pasangan' => 'nullable|string|max:200',
+                'olahraga_hobi' => 'nullable|string|max:100',
+                'perokok' => 'required|in:Ya,Tidak',
+                'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
+
+                // Data kepegawaian
+                'asal_instansi' => 'required|string|max:200',
+                'unit_kerja' => 'nullable|string|max:200',
+                'id_provinsi' => 'required',
+                'id_kabupaten_kota' => 'nullable',
+                'alamat_kantor' => 'required|string',
+                'nomor_telepon_kantor' => 'nullable|string|max:20',
+                'email_kantor' => 'nullable|email|max:100',
+                'jabatan' => 'required|string|max:200',
+                'golongan_ruang' => 'required|string|max:50',
+                'eselon' => 'required|string|max:50',
+
+                // Dokumen (opsional untuk update)
+                'file_pas_foto' => 'nullable|file|mimes:jpg,png|max:5120',
+                'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:5120',
+                'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:5120',
+                'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:5120',
+                'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:5120',
+                'file_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
+                'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:5120',
+                'file_surat_sehat' => 'nullable|file|mimes:pdf|max:5120',
+                'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:5120',
+
+                // Mentor
+                'sudah_ada_mentor' => 'required|in:Ya,Tidak',
+            ], [
+                'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+                'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
+                'agama.required' => 'Agama wajib dipilih.',
+                'tempat_lahir.required' => 'Tempat lahir wajib diisi.',
+                'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
+                'alamat_rumah.required' => 'Alamat rumah wajib diisi.',
+                'email_pribadi.required' => 'Email pribadi wajib diisi.',
+                'email_pribadi.email' => 'Format email tidak valid.',
+                'nomor_hp.required' => 'Nomor HP wajib diisi.',
+                'pendidikan_terakhir.required' => 'Pendidikan terakhir wajib dipilih.',
+                'perokok.required' => 'Status perokok wajib dipilih.',
+
+                'asal_instansi.required' => 'Asal instansi wajib diisi.',
+                'jabatan.required' => 'Jabatan wajib diisi.',
+                'golongan_ruang.required' => 'Golongan ruang wajib diisi.',
+                'eselon.required' => 'Eselon wajib diisi.',
+                'alamat_kantor.required' => 'Alamat kantor wajib diisi.',
+                'id_provinsi.required' => 'Provinsi wajib dipilih.',
+
+                'sudah_ada_mentor.required' => 'Status mentor wajib dipilih.',
+            ]);
+            // Update angkatan jika berubah
+            if ($request->id_angkatan != $pendaftaran->id_angkatan) {
+                $pendaftaran->id_angkatan = $request->id_angkatan;
+                $pendaftaran->save();
+            }
+
+            // Tambahan validasi jika sudah ada mentor
+            if ($request->sudah_ada_mentor === 'Ya') {
+                $request->validate([
+                    'mentor_mode' => 'required|in:pilih,tambah',
+                ], [
+                    'mentor_mode.required' => 'Pilih mode mentor.',
+                ]);
+
+                if ($request->mentor_mode === 'pilih') {
+                    $request->validate([
+                        'id_mentor' => 'required|exists:mentor,id',
+                    ], [
+                        'id_mentor.required' => 'Pilih mentor dari daftar.',
+                    ]);
+                } else if ($request->mentor_mode === 'tambah') {
+                    $request->validate([
+                        'nama_mentor_baru' => 'required|string|max:200',
+                        'jabatan_mentor_baru' => 'required|string|max:200',
+                    ], [
+                        'nama_mentor_baru.required' => 'Nama mentor baru wajib diisi.',
+                        'jabatan_mentor_baru.required' => 'Jabatan mentor baru wajib diisi.',
+                    ]);
+                }
+            }
+
+            // Update data peserta
+            $peserta->update([
+                'nip_nrp' => $request->nip_nrp,
+                'nama_lengkap' => $request->nama_lengkap,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'agama' => $request->agama,
+                'tempat_lahir' => $request->tempat_lahir,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'alamat_rumah' => $request->alamat_rumah,
+                'email_pribadi' => $request->email_pribadi,
+                'nomor_hp' => $request->nomor_hp,
+                'pendidikan_terakhir' => $request->pendidikan_terakhir,
+                'bidang_studi' => $request->bidang_studi,
+                'bidang_keahlian' => $request->bidang_keahlian,
+                'status_perkawinan' => $request->status_perkawinan,
+                'nama_pasangan' => $request->nama_pasangan,
+                'olahraga_hobi' => $request->olahraga_hobi,
+                'perokok' => $request->perokok,
+                'ukuran_kaos' => $request->ukuran_kaos,
+            ]);
+
+            // Update file pas foto jika ada
+            if ($request->hasFile('file_pas_foto')) {
+                $fileName = time() . '_pasfoto.' . $request->file('file_pas_foto')->getClientOriginalExtension();
+                $path = $request->file('file_pas_foto')->move(public_path('uploads'), $fileName);
+                $peserta->file_pas_foto = 'uploads/' . $fileName;
+                $peserta->save();
+            }
+
+            // Update data kepegawaian
+            $provinsi = Provinsi::find($request->id_provinsi);
+            $kabupaten = $request->id_kabupaten_kota ?
+                Kabupaten::find($request->id_kabupaten_kota) : null;
+
+            if (!$provinsi) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Provinsi tidak ditemukan.'
+                ], 422);
+            }
+
+            if ($kepegawaian) {
+                $kepegawaian->update([
+                    'asal_instansi' => $request->asal_instansi,
+                    'unit_kerja' => $request->unit_kerja,
+                    'id_provinsi' => $provinsi->id ?? null,
+                    'id_kabupaten_kota' => $kabupaten->id ?? null,
+                    'alamat_kantor' => $request->alamat_kantor,
+                    'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
+                    'email_kantor' => $request->email_kantor,
+                    'jabatan' => $request->jabatan,
+                    'golongan_ruang' => $request->golongan_ruang,
+                    'eselon' => $request->eselon,
+                ]);
+            } else {
+                KepegawaianPeserta::create([
+                    'id_peserta' => $peserta->id,
+                    'asal_instansi' => $request->asal_instansi,
+                    'unit_kerja' => $request->unit_kerja,
+                    'id_provinsi' => $provinsi->id,
+                    'id_kabupaten_kota' => $kabupaten?->id,
+                    'alamat_kantor' => $request->alamat_kantor,
+                    'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
+                    'email_kantor' => $request->email_kantor,
+                    'jabatan' => $request->jabatan,
+                    'golongan_ruang' => $request->golongan_ruang,
+                    'eselon' => $request->eselon,
+                ]);
+            }
+
+            // Update file SK jika ada
+            if ($request->hasFile('file_sk_jabatan')) {
+                $fileName = time() . '_sk_jabatan.' . $request->file('file_sk_jabatan')->getClientOriginalExtension();
+                $path = $request->file('file_sk_jabatan')->move(public_path('uploads'), $fileName);
+                $kepegawaian->file_sk_jabatan = 'uploads/' . $fileName;
+                $kepegawaian->save();
+            }
+
+            if ($request->hasFile('file_sk_pangkat')) {
+                $fileName = time() . '_sk_pangkat.' . $request->file('file_sk_pangkat')->getClientOriginalExtension();
+                $path = $request->file('file_sk_pangkat')->move(public_path('uploads'), $fileName);
+                $kepegawaian->file_sk_pangkat = 'uploads/' . $fileName;
+                $kepegawaian->save();
+            }
+
+            // Update dokumen pendaftaran
+            $dokumenFields = [
+                'file_surat_komitmen',
+                'file_pakta_integritas',
+                'file_surat_tugas',
+                'file_surat_kelulusan_seleksi',
+                'file_surat_sehat',
+                'file_surat_bebas_narkoba'
+            ];
+
+            foreach ($dokumenFields as $field) {
+                if ($request->hasFile($field)) {
+                    $fileName = time() . '_' . $field . '.' . $request->file($field)->getClientOriginalExtension();
+                    $path = $request->file($field)->move(public_path('uploads'), $fileName);
+                    $pendaftaran->$field = 'uploads/' . $fileName;
+                }
+            }
+            $pendaftaran->save();
+
+            // Update mentor
+            $pesertaMentor = PesertaMentor::where('id_pendaftaran', $pendaftaran->id)->first();
+
+            if ($request->sudah_ada_mentor === 'Ya') {
+                $mentor = null;
+
+                if ($request->mentor_mode === 'pilih' && $request->id_mentor) {
+                    $mentor = Mentor::find($request->id_mentor);
+                } elseif ($request->mentor_mode === 'tambah') {
+                    $mentor = Mentor::create([
+                        'nama_mentor' => $request->nama_mentor_baru,
+                        'jabatan_mentor' => $request->jabatan_mentor_baru,
+                        'nomor_rekening' => $request->nomor_rekening_mentor_baru,
+                        'npwp_mentor' => $request->npwp_mentor_baru,
+                        'status_aktif' => true,
+                    ]);
+                }
+
+                if ($mentor) {
+                    if ($pesertaMentor) {
+                        $pesertaMentor->update([
+                            'id_mentor' => $mentor->id,
+                            'status_mentoring' => 'Ditugaskan',
+                        ]);
+                    } else {
+                        PesertaMentor::create([
+                            'id_pendaftaran' => $pendaftaran->id,
+                            'id_mentor' => $mentor->id,
+                            'tanggal_penunjukan' => now(),
+                            'status_mentoring' => 'Ditugaskan',
+                        ]);
+                    }
+                }
+            } else {
+                // Hapus mentor jika ada
+                if ($pesertaMentor) {
+                    $pesertaMentor->delete();
+                }
+            }
+
+            // Response
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data peserta berhasil diperbarui!',
+                    'redirect_url' => route('peserta.index', ['jenis' => $jenis])
+                ], 200);
+            }
+
+            return redirect()->route('peserta.index', ['jenis' => $jenis])
+                ->with('success', 'Data peserta berhasil diperbarui!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput();
+        } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+
+
+    public function destroy($jenis, $id)
+    {
+        try {
+            $jenisData = $this->getJenisData($jenis);
+
+            // Cari pendaftaran berdasarkan ID
+            $pendaftaran = Pendaftaran::with(['peserta', 'peserta.kepegawaianPeserta', 'pesertaMentor'])
+                ->findOrFail($id);
+
+            // Verifikasi jenis pelatihan sesuai
+            if ($pendaftaran->id_jenis_pelatihan != $jenisData['id']) {
+                abort(404, 'Data tidak ditemukan untuk jenis pelatihan ini');
+            }
+
+            $peserta = $pendaftaran->peserta;
+
+            // 1. Hapus file-file yang terkait
+            $filesToDelete = [];
+
+            // File dari peserta
+            if ($peserta) {
+                $filesToDelete[] = $peserta->file_ktp;
+                $filesToDelete[] = $peserta->file_pas_foto;
+            }
+
+            // File dari kepegawaian
+            if ($peserta && $peserta->kepegawaianPeserta) {
+                $kepegawaian = $peserta->kepegawaianPeserta;
+                $filesToDelete[] = $kepegawaian->file_sk_jabatan;
+                $filesToDelete[] = $kepegawaian->file_sk_pangkat;
+                $filesToDelete[] = $kepegawaian->file_sk_cpns;
+                $filesToDelete[] = $kepegawaian->file_spmt;
+                $filesToDelete[] = $kepegawaian->file_skp;
+            }
+
+            // File dari pendaftaran
+            $fileFields = [
+                'file_surat_tugas',
+                'file_surat_kesediaan',
+                'file_pakta_integritas',
+                'file_surat_komitmen',
+                'file_surat_kelulusan_seleksi',
+                'file_surat_sehat',
+                'file_surat_bebas_narkoba',
+                'file_surat_pernyataan_administrasi',
+                'file_sertifikat_penghargaan',
+                'file_persetujuan_mentor'
+            ];
+
+            foreach ($fileFields as $field) {
+                if ($pendaftaran->$field) {
+                    $filesToDelete[] = $pendaftaran->$field;
+                }
+            }
+
+            // Hapus file fisik
+            foreach ($filesToDelete as $file) {
+                if ($file && file_exists(public_path($file))) {
+                    unlink(public_path($file));
+                }
+            }
+
+            // 2. Hapus data mentor jika ada
+            PesertaMentor::where('id_pendaftaran', $pendaftaran->id)->delete();
+
+            // 3. Hapus data kepegawaian jika ada
+            if ($peserta && $peserta->kepegawaianPeserta) {
+                $peserta->kepegawaianPeserta->delete();
+            }
+
+            // 4. Hapus pendaftaran
+            $pendaftaran->delete();
+
+            // 5. Cek apakah peserta masih memiliki pendaftaran lain
+            $otherRegistrations = Pendaftaran::where('id_peserta', $peserta->id)->count();
+
+            if ($otherRegistrations == 0) {
+                $peserta->delete();
+            }
+
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data peserta berhasil dihapus'
+                ]);
+            }
+
+            return redirect()->route('peserta.index', ['jenis' => $jenis])
+                ->with('success', 'Data peserta berhasil dihapus');
+        } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menghapus data: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->route('peserta.index', ['jenis' => $jenis])
+                ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
 }
