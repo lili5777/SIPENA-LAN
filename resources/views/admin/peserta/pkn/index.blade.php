@@ -599,1596 +599,1630 @@
 </div>
 
 @section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize variables
-            let currentPage = 1;
-            let rowsPerPage = 10;
-            let filteredRows = [];
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Initialize variables
+                let currentPage = 1;
+                let rowsPerPage = 10;
+                let filteredRows = [];
 
-            // Initialize tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
+                // Initialize tooltips
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
 
-            // Modals
-            const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-            const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                // Modals
+                const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+                const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-            // Status Form Elements
-            const statusForm = document.getElementById('statusForm');
-            const statusSubmitBtn = document.getElementById('statusSubmitBtn');
-            const statusCancelBtn = document.getElementById('statusCancelBtn');
-            const statusLoading = document.getElementById('statusLoading');
+                // Status Form Elements
+                const statusForm = document.getElementById('statusForm');
+                const statusSubmitBtn = document.getElementById('statusSubmitBtn');
+                const statusCancelBtn = document.getElementById('statusCancelBtn');
+                const statusLoading = document.getElementById('statusLoading');
 
-            // Initialize table
-            initializeTable();
+                // Initialize table
+                initializeTable();
 
-            // Show entries dropdown
-            const showEntries = document.getElementById('showEntries');
-            showEntries.addEventListener('change', function () {
-                rowsPerPage = this.value === '-1' ? -1 : parseInt(this.value);
-                currentPage = 1;
-                updateTable();
-            });
+                // Show entries dropdown
+                const showEntries = document.getElementById('showEntries');
+                showEntries.addEventListener('change', function () {
+                    rowsPerPage = this.value === '-1' ? -1 : parseInt(this.value);
+                    currentPage = 1;
+                    updateTable();
+                });
 
-            // Pagination controls
-            document.getElementById('prevPage').addEventListener('click', function () {
-                if (currentPage > 1) {
-                    currentPage--;
+                // Pagination controls
+                document.getElementById('prevPage').addEventListener('click', function () {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updateTable();
+                    }
+                });
+
+                document.getElementById('nextPage').addEventListener('click', function () {
+                    const totalPages = Math.ceil(filteredRows.length / (rowsPerPage === -1 ?
+                        filteredRows.length : rowsPerPage));
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        updateTable();
+                    }
+                });
+
+                // Initialize table function
+                function initializeTable() {
+                    const table = document.getElementById('pesertaTable');
+                    filteredRows = Array.from(table.querySelectorAll('tbody tr:not(.empty-state-row)'));
                     updateTable();
                 }
-            });
 
-            document.getElementById('nextPage').addEventListener('click', function () {
-                const totalPages = Math.ceil(filteredRows.length / (rowsPerPage === -1 ?
-                    filteredRows.length : rowsPerPage));
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    updateTable();
-                }
-            });
+                // Update table display
+                function updateTable() {
+                    const table = document.getElementById('pesertaTable');
+                    const rows = filteredRows;
+                    const totalRows = rows.length;
 
-            // Initialize table function
-            function initializeTable() {
-                const table = document.getElementById('pesertaTable');
-                filteredRows = Array.from(table.querySelectorAll('tbody tr:not(.empty-state-row)'));
-                updateTable();
-            }
+                    // Calculate pagination
+                    const totalPages = rowsPerPage === -1 ? 1 : Math.ceil(totalRows / rowsPerPage);
+                    const startIndex = rowsPerPage === -1 ? 0 : (currentPage - 1) * rowsPerPage;
+                    const endIndex = rowsPerPage === -1 ? totalRows : startIndex + rowsPerPage;
 
-            // Update table display
-            function updateTable() {
-                const table = document.getElementById('pesertaTable');
-                const rows = filteredRows;
-                const totalRows = rows.length;
-
-                // Calculate pagination
-                const totalPages = rowsPerPage === -1 ? 1 : Math.ceil(totalRows / rowsPerPage);
-                const startIndex = rowsPerPage === -1 ? 0 : (currentPage - 1) * rowsPerPage;
-                const endIndex = rowsPerPage === -1 ? totalRows : startIndex + rowsPerPage;
-
-                // Hide all rows
-                rows.forEach(row => {
-                    row.style.display = 'none';
-                });
-
-                // Show rows for current page
-                const visibleRows = rows.slice(startIndex, endIndex);
-                visibleRows.forEach(row => {
-                    row.style.display = '';
-                });
-
-                // Update pagination info
-                updatePaginationInfo(startIndex, endIndex, totalRows);
-
-                // Update pagination controls
-                updatePaginationControls(currentPage, totalPages);
-            }
-
-            // Update pagination info
-            function updatePaginationInfo(start, end, total) {
-                const startDisplay = total === 0 ? 0 : start + 1;
-                const endDisplay = Math.min(end, total);
-
-                document.getElementById('paginationInfo').textContent =
-                    `Menampilkan ${startDisplay}-${endDisplay} dari ${total} peserta`;
-
-                document.getElementById('tableInfo').textContent =
-                    `Menampilkan ${endDisplay} dari ${total} peserta`;
-            }
-
-            // Update pagination controls
-            function updatePaginationControls(current, total) {
-                document.getElementById('currentPage').textContent = current;
-                document.getElementById('totalPages').textContent = total;
-
-                const prevBtn = document.getElementById('prevPage');
-                const nextBtn = document.getElementById('nextPage');
-
-                prevBtn.parentElement.classList.toggle('disabled', current <= 1);
-                nextBtn.parentElement.classList.toggle('disabled', current >= total);
-            }
-
-            // View Detail
-            document.querySelectorAll('.view-detail').forEach(button => {
-                button.addEventListener('click', function () {
-                    const pendaftaranId = this.getAttribute('data-id');
-                    loadAllDetailData(pendaftaranId);
-                    detailModal.show();
-                });
-            });
-
-            // Update Status - PERBAIKAN: Gunakan data-status yang benar
-            document.querySelectorAll('.update-status').forEach(button => {
-                button.addEventListener('click', function () {
-                    const pendaftaranId = this.getAttribute('data-id');
-                    const currentStatus = this.getAttribute('data-status'); 
-                    const jenis = "{{ request()->route('jenis') }}";
-
-                    // Set form action - Sesuaikan dengan route Anda
-                    const form = document.getElementById('statusForm');
-                    form.action = `/peserta/update-status/${pendaftaranId}`;
-
-                    // Set current status
-                    const currentStatusElement = document.getElementById('currentStatus');
-                    const statusText = formatStatusText(currentStatus);
-                    const statusColor = getStatusColor(currentStatus);
-                    const statusIcon = getStatusIcon(currentStatus);
-
-                    currentStatusElement.innerHTML = `
-                        <span class="badge custom-badge ${statusColor}">
-                            <i class="fas ${statusIcon} me-1"></i>
-                            ${statusText}
-                        </span>
-                    `;
-
-                    // Set current status in select
-                    const statusSelect = document.getElementById('statusSelect');
-                    statusSelect.value = currentStatus;
-
-                    // Reset form state
-                    statusLoading.classList.add('d-none');
-                    statusSubmitBtn.disabled = false;
-                    statusCancelBtn.disabled = false;
-                    statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-                    document.getElementById('catatanInput').value = '';
-
-                    statusModal.show();
-                });
-            });
-
-            // Delete Peserta
-            const deleteForm = document.getElementById('deleteForm');
-            const deletePesertaName = document.getElementById('deletePesertaName');
-
-            document.querySelectorAll('.delete-peserta').forEach(button => {
-                button.addEventListener('click', function () {
-                    const pesertaId = this.getAttribute('data-id');
-                    const pesertaName = this.getAttribute('data-name');
-                    const jenis = this.getAttribute('data-jenis');
-
-                    deletePesertaName.textContent = pesertaName;
-                    deleteForm.action = `/peserta/${jenis}/${pesertaId}`;
-                    deleteModal.show();
-                });
-            });
-
-            // Status Form Submission dengan loading indicator
-            statusForm.addEventListener('submit', async function (e) {
-                e.preventDefault();
-
-                // Tampilkan loading, sembunyikan tombol
-                // statusLoading.classList.remove('d-none');
-                statusSubmitBtn.disabled = true;
-                statusCancelBtn.disabled = true;
-                statusSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
-
-                const formData = new FormData(this);
-                const action = this.action;
-
-                try {
-                    const response = await fetch(action, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: formData
+                    // Hide all rows
+                    rows.forEach(row => {
+                        row.style.display = 'none';
                     });
 
-                    const result = await response.json();
+                    // Show rows for current page
+                    const visibleRows = rows.slice(startIndex, endIndex);
+                    visibleRows.forEach(row => {
+                        row.style.display = '';
+                    });
 
-                    if (result.success) {
-                        // Update tombol dengan sukses
-                        statusSubmitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
-                        statusSubmitBtn.classList.remove('btn-primary');
-                        statusSubmitBtn.classList.add('btn-success');
+                    // Update pagination info
+                    updatePaginationInfo(startIndex, endIndex, totalRows);
 
-                        showAlert('success', result.message);
+                    // Update pagination controls
+                    updatePaginationControls(currentPage, totalPages);
+                }
 
-                        // Tutup modal setelah sukses
-                        setTimeout(() => {
-                            statusModal.hide();
+                // Update pagination info
+                function updatePaginationInfo(start, end, total) {
+                    const startDisplay = total === 0 ? 0 : start + 1;
+                    const endDisplay = Math.min(end, total);
 
-                            // Reset tombol ke keadaan semula
+                    document.getElementById('paginationInfo').textContent =
+                        `Menampilkan ${startDisplay}-${endDisplay} dari ${total} peserta`;
+
+                    document.getElementById('tableInfo').textContent =
+                        `Menampilkan ${endDisplay} dari ${total} peserta`;
+                }
+
+                // Update pagination controls
+                function updatePaginationControls(current, total) {
+                    document.getElementById('currentPage').textContent = current;
+                    document.getElementById('totalPages').textContent = total;
+
+                    const prevBtn = document.getElementById('prevPage');
+                    const nextBtn = document.getElementById('nextPage');
+
+                    prevBtn.parentElement.classList.toggle('disabled', current <= 1);
+                    nextBtn.parentElement.classList.toggle('disabled', current >= total);
+                }
+
+                // View Detail
+                document.querySelectorAll('.view-detail').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const pendaftaranId = this.getAttribute('data-id');
+                        loadAllDetailData(pendaftaranId);
+                        detailModal.show();
+                    });
+                });
+
+                // Update Status - PERBAIKAN: Gunakan data-status yang benar
+                document.querySelectorAll('.update-status').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const pendaftaranId = this.getAttribute('data-id');
+                        const currentStatus = this.getAttribute('data-status'); 
+                        const jenis = "{{ request()->route('jenis') }}";
+
+                        // Set form action - Sesuaikan dengan route Anda
+                        const form = document.getElementById('statusForm');
+                        form.action = `/peserta/update-status/${pendaftaranId}`;
+
+                        // Set current status
+                        const currentStatusElement = document.getElementById('currentStatus');
+                        const statusText = formatStatusText(currentStatus);
+                        const statusColor = getStatusColor(currentStatus);
+                        const statusIcon = getStatusIcon(currentStatus);
+
+                        currentStatusElement.innerHTML = `
+                            <span class="badge custom-badge ${statusColor}">
+                                <i class="fas ${statusIcon} me-1"></i>
+                                ${statusText}
+                            </span>
+                        `;
+
+                        // Set current status in select
+                        const statusSelect = document.getElementById('statusSelect');
+                        statusSelect.value = currentStatus;
+
+                        // Reset form state
+                        statusLoading.classList.add('d-none');
+                        statusSubmitBtn.disabled = false;
+                        statusCancelBtn.disabled = false;
+                        statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+                        document.getElementById('catatanInput').value = '';
+
+                        statusModal.show();
+                    });
+                });
+
+                // Delete Peserta
+                const deleteForm = document.getElementById('deleteForm');
+                const deletePesertaName = document.getElementById('deletePesertaName');
+
+                document.querySelectorAll('.delete-peserta').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const pesertaId = this.getAttribute('data-id');
+                        const pesertaName = this.getAttribute('data-name');
+                        const jenis = this.getAttribute('data-jenis');
+
+                        deletePesertaName.textContent = pesertaName;
+                        deleteForm.action = `/peserta/${jenis}/${pesertaId}`;
+                        deleteModal.show();
+                    });
+                });
+
+                // Status Form Submission dengan loading indicator
+                statusForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    // Tampilkan loading, sembunyikan tombol
+                    // statusLoading.classList.remove('d-none');
+                    statusSubmitBtn.disabled = true;
+                    statusCancelBtn.disabled = true;
+                    statusSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
+
+                    const formData = new FormData(this);
+                    const action = this.action;
+
+                    try {
+                        const response = await fetch(action, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Update tombol dengan sukses
+                            statusSubmitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
+                            statusSubmitBtn.classList.remove('btn-primary');
+                            statusSubmitBtn.classList.add('btn-success');
+
+                            showAlert('success', result.message);
+
+                            // Tutup modal setelah sukses
                             setTimeout(() => {
-                                // statusLoading.classList.add('d-none');
-                                statusSubmitBtn.disabled = false;
-                                statusCancelBtn.disabled = false;
-                                statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-                                statusSubmitBtn.classList.remove('btn-success');
-                                statusSubmitBtn.classList.add('btn-primary');
+                                statusModal.hide();
 
-                                // Refresh halaman
-                                window.location.reload();
-                            }, 500);
-                        }, 1500);
-                    } else {
+                                // Reset tombol ke keadaan semula
+                                setTimeout(() => {
+                                    // statusLoading.classList.add('d-none');
+                                    statusSubmitBtn.disabled = false;
+                                    statusCancelBtn.disabled = false;
+                                    statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+                                    statusSubmitBtn.classList.remove('btn-success');
+                                    statusSubmitBtn.classList.add('btn-primary');
+
+                                    // Refresh halaman
+                                    window.location.reload();
+                                }, 500);
+                            }, 1500);
+                        } else {
+                            // Sembunyikan loading, aktifkan tombol kembali
+                            // statusLoading.classList.add('d-none');
+                            statusSubmitBtn.disabled = false;
+                            statusCancelBtn.disabled = false;
+                            statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+
+                            showAlert('error', result.message || 'Terjadi kesalahan');
+                        }
+                    } catch (error) {
                         // Sembunyikan loading, aktifkan tombol kembali
                         // statusLoading.classList.add('d-none');
                         statusSubmitBtn.disabled = false;
                         statusCancelBtn.disabled = false;
                         statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
 
-                        showAlert('error', result.message || 'Terjadi kesalahan');
+                        showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+                        console.error('Error:', error);
                     }
-                } catch (error) {
-                    // Sembunyikan loading, aktifkan tombol kembali
-                    // statusLoading.classList.add('d-none');
-                    statusSubmitBtn.disabled = false;
-                    statusCancelBtn.disabled = false;
-                    statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-
-                    showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
-                    console.error('Error:', error);
-                }
-            });
-
-            // Load All Detail Data
-            async function loadAllDetailData(pendaftaranId) {
-                try {
-                    const response = await fetch(`/peserta/detail/${pendaftaranId}`);
-                    const result = await response.json();
-
-                    if (result.success) {
-                        const data = result.data;
-
-                        // Update modal header
-                        document.getElementById('detailModalSubtitle').textContent =
-                            `${data.peserta.nip_nrp || 'NIP/NRP tidak tersedia'} • ${data.angkatan?.nama_angkatan || ''}`;
-
-                        // Update status badge
-                        updateStatusBadge(data.pendaftaran.status_pendaftaran);
-
-                        // Update timestamp
-                        document.getElementById('detailTimestamp').textContent =
-                            `Terakhir diperbarui: ${formatDateTime(new Date())}`;
-
-                        // Load tab contents
-                        loadDataPesertaContent(data);
-                        loadDokumenContent(data);
-                        loadMentorContent(data);
-                    } else {
-                        showDetailError();
-                    }
-                } catch (error) {
-                    showDetailError();
-                    console.error('Error loading detail:', error);
-                }
-            }
-
-            // Load Data Peserta Content
-            function loadDataPesertaContent(data) {
-                const content = document.getElementById('dataPesertaContent');
-                content.innerHTML = generateDataPesertaHTML(data);
-            }
-
-            // Load Dokumen Content - SEMUA DISATUKAN
-            function loadDokumenContent(data) {
-                const content = document.getElementById('dokumenContent');
-                content.innerHTML = generateDokumenHTML(data);
-
-                // Add event listeners for document viewer
-                content.querySelectorAll('.view-document').forEach(button => {
-                    button.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        const url = this.getAttribute('data-url');
-                        const title = this.getAttribute('data-title');
-                        openDocumentViewer(url, title);
-                    });
                 });
-            }
 
-            // Load Mentor Content
-            function loadMentorContent(data) {
-                const content = document.getElementById('mentorContent');
-                content.innerHTML = generateMentorHTML(data);
-            }
+                // Load All Detail Data
+                async function loadAllDetailData(pendaftaranId) {
+                    try {
+                        const response = await fetch(`/peserta/detail/${pendaftaranId}`);
+                        const result = await response.json();
 
-            // Generate Data Peserta HTML
-            function generateDataPesertaHTML(data) {
-                const peserta = data.peserta;
-                const kepegawaian = data.kepegawaian;
+                        if (result.success) {
+                            const data = result.data;
 
-                return `
-                    <div class="detail-content">
-                        <!-- Profile Header -->
-                        <div class="profile-header mb-4 pb-4 border-bottom">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <h4 class="fw-bold text-primary mb-2">${peserta.nama_lengkap}</h4>
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <div class="info-item">
-                                                <label class="text-muted small">NIP/NRP</label>
-                                                <p class="fw-semibold mb-0">${peserta.nip_nrp || '-'}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="info-item">
-                                                <label class="text-muted small">Jenis Kelamin</label>
-                                                <p class="fw-semibold mb-0">${peserta.jenis_kelamin || '-'}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="info-item">
-                                                <label class="text-muted small">Tempat/Tanggal Lahir</label>
-                                                <p class="fw-semibold mb-0">${peserta.tempat_lahir || '-'}, ${formatDate(peserta.tanggal_lahir)}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="info-item">
-                                                <label class="text-muted small">Agama</label>
-                                                <p class="fw-semibold mb-0">${peserta.agama || '-'}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 text-md-end">
-                                    <div class="avatar-placeholder rounded-3 bg-primary bg-opacity-10 p-4 d-inline-block">
-                                        <i class="fas fa-user fa-4x text-primary"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            // Update modal header
+                            document.getElementById('detailModalSubtitle').textContent =
+                                `${data.peserta.nip_nrp || 'NIP/NRP tidak tersedia'} • ${data.angkatan?.nama_angkatan || ''}`;
 
-                        <!-- Informasi Pribadi -->
-                        <div class="info-section mb-4">
-                            <h6 class="fw-bold mb-3 pb-2 border-bottom">
-                                <i class="fas fa-id-card me-2 text-primary"></i>Informasi Pribadi
-                            </h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Alamat Rumah</label>
-                                        <p class="fw-semibold mb-0">${peserta.alamat_rumah || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Email Pribadi</label>
-                                        <p class="fw-semibold mb-0">${peserta.email_pribadi || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Nomor HP/WhatsApp</label>
-                                        <p class="fw-semibold mb-0">${peserta.nomor_hp || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Pendidikan Terakhir</label>
-                                        <p class="fw-semibold mb-0">${peserta.pendidikan_terakhir || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Bidang Studi</label>
-                                        <p class="fw-semibold mb-0">${peserta.bidang_studi || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Bidang Keahlian</label>
-                                        <p class="fw-semibold mb-0">${peserta.bidang_keahlian || '-'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            // Update status badge
+                            updateStatusBadge(data.pendaftaran.status_pendaftaran);
 
-                        <!-- Informasi Kepegawaian -->
-                        <div class="info-section mb-4">
-                            <h6 class="fw-bold mb-3 pb-2 border-bottom">
-                                <i class="fas fa-building me-2 text-primary"></i>Informasi Kepegawaian
-                            </h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Asal Instansi</label>
-                                        <p class="fw-semibold mb-0">${kepegawaian?.asal_instansi || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Unit Kerja</label>
-                                        <p class="fw-semibold mb-0">${kepegawaian?.unit_kerja || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Jabatan</label>
-                                        <p class="fw-semibold mb-0">${kepegawaian?.jabatan || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Eselon</label>
-                                        <p class="fw-semibold mb-0">${kepegawaian?.eselon || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Pangkat/Golongan</label>
-                                        <p class="fw-semibold mb-0">${kepegawaian?.pangkat || '-'} ${kepegawaian?.golongan_ruang ? '/ ' + kepegawaian.golongan_ruang : ''}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Email Kantor</label>
-                                        <p class="fw-semibold mb-0">${kepegawaian?.email_kantor || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Alamat Kantor</label>
-                                        <p class="fw-semibold mb-0">${kepegawaian?.alamat_kantor || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Nomor Telepon Kantor</label>
-                                        <p class="fw-semibold mb-0">${kepegawaian?.nomor_telepon_kantor || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Provinsi</label>
-                                        <p class="fw-semibold mb-0">${data.provinsi?.name || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Kabupaten/Kota</label>
-                                        <p class="fw-semibold mb-0">${data.kabupaten?.name || '-'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            // Update timestamp
+                            document.getElementById('detailTimestamp').textContent =
+                                `Terakhir diperbarui: ${formatDateTime(new Date())}`;
 
-                        <!-- Informasi Tambahan -->
-                        <div class="info-section">
-                            <h6 class="fw-bold mb-3 pb-2 border-bottom">
-                                <i class="fas fa-info-circle me-2 text-primary"></i>Informasi Tambahan
-                            </h6>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Status</label>
-                                        <p class="fw-semibold mb-0">${peserta.status_perkawinan || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Nama Pasangan</label>
-                                        <p class="fw-semibold mb-0">${peserta.nama_pasangan || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Olahraga/Hobi</label>
-                                        <p class="fw-semibold mb-0">${peserta.olahraga_hobi || '-'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Merokok</label>
-                                        <p class="fw-semibold mb-0">${peserta.perokok ? 'Ya' : 'Tidak'}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="info-item">
-                                        <label class="text-muted small">Ukuran Kaos</label>
-                                        <p class="fw-semibold mb-0">${peserta.ukuran_kaos || '-'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Generate Dokumen HTML - SEMUA DISATUKAN
-            function generateDokumenHTML(data) {
-                const peserta = data.peserta;
-                const kepegawaian = data.kepegawaian;
-                const pendaftaran = data.pendaftaran;
-
-                // Dokumen dengan ikon yang lebih jelas
-                const dokumenList = [
-                    {
-                        title: 'Pasfoto',
-                        icon: 'fa-camera',
-                        color: 'primary',
-                        file: peserta.file_pas_foto,
-                        description: 'Foto terbaru ukuran 4x6 dengan background merah'
-                    },
-                    {
-                        title: 'SK Jabatan Terakhir',
-                        icon: 'fa-file-alt',
-                        color: 'success',
-                        file: kepegawaian?.file_sk_jabatan,
-                        description: 'Surat Keputusan jabatan terakhir yang masih berlaku'
-                    },
-                    {
-                        title: 'SK Pangkat/Golongan',
-                        icon: 'fa-award',
-                        color: 'warning',
-                        file: kepegawaian?.file_sk_pangkat,
-                        description: 'Surat Keputusan kenaikan pangkat/golongan'
-                    },
-                    {
-                        title: 'Surat Komitmen',
-                        icon: 'fa-handshake',
-                        color: 'info',
-                        file: pendaftaran.file_surat_komitmen,
-                        description: 'Surat komitmen menyelesaikan pelatihan'
-                    },
-                    {
-                        title: 'Pakta Integritas',
-                        icon: 'fa-file-signature',
-                        color: 'danger',
-                        file: pendaftaran.file_pakta_integritas,
-                        description: 'Pakta integritas mengikuti peraturan'
-                    },
-                    {
-                        title: 'Surat Tugas',
-                        icon: 'fa-tasks',
-                        color: 'primary',
-                        file: pendaftaran.file_surat_tugas,
-                        description: 'Surat tugas dari instansi asal'
-                    },
-                    {
-                        title: 'Surat Kelulusan Seleksi',
-                        icon: 'fa-graduation-cap',
-                        color: 'success',
-                        file: pendaftaran.file_surat_kelulusan_seleksi,
-                        description: 'Surat kelulusan seleksi administrasi'
-                    },
-                    {
-                        title: 'Surat Sehat',
-                        icon: 'fa-heartbeat',
-                        color: 'warning',
-                        file: pendaftaran.file_surat_sehat,
-                        description: 'Surat keterangan sehat dari dokter'
-                    },
-                    {
-                        title: 'Surat Bebas Narkoba',
-                        icon: 'fa-ban',
-                        color: 'info',
-                        file: pendaftaran.file_surat_bebas_narkoba,
-                        description: 'Surat keterangan bebas narkoba'
+                            // Load tab contents
+                            loadDataPesertaContent(data);
+                            loadDokumenContent(data);
+                            loadMentorContent(data);
+                        } else {
+                            showDetailError();
+                        }
+                    } catch (error) {
+                        showDetailError();
+                        console.error('Error loading detail:', error);
                     }
-                ];
-
-                // Hitung statistik dokumen
-                const totalDokumen = dokumenList.length;
-                const dokumenTersedia = dokumenList.filter(d => d.file).length;
-                const dokumenBelum = totalDokumen - dokumenTersedia;
-                const persentaseKelengkapan = dokumenTersedia > 0 ? Math.round((dokumenTersedia / totalDokumen) * 100) : 0;
-
-                return `
-                    <div class="dokumen-container">
-                        <!-- Statistik Dokumen -->
-                        <div class="row mb-4">
-                            <div class="col-md-6 col-lg-3">
-                                <div class="stat-card card border-0 shadow-sm">
-                                    <div class="card-body text-center p-3">
-                                        <div class="stat-icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
-                                            <i class="fas fa-folder-open fa-xl text-primary"></i>
-                                        </div>
-                                        <h3 class="fw-bold text-primary mb-1">${totalDokumen}</h3>
-                                        <p class="text-muted small mb-0">Total Dokumen</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="stat-card card border-0 shadow-sm">
-                                    <div class="card-body text-center p-3">
-                                        <div class="stat-icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
-                                            <i class="fas fa-check-circle fa-xl text-success"></i>
-                                        </div>
-                                        <h3 class="fw-bold text-success mb-1">${dokumenTersedia}</h3>
-                                        <p class="text-muted small mb-0">Dokumen Tersedia</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="stat-card card border-0 shadow-sm">
-                                    <div class="card-body text-center p-3">
-                                        <div class="stat-icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
-                                            <i class="fas fa-clock fa-xl text-warning"></i>
-                                        </div>
-                                        <h3 class="fw-bold text-warning mb-1">${dokumenBelum}</h3>
-                                        <p class="text-muted small mb-0">Belum Diunggah</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="stat-card card border-0 shadow-sm">
-                                    <div class="card-body text-center p-3">
-                                        <div class="stat-icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
-                                            <i class="fas fa-chart-line fa-xl text-info"></i>
-                                        </div>
-                                        <h3 class="fw-bold text-info mb-1">${persentaseKelengkapan}%</h3>
-                                        <p class="text-muted small mb-0">Kelengkapan</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Progress Bar Kelengkapan -->
-                        <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 class="fw-bold mb-0">Kelengkapan Dokumen</h6>
-                                    <span class="badge bg-primary">${persentaseKelengkapan}%</span>
-                                </div>
-                                <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" 
-                                         style="width: ${persentaseKelengkapan}%" 
-                                         aria-valuenow="${persentaseKelengkapan}" 
-                                         aria-valuemin="0" 
-                                         aria-valuemax="100">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Header -->
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="fw-bold mb-0 d-flex align-items-center">
-                                <div class="icon-wrapper bg-primary bg-opacity-10 p-2 rounded-3 me-3">
-                                    <i class="fas fa-folder-open text-primary"></i>
-                                </div>
-                                <span>Semua Dokumen Peserta</span>
-                            </h5>
-                            <div class="text-muted small">
-                                <i class="fas fa-check-circle text-success me-1"></i>
-                                ${dokumenTersedia} dari ${totalDokumen} dokumen tersedia
-                            </div>
-                        </div>
-
-                        <!-- Grid Dokumen -->
-                        <div class="row g-4">
-                            ${dokumenList.map(dokumen => dokumenCard(dokumen)).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Dokumen Card Component
-            function dokumenCard(dokumen) {
-                if (dokumen.file) {
-                    const fileSize = getFileSize(dokumen.file);
-                    return `
-                        <div class="col-xl-4 col-lg-6 col-md-6">
-                            <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-available">
-                                <div class="card-body p-4">
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="dokumen-icon-wrapper bg-${dokumen.color} bg-opacity-10 p-3 rounded-3 me-3">
-                                            <i class="fas ${dokumen.icon} fa-2x text-${dokumen.color}"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
-                                            <p class="text-muted small mb-2">${dokumen.description}</p>
-                                            <div class="d-flex align-items-center flex-wrap gap-2">
-                                                <span class="badge bg-success bg-opacity-10 text-success">
-                                                    <i class="fas fa-check-circle me-1"></i>Tersedia
-                                                </span>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-file me-1"></i>${fileSize}
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-${dokumen.color} view-document" 
-                                                data-url="${dokumen.file}" data-title="${dokumen.title}">
-                                            <i class="fas fa-eye me-1"></i> Lihat
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    return `
-                        <div class="col-xl-4 col-lg-6 col-md-6">
-                            <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-missing">
-                                <div class="card-body p-4">
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="dokumen-icon-wrapper bg-secondary bg-opacity-10 p-3 rounded-3 me-3">
-                                            <i class="fas ${dokumen.icon} fa-2x text-secondary"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
-                                            <p class="text-muted small mb-2">${dokumen.description}</p>
-                                            <div class="d-flex align-items-center">
-                                                <span class="badge bg-danger bg-opacity-10 text-danger">
-                                                    <i class="fas fa-times-circle me-1"></i>Belum diunggah
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-center">
-                                        <small class="text-muted">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Dokumen belum diunggah oleh peserta
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            // Helper function untuk ukuran file
-            function getFileSize(fileUrl) {
-                // Simulasi ukuran file
-                const sizes = ['2.1 MB', '1.8 MB', '3.2 MB', '1.5 MB', '2.4 MB', '1.9 MB', '2.7 MB', '2.3 MB', '1.6 MB'];
-                const randomIndex = Math.floor(Math.random() * sizes.length);
-                return sizes[randomIndex];
-            }
-
-            // Generate Mentor HTML
-            function generateMentorHTML(data) {
-                const mentor = data.mentor;
-                const angkatan = data.angkatan;
-
-                if (!mentor) {
-                    return `
-                        <div class="mentor-content text-center py-5">
-                            <div class="empty-state">
-                                <div class="empty-state-icon mb-4">
-                                    <i class="fas fa-chalkboard-teacher fa-4x" style="color: #e9ecef;"></i>
-                                </div>
-                                <h4 class="text-muted mb-3">Belum Ditugaskan Mentor</h4>
-                                <p class="text-muted mb-4">Peserta ini belum memiliki mentor yang ditugaskan</p>
-                            </div>
-                        </div>
-                    `;
                 }
 
-                return `
-                    <div class="mentor-content">
-                        <!-- Mentor Profile -->
-                        <div class="mentor-profile card border-0 shadow-sm mb-4">
-                            <div class="card-body">
+                // Load Data Peserta Content
+                function loadDataPesertaContent(data) {
+                    const content = document.getElementById('dataPesertaContent');
+                    content.innerHTML = generateDataPesertaHTML(data);
+                }
+
+                // Load Dokumen Content - SEMUA DISATUKAN
+                function loadDokumenContent(data) {
+                    const content = document.getElementById('dokumenContent');
+                    content.innerHTML = generateDokumenHTML(data);
+
+                    // Add event listeners for document viewer
+                    content.querySelectorAll('.view-document').forEach(button => {
+                        button.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            const url = this.getAttribute('data-url');
+                            const title = this.getAttribute('data-title');
+                            openDocumentViewer(url, title);
+                        });
+                    });
+                }
+
+                // Load Mentor Content
+                function loadMentorContent(data) {
+                    const content = document.getElementById('mentorContent');
+                    content.innerHTML = generateMentorHTML(data);
+                }
+
+                // Generate Data Peserta HTML
+                function generateDataPesertaHTML(data) {
+                    const peserta = data.peserta;
+                    const kepegawaian = data.kepegawaian;
+
+                    return `
+                        <div class="detail-content">
+                            <!-- Profile Header -->
+                            <div class="profile-header mb-4 pb-4 border-bottom">
                                 <div class="row align-items-center">
                                     <div class="col-md-8">
-                                        <h4 class="fw-bold text-primary mb-2">${mentor.nama_mentor}</h4>
+                                        <h4 class="fw-bold text-primary mb-2">${peserta.nama_lengkap}</h4>
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <div class="info-item">
-                                                    <label class="text-muted small">Jabatan</label>
-                                                    <p class="fw-semibold mb-0">${mentor.jabatan_mentor || '-'}</p>
+                                                    <label class="text-muted small">NIP/NRP</label>
+                                                    <p class="fw-semibold mb-0">${peserta.nip_nrp || '-'}</p>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="info-item">
-                                                    <label class="text-muted small">Instansi</label>
-                                                    <p class="fw-semibold mb-0">${mentor.instansi_mentor || '-'}</p>
+                                                    <label class="text-muted small">Jenis Kelamin</label>
+                                                    <p class="fw-semibold mb-0">${peserta.jenis_kelamin || '-'}</p>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="info-item">
-                                                    <label class="text-muted small">Email</label>
-                                                    <p class="fw-semibold mb-0">${mentor.email_mentor || '-'}</p>
+                                                    <label class="text-muted small">Tempat/Tanggal Lahir</label>
+                                                    <p class="fw-semibold mb-0">${peserta.tempat_lahir || '-'}, ${formatDate(peserta.tanggal_lahir)}</p>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="info-item">
-                                                    <label class="text-muted small">Telepon</label>
-                                                    <p class="fw-semibold mb-0">${mentor.telepon_mentor || '-'}</p>
+                                                    <label class="text-muted small">Agama</label>
+                                                    <p class="fw-semibold mb-0">${peserta.agama || '-'}</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-4 text-md-end">
-                                        <div class="mentor-badge bg-primary bg-opacity-10 rounded-3 p-3 d-inline-block">
-                                            <i class="fas fa-chalkboard-teacher fa-3x text-primary"></i>
+                                        <div class="avatar-placeholder rounded-3 bg-primary bg-opacity-10 p-4 d-inline-block">
+                                            <i class="fas fa-user fa-4x text-primary"></i>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Informasi Angkatan -->
-                        <div class="angkatan-info card border-0 shadow-sm">
-                            <div class="card-header bg-light border-0">
-                                <h6 class="mb-0 fw-bold">
-                                    <i class="fas fa-calendar-alt me-2 text-primary"></i>Informasi Angkatan
+                            <!-- Informasi Pribadi -->
+                            <div class="info-section mb-4">
+                                <h6 class="fw-bold mb-3 pb-2 border-bottom">
+                                    <i class="fas fa-id-card me-2 text-primary"></i>Informasi Pribadi
                                 </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Alamat Rumah</label>
+                                            <p class="fw-semibold mb-0">${peserta.alamat_rumah || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Email Pribadi</label>
+                                            <p class="fw-semibold mb-0">${peserta.email_pribadi || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Nomor HP/WhatsApp</label>
+                                            <p class="fw-semibold mb-0">${peserta.nomor_hp || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Pendidikan Terakhir</label>
+                                            <p class="fw-semibold mb-0">${peserta.pendidikan_terakhir || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Bidang Studi</label>
+                                            <p class="fw-semibold mb-0">${peserta.bidang_studi || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Bidang Keahlian</label>
+                                            <p class="fw-semibold mb-0">${peserta.bidang_keahlian || '-'}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="row">
+
+                            <!-- Informasi Kepegawaian -->
+                            <div class="info-section mb-4">
+                                <h6 class="fw-bold mb-3 pb-2 border-bottom">
+                                    <i class="fas fa-building me-2 text-primary"></i>Informasi Kepegawaian
+                                </h6>
+                                <div class="row g-3">
                                     <div class="col-md-6">
-                                        <div class="info-item mb-3">
-                                            <label class="text-muted small">Nama Angkatan</label>
-                                            <p class="fw-semibold mb-0">${angkatan?.nama_angkatan || '-'}</p>
+                                        <div class="info-item">
+                                            <label class="text-muted small">Asal Instansi</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.asal_instansi || '-'}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="info-item mb-3">
-                                            <label class="text-muted small">Periode</label>
-                                            <p class="fw-semibold mb-0">
-                                                ${formatDate(angkatan?.tanggal_mulai)} - ${formatDate(angkatan?.tanggal_selesai)}
-                                            </p>
+                                        <div class="info-item">
+                                            <label class="text-muted small">Unit Kerja</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.unit_kerja || '-'}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="info-item mb-3">
-                                            <label class="text-muted small">Lokasi Pelatihan</label>
-                                            <p class="fw-semibold mb-0">${angkatan?.lokasi_pelatihan || '-'}</p>
+                                        <div class="info-item">
+                                            <label class="text-muted small">Jabatan</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.jabatan || '-'}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="info-item mb-3">
-                                            <label class="text-muted small">Status Angkatan</label>
-                                            <p class="fw-semibold mb-0">
-                                                <span class="badge ${getAngkatanStatusBadge(angkatan?.status)}">
-                                                    ${angkatan?.status || '-'}
-                                                </span>
-                                            </p>
+                                        <div class="info-item">
+                                            <label class="text-muted small">Eselon</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.eselon || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Pangkat/Golongan</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.pangkat || '-'} ${kepegawaian?.golongan_ruang ? '/ ' + kepegawaian.golongan_ruang : ''}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Email Kantor</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.email_kantor || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Alamat Kantor</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.alamat_kantor || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Nomor Telepon Kantor</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.nomor_telepon_kantor || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Provinsi</label>
+                                            <p class="fw-semibold mb-0">${data.provinsi?.name || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Kabupaten/Kota</label>
+                                            <p class="fw-semibold mb-0">${data.kabupaten?.name || '-'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informasi Tambahan -->
+                            <div class="info-section">
+                                <h6 class="fw-bold mb-3 pb-2 border-bottom">
+                                    <i class="fas fa-info-circle me-2 text-primary"></i>Informasi Tambahan
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Status</label>
+                                            <p class="fw-semibold mb-0">${peserta.status_perkawinan || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Nama Pasangan</label>
+                                            <p class="fw-semibold mb-0">${peserta.nama_pasangan || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Olahraga/Hobi</label>
+                                            <p class="fw-semibold mb-0">${peserta.olahraga_hobi || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Merokok</label>
+                                            <p class="fw-semibold mb-0">${peserta.perokok ? 'Ya' : 'Tidak'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Ukuran Kaos</label>
+                                            <p class="fw-semibold mb-0">${peserta.ukuran_kaos || '-'}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            }
+                    `;
+                }
 
-            // Helper Functions untuk Status
-            function getStatusIcon(status) {
-                const statusLower = status.toLowerCase();
-                const icons = {
-                    'menunggu verifikasi': 'fa-clock',
-                    'diterima': 'fa-check-circle',
-                    'ditolak': 'fa-times-circle',
-                    'lulus': 'fa-graduation-cap'
-                };
-                return icons[statusLower] || 'fa-question-circle';
-            }
+                // Generate Dokumen HTML - SEMUA DISATUKAN
+                function generateDokumenHTML(data) {
+                    const peserta = data.peserta;
+                    const kepegawaian = data.kepegawaian;
+                    const pendaftaran = data.pendaftaran;
 
-            function getStatusColor(status) {
-                const statusLower = status.toLowerCase();
-                const colors = {
-                    'menunggu verifikasi': 'status-warning',
-                    'diterima': 'status-info',
-                    'ditolak': 'status-danger',
-                    'lulus': 'status-success'
-                };
-                return colors[statusLower] || 'status-secondary';
-            }
+                    // Dokumen dengan ikon yang lebih jelas
+                    const dokumenList = [
+                        {
+                            title: 'Pasfoto',
+                            icon: 'fa-camera',
+                            color: 'primary',
+                            file: peserta.file_pas_foto,
+                            description: 'Foto terbaru ukuran 4x6 dengan background merah'
+                        },
+                        {
+                            title: 'SK Jabatan Terakhir',
+                            icon: 'fa-file-alt',
+                            color: 'success',
+                            file: kepegawaian?.file_sk_jabatan,
+                            description: 'Surat Keputusan jabatan terakhir yang masih berlaku'
+                        },
+                        {
+                            title: 'SK Pangkat/Golongan',
+                            icon: 'fa-award',
+                            color: 'warning',
+                            file: kepegawaian?.file_sk_pangkat,
+                            description: 'Surat Keputusan kenaikan pangkat/golongan'
+                        },
+                        {
+                            title: 'Surat Komitmen',
+                            icon: 'fa-handshake',
+                            color: 'info',
+                            file: pendaftaran.file_surat_komitmen,
+                            description: 'Surat komitmen menyelesaikan pelatihan'
+                        },
+                        {
+                            title: 'Pakta Integritas',
+                            icon: 'fa-file-signature',
+                            color: 'danger',
+                            file: pendaftaran.file_pakta_integritas,
+                            description: 'Pakta integritas mengikuti peraturan'
+                        },
+                        {
+                            title: 'Surat Tugas',
+                            icon: 'fa-tasks',
+                            color: 'primary',
+                            file: pendaftaran.file_surat_tugas,
+                            description: 'Surat tugas dari instansi asal'
+                        },
+                        {
+                            title: 'Surat Kelulusan Seleksi',
+                            icon: 'fa-graduation-cap',
+                            color: 'success',
+                            file: pendaftaran.file_surat_kelulusan_seleksi,
+                            description: 'Surat kelulusan seleksi administrasi'
+                        },
+                        {
+                            title: 'Surat Sehat',
+                            icon: 'fa-heartbeat',
+                            color: 'warning',
+                            file: pendaftaran.file_surat_sehat,
+                            description: 'Surat keterangan sehat dari dokter'
+                        },
+                        {
+                            title: 'Surat Bebas Narkoba',
+                            icon: 'fa-ban',
+                            color: 'info',
+                            file: pendaftaran.file_surat_bebas_narkoba,
+                            description: 'Surat keterangan bebas narkoba'
+                        }
+                    ];
 
-            function formatStatusText(status) {
-                const statusLower = status.toLowerCase();
-                const texts = {
-                    'menunggu verifikasi': 'Menunggu Verifikasi',
-                    'diterima': 'Diterima',
-                    'ditolak': 'Ditolak',
-                    'lulus': 'Lulus'
-                };
-                return texts[statusLower] || status;
-            }
+                    // Hitung statistik dokumen
+                    const totalDokumen = dokumenList.length;
+                    const dokumenTersedia = dokumenList.filter(d => d.file).length;
+                    const dokumenBelum = totalDokumen - dokumenTersedia;
+                    const persentaseKelengkapan = dokumenTersedia > 0 ? Math.round((dokumenTersedia / totalDokumen) * 100) : 0;
 
-            function updateStatusBadge(status) {
-                const badge = document.getElementById('detailStatusBadge');
-                const statusText = formatStatusText(status);
-                const statusColor = getStatusColor(status);
-                const statusIcon = getStatusIcon(status);
+                    return `
+                        <div class="dokumen-container">
+                            <!-- Statistik Dokumen -->
+                            <div class="row mb-4">
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="stat-card card border-0 shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="stat-icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
+                                                <i class="fas fa-folder-open fa-xl text-primary"></i>
+                                            </div>
+                                            <h3 class="fw-bold text-primary mb-1">${totalDokumen}</h3>
+                                            <p class="text-muted small mb-0">Total Dokumen</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="stat-card card border-0 shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="stat-icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
+                                                <i class="fas fa-check-circle fa-xl text-success"></i>
+                                            </div>
+                                            <h3 class="fw-bold text-success mb-1">${dokumenTersedia}</h3>
+                                            <p class="text-muted small mb-0">Dokumen Tersedia</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="stat-card card border-0 shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="stat-icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
+                                                <i class="fas fa-clock fa-xl text-warning"></i>
+                                            </div>
+                                            <h3 class="fw-bold text-warning mb-1">${dokumenBelum}</h3>
+                                            <p class="text-muted small mb-0">Belum Diunggah</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="stat-card card border-0 shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="stat-icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
+                                                <i class="fas fa-chart-line fa-xl text-info"></i>
+                                            </div>
+                                            <h3 class="fw-bold text-info mb-1">${persentaseKelengkapan}%</h3>
+                                            <p class="text-muted small mb-0">Kelengkapan</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                badge.className = `badge custom-badge ${statusColor}`;
-                badge.innerHTML = `<i class="fas ${statusIcon} me-1"></i>${statusText}`;
-            }
+                            <!-- Progress Bar Kelengkapan -->
+                            <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="fw-bold mb-0">Kelengkapan Dokumen</h6>
+                                        <span class="badge bg-primary">${persentaseKelengkapan}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                             style="width: ${persentaseKelengkapan}%" 
+                                             aria-valuenow="${persentaseKelengkapan}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-            function getAngkatanStatusBadge(status) {
-                const badges = {
-                    'aktif': 'bg-success',
-                    'selesai': 'bg-primary',
-                    'rencana': 'bg-warning',
-                    'dibatalkan': 'bg-danger'
-                };
-                return badges[status?.toLowerCase()] || 'bg-secondary';
-            }
+                            <!-- Header -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0 d-flex align-items-center">
+                                    <div class="icon-wrapper bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                                        <i class="fas fa-folder-open text-primary"></i>
+                                    </div>
+                                    <span>Semua Dokumen Peserta</span>
+                                </h5>
+                                <div class="text-muted small">
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    ${dokumenTersedia} dari ${totalDokumen} dokumen tersedia
+                                </div>
+                            </div>
 
-            function formatDate(dateString) {
-                if (!dateString) return '-';
-                try {
-                    const date = new Date(dateString);
+                            <!-- Grid Dokumen -->
+                            <div class="row g-4">
+                                ${dokumenList.map(dokumen => dokumenCard(dokumen)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Dokumen Card Component
+                function dokumenCard(dokumen) {
+                    if (dokumen.file) {
+                        const fileSize = getFileSize(dokumen.file);
+                        return `
+                            <div class="col-xl-4 col-lg-6 col-md-6">
+                                <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-available">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <div class="dokumen-icon-wrapper bg-${dokumen.color} bg-opacity-10 p-3 rounded-3 me-3">
+                                                <i class="fas ${dokumen.icon} fa-2x text-${dokumen.color}"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
+                                                <p class="text-muted small mb-2">${dokumen.description}</p>
+                                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                                    <span class="badge bg-success bg-opacity-10 text-success">
+                                                        <i class="fas fa-check-circle me-1"></i>Tersedia
+                                                    </span>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-file me-1"></i>${fileSize}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-${dokumen.color} view-document" 
+                                                    data-url="${dokumen.file}" data-title="${dokumen.title}">
+                                                <i class="fas fa-eye me-1"></i> Lihat
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="col-xl-4 col-lg-6 col-md-6">
+                                <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-missing">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <div class="dokumen-icon-wrapper bg-secondary bg-opacity-10 p-3 rounded-3 me-3">
+                                                <i class="fas ${dokumen.icon} fa-2x text-secondary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
+                                                <p class="text-muted small mb-2">${dokumen.description}</p>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger">
+                                                        <i class="fas fa-times-circle me-1"></i>Belum diunggah
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Dokumen belum diunggah oleh peserta
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Helper function untuk ukuran file
+                function getFileSize(fileUrl) {
+                    // Simulasi ukuran file
+                    const sizes = ['2.1 MB', '1.8 MB', '3.2 MB', '1.5 MB', '2.4 MB', '1.9 MB', '2.7 MB', '2.3 MB', '1.6 MB'];
+                    const randomIndex = Math.floor(Math.random() * sizes.length);
+                    return sizes[randomIndex];
+                }
+
+                // Generate Mentor HTML
+                function generateMentorHTML(data) {
+                    const mentor = data.mentor;
+                    const angkatan = data.angkatan;
+
+                    if (!mentor) {
+                        return `
+                            <div class="mentor-content text-center py-5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon mb-4">
+                                        <i class="fas fa-chalkboard-teacher fa-4x" style="color: #e9ecef;"></i>
+                                    </div>
+                                    <h4 class="text-muted mb-3">Belum Ditugaskan Mentor</h4>
+                                    <p class="text-muted mb-4">Peserta ini belum memiliki mentor yang ditugaskan</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="mentor-content">
+                            <!-- Mentor Profile -->
+                            <div class="mentor-profile card border-0 shadow-sm mb-4">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h4 class="fw-bold text-primary mb-2">${mentor.nama_mentor}</h4>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="text-muted small">Jabatan</label>
+                                                        <p class="fw-semibold mb-0">${mentor.jabatan_mentor || '-'}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="text-muted small">Instansi</label>
+                                                        <p class="fw-semibold mb-0">${mentor.instansi_mentor || '-'}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="text-muted small">Email</label>
+                                                        <p class="fw-semibold mb-0">${mentor.email_mentor || '-'}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="text-muted small">Telepon</label>
+                                                        <p class="fw-semibold mb-0">${mentor.telepon_mentor || '-'}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-md-end">
+                                            <div class="mentor-badge bg-primary bg-opacity-10 rounded-3 p-3 d-inline-block">
+                                                <i class="fas fa-chalkboard-teacher fa-3x text-primary"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informasi Angkatan -->
+                            <div class="angkatan-info card border-0 shadow-sm">
+                                <div class="card-header bg-light border-0">
+                                    <h6 class="mb-0 fw-bold">
+                                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Informasi Angkatan
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="info-item mb-3">
+                                                <label class="text-muted small">Nama Angkatan</label>
+                                                <p class="fw-semibold mb-0">${angkatan?.nama_angkatan || '-'}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="info-item mb-3">
+                                                <label class="text-muted small">Periode</label>
+                                                <p class="fw-semibold mb-0">
+                                                    ${formatDate(angkatan?.tanggal_mulai)} - ${formatDate(angkatan?.tanggal_selesai)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="info-item mb-3">
+                                                <label class="text-muted small">Lokasi Pelatihan</label>
+                                                <p class="fw-semibold mb-0">${angkatan?.lokasi_pelatihan || '-'}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="info-item mb-3">
+                                                <label class="text-muted small">Status Angkatan</label>
+                                                <p class="fw-semibold mb-0">
+                                                    <span class="badge ${getAngkatanStatusBadge(angkatan?.status)}">
+                                                        ${angkatan?.status || '-'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Helper Functions untuk Status
+                function getStatusIcon(status) {
+                    const statusLower = status.toLowerCase();
+                    const icons = {
+                        'menunggu verifikasi': 'fa-clock',
+                        'diterima': 'fa-check-circle',
+                        'ditolak': 'fa-times-circle',
+                        'lulus': 'fa-graduation-cap'
+                    };
+                    return icons[statusLower] || 'fa-question-circle';
+                }
+
+                function getStatusColor(status) {
+                    const statusLower = status.toLowerCase();
+                    const colors = {
+                        'menunggu verifikasi': 'status-warning',
+                        'diterima': 'status-info',
+                        'ditolak': 'status-danger',
+                        'lulus': 'status-success'
+                    };
+                    return colors[statusLower] || 'status-secondary';
+                }
+
+                function formatStatusText(status) {
+                    const statusLower = status.toLowerCase();
+                    const texts = {
+                        'menunggu verifikasi': 'Menunggu Verifikasi',
+                        'diterima': 'Diterima',
+                        'ditolak': 'Ditolak',
+                        'lulus': 'Lulus'
+                    };
+                    return texts[statusLower] || status;
+                }
+
+                function updateStatusBadge(status) {
+                    const badge = document.getElementById('detailStatusBadge');
+                    const statusText = formatStatusText(status);
+                    const statusColor = getStatusColor(status);
+                    const statusIcon = getStatusIcon(status);
+
+                    badge.className = `badge custom-badge ${statusColor}`;
+                    badge.innerHTML = `<i class="fas ${statusIcon} me-1"></i>${statusText}`;
+                }
+
+                function getAngkatanStatusBadge(status) {
+                    const badges = {
+                        'aktif': 'bg-success',
+                        'selesai': 'bg-primary',
+                        'rencana': 'bg-warning',
+                        'dibatalkan': 'bg-danger'
+                    };
+                    return badges[status?.toLowerCase()] || 'bg-secondary';
+                }
+
+                function formatDate(dateString) {
+                    if (!dateString) return '-';
+                    try {
+                        const date = new Date(dateString);
+                        return date.toLocaleDateString('id-ID', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric'
+                        });
+                    } catch (e) {
+                        return '-';
+                    }
+                }
+
+                function formatDateTime(date) {
                     return date.toLocaleDateString('id-ID', {
                         day: '2-digit',
-                        month: 'long',
-                        year: 'numeric'
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
                     });
-                } catch (e) {
-                    return '-';
                 }
-            }
 
-            function formatDateTime(date) {
-                return date.toLocaleDateString('id-ID', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            }
-
-            function showAlert(type, message) {
-                // Hapus alert lama
-                const oldAlerts = document.querySelectorAll('.alert-container .alert');
-                oldAlerts.forEach(alert => {
-                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-                    bsAlert.close();
-                });
-
-                // Buat alert baru
-                const alertDiv = document.createElement('div');
-                alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow-sm d-flex align-items-center`;
-
-                const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-                const title = type === 'success' ? 'Sukses!' : 'Error!';
-
-                alertDiv.innerHTML = `
-                    <div class="alert-icon flex-shrink-0">
-                        <i class="fas ${iconClass} fa-lg"></i>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                        <strong>${title}</strong> ${message}
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-
-                document.querySelector('.alert-container').prepend(alertDiv);
-
-                // Auto close setelah 5 detik
-                setTimeout(() => {
-                    if (alertDiv.parentNode) {
-                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+                function showAlert(type, message) {
+                    // Hapus alert lama
+                    const oldAlerts = document.querySelectorAll('.alert-container .alert');
+                    oldAlerts.forEach(alert => {
+                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
                         bsAlert.close();
-                    }
-                }, 5000);
-            }
+                    });
 
-            function showDetailError() {
-                const content = document.getElementById('dataPesertaContent');
-                content.innerHTML = `
-                    <div class="text-center py-5">
-                        <div class="empty-state-icon mb-3">
-                            <i class="fas fa-exclamation-circle fa-4x" style="color: #e9ecef;"></i>
+                    // Buat alert baru
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow-sm d-flex align-items-center`;
+
+                    const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+                    const title = type === 'success' ? 'Sukses!' : 'Error!';
+
+                    alertDiv.innerHTML = `
+                        <div class="alert-icon flex-shrink-0">
+                            <i class="fas ${iconClass} fa-lg"></i>
                         </div>
-                        <h5 class="text-muted mb-2">Gagal memuat data</h5>
-                        <p class="text-muted">Silakan coba lagi</p>
-                    </div>
-                `;
-            }
-
-            // Document Viewer
-            function openDocumentViewer(url, title) {
-                const cleanUrl = url.startsWith('uploads/') ? '/' + url : url;
-                window.open(cleanUrl, '_blank');
-
-                // Show notification
-                showToast('info', `Membuka dokumen: ${title}`);
-            }
-
-            function showToast(type, message) {
-                const toast = document.createElement('div');
-                toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
-                toast.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fas fa-info-circle me-2"></i>${message}
+                        <div class="flex-grow-1 ms-3">
+                            <strong>${title}</strong> ${message}
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                `;
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
 
-                document.body.appendChild(toast);
-                const bsToast = new bootstrap.Toast(toast);
-                bsToast.show();
+                    document.querySelector('.alert-container').prepend(alertDiv);
 
-                toast.addEventListener('hidden.bs.toast', function () {
-                    toast.remove();
-                });
-            }
-
-            // Initialize search
-            initializeSearch();
-
-            // Auto-hide alerts
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    if (alert.classList.contains('show')) {
-                        bootstrap.Alert.getOrCreateInstance(alert).close();
-                    }
-                }, 5000);
-            });
-
-            // Add hover effects to table rows
-            const tableRows = document.querySelectorAll('.peserta-row');
-            tableRows.forEach(row => {
-                row.addEventListener('mouseenter', function () {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.transition = 'transform 0.2s ease';
-                });
-
-                row.addEventListener('mouseleave', function () {
-                    this.style.transform = 'translateY(0)';
-                });
-            });
-        });
-
-        // Search Functionality
-        function initializeSearch() {
-            const searchInput = document.getElementById('searchInput');
-            const clearSearchBtn = document.getElementById('clearSearch');
-            const pesertaTable = document.getElementById('pesertaTable');
-            const tbody = pesertaTable.querySelector('tbody');
-
-            searchInput.addEventListener('input', function () {
-                const term = this.value.trim();
-
-                if (term !== '') {
-                    clearSearchBtn.style.display = 'block';
-                } else {
-                    clearSearchBtn.style.display = 'none';
+                    // Auto close setelah 5 detik
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) {
+                            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+                            bsAlert.close();
+                        }
+                    }, 5000);
                 }
 
-                performSearch(term);
+                function showDetailError() {
+                    const content = document.getElementById('dataPesertaContent');
+                    content.innerHTML = `
+                        <div class="text-center py-5">
+                            <div class="empty-state-icon mb-3">
+                                <i class="fas fa-exclamation-circle fa-4x" style="color: #e9ecef;"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">Gagal memuat data</h5>
+                            <p class="text-muted">Silakan coba lagi</p>
+                        </div>
+                    `;
+                }
+
+                // Document Viewer
+                function openDocumentViewer(url, title) {
+                    const cleanUrl = url.startsWith('uploads/') ? '/' + url : url;
+                    window.open(cleanUrl, '_blank');
+
+                    // Show notification
+                    showToast('info', `Membuka dokumen: ${title}`);
+                }
+
+                function showToast(type, message) {
+                    const toast = document.createElement('div');
+                    toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+                    toast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="fas fa-info-circle me-2"></i>${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    `;
+
+                    document.body.appendChild(toast);
+                    const bsToast = new bootstrap.Toast(toast);
+                    bsToast.show();
+
+                    toast.addEventListener('hidden.bs.toast', function () {
+                        toast.remove();
+                    });
+                }
+
+                // Initialize search
+                initializeSearch();
+
+                // Auto-hide alerts
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    setTimeout(() => {
+                        if (alert.classList.contains('show')) {
+                            bootstrap.Alert.getOrCreateInstance(alert).close();
+                        }
+                    }, 5000);
+                });
+
+                // Add hover effects to table rows
+                const tableRows = document.querySelectorAll('.peserta-row');
+                tableRows.forEach(row => {
+                    row.addEventListener('mouseenter', function () {
+                        this.style.transform = 'translateY(-2px)';
+                        this.style.transition = 'transform 0.2s ease';
+                    });
+
+                    row.addEventListener('mouseleave', function () {
+                        this.style.transform = 'translateY(0)';
+                    });
+                });
             });
 
-            clearSearchBtn.addEventListener('click', function () {
-                searchInput.value = '';
-                this.style.display = 'none';
-                performSearch('');
-            });
+            // Search Functionality
+            function initializeSearch() {
+                const searchInput = document.getElementById('searchInput');
+                const clearSearchBtn = document.getElementById('clearSearch');
+                const pesertaTable = document.getElementById('pesertaTable');
+                const tbody = pesertaTable.querySelector('tbody');
 
-            function performSearch(searchTerm) {
-                const term = searchTerm.toLowerCase().trim();
-                const allRows = Array.from(tbody.querySelectorAll('tr.peserta-row'));
+                searchInput.addEventListener('input', function () {
+                    const term = this.value.trim();
 
-                // SELALU hapus pesan no-result di awal
-                removeNoResultsMessage();
-
-                allRows.forEach(row => {
-                    const nameText = row.querySelector('.peserta-name')?.textContent.toLowerCase() || '';
-                    const nipText = row.querySelector('.text-muted')?.textContent.toLowerCase() || '';
-                    const instansiText = row.querySelector('.peserta-instansi')?.textContent.toLowerCase() || '';
-
-                    if (term === '') {
-                        // Input kosong → tampilkan semua data
-                        row.style.display = '';
-                    } else if (
-                        nameText.includes(term) ||
-                        nipText.includes(term) ||
-                        instansiText.includes(term)
-                    ) {
-                        row.style.display = '';
+                    if (term !== '') {
+                        clearSearchBtn.style.display = 'block';
                     } else {
-                        row.style.display = 'none';
+                        clearSearchBtn.style.display = 'none';
                     }
+
+                    performSearch(term);
                 });
 
-                // Kalau term kosong → jangan tampilkan pesan apa pun
-                if (term === '') {
-                    return;
+                clearSearchBtn.addEventListener('click', function () {
+                    searchInput.value = '';
+                    this.style.display = 'none';
+                    performSearch('');
+                });
+
+                function performSearch(searchTerm) {
+                    const term = searchTerm.toLowerCase().trim();
+                    const allRows = Array.from(tbody.querySelectorAll('tr.peserta-row'));
+
+                    // SELALU hapus pesan no-result di awal
+                    removeNoResultsMessage();
+
+                    allRows.forEach(row => {
+                        const nameText = row.querySelector('.peserta-name')?.textContent.toLowerCase() || '';
+                        const nipText = row.querySelector('.text-muted')?.textContent.toLowerCase() || '';
+                        const instansiText = row.querySelector('.peserta-instansi')?.textContent.toLowerCase() || '';
+
+                        if (term === '') {
+                            // Input kosong → tampilkan semua data
+                            row.style.display = '';
+                        } else if (
+                            nameText.includes(term) ||
+                            nipText.includes(term) ||
+                            instansiText.includes(term)
+                        ) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Kalau term kosong → jangan tampilkan pesan apa pun
+                    if (term === '') {
+                        return;
+                    }
+
+                    // Cek apakah masih ada row yang terlihat
+                    const anyVisible = allRows.some(row => row.style.display !== 'none');
+
+                    if (!anyVisible) {
+                        showNoResultsMessage(tbody, term);
+                    }
                 }
 
-                // Cek apakah masih ada row yang terlihat
-                const anyVisible = allRows.some(row => row.style.display !== 'none');
+                function showNoResultsMessage(tbody, term) {
+                    removeNoResultsMessage();
 
-                if (!anyVisible) {
-                    showNoResultsMessage(tbody, term);
+                    const noResultsRow = document.createElement('tr');
+                    noResultsRow.className = 'no-results-row';
+                    noResultsRow.innerHTML = `
+                    <td colspan="6" class="text-center py-4">
+                        <div class="text-muted">
+                            <i class="fas fa-search me-2"></i>
+                            Tidak ditemukan peserta dengan kata kunci "${term}"
+                        </div>
+                    </td>
+                `;
+                    tbody.appendChild(noResultsRow);
+                }
+
+                function removeNoResultsMessage() {
+                    const existing = tbody.querySelector('.no-results-row');
+                    if (existing) {
+                        existing.remove();
+                    }
                 }
             }
 
-            function showNoResultsMessage(tbody, term) {
-                removeNoResultsMessage();
+            function clearSearch() {
+                const searchInput = document.getElementById('searchInput');
+                const clearSearchBtn = document.getElementById('clearSearch');
 
-                const noResultsRow = document.createElement('tr');
-                noResultsRow.className = 'no-results-row';
-                noResultsRow.innerHTML = `
-                <td colspan="6" class="text-center py-4">
-                    <div class="text-muted">
-                        <i class="fas fa-search me-2"></i>
-                        Tidak ditemukan peserta dengan kata kunci "${term}"
-                    </div>
-                </td>
-            `;
-                tbody.appendChild(noResultsRow);
+                searchInput.value = '';
+                clearSearchBtn.style.display = 'none';
+
+                const event = new Event('input');
+                searchInput.dispatchEvent(event);
             }
+        </script>
 
-            function removeNoResultsMessage() {
-                const existing = tbody.querySelector('.no-results-row');
-                if (existing) {
-                    existing.remove();
-                }
-            }
-        }
-
-        function clearSearch() {
-            const searchInput = document.getElementById('searchInput');
-            const clearSearchBtn = document.getElementById('clearSearch');
-
-            searchInput.value = '';
-            clearSearchBtn.style.display = 'none';
-
-            const event = new Event('input');
-            searchInput.dispatchEvent(event);
-        }
-    </script>
-
-    <style>
+        <style>
 
 
-        /* CUSTOM STATUS BADGES (CSS Custom - Tidak bergantung pada Bootstrap) */
-        .custom-badge {
-            border-radius: 8px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            padding: 0.5rem 0.75rem;
-            border: none;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+            /* CUSTOM STATUS BADGES (CSS Custom - Tidak bergantung pada Bootstrap) */
+            /* SIMPLE FIX FOR TOOLTIP POSITION */
+    .tooltip {
+        position: fixed !important;
+        z-index: 9999 !important;
+    }
 
-        .custom-badge:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
+    /* Pastikan tombol memiliki posisi relative */
+    .btn-action {
+        position: relative !important;
+    }
 
-        .status-warning {
-            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
-            color: #212529 !important;
-        }
+    /* Hilangkan efek transform pada hover jika mengganggu */
+    .btn-action:hover {
+        transform: none !important;
+    }
 
-        .status-info {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
-            color: white !important;
-        }
+    /* Perbaikan untuk tabel */
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible !important;
+    }
 
-        .status-danger {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
-            color: white !important;
-        }
+    .table {
+        margin-bottom: 0;
+    }
 
-        .status-success {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
-            color: white !important;
-        }
+    /* Force tooltip to be visible */
+    .bs-tooltip-top {
+        margin-top: -10px !important;
+    }
 
-        .status-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
-            color: white !important;
-        }
-
-        /* Page Header */
-        .page-header {
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(40, 84, 150, 0.15);
-        }
-
-        .icon-wrapper {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Stats Cards */
-        .stat-card {
-            border-radius: 12px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid #e9ecef;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-
-        .btn-filter-primary {
-            background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);
-            border: none;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .btn-filter-primary:hover {
-            background: linear-gradient(135deg, #1e3d6f 0%, #2d5499 100%);
-            transform: translateY(-2px);
-            color: white;
-            box-shadow: 0 8px 25px rgba(40, 84, 150, 0.4);
-        }
-
-        /* User Avatar */
-        .user-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 8px rgba(40, 84, 150, 0.2);
-        }
-
-        /* Action Buttons */
-        .btn-action {
-            border-radius: 8px;
-            padding: 0.375rem 0.75rem;
-            margin: 0 2px;
-            transition: all 0.2s ease;
-            border-width: 2px;
-        }
-
-        .btn-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-lift {
-            transition: transform 0.2s ease;
-        }
-
-        .btn-lift:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Table Styling */
-        .table th {
-            border-bottom: 2px solid var(--primary-light);
-            font-weight: 600;
-            color: #285496;
-            background-color: #f8fafc;
-            padding: 1rem;
-        }
-
-        .table td {
-            padding: 1rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .peserta-row:hover {
-            background-color: rgba(40, 84, 150, 0.03) !important;
-        }
-
-        /* Pagination */
-        .pagination .page-link {
-            color: #285496;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            margin: 0 2px;
-            font-weight: 500;
-        }
-
-        .pagination .page-link:hover {
-            background-color: rgba(40, 84, 150, 0.1);
-            border-color: #285496;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #285496;
-            border-color: #285496;
-            color: white;
-        }
-
-        .pagination .page-item.disabled .page-link {
-            color: #6c757d;
-            pointer-events: none;
-            background-color: #f8f9fa;
-        }
-
-        /* Loading Indicator in Status Modal */
-        #statusLoading {
-            padding: 2rem;
-            border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.95);
-            margin: 1.5rem 0;
-            text-align: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        #statusLoading .spinner-border {
-            width: 3rem;
-            height: 3rem;
-            border-width: 0.25rem;
-        }
-
-        /* Button Colors */
-        .btn-primary {
-            background-color: #285496 !important;
-            border-color: #285496 !important;
-        }
-
-        .btn-success {
-            background-color: #28a745 !important;
-            border-color: #28a745 !important;
-        }
-
-        .btn-warning {
-            background-color: #ffc107 !important;
-            border-color: #ffc107 !important;
-            color: #212529 !important;
-        }
-
-        .btn-info {
-            background-color: #17a2b8 !important;
-            border-color: #17a2b8 !important;
-        }
-
-        .btn-danger {
-            background-color: #dc3545 !important;
-            border-color: #dc3545 !important;
-        }
-
-        /* DOKUMEN STYLING */
-        .dokumen-container .stat-card {
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .dokumen-container .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important;
-        }
-
-        .stat-icon-wrapper {
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .dokumen-container h3 {
-            font-size: 1.75rem;
-            font-weight: 700;
-        }
-
-        /* Progress Bar */
-        .progress {
-            background-color: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            background: linear-gradient(90deg, #285496, #3a6bc7);
-            transition: width 0.6s ease;
-        }
-
-        /* Dokumen Cards */
-        .dokumen-card {
-            transition: all 0.3s ease;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #e9ecef;
-            height: 100%;
-        }
-
-        .dokumen-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
-            border-color: #285496;
-        }
-
-        .dokumen-available {
-            border-left: 4px solid #28a745;
-        }
-
-        .dokumen-missing {
-            border-left: 4px solid #6c757d;
-            opacity: 0.8;
-        }
-
-        .dokumen-card:hover.dokumen-missing {
-            opacity: 1;
-            border-color: #6c757d;
-        }
-
-        .dokumen-icon-wrapper {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .dokumen-card:hover .dokumen-icon-wrapper {
-            transform: scale(1.1);
-        }
-
-        /* Badge Styling */
-        .badge.bg-success.bg-opacity-10 {
-            background-color: rgba(40, 167, 69, 0.1) !important;
-            color: #28a745 !important;
-            border: 1px solid rgba(40, 167, 69, 0.2);
-        }
-
-        .badge.bg-danger.bg-opacity-10 {
-            background-color: rgba(220, 53, 69, 0.1) !important;
-            color: #dc3545 !important;
-            border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-
-        .badge.bg-primary {
-            background-color: #285496 !important;
-            color: white !important;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
+    .bs-tooltip-bottom {
+        margin-top: 10px !important;
+    }
             .custom-badge {
-                padding: 0.35rem 0.5rem;
-                font-size: 0.75rem;
-            }
-
-            .modal-dialog.modal-xl {
-                margin: 0.5rem;
-            }
-
-            .nav-tabs {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .nav-tabs .nav-link {
-                white-space: nowrap;
+                border-radius: 8px;
+                font-weight: 500;
+                letter-spacing: 0.3px;
+                padding: 0.5rem 0.75rem;
+                border: none;
                 font-size: 0.85rem;
-                padding: 0.75rem 1rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
 
-            .dokumen-container .row>.col-xl-4 {
-                flex: 0 0 100%;
-                max-width: 100%;
+            .custom-badge:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             }
 
-            .dokumen-icon-wrapper {
-                width: 50px;
-                height: 50px;
+            .status-warning {
+                background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+                color: #212529 !important;
             }
 
-            .dokumen-icon-wrapper i {
-                font-size: 1.5rem !important;
+            .status-info {
+                background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+                color: white !important;
             }
 
-            .modal-footer .btn-group {
-                flex-direction: column;
-                width: 100%;
+            .status-danger {
+                background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+                color: white !important;
             }
 
-            .modal-footer .btn {
-                width: 100%;
-                margin-bottom: 0.5rem;
+            .status-success {
+                background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+                color: white !important;
             }
 
-            .stat-icon-wrapper {
-                width: 50px;
-                height: 50px;
+            .status-secondary {
+                background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+                color: white !important;
             }
 
-            .stat-icon-wrapper i {
-                font-size: 1.25rem !important;
+            /* Page Header */
+            .page-header {
+                padding: 2rem;
+                margin-bottom: 1.5rem;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(40, 84, 150, 0.15);
             }
 
-            .dokumen-container h3 {
-                font-size: 1.5rem;
-            }
-        }
-
-        @media (min-width: 769px) and (max-width: 992px) {
-            .dokumen-container .row>.col-xl-4 {
-                flex: 0 0 50%;
-                max-width: 50%;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .custom-badge {
-                padding: 0.25rem 0.4rem;
-                font-size: 0.7rem;
+            .icon-wrapper {
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
-            .modal-header {
+            /* Stats Cards */
+            .stat-card {
+                border-radius: 12px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border: 1px solid #e9ecef;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .stat-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+            }
+
+            .btn-filter-primary {
+                background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);
+                border: none;
+                color: white;
+                transition: all 0.3s ease;
+            }
+
+            .btn-filter-primary:hover {
+                background: linear-gradient(135deg, #1e3d6f 0%, #2d5499 100%);
+                transform: translateY(-2px);
+                color: white;
+                box-shadow: 0 8px 25px rgba(40, 84, 150, 0.4);
+            }
+
+            /* User Avatar */
+            .user-avatar {
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.1rem;
+                box-shadow: 0 4px 8px rgba(40, 84, 150, 0.2);
+            }
+
+            /* Action Buttons */
+            .btn-action {
+                border-radius: 8px;
+                padding: 0.375rem 0.75rem;
+                margin: 0 2px;
+                transition: all 0.2s ease;
+                border-width: 2px;
+            }
+
+            .btn-action:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn-lift {
+                transition: transform 0.2s ease;
+            }
+
+            .btn-lift:hover {
+                transform: translateY(-2px);
+            }
+
+            /* Table Styling */
+            .table th {
+                border-bottom: 2px solid var(--primary-light);
+                font-weight: 600;
+                color: #285496;
+                background-color: #f8fafc;
                 padding: 1rem;
             }
 
-            .modal-body {
-                padding: 0;
-            }
-
-            .nav-tabs .nav-link {
-                font-size: 0.8rem;
-                padding: 0.5rem 0.75rem;
-            }
-
-            .dokumen-card .card-body {
-                padding: 1rem !important;
-            }
-
-            .btn-sm {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.8rem;
-            }
-
-            .table th,
             .table td {
-                padding: 0.75rem 0.5rem;
-                font-size: 0.85rem;
+                padding: 1rem;
+                vertical-align: middle;
+                border-bottom: 1px solid #e9ecef;
             }
 
-            .btn-action {
-                padding: 0.25rem 0.5rem;
-                margin: 1px;
+            .peserta-row:hover {
+                background-color: rgba(40, 84, 150, 0.03) !important;
             }
 
+            /* Pagination */
             .pagination .page-link {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.8rem;
-                margin: 1px;
+                color: #285496;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                margin: 0 2px;
+                font-weight: 500;
             }
 
-            .dokumen-container .row>.col-xl-4 {
-                margin-bottom: 1rem;
+            .pagination .page-link:hover {
+                background-color: rgba(40, 84, 150, 0.1);
+                border-color: #285496;
             }
-        }
-    </style>
+
+            .pagination .page-item.active .page-link {
+                background-color: #285496;
+                border-color: #285496;
+                color: white;
+            }
+
+            .pagination .page-item.disabled .page-link {
+                color: #6c757d;
+                pointer-events: none;
+                background-color: #f8f9fa;
+            }
+
+            /* Loading Indicator in Status Modal */
+            #statusLoading {
+                padding: 2rem;
+                border-radius: 10px;
+                background-color: rgba(255, 255, 255, 0.95);
+                margin: 1.5rem 0;
+                text-align: center;
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            #statusLoading .spinner-border {
+                width: 3rem;
+                height: 3rem;
+                border-width: 0.25rem;
+            }
+
+            /* Button Colors */
+            .btn-primary {
+                background-color: #285496 !important;
+                border-color: #285496 !important;
+            }
+
+            .btn-success {
+                background-color: #28a745 !important;
+                border-color: #28a745 !important;
+            }
+
+            .btn-warning {
+                background-color: #ffc107 !important;
+                border-color: #ffc107 !important;
+                color: #212529 !important;
+            }
+
+            .btn-info {
+                background-color: #17a2b8 !important;
+                border-color: #17a2b8 !important;
+            }
+
+            .btn-danger {
+                background-color: #dc3545 !important;
+                border-color: #dc3545 !important;
+            }
+
+            /* DOKUMEN STYLING */
+            .dokumen-container .stat-card {
+                border-radius: 10px;
+                transition: all 0.3s ease;
+                height: 100%;
+            }
+
+            .dokumen-container .stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .stat-icon-wrapper {
+                width: 70px;
+                height: 70px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .dokumen-container h3 {
+                font-size: 1.75rem;
+                font-weight: 700;
+            }
+
+            /* Progress Bar */
+            .progress {
+                background-color: #e9ecef;
+                border-radius: 4px;
+                overflow: hidden;
+            }
+
+            .progress-bar {
+                background: linear-gradient(90deg, #285496, #3a6bc7);
+                transition: width 0.6s ease;
+            }
+
+            /* Dokumen Cards */
+            .dokumen-card {
+                transition: all 0.3s ease;
+                border-radius: 12px;
+                overflow: hidden;
+                border: 1px solid #e9ecef;
+                height: 100%;
+            }
+
+            .dokumen-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+                border-color: #285496;
+            }
+
+            .dokumen-available {
+                border-left: 4px solid #28a745;
+            }
+
+            .dokumen-missing {
+                border-left: 4px solid #6c757d;
+                opacity: 0.8;
+            }
+
+            .dokumen-card:hover.dokumen-missing {
+                opacity: 1;
+                border-color: #6c757d;
+            }
+
+            .dokumen-icon-wrapper {
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                flex-shrink: 0;
+            }
+
+            .dokumen-card:hover .dokumen-icon-wrapper {
+                transform: scale(1.1);
+            }
+
+            /* Badge Styling */
+            .badge.bg-success.bg-opacity-10 {
+                background-color: rgba(40, 167, 69, 0.1) !important;
+                color: #28a745 !important;
+                border: 1px solid rgba(40, 167, 69, 0.2);
+            }
+
+            .badge.bg-danger.bg-opacity-10 {
+                background-color: rgba(220, 53, 69, 0.1) !important;
+                color: #dc3545 !important;
+                border: 1px solid rgba(220, 53, 69, 0.2);
+            }
+
+            .badge.bg-primary {
+                background-color: #285496 !important;
+                color: white !important;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .custom-badge {
+                    padding: 0.35rem 0.5rem;
+                    font-size: 0.75rem;
+                }
+
+                .modal-dialog.modal-xl {
+                    margin: 0.5rem;
+                }
+
+                .nav-tabs {
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                .nav-tabs .nav-link {
+                    white-space: nowrap;
+                    font-size: 0.85rem;
+                    padding: 0.75rem 1rem;
+                }
+
+                .dokumen-container .row>.col-xl-4 {
+                    flex: 0 0 100%;
+                    max-width: 100%;
+                }
+
+                .dokumen-icon-wrapper {
+                    width: 50px;
+                    height: 50px;
+                }
+
+                .dokumen-icon-wrapper i {
+                    font-size: 1.5rem !important;
+                }
+
+                .modal-footer .btn-group {
+                    flex-direction: column;
+                    width: 100%;
+                }
+
+                .modal-footer .btn {
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                }
+
+                .stat-icon-wrapper {
+                    width: 50px;
+                    height: 50px;
+                }
+
+                .stat-icon-wrapper i {
+                    font-size: 1.25rem !important;
+                }
+
+                .dokumen-container h3 {
+                    font-size: 1.5rem;
+                }
+            }
+
+            @media (min-width: 769px) and (max-width: 992px) {
+                .dokumen-container .row>.col-xl-4 {
+                    flex: 0 0 50%;
+                    max-width: 50%;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .custom-badge {
+                    padding: 0.25rem 0.4rem;
+                    font-size: 0.7rem;
+                }
+
+                .modal-header {
+                    padding: 1rem;
+                }
+
+                .modal-body {
+                    padding: 0;
+                }
+
+                .nav-tabs .nav-link {
+                    font-size: 0.8rem;
+                    padding: 0.5rem 0.75rem;
+                }
+
+                .dokumen-card .card-body {
+                    padding: 1rem !important;
+                }
+
+                .btn-sm {
+                    padding: 0.25rem 0.5rem;
+                    font-size: 0.8rem;
+                }
+
+                .table th,
+                .table td {
+                    padding: 0.75rem 0.5rem;
+                    font-size: 0.85rem;
+                }
+
+                .btn-action {
+                    padding: 0.25rem 0.5rem;
+                    margin: 1px;
+                }
+
+                .pagination .page-link {
+                    padding: 0.25rem 0.5rem;
+                    font-size: 0.8rem;
+                    margin: 1px;
+                }
+
+                .dokumen-container .row>.col-xl-4 {
+                    margin-bottom: 1rem;
+                }
+            }
+        </style>
 @endsection
