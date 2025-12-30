@@ -27,13 +27,29 @@
                 <i class="fas fa-chevron-right menu-arrow"></i>
             </a>
             <div class="submenu">
-                {{-- <a href="" class="submenu-link">
+                <a href="" class="submenu-link">
                     <i class="fas fa-building me-2"></i> Unit Kerja
                 </a>
                 <a href="" class="submenu-link">
                     <i class="fas fa-handshake me-2"></i> Mitra Kerja
-                </a> --}}
-                <!-- Menu Sidebar / Navbar -->
+                </a>
+                <a href="" class="submenu-link">
+                    <i class="fas fa-book me-2"></i> Materi Pelatihan
+                </a>
+                <a href="" class="submenu-link">
+                    <i class="fas fa-chalkboard-teacher me-2"></i> Instruktur
+                </a>
+            </div>
+        </div>
+
+        {{-- Peserta --}}
+        <div class="menu-item has-submenu">
+            <a href="#" class="menu-link">
+                <i class="fas fa-user menu-icon"></i>
+                <span class="menu-text">Peserta</span>
+                <i class="fas fa-chevron-right menu-arrow"></i>
+            </a>
+            <div class="submenu">
                 <a href="{{ route('peserta.index', ['jenis' => 'pkn']) }}" class="submenu-link">
                     <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
                 </a>
@@ -46,12 +62,6 @@
                 <a href="{{ route('peserta.index', ['jenis' => 'pkp']) }}" class="submenu-link">
                     <i class="fas fa-user-check me-2"></i> Peserta PKP
                 </a>
-                {{-- <a href="" class="submenu-link">
-                    <i class="fas fa-book me-2"></i> Materi Pelatihan
-                </a>
-                <a href="" class="submenu-link">
-                    <i class="fas fa-chalkboard-teacher me-2"></i> Instruktur
-                </a> --}}
             </div>
         </div>
 
