@@ -85,6 +85,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/peserta/detail/{id}', [PesertaController::class, 'getDetail'])->name('peserta.detail');
     Route::post('/peserta/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('peserta.update-status');
     Route::get('/peserta/tambah-peserta-pkn-tk2', [PesertaController::class, 'create'])->name('peserta.tambah-peserta-pkn-tk2');
+    Route::post('/peserta/store', [PesertaController::class, 'store'])->name('peserta.store');
+    Route::get('/peserta/{id}/edit', [PesertaController::class, 'edit'])->name('peserta.edit');
+    Route::put('/peserta/{id}', [PesertaController::class, 'update'])->name('peserta.update');
 });
 
 
