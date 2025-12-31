@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('alamat_rumah');
             $table->string('email_pribadi', 100);
             $table->string('nomor_hp', 20);
-            $table->enum('pendidikan_terakhir', ['SD', 'SMP', 'SMA', 'D3', 'D4', 'S1', 'S2', 'S3']);
+            $table->enum('pendidikan_terakhir', ['SD', 'SMP', 'SMU', 'D3', 'D4', 'S1', 'S2', 'S3']);
             $table->string('bidang_studi', 100)->nullable();
             $table->string('bidang_keahlian', 100)->nullable();
             $table->enum('status_perkawinan', ['Belum Menikah', 'Menikah', 'Duda', 'Janda']);
