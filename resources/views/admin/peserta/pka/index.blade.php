@@ -13,8 +13,8 @@
                         <i class="fas fa-users fa-lg" style="color: #285496;"></i>
                     </div>
                     <div>
-                        <h1 class="text-white mb-1">Peserta {{ $jenisPelatihan->nama_pelatihan ?? 'PKN TK II' }}</h1>
-                        <p class="text-white-50 mb-0">Kelola peserta pelatihan PKN TK II</p>
+                        <h1 class="text-white mb-1">Peserta {{ $jenisPelatihan->nama_pelatihan ?? 'PKKA' }}</h1>
+                        <p class="text-white-50 mb-0">Kelola peserta pelatihan PKA</p>
                     </div>
                 </div>
             </div>

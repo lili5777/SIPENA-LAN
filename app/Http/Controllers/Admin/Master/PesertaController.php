@@ -294,6 +294,7 @@ class PesertaController extends Controller
                     'file_skp' => 'nullable|file|mimes:pdf|max:5120',
                     'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:5120',
                     'nomor_sk_cpns' => 'nullable|string|max:100',
+                    'nomor_sk_terakhirs' => 'nullable|string|max:100',
                     'tanggal_sk_cpns' => 'nullable|date',
                     'tanggal_sk_jabatan' => 'nullable|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
@@ -471,6 +472,9 @@ class PesertaController extends Controller
 
                     'nomor_sk_cpns.string' => 'Nomor SK CPNS harus berupa teks.',
                     'nomor_sk_cpns.max'    => 'Nomor SK CPNS maksimal 100 karakter.',
+
+                    'nomor_sk_terakhir.string' => 'Nomor SK terakhir harus berupa teks.',
+                    'nomor_sk_terakhir.max'    => 'Nomor SK terakhir maksimal 100 karakter.',
 
                     'tanggal_sk_cpns.date' => 'Tanggal SK CPNS tidak valid.',
 
@@ -678,6 +682,7 @@ class PesertaController extends Controller
                     'file_sk_jabatan' => $files['file_sk_jabatan'] ?? null,
                     'file_sk_pangkat' => $files['file_sk_pangkat'] ?? null,
                     'nomor_sk_cpns' => $request->nomor_sk_cpns ?? null,
+                    'nomor_sk_terakhir' => $request->nomor_sk_terakhir ?? null,
                     'tanggal_sk_cpns' => $request->tanggal_sk_cpns ?? null,
                     'file_sk_cpns' => $files['file_sk_cpns'] ?? null,
                     'file_spmt' => $files['file_spmt'] ?? null,
@@ -857,6 +862,7 @@ class PesertaController extends Controller
                     'file_skp' => 'nullable|file|mimes:pdf|max:5120',
                     'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:5120',
                     'nomor_sk_cpns' => 'nullable|string|max:100',
+                    'nomor_sk_terakhir' => 'nullable|string|max:100',
                     'tanggal_sk_cpns' => 'nullable|date',
                     'tanggal_sk_jabatan' => 'nullable|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
@@ -1034,6 +1040,9 @@ class PesertaController extends Controller
 
                     'nomor_sk_cpns.string' => 'Nomor SK CPNS harus berupa teks.',
                     'nomor_sk_cpns.max'    => 'Nomor SK CPNS maksimal 100 karakter.',
+
+                    'nomor_sk_terakhir.string' => 'Nomor SK terakhir harus berupa teks.',
+                    'nomor_sk_terakhir.max'    => 'Nomor SK terakhir maksimal 100 karakter.',
 
                     'tanggal_sk_cpns.date' => 'Tanggal SK CPNS tidak valid.',
 
@@ -1236,6 +1245,7 @@ class PesertaController extends Controller
                 'eselon' => $request->eselon ?? null,
                 'tanggal_sk_jabatan' => $request->tanggal_sk_jabatan ?? null,
                 'nomor_sk_cpns' => $request->nomor_sk_cpns ?? null,
+                'nomor_sk_terakhir' => $request->nomor_sk_terakhir ?? null,
                 'tanggal_sk_cpns' => $request->tanggal_sk_cpns ?? null,
                 'tahun_lulus_pkp_pim_iv' => $request->tahun_lulus_pkp_pim_iv ?? null,
             ];

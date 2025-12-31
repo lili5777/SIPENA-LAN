@@ -14,7 +14,7 @@
                     </div>
                     <div>
                         <h1 class="text-white mb-1">Peserta {{ $jenisPelatihan->nama_pelatihan ?? 'PKN TK II' }}</h1>
-                        <p class="text-white-50 mb-0">Kelola peserta pelatihan PKN TK II</p>
+                        <p class="text-white-50 mb-0">Kelola peserta pelatihan PKP</p>
                     </div>
                 </div>
             </div>
