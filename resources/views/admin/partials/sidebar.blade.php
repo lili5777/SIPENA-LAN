@@ -27,8 +27,8 @@
                 <i class="fas fa-chevron-right menu-arrow"></i>
             </a>
             <div class="submenu">
-                <a href="" class="submenu-link">
-                    <i class="fas fa-building me-2"></i> Unit Kerja
+                <a href="{{ route('angkatan.index') }}" class="submenu-link">
+                    <i class="fas fa-handshake me-2"></i> Angkatan
                 </a>
                 <a href="" class="submenu-link">
                     <i class="fas fa-handshake me-2"></i> Mitra Kerja

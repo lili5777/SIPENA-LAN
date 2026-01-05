@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Angkatan\AngkatanController;
 use App\Http\Controllers\Admin\Master\PesertaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
@@ -114,6 +115,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/detail/{id}', [PesertaController::class, 'getDetail'])->name('detail');
         Route::post('/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('update-status');
     });
+
+    // Master Angkatan Routes
+    Route::prefix('angkatan')->name('angkatan.')->group(function () {
+        Route::get('/', [AngkatanController::class, 'index'])->name('index');
+        Route::get('/create', [AngkatanController::class, 'create'])->name('create');
+        Route::post('/', [AngkatanController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [AngkatanController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AngkatanController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AngkatanController::class, 'destroy'])->name('destroy');
+    });
+
+    
 });
 
 

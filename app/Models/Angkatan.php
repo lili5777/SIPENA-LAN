@@ -10,7 +10,6 @@ class Angkatan extends Model
     use HasFactory;
 
     protected $table = 'angkatan';
-    // protected $primaryKey = 'id_angkatan';
     public $timestamps = false;
 
     protected $fillable = [
@@ -21,6 +20,14 @@ class Angkatan extends Model
         'tanggal_selesai',
         'kuota',
         'status_angkatan',
+        'dibuat_pada', // tambahkan ini
+    ];
+
+    // Casting untuk properti tanggal
+    protected $casts = [
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai' => 'date',
+        'dibuat_pada' => 'datetime', // casting ke datetime
     ];
 
     // Relasi: belongsTo ke JenisPelatihan
