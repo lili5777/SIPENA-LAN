@@ -2050,34 +2050,58 @@ document.addEventListener('DOMContentLoaded', function () {
         sudahAdaMentorSelect.addEventListener('change', function () {
             if (this.value === 'Ya') {
                 mentorContainer.style.display = 'block';
+                // Kembalikan required attribute jika ada
+                restoreMentorRequiredAttributes();
             } else {
                 mentorContainer.style.display = 'none';
+                // Remove required attribute dari semua field mentor
+                removeMentorRequiredAttributes();
                 // Reset mentor forms
-                mentorModeSelect.value = '';
+                if (mentorModeSelect) mentorModeSelect.value = '';
                 selectMentorForm.style.display = 'none';
                 addMentorForm.style.display = 'none';
-                mentorSelect.value = '';
+                if (mentorSelect) mentorSelect.value = '';
                 resetMentorFields();
             }
         });
 
-        mentorModeSelect.addEventListener('change', function () {
-            if (this.value === 'pilih') {
-                selectMentorForm.style.display = 'block';
-                addMentorForm.style.display = 'none';
-                // Load mentors if not loaded
-                if (mentorSelect && mentorSelect.options.length <= 1) {
-                    loadMentors();
+        if (mentorModeSelect) {
+            mentorModeSelect.addEventListener('change', function () {
+                if (this.value === 'pilih') {
+                    selectMentorForm.style.display = 'block';
+                    addMentorForm.style.display = 'none';
+                    // Set required untuk field pilih mentor
+                    if (mentorSelect) mentorSelect.setAttribute('required', 'required');
+                    // Remove required dari field tambah mentor
+                    const tambahFields = ['nama_mentor_baru', 'jabatan_mentor_baru'];
+                    tambahFields.forEach(field => {
+                        const el = document.getElementById(field);
+                        if (el) el.removeAttribute('required');
+                    });
+                    // Load mentors if not loaded
+                    if (mentorSelect && mentorSelect.options.length <= 1) {
+                        loadMentors();
+                    }
+                } else if (this.value === 'tambah') {
+                    selectMentorForm.style.display = 'none';
+                    addMentorForm.style.display = 'block';
+                    // Remove required dari field pilih mentor
+                    if (mentorSelect) mentorSelect.removeAttribute('required');
+                    // Set required untuk field tambah mentor
+                    const tambahFields = ['nama_mentor_baru', 'jabatan_mentor_baru'];
+                    tambahFields.forEach(field => {
+                        const el = document.getElementById(field);
+                        if (el) el.setAttribute('required', 'required');
+                    });
+                    resetMentorFields();
+                } else {
+                    selectMentorForm.style.display = 'none';
+                    addMentorForm.style.display = 'none';
+                    // Remove required dari semua field
+                    removeMentorRequiredAttributes();
                 }
-            } else if (this.value === 'tambah') {
-                selectMentorForm.style.display = 'none';
-                addMentorForm.style.display = 'block';
-                resetMentorFields();
-            } else {
-                selectMentorForm.style.display = 'none';
-                addMentorForm.style.display = 'none';
-            }
-        });
+            });
+        }
 
         if (mentorSelect) {
             mentorSelect.addEventListener('change', function () {
@@ -2093,6 +2117,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     resetMentorFields();
                 }
             });
+        }
+
+        // Helper functions untuk mengelola required attributes
+        function removeMentorRequiredAttributes() {
+            const mentorFields = document.querySelectorAll('#mentor-container [required]');
+            mentorFields.forEach(field => {
+                field.removeAttribute('required');
+            });
+        }
+        
+        function restoreMentorRequiredAttributes() {
+            // Restore based on current mentor mode
+            if (mentorModeSelect && mentorModeSelect.value === 'pilih') {
+                if (mentorSelect) mentorSelect.setAttribute('required', 'required');
+            } else if (mentorModeSelect && mentorModeSelect.value === 'tambah') {
+                const tambahFields = ['nama_mentor_baru', 'jabatan_mentor_baru'];
+                tambahFields.forEach(field => {
+                    const el = document.getElementById(field);
+                    if (el) el.setAttribute('required', 'required');
+                });
+            }
         }
 
         // Trigger change if value exists (for old form values)
@@ -2302,7 +2347,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     nextToStep4Btn.addEventListener('click', () => {
-        // Validate required fields in step 3 (tidak termasuk file inputs untuk edit mode)
+        // Validate required fields in step 3
         const requiredFields = document.querySelectorAll('#step3-content [required]');
         let isValid = true;
         let firstInvalidField = null;
@@ -2313,6 +2358,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             
+            // Skip validation untuk field yang berada di dalam hidden mentor container
+            if (mentorContainer && mentorContainer.style.display === 'none') {
+                const isInMentorContainer = field.closest('#mentor-container');
+                if (isInMentorContainer) {
+                    return;
+                }
+            }
+            
             if (!field.value.trim() && field.type !== 'file') {
                 if (!firstInvalidField) firstInvalidField = field;
                 field.classList.add('error');
@@ -2321,25 +2374,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 field.classList.remove('error');
             }
         });
-
-        // Validate mentor fields if mentor is selected
-        if (sudahAdaMentorSelect && sudahAdaMentorSelect.value === 'Ya') {
-            if (!mentorModeSelect.value) {
-                mentorModeSelect.classList.add('error');
-                isValid = false;
-                if (!firstInvalidField) firstInvalidField = mentorModeSelect;
-            } else {
-                mentorModeSelect.classList.remove('error');
-            }
-
-            if (mentorModeSelect.value === 'pilih' && !mentorSelect.value) {
-                mentorSelect.classList.add('error');
-                isValid = false;
-                if (!firstInvalidField) firstInvalidField = mentorSelect;
-            } else if (mentorModeSelect.value === 'pilih') {
-                mentorSelect.classList.remove('error');
-            }
-        }
 
         if (!isValid) {
             showNotification('error', 'Silakan lengkapi semua field yang wajib diisi');
@@ -2370,12 +2404,20 @@ document.addEventListener('DOMContentLoaded', function () {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (isEdit ? 'Mengupdate...' : 'Menyimpan...');
         submitBtn.disabled = true;
 
-        // Validasi client-side untuk field required (tidak termasuk file untuk edit mode)
-        const requiredFields = this.querySelectorAll('[required]');
-        let hasEmptyRequired = false;
-
         // Clear previous client-side errors
         document.querySelectorAll('.client-error').forEach(el => el.remove());
+        
+        // Temporary remove required dari field mentor yang tersembunyi
+        if (mentorContainer && mentorContainer.style.display === 'none') {
+            const hiddenRequiredFields = mentorContainer.querySelectorAll('[required]');
+            hiddenRequiredFields.forEach(field => {
+                field.removeAttribute('required');
+            });
+        }
+
+        // Validasi client-side untuk field required
+        const requiredFields = this.querySelectorAll('[required]');
+        let hasEmptyRequired = false;
 
         requiredFields.forEach(field => {
             // Skip file validation for edit mode
@@ -2396,6 +2438,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
+
+        // Restore required attributes jika ada
+        if (mentorContainer && mentorContainer.style.display === 'none') {
+            // Kembalikan required attributes untuk mentor fields
+            restoreMentorRequiredAttributes();
+        }
 
         if (hasEmptyRequired) {
             submitBtn.innerHTML = originalText;
