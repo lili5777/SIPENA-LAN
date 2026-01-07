@@ -22,7 +22,7 @@ class PesertaController extends Controller
      */
     private $jenisMapping = [
         'pkn' => ['id' => 1, 'nama' => 'PKN TK II'],
-        'cpns' => ['id' => 2, 'nama' => 'PD CPNS'],
+        'latsar' => ['id' => 2, 'nama' => 'LATSAR'],
         'pka' => ['id' => 3, 'nama' => 'PKA'],
         'pkp' => ['id' => 4, 'nama' => 'PKP']
     ];
@@ -515,7 +515,7 @@ class PesertaController extends Controller
                 ];
             }
 
-            if ($kode === 'PD_CPNS') {
+            if ($kode === 'LATSAR') {
                 $additionalRules = [
                     'nomor_sk_cpns' => 'required|string|max:100',
                     'tanggal_sk_cpns' => 'required|date',
@@ -1085,7 +1085,7 @@ class PesertaController extends Controller
                 ];
             }
 
-            if ($kode === 'PD_CPNS') {
+            if ($kode === 'LATSAR') {
                 $additionalRules = [
                     'nomor_sk_cpns' => 'required|string|max:100',
                     'tanggal_sk_cpns' => 'required|date',

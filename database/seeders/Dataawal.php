@@ -28,8 +28,8 @@ class Dataawal extends Seeder
                 'aktif' => true,
             ],
             [
-                'kode_pelatihan' => 'PD_CPNS',
-                'nama_pelatihan' => 'PD CPNS',
+                'kode_pelatihan' => 'LATSAR',
+                'nama_pelatihan' => 'LATSAR',
                 'deskripsi' => 'Pelatihan Dasar Calon Pegawai Negeri Sipil',
                 'aktif' => true,
             ],
@@ -58,7 +58,7 @@ class Dataawal extends Seeder
         foreach ($jenisPelatihan as $jp) {
             Angkatan::create([
                 'id_jenis_pelatihan' => $jp->id,
-                'nama_angkatan' => 'Angkatan 1',
+                'nama_angkatan' => 'Angkatan I',
                 'tahun' => 2025,
                 'tanggal_mulai' => '2025-01-01',
                 'tanggal_selesai' => '2025-03-31',
@@ -68,7 +68,7 @@ class Dataawal extends Seeder
 
             Angkatan::create([
                 'id_jenis_pelatihan' => $jp->id,
-                'nama_angkatan' => 'Angkatan 2',
+                'nama_angkatan' => 'Angkatan II',
                 'tahun' => 2026,
                 'tanggal_mulai' => '2026-01-01',
                 'tanggal_selesai' => '2026-03-31',

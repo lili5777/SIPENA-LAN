@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Angkatan\AngkatanController;
 use App\Http\Controllers\Admin\Master\PesertaController;
+use App\Http\Controllers\Admin\Mentor\MentorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PendaftaranController;
@@ -85,27 +86,27 @@ Route::middleware('auth')->group(function () {
     Route::prefix('peserta')->name('peserta.')->group(function () {
         // Route utama dengan parameter jenis
         Route::get('/{jenis}', [PesertaController::class, 'index'])
-            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->where('jenis', 'pkn|latsar|pka|pkp')
             ->name('index');
 
         // Route create dengan parameter jenis
         Route::get('/{jenis}/create', [PesertaController::class, 'create'])
-            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->where('jenis', 'pkn|latsar|pka|pkp')
             ->name('create');
 
         // Route edit dengan parameter jenis
         Route::get('/{jenis}/{id}/edit', [PesertaController::class, 'edit'])
-            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->where('jenis', 'pkn|latsar|pka|pkp')
             ->name('edit');
 
         // Route update dengan parameter jenis
         Route::put('/{jenis}/{id}', [PesertaController::class, 'update'])
-            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->where('jenis', 'pkn|latsar|pka|pkp')
             ->name('update');
 
         // Route destroy dengan parameter jenis
         Route::delete('/{jenis}/{id}', [PesertaController::class, 'destroy'])
-            ->where('jenis', 'pkn|cpns|pka|pkp')
+            ->where('jenis', 'pkn|latsar|pka|pkp')
             ->name('destroy');
 
         // Route store (tidak perlu parameter jenis karena dari session)
@@ -124,6 +125,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/edit', [AngkatanController::class, 'edit'])->name('edit');
         Route::put('/{id}', [AngkatanController::class, 'update'])->name('update');
         Route::delete('/{id}', [AngkatanController::class, 'destroy'])->name('destroy');
+    });
+
+    // Master Mentor Routes
+    Route::prefix('mentor')->name('mentor.')->group(function () {
+        Route::get('/', [MentorController::class, 'index'])->name('index');
+        Route::get('/create', [MentorController::class, 'create'])->name('create');
+        Route::post('/', [MentorController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [MentorController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [MentorController::class, 'update'])->name('update');
+        Route::delete('/{id}', [MentorController::class, 'destroy'])->name('destroy');
     });
 
     

@@ -1,5 +1,5 @@
 <div class="form-section-header">
-    <i class="fas fa-user-graduate"></i> Form Kesediaan PD CPNS
+    <i class="fas fa-user-graduate"></i> Form Kesediaan LATSAR
 </div>
 
 <div class="form-row">

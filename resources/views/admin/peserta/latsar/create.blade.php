@@ -7,7 +7,7 @@
     // Mapping nama dan ID
     $jenisMapping = [
         'pkn' => ['nama' => 'PKN TK II', 'id' => 1, 'kode' => 'PKN_TK_II'],
-        'cpns' => ['nama' => 'PD CPNS', 'id' => 2, 'kode' => 'PD_CPNS'],
+        'latsar' => ['nama' => 'LATSAR', 'id' => 2, 'kode' => 'LATSAR'],
         'pka' => ['nama' => 'PKA', 'id' => 3, 'kode' => 'PKA'],
         'pkp' => ['nama' => 'PKP', 'id' => 4, 'kode' => 'PKP']
     ];
@@ -23,7 +23,7 @@
     $mentorData = $isEdit ? ($pendaftaran->pesertaMentor->first() ?? null) : null;
 
     // Tentukan fields yang required berdasarkan jenis
-    $isCPNS = $jenis === 'cpns';
+    $isLATSAR = $jenis === 'latsar';
     $isPKA = $jenis === 'pka';
     $isPKP = $jenis === 'pkp';
     $isPKN = $jenis === 'pkn';
@@ -634,7 +634,7 @@
                             </div>
 
                             <!-- Data SK CPNS khusus untuk CPNS -->
-                            @if($isCPNS)
+                            @if($isLATSAR)
                                 <div class="form-section-header">
                                     <i class="fas fa-file-contract"></i> Data SK CPNS
                                 </div>
@@ -691,7 +691,7 @@
                                     </div>
                                 @endif
 
-                                @if($isCPNS && $kepegawaianData->file_sk_cpns)
+                                @if($isLATSAR && $kepegawaianData->file_sk_cpns)
                                     <div class="form-group">
                                         <label class="form-label">SK CPNS Saat Ini</label>
                                         <div class="current-file-preview">
@@ -704,7 +704,7 @@
                                     </div>
                                 @endif
 
-                                @if($isCPNS && $kepegawaianData->file_spmt)
+                                @if($isLATSAR && $kepegawaianData->file_spmt)
                                     <div class="form-group">
                                         <label class="form-label">SPMT Saat Ini</label>
                                         <div class="current-file-preview">
@@ -718,8 +718,8 @@
                                 @endif
                             @endif
 
-                            <!-- File SK CPNS khusus untuk CPNS -->
-                            @if($isCPNS)
+                            <!-- File SK CPNS khusus untuk LATSAR -->
+                            @if($isLATSAR)
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label class="form-label {{ !$isEdit ? 'required' : '' }}">
@@ -796,10 +796,10 @@
                             @endphp
 
                             <div class="form-group">
-                                <label class="form-label {{ ($isCPNS || $isPKA || $isPKP) ? 'required' : '' }}">Apakah sudah
-                                    ada penunjukan Mentor? {{ ($isCPNS || $isPKA || $isPKP) ? '*' : '' }}</label>
+                                <label class="form-label {{ ($isLATSAR || $isPKA || $isPKP) ? 'required' : '' }}">Apakah sudah
+                                    ada penunjukan Mentor? {{ ($isLATSAR || $isPKA || $isPKP) ? '*' : '' }}</label>
                                 <select name="sudah_ada_mentor" id="sudah_ada_mentor"
-                                    class="form-select @error('sudah_ada_mentor') error @enderror" {{ ($isCPNS || $isPKA || $isPKP) ? 'required' : '' }}>
+                                    class="form-select @error('sudah_ada_mentor') error @enderror" {{ ($isLATSAR || $isPKA || $isPKP) ? 'required' : '' }}>
                                     <option value="">Pilih</option>
                                     <option value="Ya" {{ $hasMentor || old('sudah_ada_mentor') == 'Ya' ? 'selected' : '' }}>
                                         Ya</option>
@@ -1007,7 +1007,7 @@
                             </div>
 
                             <!-- Alert khusus untuk jenis tertentu -->
-                            @if($isCPNS)
+                            @if($isLATSAR)
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle"></i>
                                     <strong>Khusus CPNS:</strong> Pastikan Surat Kesediaan sudah diunggah.
@@ -1055,7 +1055,7 @@
                             @endif
 
                             <!-- Surat Kesediaan (wajib untuk CPNS, PKA, PKP) -->
-                            @if($isCPNS || $isPKA || $isPKP)
+                            @if($isLATSAR || $isPKA || $isPKP)
                                 <div class="form-group">
                                     <label class="form-label {{ !$isEdit ? 'required' : '' }}">
                                         Unggah Surat Kesediaan
@@ -1239,8 +1239,8 @@
                                 </div>
                             </div>
 
-                            <!-- Dokumen tambahan untuk CPNS -->
-                            @if($isCPNS)
+                            <!-- Dokumen tambahan untuk LATSAR -->
+                            @if($isLATSAR)
                                 <div class="form-group">
                                     <label class="form-label">Unggah SKP (Sasaran Kinerja Pegawai)</label>
                                     <div class="form-file">

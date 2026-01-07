@@ -42,8 +42,8 @@ class PendaftaranController extends Controller
     {
         if ($type === 'PKN_TK_II') {
             return view('partials.form-pkn-tk-ii');
-        } elseif ($type === 'PD_CPNS') {
-            return view('partials.form-pd-cpns');
+        } elseif ($type === 'LATSAR') {
+            return view('partials.form-latsar');
         } elseif ($type === 'PKA') {
             return view('partials.form-pka');
         }
@@ -344,7 +344,7 @@ class PendaftaranController extends Controller
                 ];
             }
 
-            if ($kode === 'PD_CPNS') {
+            if ($kode === 'LATSAR') {
                 $additionalRules = [
                     'nomor_sk_cpns' => 'required|string|max:100',
                     'tanggal_sk_cpns' => 'required|date',

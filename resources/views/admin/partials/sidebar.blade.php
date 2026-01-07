@@ -30,14 +30,14 @@
                 <a href="{{ route('angkatan.index') }}" class="submenu-link">
                     <i class="fas fa-handshake me-2"></i> Angkatan
                 </a>
-                <a href="" class="submenu-link">
+                {{-- <a href="" class="submenu-link">
                     <i class="fas fa-handshake me-2"></i> Mitra Kerja
                 </a>
                 <a href="" class="submenu-link">
                     <i class="fas fa-book me-2"></i> Materi Pelatihan
-                </a>
-                <a href="" class="submenu-link">
-                    <i class="fas fa-chalkboard-teacher me-2"></i> Instruktur
+                </a> --}}
+                <a href="{{ route('mentor.index') }}" class="submenu-link">
+                    <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
                 </a>
             </div>
         </div>
@@ -53,8 +53,8 @@
                 <a href="{{ route('peserta.index', ['jenis' => 'pkn']) }}" class="submenu-link">
                     <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
                 </a>
-                <a href="{{ route('peserta.index', ['jenis' => 'cpns']) }}" class="submenu-link">
-                    <i class="fas fa-user-tie me-2"></i> Peserta PD CPNS
+                <a href="{{ route('peserta.index', ['jenis' => 'latsar']) }}" class="submenu-link">
+                    <i class="fas fa-user-tie me-2"></i> Peserta LATSAR
                 </a>
                 <a href="{{ route('peserta.index', ['jenis' => 'pka']) }}" class="submenu-link">
                     <i class="fas fa-users-gear me-2"></i> Peserta PKA

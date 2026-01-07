@@ -13,8 +13,8 @@
                         <i class="fas fa-users fa-lg" style="color: #285496;"></i>
                     </div>
                     <div>
-                        <h1 class="text-white mb-1">Peserta {{ $jenisPelatihan->nama_pelatihan ?? 'CPNS' }}</h1>
-                        <p class="text-white-50 mb-0">Kelola peserta pelatihan CPNS</p>
+                        <h1 class="text-white mb-1">Peserta {{ $jenisPelatihan->nama_pelatihan ?? 'LATSAR' }}</h1>
+                        <p class="text-white-50 mb-0">Kelola peserta LATSAR</p>
                     </div>
                 </div>
             </div>

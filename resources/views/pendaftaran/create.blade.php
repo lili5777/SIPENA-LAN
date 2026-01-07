@@ -52,11 +52,11 @@
                                 <p class="training-code">PKN Tingkat II</p>
                                 <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
                             </div>
-                            <div class="training-card" data-id="2" data-kode="PD_CPNS">
+                            <div class="training-card" data-id="2" data-kode="LATSAR">
                                 <div class="training-icon">
                                     <i class="fas fa-user-graduate"></i>
                                 </div>
-                                <h3 class="training-name">PD CPNS</h3>
+                                <h3 class="training-name">LATSAR</h3>
                                 <p class="training-code">Pendidikan CPNS</p>
                                 <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
                             </div>
@@ -912,8 +912,8 @@
                 setTimeout(() => {
                     if (selectedTraining.kode === 'PKN_TK_II') {
                         loadFormPartial('PKN_TK_II');
-                    } else if (selectedTraining.kode === 'PD_CPNS') {
-                        loadFormPartial('PD_CPNS');
+                    } else if (selectedTraining.kode === 'LATSAR') {
+                        loadFormPartial('LATSAR');
                     } else if (selectedTraining.kode === 'PKA' || selectedTraining.kode === 'PKP') {
                         loadFormPartial('PKA');
                     }
