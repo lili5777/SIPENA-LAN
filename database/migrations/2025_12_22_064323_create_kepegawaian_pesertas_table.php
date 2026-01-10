@@ -10,20 +10,20 @@ return new class extends Migration
     {
         Schema::create('kepegawaian_peserta', function (Blueprint $table) {
             $table->id('id');
-            $table->foreignId('id_peserta')->constrained('peserta')->onDelete('cascade');
-            $table->string('asal_instansi', 200);
+            $table->foreignId('id_peserta')->nullable()->constrained('peserta')->onDelete('cascade');
+            $table->string('asal_instansi', 200)->nullable();
             $table->string('unit_kerja', 200)->nullable();
-            $table->foreignId('id_provinsi')->constrained('provinsis')->onDelete('cascade');
+            $table->foreignId('id_provinsi')->nullable()->constrained('provinsis')->onDelete('cascade');
             $table->foreignId('id_kabupaten_kota')->nullable()->constrained('kabupatens')->onDelete('cascade');
-            $table->text('alamat_kantor');
+            $table->text('alamat_kantor')->nullable();
             $table->string('nomor_telepon_kantor', 20)->nullable();
             $table->string('email_kantor', 100)->nullable();
-            $table->string('jabatan', 200);
+            $table->string('jabatan', 200)->nullable();
             $table->string('eselon', 50)->nullable();
             $table->date('tanggal_sk_jabatan')->nullable();
             $table->string('file_sk_jabatan', 255)->nullable();
             $table->string('pangkat', 50)->nullable();
-            $table->string('golongan_ruang', 50);
+            $table->string('golongan_ruang', 50)->nullable();
             $table->string('file_sk_pangkat', 255)->nullable();
             $table->string('nomor_sk_cpns', 100)->nullable();
             $table->string('nomor_sk_terakhir', 100)->nullable();

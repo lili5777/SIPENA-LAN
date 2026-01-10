@@ -1,20 +1,24 @@
 <div class="form-section-header">
-    <i class="fas fa-user-graduate"></i> Form Kesediaan LATSAR
+    <i class="fas fa-user-graduate"></i> Form Pembaruan Data LATSAR
 </div>
+
+<input type="hidden" name="peserta_id" id="peserta_id" value="{{ $peserta['id'] ?? '' }}">
+<input type="hidden" name="pendaftaran_id" id="pendaftaran_id" value="{{ $pendaftaran['id'] ?? '' }}">
 
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Nama Lengkap dan Gelar</label>
         <input type="text" name="nama_lengkap" class="form-input @error('nama_lengkap') error @enderror"
-            value="{{ old('nama_lengkap') }}" required>
+            value="{{ $peserta['nama_lengkap'] ?? old('nama_lengkap') }}" required>
         @error('nama_lengkap')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
         <label class="form-label required">NIP</label>
-        <input type="text" name="nip_nrp" class="form-input @error('nip_nrp') error @enderror" value="{{ old('nip_nrp') }}"
-            required>
+        <input type="text" name="nip_nrp" class="form-input @error('nip_nrp') error @enderror" 
+            value="{{ $peserta['nip_nrp'] ?? old('nip_nrp') }}" required readonly>
+        <small class="form-hint">NIP/NRP tidak dapat diubah</small>
         @error('nip_nrp')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -25,7 +29,7 @@
     <div class="form-group">
         <label class="form-label">Nama Panggilan</label>
         <input type="text" name="nama_panggilan" class="form-input @error('nama_panggilan') error @enderror"
-            value="{{ old('nama_panggilan') }}">
+            value="{{ $peserta['nama_panggilan'] ?? old('nama_panggilan') }}">
         @error('nama_panggilan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -34,8 +38,8 @@
         <label class="form-label required">Jenis Kelamin</label>
         <select name="jenis_kelamin" class="form-select @error('jenis_kelamin') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-            <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+            <option value="Laki-laki" {{ ($peserta['jenis_kelamin'] ?? old('jenis_kelamin')) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+            <option value="Perempuan" {{ ($peserta['jenis_kelamin'] ?? old('jenis_kelamin')) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
         </select>
         @error('jenis_kelamin')
             <small class="text-danger">{{ $message }}</small>
@@ -45,12 +49,12 @@
         <label class="form-label required">Agama</label>
         <select name="agama" class="form-select @error('agama') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="Islam" {{ old('agama') == 'Islam' ? 'selected' : '' }}>Islam</option>
-            <option value="Kristen" {{ old('agama') == 'Kristen' ? 'selected' : '' }}>Kristen</option>
-            <option value="Katolik" {{ old('agama') == 'Katolik' ? 'selected' : '' }}>Katolik</option>
-            <option value="Hindu" {{ old('agama') == 'Hindu' ? 'selected' : '' }}>Hindu</option>
-            <option value="Buddha" {{ old('agama') == 'Buddha' ? 'selected' : '' }}>Buddha</option>
-            <option value="Konghucu" {{ old('agama') == 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
+            <option value="Islam" {{ ($peserta['agama'] ?? old('agama')) == 'Islam' ? 'selected' : '' }}>Islam</option>
+            <option value="Kristen" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen' ? 'selected' : '' }}>Kristen</option>
+            <option value="Katolik" {{ ($peserta['agama'] ?? old('agama')) == 'Katolik' ? 'selected' : '' }}>Katolik</option>
+            <option value="Hindu" {{ ($peserta['agama'] ?? old('agama')) == 'Hindu' ? 'selected' : '' }}>Hindu</option>
+            <option value="Buddha" {{ ($peserta['agama'] ?? old('agama')) == 'Buddha' ? 'selected' : '' }}>Buddha</option>
+            <option value="Konghucu" {{ ($peserta['agama'] ?? old('agama')) == 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
         </select>
         @error('agama')
             <small class="text-danger">{{ $message }}</small>
@@ -61,16 +65,16 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Email</label>
-        <input type="email" name="email_pribadi" class="form-input @error('email_pribadi') error @enderror" value="{{ old('email_pribadi') }}"
-            required>
+        <input type="email" name="email_pribadi" class="form-input @error('email_pribadi') error @enderror" 
+            value="{{ $peserta['email_pribadi'] ?? old('email_pribadi') }}" required>
         @error('email_pribadi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
         <label class="form-label required">No HP (yang terhubung Whatsapp)</label>
-        <input type="tel" name="nomor_hp" class="form-input @error('nomor_hp') error @enderror" value="{{ old('nomor_hp') }}"
-            required>
+        <input type="tel" name="nomor_hp" class="form-input @error('nomor_hp') error @enderror" 
+            value="{{ $peserta['nomor_hp'] ?? old('nomor_hp') }}" required>
         @error('nomor_hp')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -81,7 +85,7 @@
     <div class="form-group">
         <label class="form-label required">Tempat Lahir (sesuai KTP)</label>
         <input type="text" name="tempat_lahir" class="form-input @error('tempat_lahir') error @enderror"
-            value="{{ old('tempat_lahir') }}" required>
+            value="{{ $peserta['tempat_lahir'] ?? old('tempat_lahir') }}" required>
         @error('tempat_lahir')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -89,7 +93,7 @@
     <div class="form-group">
         <label class="form-label required">Tanggal Lahir</label>
         <input type="date" name="tanggal_lahir" class="form-input @error('tanggal_lahir') error @enderror"
-            value="{{ old('tanggal_lahir') }}" required>
+            value="{{ $peserta['tanggal_lahir'] ?? old('tanggal_lahir') }}" required>
         @error('tanggal_lahir')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -99,7 +103,7 @@
 <div class="form-group">
     <label class="form-label required">Alamat Rumah</label>
     <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror"
-        required>{{ old('alamat_rumah') }}</textarea>
+        required>{{ $peserta['alamat_rumah'] ?? old('alamat_rumah') }}</textarea>
     @error('alamat_rumah')
         <small class="text-danger">{{ $message }}</small>
     @enderror
@@ -108,11 +112,13 @@
 <div class="form-group">
     <label class="form-label required">Alamat Kantor</label>
     <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror"
-        required>{{ old('alamat_kantor') }}</textarea>
+        required>{{ $peserta['alamat_kantor'] ?? old('alamat_kantor') }}</textarea>
     @error('alamat_kantor')
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
+
+
 
 <div class="form-section-header">
     <i class="fas fa-building"></i> Data Instansi
@@ -122,7 +128,8 @@
     <div class="form-group">
         <label class="form-label required">Asal Instansi</label>
         <input type="text" name="asal_instansi" class="form-input @error('asal_instansi') error @enderror"
-            placeholder="Contoh: Dinas Kesehatan" value="{{ old('asal_instansi') }}" required>
+            placeholder="Contoh: Dinas Kesehatan" 
+            value="{{ $peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') }}" required>
         @error('asal_instansi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -130,7 +137,7 @@
     <div class="form-group">
         <label class="form-label required">Jabatan</label>
         <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
-            value="{{ old('jabatan') }}" required placeholder="Contoh : Perencana Ahli Pertama">
+            value="{{ $peserta['kepegawaian']['jabatan'] ?? old('jabatan') }}" required placeholder="Contoh : Perencana Ahli Pertama">
         @error('jabatan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -162,7 +169,7 @@
 <div class="form-group">
     <label class="form-label">Alamat Instansi</label>
     <textarea name="alamat_instansi"
-        class="form-textarea @error('alamat_instansi') error @enderror">{{ old('alamat_instansi') }}</textarea>
+        class="form-textarea @error('alamat_instansi') error @enderror">{{ $peserta['kepegawaian']['alamat_kantor'] ?? old('alamat_instansi') }}</textarea>
     @error('alamat_instansi')
         <small class="text-danger">{{ $message }}</small>
     @enderror
@@ -173,11 +180,11 @@
         <label class="form-label required">Golongan Ruang</label>
         <select name="golongan_ruang" class="form-select @error('golongan_ruang') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="III/C" {{ old('golongan_ruang') == 'III/C' ? 'selected' : '' }}>III/C</option>
-            <option value="III/B" {{ old('golongan_ruang') == 'III/B' ? 'selected' : '' }}>III/B</option>
-            <option value="III/A" {{ old('golongan_ruang') == 'III/A' ? 'selected' : '' }}>III/A</option>
-            <option value="II/C" {{ old('golongan_ruang') == 'II/C' ? 'selected' : '' }}>II/C</option>
-            <option value="II/A" {{ old('golongan_ruang') == 'II/A' ? 'selected' : '' }}>II/A</option>
+            <option value="III/C" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'III/C' ? 'selected' : '' }}>III/C</option>
+            <option value="III/B" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'III/B' ? 'selected' : '' }}>III/B</option>
+            <option value="III/A" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'III/A' ? 'selected' : '' }}>III/A</option>
+            <option value="II/C" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'II/C' ? 'selected' : '' }}>II/C</option>
+            <option value="II/A" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'II/A' ? 'selected' : '' }}>II/A</option>
         </select>
         @error('golongan_ruang')
             <small class="text-danger">{{ $message }}</small>
@@ -187,12 +194,12 @@
         <label class="form-label required">Pangkat</label>
         <select name="pangkat" class="form-select @error('pangkat') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="Penata" {{ old('pangkat') == 'Penata' ? 'selected' : '' }}>Penata</option>
-            <option value="Penata Muda Tingkat I" {{ old('pangkat') == 'Penata Muda Tingkat I' ? 'selected' : '' }}>Penata
+            <option value="Penata" {{ ($peserta['kepegawaian']['pangkat'] ?? old('pangkat')) == 'Penata' ? 'selected' : '' }}>Penata</option>
+            <option value="Penata Muda Tingkat I" {{ ($peserta['kepegawaian']['pangkat'] ?? old('pangkat')) == 'Penata Muda Tingkat I' ? 'selected' : '' }}>Penata
                 Muda Tingkat I</option>
-            <option value="Penata Muda" {{ old('pangkat') == 'Penata Muda' ? 'selected' : '' }}>Penata Muda</option>
-            <option value="Pengatur" {{ old('pangkat') == 'Pengatur' ? 'selected' : '' }}>Pengatur</option>
-            <option value="Pengatur Muda" {{ old('pangkat') == 'Pengatur Muda' ? 'selected' : '' }}>Pengatur Muda</option>
+            <option value="Penata Muda" {{ ($peserta['kepegawaian']['pangkat'] ?? old('pangkat')) == 'Penata Muda' ? 'selected' : '' }}>Penata Muda</option>
+            <option value="Pengatur" {{ ($peserta['kepegawaian']['pangkat'] ?? old('pangkat')) == 'Pengatur' ? 'selected' : '' }}>Pengatur</option>
+            <option value="Pengatur Muda" {{ ($peserta['kepegawaian']['pangkat'] ?? old('pangkat')) == 'Pengatur Muda' ? 'selected' : '' }}>Pengatur Muda</option>
         </select>
         @error('pangkat')
             <small class="text-danger">{{ $message }}</small>
@@ -204,7 +211,7 @@
     <div class="form-group">
         <label class="form-label required">Nomor SK CPNS</label>
         <input type="text" name="nomor_sk_cpns" class="form-input @error('nomor_sk_cpns') error @enderror"
-            value="{{ old('nomor_sk_cpns') }}" required>
+            value="{{ $peserta['kepegawaian']['nomor_sk_cpns'] ?? old('nomor_sk_cpns') }}" required>
         @error('nomor_sk_cpns')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -212,7 +219,7 @@
     <div class="form-group">
         <label class="form-label required">Tanggal SK CPNS</label>
         <input type="date" name="tanggal_sk_cpns" class="form-input @error('tanggal_sk_cpns') error @enderror"
-            value="{{ old('tanggal_sk_cpns') }}" required>
+            value="{{ $peserta['kepegawaian']['tanggal_sk_cpns'] ?? old('tanggal_sk_cpns') }}" required>
         @error('tanggal_sk_cpns')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -228,11 +235,11 @@
         <label class="form-label required">Pendidikan Terakhir</label>
         <select name="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="SMU" {{ old('pendidikan_terakhir') == 'SMU' ? 'selected' : '' }}>SMU</option>
-            <option value="D3" {{ old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3</option>
-            <option value="S1" {{ old('pendidikan_terakhir') == 'S1' ? 'selected' : '' }}>S1</option>
-            <option value="S2" {{ old('pendidikan_terakhir') == 'S2' ? 'selected' : '' }}>S2</option>
-            <option value="S3" {{ old('pendidikan_terakhir') == 'S3' ? 'selected' : '' }}>S3</option>
+            <option value="SMU" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'SMU' ? 'selected' : '' }}>SMU</option>
+            <option value="D3" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'D3' ? 'selected' : '' }}>D3</option>
+            <option value="S1" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'S1' ? 'selected' : '' }}>S1</option>
+            <option value="S2" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'S2' ? 'selected' : '' }}>S2</option>
+            <option value="S3" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'S3' ? 'selected' : '' }}>S3</option>
         </select>
         @error('pendidikan_terakhir')
             <small class="text-danger">{{ $message }}</small>
@@ -241,7 +248,7 @@
     <div class="form-group">
         <label class="form-label required">Bidang Studi Pendidikan Terakhir</label>
         <input type="text" name="bidang_studi" class="form-input @error('bidang_studi') error @enderror"
-            value="{{ old('bidang_studi') }}" required placeholder="Contoh : Ilmu Hukum">
+            value="{{ $peserta['bidang_studi'] ?? old('bidang_studi') }}" required placeholder="Contoh : Ilmu Hukum">
         @error('bidang_studi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -249,7 +256,7 @@
     <div class="form-group">
         <label class="form-label required">Bidang Keahlian/Kepakaran</label>
         <input type="text" name="bidang_keahlian" class="form-input @error('bidang_keahlian') error @enderror"
-            value="{{ old('bidang_keahlian') }}" required placeholder="Contoh : Manajemen Pemerintahan ">
+            value="{{ $peserta['bidang_keahlian'] ?? old('bidang_keahlian') }}" required placeholder="Contoh : Manajemen Pemerintahan ">
         @error('bidang_keahlian')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -264,7 +271,7 @@
     <div class="form-group">
         <label class="form-label required">Olahraga Kegemaran/Hobi</label>
         <input type="text" name="olahraga_hobi" class="form-input @error('olahraga_hobi') error @enderror"
-            value="{{ old('olahraga_hobi') }}" required>
+            value="{{ $peserta['olahraga_hobi'] ?? old('olahraga_hobi') }}" required>
         @error('olahraga_hobi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -273,8 +280,8 @@
         <label class="form-label required">Apakah Saudara/i adalah perokok?</label>
         <select name="perokok" class="form-select @error('perokok') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="Ya" {{ old('perokok') == 'Ya' ? 'selected' : '' }}>Ya</option>
-            <option value="Tidak" {{ old('perokok') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
+            <option value="Ya" {{ ($peserta['perokok'] ?? old('perokok')) == 'Ya' ? 'selected' : '' }}>Ya</option>
+            <option value="Tidak" {{ ($peserta['perokok'] ?? old('perokok')) == 'Tidak' ? 'selected' : '' }}>Tidak</option>
         </select>
         @error('perokok')
             <small class="text-danger">{{ $message }}</small>
@@ -283,7 +290,7 @@
     <div class="form-group">
         <label class="form-label">Kondisi Peserta</label>
         <textarea name="kondisi_peserta"
-            class="form-textarea @error('kondisi_peserta') error @enderror">{{ old('kondisi_peserta') }}</textarea>
+            class="form-textarea @error('kondisi_peserta') error @enderror">{{ $peserta['kondisi_peserta'] ?? old('kondisi_peserta') }}</textarea>
         @error('kondisi_peserta')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -295,11 +302,11 @@
         <label class="form-label required">Status Perkawinan</label>
         <select name="status_perkawinan" class="form-select @error('status_perkawinan') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="Belum Menikah" {{ old('status_perkawinan') == 'Belum Menikah' ? 'selected' : '' }}>Belum
+            <option value="Belum Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Belum Menikah' ? 'selected' : '' }}>Belum
                 Menikah</option>
-            <option value="Menikah" {{ old('status_perkawinan') == 'Menikah' ? 'selected' : '' }}>Menikah</option>
-            <option value="Duda" {{ old('status_perkawinan') == 'Duda' ? 'selected' : '' }}>Duda</option>
-            <option value="Janda" {{ old('status_perkawinan') == 'Janda' ? 'selected' : '' }}>Janda</option>
+            <option value="Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Menikah' ? 'selected' : '' }}>Menikah</option>
+            <option value="Duda" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Duda' ? 'selected' : '' }}>Duda</option>
+            <option value="Janda" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Janda' ? 'selected' : '' }}>Janda</option>
         </select>
         @error('status_perkawinan')
             <small class="text-danger">{{ $message }}</small>
@@ -308,7 +315,7 @@
     <div class="form-group">
         <label class="form-label">Nama Istri/Suami</label>
         <input type="text" name="nama_pasangan" class="form-input @error('nama_pasangan') error @enderror"
-            value="{{ old('nama_pasangan') }}">
+            value="{{ $peserta['nama_pasangan'] ?? old('nama_pasangan') }}">
         @error('nama_pasangan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -317,12 +324,12 @@
         <label class="form-label">Ukuran Kaos olahraga</label>
         <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ old('ukuran_kaos') == 'S' ? 'selected' : '' }}>S</option>
-            <option value="M" {{ old('ukuran_kaos') == 'M' ? 'selected' : '' }}>M</option>
-            <option value="L" {{ old('ukuran_kaos') == 'L' ? 'selected' : '' }}>L</option>
-            <option value="XL" {{ old('ukuran_kaos') == 'XL' ? 'selected' : '' }}>XL</option>
-            <option value="XXL" {{ old('ukuran_kaos') == 'XXL' ? 'selected' : '' }}>XXL</option>
-            <option value="XXXL" {{ old('ukuran_kaos') == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+            <option value="S" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'S' ? 'selected' : '' }}>S</option>
+            <option value="M" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'M' ? 'selected' : '' }}>M</option>
+            <option value="L" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'L' ? 'selected' : '' }}>L</option>
+            <option value="XL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XL' ? 'selected' : '' }}>XL</option>
+            <option value="XXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXL' ? 'selected' : '' }}>XXL</option>
+            <option value="XXXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
         </select>
         @error('ukuran_kaos')
             <small class="text-danger">{{ $message }}</small>
@@ -330,7 +337,6 @@
     </div>
 </div>
 
-{{-- Ganti bagian Data Mentor yang ada dengan ini --}}
 <div class="form-section-header">
     <i class="fas fa-user-graduate"></i> Data Mentor
 </div>
@@ -340,23 +346,23 @@
     <select name="sudah_ada_mentor" id="sudah_ada_mentor" class="form-select @error('sudah_ada_mentor') error @enderror"
         required>
         <option value="">Pilih</option>
-        <option value="Ya" {{ old('sudah_ada_mentor') == 'Ya' ? 'selected' : '' }}>Ya</option>
-        <option value="Tidak" {{ old('sudah_ada_mentor') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
+        <option value="Ya" {{ ($peserta['sudah_ada_mentor'] ?? old('sudah_ada_mentor')) == 'Ya' ? 'selected' : '' }}>Ya</option>
+        <option value="Tidak" {{ ($peserta['sudah_ada_mentor'] ?? old('sudah_ada_mentor')) == 'Tidak' ? 'selected' : '' }}>Tidak</option>
     </select>
     @error('sudah_ada_mentor')
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
 
-<div id="mentor-container" style="display: {{ old('sudah_ada_mentor') == 'Ya' ? 'block' : 'none' }};">
+<div id="mentor-container" style="display: {{ ($peserta['sudah_ada_mentor'] ?? old('sudah_ada_mentor')) == 'Ya' ? 'block' : 'none' }};">
     <div class="form-group">
         <label class="form-label required">Pilih Mentor atau Tambah Baru</label>
         <div class="mentor-options">
             <select name="mentor_mode" id="mentor_mode" class="form-select @error('mentor_mode') error @enderror">
                 <option value="">Pilih Menu</option>
-                <option value="pilih" {{ old('mentor_mode') == 'pilih' ? 'selected' : '' }}>Daftar mentor
+                <option value="pilih" {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'pilih' ? 'selected' : '' }}>Daftar mentor
                 </option>
-                <option value="tambah" {{ old('mentor_mode') == 'tambah' ? 'selected' : '' }}>Tambah mentor(Jika tidak ada di daftar mentor)</option>
+                <option value="tambah" {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'tambah' ? 'selected' : '' }}>Tambah mentor(Jika tidak ada di daftar mentor)</option>
             </select>
         </div>
         @error('mentor_mode')
@@ -365,7 +371,7 @@
     </div>
 
     <!-- Form untuk memilih mentor yang sudah ada -->
-    <div id="select-mentor-form" style="display: {{ old('mentor_mode') == 'pilih' ? 'block' : 'none' }};">
+    <div id="select-mentor-form" style="display: {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'pilih' ? 'block' : 'none' }};">
         <div class="form-group">
             <label class="form-label required">Pilih Mentor</label>
             <select name="id_mentor" id="id_mentor" class="form-select @error('id_mentor') error @enderror">
@@ -381,7 +387,7 @@
             <div class="form-group">
                 <label class="form-label required">Nama Mentor</label>
                 <input type="text" name="nama_mentor" id="nama_mentor_select"
-                    class="form-input @error('nama_mentor') error @enderror" value="{{ old('nama_mentor') }}" readonly>
+                    class="form-input @error('nama_mentor') error @enderror" value="{{ $peserta['nama_mentor'] ?? old('nama_mentor') }}" readonly>
                 @error('nama_mentor')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -389,7 +395,7 @@
             <div class="form-group">
                 <label class="form-label required">Jabatan Mentor</label>
                 <input type="text" name="jabatan_mentor" id="jabatan_mentor_select"
-                    class="form-input @error('jabatan_mentor') error @enderror" value="{{ old('jabatan_mentor') }}"
+                    class="form-input @error('jabatan_mentor') error @enderror" value="{{ $peserta['jabatan_mentor'] ?? old('jabatan_mentor') }}"
                     readonly>
                 @error('jabatan_mentor')
                     <small class="text-danger">{{ $message }}</small>
@@ -403,7 +409,7 @@
                 <input type="text" name="nomor_rekening_mentor" id="nomor_rekening_mentor_select"
                     class="form-input @error('nomor_rekening_mentor') error @enderror"
                     placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
-                    value="{{ old('nomor_rekening_mentor') }}" readonly>
+                    value="{{ $peserta['nomor_rekening_mentor'] ?? old('nomor_rekening_mentor') }}" readonly>
                 @error('nomor_rekening_mentor')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -411,7 +417,7 @@
             <div class="form-group">
                 <label class="form-label">NPWP Mentor</label>
                 <input type="text" name="npwp_mentor" id="npwp_mentor_select"
-                    class="form-input @error('npwp_mentor') error @enderror" value="{{ old('npwp_mentor') }}" readonly>
+                    class="form-input @error('npwp_mentor') error @enderror" value="{{ $peserta['npwp_mentor'] ?? old('npwp_mentor') }}" readonly>
                 @error('npwp_mentor')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -420,7 +426,7 @@
     </div>
 
     <!-- Form untuk menambah mentor baru -->
-    <div id="add-mentor-form" style="display: {{ old('mentor_mode') == 'tambah' ? 'block' : 'none' }};">
+    <div id="add-mentor-form" style="display: {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'tambah' ? 'block' : 'none' }};">
         <div class="alert alert-info">
             <i class="fas fa-info-circle"></i>
             Silakan lengkapi data mentor baru
@@ -430,7 +436,7 @@
             <div class="form-group">
                 <label class="form-label required">Nama Mentor</label>
                 <input type="text" name="nama_mentor_baru" id="nama_mentor_baru"
-                    class="form-input @error('nama_mentor_baru') error @enderror" value="{{ old('nama_mentor_baru') }}">
+                    class="form-input @error('nama_mentor_baru') error @enderror" value="{{ $peserta['nama_mentor_baru'] ?? old('nama_mentor_baru') }}">
                 @error('nama_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -439,7 +445,7 @@
                 <label class="form-label required">Jabatan Mentor</label>
                 <input type="text" name="jabatan_mentor_baru" id="jabatan_mentor_baru"
                     class="form-input @error('jabatan_mentor_baru') error @enderror"
-                    value="{{ old('jabatan_mentor_baru') }}">
+                    value="{{ $peserta['jabatan_mentor_baru'] ?? old('jabatan_mentor_baru') }}">
                 @error('jabatan_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -452,7 +458,7 @@
                 <input type="text" name="nomor_rekening_mentor_baru" id="nomor_rekening_mentor_baru"
                     class="form-input @error('nomor_rekening_mentor_baru') error @enderror"
                     placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
-                    value="{{ old('nomor_rekening_mentor_baru') }}">
+                    value="{{ $peserta['nomor_rekening_mentor_baru'] ?? old('nomor_rekening_mentor_baru') }}">
                 @error('nomor_rekening_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -460,7 +466,7 @@
             <div class="form-group">
                 <label class="form-label">NPWP Mentor</label>
                 <input type="text" name="npwp_mentor_baru" id="npwp_mentor_baru"
-                    class="form-input @error('npwp_mentor_baru') error @enderror" value="{{ old('npwp_mentor_baru') }}">
+                    class="form-input @error('npwp_mentor_baru') error @enderror" value="{{ $peserta['npwp_mentor_baru'] ?? old('npwp_mentor_baru') }}">
                 @error('npwp_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -470,20 +476,46 @@
 </div>
 
 <div class="form-section-header">
+    <i class="fas fa-calendar-alt"></i> Informasi Angkatan
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label">Nama Angkatan</label>
+        <input type="text" class="form-input" 
+            value="{{ $pendaftaran['angkatan']['nama_angkatan'] ?? 'Tidak tersedia' }}" readonly>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Tahun Angkatan</label>
+        <input type="text" class="form-input" 
+            value="{{ $pendaftaran['angkatan']['tahun'] ?? 'Tidak tersedia' }}" readonly>
+    </div>
+</div>
+
+<div class="form-section-header">
     <i class="fas fa-file-upload"></i> Dokumen Pendukung
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i>
+    <strong>Catatan:</strong> File yang sudah diupload sebelumnya akan tetap tersimpan. Upload ulang hanya jika ingin mengganti file.
 </div>
 
 <div class="form-group">
     <label class="form-label required">Unggah Scan atau Foto KTP yang berlaku</label>
     <div class="form-file">
-        <input type="file" name="file_ktp" class="form-file-input @error('file_ktp') error @enderror" accept=".pdf" {{ old('file_ktp') ? '' : 'required' }}>
+        <input type="file" name="file_ktp" class="form-file-input @error('file_ktp') error @enderror" accept=".pdf,.jpg,.jpeg,.png">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file PDF (maks. 5MB)
+            Klik untuk mengunggah file PDF/JPG/PNG (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if(old('file_ktp'))
+            @if($peserta['file_ktp'] ?? false)
                 File sudah diupload sebelumnya
+            @elseif(old('file_ktp'))
+                File sudah diupload sebelumnya
+            @else
+                Belum ada file dipilih
             @endif
         </div>
     </div>
@@ -497,14 +529,18 @@
         <label class="form-label required">Unggah scan SK CPNS</label>
         <div class="form-file">
             <input type="file" name="file_sk_cpns" class="form-file-input @error('file_sk_cpns') error @enderror"
-                accept=".pdf" {{ old('file_sk_cpns') ? '' : 'required' }}>
+                accept=".pdf">
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
                 Klik untuk mengunggah file PDF (maks. 5MB)
             </label>
             <div class="form-file-name">
-                @if(old('file_sk_cpns'))
+                @if($peserta['kepegawaian']['file_sk_cpns'] ?? false)
                     File sudah diupload sebelumnya
+                @elseif(old('file_sk_cpns'))
+                    File sudah diupload sebelumnya
+                @else
+                    Belum ada file dipilih
                 @endif
             </div>
         </div>
@@ -516,14 +552,18 @@
         <label class="form-label required">Unggah scan SPMT</label>
         <div class="form-file">
             <input type="file" name="file_spmt" class="form-file-input @error('file_spmt') error @enderror"
-                accept=".pdf" {{ old('file_spmt') ? '' : 'required' }}>
+                accept=".pdf">
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
                 Klik untuk mengunggah file PDF (maks. 5MB)
             </label>
             <div class="form-file-name">
-                @if(old('file_spmt'))
+                @if($peserta['kepegawaian']['file_spmt'] ?? false)
                     File sudah diupload sebelumnya
+                @elseif(old('file_spmt'))
+                    File sudah diupload sebelumnya
+                @else
+                    Belum ada file dipilih
                 @endif
             </div>
         </div>
@@ -537,14 +577,18 @@
     <label class="form-label required">Unggah scan Surat Penyataan Kesediaan</label>
     <div class="form-file">
         <input type="file" name="file_surat_kesediaan"
-            class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf" {{ old('file_surat_kesediaan') ? '' : 'required' }}>
+            class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if(old('file_surat_kesediaan'))
+            @if($pendaftaran['file_surat_kesediaan'] ?? false)
                 File sudah diupload sebelumnya
+            @elseif(old('file_surat_kesediaan'))
+                File sudah diupload sebelumnya
+            @else
+                Belum ada file dipilih
             @endif
         </div>
     </div>
@@ -558,14 +602,18 @@
         berwenang (jika belum maka WAJIB disertakan saat masa klasikal)</label>
     <div class="form-file">
         <input type="file" name="file_surat_tugas" class="form-file-input @error('file_surat_tugas') error @enderror"
-            accept=".pdf" {{ old('file_surat_tugas') }}>
+            accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if(old('file_surat_tugas'))
+            @if($pendaftaran['file_surat_tugas'] ?? false)
                 File sudah diupload sebelumnya
+            @elseif(old('file_surat_tugas'))
+                File sudah diupload sebelumnya
+            @else
+                Belum ada file dipilih
             @endif
         </div>
     </div>
@@ -583,8 +631,12 @@
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if(old('file_skp'))
+            @if($peserta['kepegawaian']['file_skp'] ?? false)
                 File sudah diupload sebelumnya
+            @elseif(old('file_skp'))
+                File sudah diupload sebelumnya
+            @else
+                Belum ada file dipilih
             @endif
         </div>
     </div>
@@ -597,14 +649,18 @@
     <label class="form-label required">Unggah Pas Foto peserta (untuk digunakan di name tag peserta)</label>
     <div class="form-file">
         <input type="file" name="file_pas_foto" class="form-file-input @error('file_pas_foto') error @enderror"
-            accept=".jpg,.jpeg,.png" {{ old('file_pas_foto') ? '' : 'required' }}>
+            accept=".jpg,.jpeg,.png">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file JPG/PNG (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if(old('file_pas_foto'))
+            @if($peserta['file_pas_foto'] ?? false)
                 File sudah diupload sebelumnya
+            @elseif(old('file_pas_foto'))
+                File sudah diupload sebelumnya
+            @else
+                Belum ada file dipilih
             @endif
         </div>
     </div>
@@ -623,8 +679,12 @@
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if(old('file_surat_sehat'))
+            @if($pendaftaran['file_surat_sehat'] ?? false)
                 File sudah diupload sebelumnya
+            @elseif(old('file_surat_sehat'))
+                File sudah diupload sebelumnya
+            @else
+                Belum ada file dipilih
             @endif
         </div>
     </div>
@@ -632,37 +692,3 @@
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
-
-<style>
-    .alert {
-    padding: 15px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    border-left: 4px solid;
-}
-
-.alert-info {
-    background-color: rgba(66, 153, 225, 0.1);
-    border-color: var(--accent-color);
-    color: var(--secondary-color);
-}
-
-.alert i {
-    margin-right: 10px;
-}
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const mentorSelect = document.getElementById('sudah_ada_mentor');
-        const mentorDetail = document.getElementById('mentor-detail');
-
-        mentorSelect.addEventListener('change', function () {
-            if (this.value === 'Ya') {
-                mentorDetail.style.display = 'block';
-            } else {
-                mentorDetail.style.display = 'none';
-            }
-        });
-    });
-</script>

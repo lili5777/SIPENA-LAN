@@ -1,15 +1,14 @@
 @extends('layouts.master')
 
-@section('title', 'SIPENA - Form Pendaftaran Pelatihan')
+@section('title', 'SIPENA - Form Pembaruan Data Peserta')
 
 @section('content')
     <!-- Hero Section -->
     <section class="form-hero" id="home">
         <div class="container">
             <div class="form-hero-content animate">
-                <h1 class="form-hero-title">Form Pendaftaran Peserta Pelatihan</h1>
-                <p class="form-hero-text">Daftarkan diri Anda untuk mengikuti program pelatihan profesional. Isi formulir
-                    dengan data yang lengkap dan valid.</p>
+                <h1 class="form-hero-title">Form Pembaruan Data Peserta Pelatihan</h1>
+                <p class="form-hero-text">Perbarui data diri Anda untuk mengikuti program pelatihan profesional. Isi formulir dengan data yang lengkap dan valid.</p>
                 <div class="progress-indicator">
                     <div class="progress-step active" id="step1">
                         <div class="step-number">1</div>
@@ -17,11 +16,11 @@
                     </div>
                     <div class="progress-step" id="step2">
                         <div class="step-number">2</div>
-                        <div class="step-label">Pilih Angkatan</div>
+                        <div class="step-label">Verifikasi NIP/NRP</div>
                     </div>
                     <div class="progress-step" id="step3">
                         <div class="step-number">3</div>
-                        <div class="step-label">Isi Formulir</div>
+                        <div class="step-label">Perbarui Data</div>
                     </div>
                 </div>
             </div>
@@ -32,61 +31,45 @@
     <section class="form-section" id="form-section">
         <div class="container">
             <div class="form-wrapper animate">
-                <form action="{{ route('pendaftaran.store') }}" method="POST" enctype="multipart/form-data"
-                    id="pendaftaranForm">
+                <form action="{{ route('pendaftaran.updateData') }}" method="POST" enctype="multipart/form-data" id="pendaftaranForm">
                     @csrf
 
                     <!-- Step 1: Pilih Pelatihan -->
                     <div class="form-step active" id="step1-content">
                         <div class="step-header">
                             <h2 class="step-title">Pilih Jenis Pelatihan</h2>
-                            <p class="step-description">Silakan pilih jenis pelatihan yang akan Anda ikuti</p>
+                            <p class="step-description">Silakan pilih jenis pelatihan yang sudah Anda daftarkan</p>
                         </div>
 
                         <div class="training-options">
-                            <div class="training-card" data-id="1" data-kode="PKN_TK_II">
+                            @foreach($jenisPelatihan as $pelatihan)
+                            <div class="training-card" data-id="{{ $pelatihan->id }}" data-kode="{{ $pelatihan->kode_pelatihan }}">
                                 <div class="training-icon">
-                                    <i class="fas fa-user-tie"></i>
+                                    @if($pelatihan->kode_pelatihan == 'PKN_TK_II')
+                                        <i class="fas fa-user-tie"></i>
+                                    @elseif($pelatihan->kode_pelatihan == 'LATSAR')
+                                        <i class="fas fa-user-graduate"></i>
+                                    @elseif($pelatihan->kode_pelatihan == 'PKA')
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                    @elseif($pelatihan->kode_pelatihan == 'PKP')
+                                        <i class="fas fa-user-shield"></i>
+                                    @endif
                                 </div>
-                                <h3 class="training-name">PKN TK II</h3>
-                                <p class="training-code">PKN Tingkat II</p>
+                                <h3 class="training-name">{{ $pelatihan->nama_pelatihan }}</h3>
+                                <p class="training-code">{{ $pelatihan->kode_pelatihan }}</p>
                                 <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
                             </div>
-                            <div class="training-card" data-id="2" data-kode="LATSAR">
-                                <div class="training-icon">
-                                    <i class="fas fa-user-graduate"></i>
-                                </div>
-                                <h3 class="training-name">LATSAR</h3>
-                                <p class="training-code">Pendidikan CPNS</p>
-                                <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
-                            </div>
-                            <div class="training-card" data-id="3" data-kode="PKA">
-                                <div class="training-icon">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                </div>
-                                <h3 class="training-name">PKA</h3>
-                                <p class="training-code">Pelatihan Administrator</p>
-                                <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
-                            </div>
-                            <div class="training-card" data-id="4" data-kode="PKP">
-                                <div class="training-icon">
-                                    <i class="fas fa-user-shield"></i>
-                                </div>
-                                <h3 class="training-name">PKP</h3>
-                                <p class="training-code">Pelatihan Pengawas</p>
-                                <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
-                            </div>
+                            @endforeach
                         </div>
 
-                        <input type="hidden" name="id_jenis_pelatihan" id="id_jenis_pelatihan"
-                            value="{{ old('id_jenis_pelatihan', '') }}">
+                        <input type="hidden" name="id_jenis_pelatihan" id="id_jenis_pelatihan" value="{{ old('id_jenis_pelatihan', '') }}">
                     </div>
 
-                    <!-- Step 2: Pilih Angkatan -->
+                    <!-- Step 2: Verifikasi NIP/NRP -->
                     <div class="form-step" id="step2-content">
                         <div class="step-header">
-                            <h2 class="step-title">Pilih Angkatan Pelatihan</h2>
-                            <p class="step-description">Silakan pilih angkatan untuk pelatihan yang dipilih</p>
+                            <h2 class="step-title">Verifikasi NIP/NRP</h2>
+                            <p class="step-description">Masukkan NIP/NRP Anda untuk verifikasi dan akses form pembaruan data</p>
                             <div class="selected-training">
                                 <i class="fas fa-check-circle"></i>
                                 <span id="selected-training-name"></span>
@@ -95,36 +78,66 @@
 
                         <div class="angkatan-container">
                             <div class="form-group">
-                                <label for="id_angkatan" class="form-label">Angkatan *</label>
-                                <select name="id_angkatan" id="id_angkatan"
-                                    class="form-select @error('id_angkatan') error @enderror" required disabled>
-                                    <option value="">Memuat pilihan angkatan...</option>
-                                </select>
-                                @error('id_angkatan')
+                                <label for="nip_nrp" class="form-label required">NIP/NRP *</label>
+                                <input type="text" name="nip_nrp" id="nip_nrp" 
+                                    class="form-input @error('nip_nrp') error @enderror"
+                                    placeholder="Masukkan NIP/NRP Anda" required>
+                                @error('nip_nrp')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
-                                <div class="form-hint">Harap tunggu hingga daftar angkatan dimuat</div>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary" id="verify-nip-btn" style="width: 100%;">
+                                    <i class="fas fa-check"></i> Verifikasi NIP/NRP
+                                </button>
+                            </div>
+
+                            <div class="verification-result" id="verification-result" style="display: none;">
+                                <div class="info-card">
+                                    <h4><i class="fas fa-info-circle"></i> Hasil Verifikasi</h4>
+                                    <div class="info-details">
+                                        <div class="info-item" id="verification-success" style="display: none;">
+                                            <span class="info-label">Status:</span>
+                                            <span class="info-value text-success">
+                                                <i class="fas fa-check-circle"></i> 
+                                                <span id="success-message"></span>
+                                            </span>
+                                        </div>
+                                        <div class="info-item" id="verification-error" style="display: none;">
+                                            <span class="info-label">Status:</span>
+                                            <span class="info-value text-danger">
+                                                <i class="fas fa-exclamation-circle"></i> 
+                                                <span id="error-message"></span>
+                                            </span>
+                                        </div>
+                                        <div class="info-item" id="verification-details" style="display: none;">
+                                            <span class="info-label">Nama Peserta:</span>
+                                            <span class="info-value" id="detail-nama"></span>
+                                        </div>
+                                        <div class="info-item" id="verification-anggaran" style="display: none;">
+                                            <span class="info-label">Angkatan:</span>
+                                            <span class="info-value" id="detail-angkatan"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="angkatan-info" id="angkatan-info" style="display: none;">
                                 <div class="info-card">
-                                    <h4><i class="fas fa-info-circle"></i> Informasi Angkatan</h4>
+                                    <h4><i class="fas fa-info-circle"></i> Informasi Sistem</h4>
                                     <div class="info-details">
                                         <div class="info-item">
-                                            <span class="info-label">Nama Angkatan:</span>
-                                            <span class="info-value" id="info-nama-angkatan"></span>
+                                            <span class="info-label">Sistem ini:</span>
+                                            <span class="info-value">Hanya untuk pembaruan data peserta terdaftar</span>
                                         </div>
                                         <div class="info-item">
-                                            <span class="info-label">Tahun:</span>
-                                            <span class="info-value" id="info-tahun-angkatan"></span>
+                                            <span class="info-label">Validasi:</span>
+                                            <span class="info-value">NIP/NRP harus sudah didaftarkan oleh admin</span>
                                         </div>
                                         <div class="info-item">
-                                            <span class="info-label">Kuota:</span>
-                                            <span class="info-value" id="info-kuota-angkatan"></span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">Status:</span>
-                                            <span class="info-badge" id="info-status-angkatan"></span>
+                                            <span class="info-label">Bantuan:</span>
+                                            <span class="info-value">Hubungi admin jika mengalami kendala</span>
                                         </div>
                                     </div>
                                 </div>
@@ -141,18 +154,25 @@
                         </div>
                     </div>
 
-                    <!-- Step 3: Isi Formulir -->
+                    <!-- Step 3: Perbarui Data -->
                     <div class="form-step" id="step3-content">
                         <div class="step-header">
-                            <h2 class="step-title">Isi Formulir Pendaftaran</h2>
-                            <p class="step-description">Lengkapi data berikut dengan informasi yang valid</p>
+                            <h2 class="step-title">Perbarui Data Peserta</h2>
+                            <p class="step-description">Lengkapi atau perbarui data berikut dengan informasi yang valid</p>
                             <div class="selected-info">
                                 <div class="info-badge">
                                     <i class="fas fa-book"></i> <span id="current-training-name"></span>
                                 </div>
+                                <div class="info-badge" style="display: none">
+                                    <i class="fas fa-id-card"></i> NIP/NRP: <span id="current-nip-nrp"></span>
+                                </div>
                                 <div class="info-badge">
                                     <i class="fas fa-calendar-alt"></i> Angkatan: <span id="current-angkatan-name"></span>
                                 </div>
+                            </div>
+                            <div class="alert alert-info" style="margin-top: 20px;">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Catatan:</strong> Form ini hanya untuk pembaruan data peserta yang sudah terdaftar. Pastikan data yang Anda isi sesuai dengan kondisi terkini.
                             </div>
                         </div>
 
@@ -166,7 +186,7 @@
                                 <i class="fas fa-arrow-left"></i> Kembali
                             </button>
                             <button type="submit" class="btn btn-success" id="submit-form">
-                                <i class="fas fa-paper-plane"></i> Kirim Pendaftaran
+                                <i class="fas fa-save"></i> Simpan Perubahan
                             </button>
                         </div>
                     </div>
@@ -178,6 +198,7 @@
 
 @push('styles')
     <style>
+        /* CSS UTAMA YANG SUDAH ADA */
         :root {
             --primary-color: #1a3a6c;
             --secondary-color: #2c5282;
@@ -290,7 +311,6 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -529,14 +549,12 @@
             color: var(--gray-color);
         }
 
-        .info-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background: var(--success-color);
-            color: white;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
+        .text-success {
+            color: var(--success-color) !important;
+        }
+
+        .text-danger {
+            color: var(--danger-color) !important;
         }
 
         /* Selected Info */
@@ -554,6 +572,10 @@
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
         }
 
         /* Dynamic Form Container */
@@ -658,6 +680,33 @@
             border-top: 2px solid #e2e8f0;
         }
 
+        /* Alert Styles */
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-info {
+            background-color: rgba(66, 153, 225, 0.1);
+            border-color: var(--accent-color);
+            color: var(--secondary-color);
+        }
+
+        .alert i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* Verification Result */
+        .verification-result {
+            margin-top: 20px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .form-hero {
@@ -704,6 +753,21 @@
             .step-navigation .btn {
                 width: 100%;
             }
+
+            .selected-info {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .info-label, .info-value {
+                width: 100%;
+            }
         }
     </style>
 @endpush
@@ -721,61 +785,31 @@
             const step2Indicator = document.getElementById('step2');
             const step3Indicator = document.getElementById('step3');
             const jenisPelatihanInput = document.getElementById('id_jenis_pelatihan');
-            const angkatanSelect = document.getElementById('id_angkatan');
             const selectedTrainingName = document.getElementById('selected-training-name');
             const currentTrainingName = document.getElementById('current-training-name');
+            const currentNipNrp = document.getElementById('current-nip-nrp');
             const currentAngkatanName = document.getElementById('current-angkatan-name');
             const dynamicFormContainer = document.getElementById('dynamic-form-container');
             const backToStep1Btn = document.getElementById('back-to-step1');
             const backToStep2Btn = document.getElementById('back-to-step2');
             const nextToStep3Btn = document.getElementById('next-to-step3');
+            const verifyNipBtn = document.getElementById('verify-nip-btn');
+            const nipNrpInput = document.getElementById('nip_nrp');
+            const verificationResult = document.getElementById('verification-result');
+            const verificationSuccess = document.getElementById('verification-success');
+            const verificationError = document.getElementById('verification-error');
+            const verificationDetails = document.getElementById('verification-details');
+            const verificationAnggaran = document.getElementById('verification-anggaran');
+            const successMessage = document.getElementById('success-message');
+            const errorMessage = document.getElementById('error-message');
+            const detailNama = document.getElementById('detail-nama');
+            const detailAngkatan = document.getElementById('detail-angkatan');
             const submitFormBtn = document.getElementById('submit-form');
             const angkatanInfo = document.getElementById('angkatan-info');
 
             let selectedTraining = null;
-            let selectedAngkatan = null;
-
-            // ============================================
-            // HANDLE OLD VALUES (IF VALIDATION FAILED)
-            // ============================================
-            window.oldValues = @json(old(), JSON_PRETTY_PRINT);
-            const validationFailed = @json($errors->any() ? true : false);
-
-            // Jika ada validation errors, auto-select training yang dipilih sebelumnya
-            if (validationFailed && window.oldValues.id_jenis_pelatihan) {
-                // Tunggu DOM siap
-                setTimeout(() => {
-                    const oldTrainingId = window.oldValues.id_jenis_pelatihan;
-                    const trainingCard = document.querySelector(`[data-id="${oldTrainingId}"]`);
-
-                    if (trainingCard) {
-                        // Auto-select training card
-                        trainingCard.click();
-
-                        // Tunggu angkatan load
-                        setTimeout(() => {
-                            if (window.oldValues.id_angkatan) {
-                                const angkatanSelect = document.getElementById('id_angkatan');
-
-                                // Cek berulang sampai options tersedia
-                                const checkAngkatan = setInterval(() => {
-                                    if (angkatanSelect.options.length > 1) {
-                                        clearInterval(checkAngkatan);
-                                        angkatanSelect.value = window.oldValues.id_angkatan;
-                                        angkatanSelect.dispatchEvent(new Event('change'));
-
-                                        // Load form setelah semua ready
-                                        setTimeout(() => {
-                                            loadDynamicForm();
-                                            moveToStep(3);
-                                        }, 500);
-                                    }
-                                }, 100);
-                            }
-                        }, 500);
-                    }
-                }, 100);
-            }
+            let verifiedPeserta = null;
+            let pendaftaranData = null;
 
             // ============================================
             // STEP 1: PILIH PELATIHAN
@@ -807,143 +841,193 @@
                     // Move to step 2
                     moveToStep(2);
 
-                    // Load angkatan
-                    loadAngkatan(selectedTraining.id);
+                    // Reset verification
+                    resetVerification();
                 });
             });
 
             // ============================================
-            // STEP 2: PILIH ANGKATAN
+            // STEP 2: VERIFIKASI NIP/NRP
             // ============================================
-            async function loadAngkatan(jenisId) {
-                angkatanSelect.innerHTML = '<option value="">Memuat pilihan angkatan...</option>';
-                angkatanSelect.disabled = true;
+            function resetVerification() {
+                verificationResult.style.display = 'none';
+                verificationSuccess.style.display = 'none';
+                verificationError.style.display = 'none';
+                verificationDetails.style.display = 'none';
+                verificationAnggaran.style.display = 'none';
                 nextToStep3Btn.disabled = true;
-                angkatanInfo.style.display = 'none';
-
-                try {
-                    const response = await fetch(`/api/angkatan/${jenisId}`);
-                    const data = await response.json();
-
-                    if (data.length === 0) {
-                        angkatanSelect.innerHTML = '<option value="">Tidak ada angkatan tersedia</option>';
-                        return;
-                    }
-
-                    angkatanSelect.innerHTML = '<option value="">Pilih Angkatan</option>';
-                    data.forEach(angkatan => {
-                        const option = document.createElement('option');
-                        option.value = angkatan.id;
-                        option.textContent = `${angkatan.nama_angkatan} (${angkatan.tahun})`;
-                        option.dataset.nama = angkatan.nama_angkatan;
-                        option.dataset.tahun = angkatan.tahun;
-                        option.dataset.kuota = angkatan.kuota;
-                        option.dataset.status = angkatan.status_angkatan;
-                        angkatanSelect.appendChild(option);
-                    });
-
-                    angkatanSelect.disabled = false;
-
-                    // Jika ada old value, set value
-                    if (window.oldValues && window.oldValues.id_angkatan) {
-                        setTimeout(() => {
-                            angkatanSelect.value = window.oldValues.id_angkatan;
-                            if (angkatanSelect.value) {
-                                angkatanSelect.dispatchEvent(new Event('change'));
-                            }
-                        }, 100);
-                    }
-                } catch (error) {
-                    console.error('Error load angkatan:', error);
-                    angkatanSelect.innerHTML = '<option value="">Error loading data</option>';
-                }
+                verifiedPeserta = null;
+                pendaftaranData = null;
+                nipNrpInput.value = '';
+                dynamicFormContainer.innerHTML = '';
+                angkatanInfo.style.display = 'block';
             }
 
-            angkatanSelect.addEventListener('change', function () {
-                if (!this.value) {
-                    nextToStep3Btn.disabled = true;
-                    angkatanInfo.style.display = 'none';
+            verifyNipBtn.addEventListener('click', async function () {
+                if (!selectedTraining || !nipNrpInput.value.trim()) {
+                    showVerificationError('Silakan pilih pelatihan dan masukkan NIP/NRP');
                     return;
                 }
 
-                const selectedOption = this.options[this.selectedIndex];
-                selectedAngkatan = {
-                    id: this.value,
-                    nama: selectedOption.dataset.nama,
-                    tahun: selectedOption.dataset.tahun,
-                    kuota: selectedOption.dataset.kuota,
-                    status: selectedOption.dataset.status
-                };
+                // Show loading state
+                const originalText = verifyNipBtn.innerHTML;
+                verifyNipBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memverifikasi...';
+                verifyNipBtn.disabled = true;
 
-                // Update UI
-                currentAngkatanName.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                try {
+                    const response = await fetch('/api/verify-nip', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            nip_nrp: nipNrpInput.value.trim(),
+                            id_jenis_pelatihan: selectedTraining.id
+                        })
+                    });
 
-                // Show angkatan info
-                document.getElementById('info-nama-angkatan').textContent = selectedAngkatan.nama;
-                document.getElementById('info-tahun-angkatan').textContent = selectedAngkatan.tahun;
-                document.getElementById('info-kuota-angkatan').textContent = selectedAngkatan.kuota;
+                    const data = await response.json();
 
-                const statusBadge = document.getElementById('info-status-angkatan');
-                statusBadge.textContent = selectedAngkatan.status;
-                statusBadge.className = 'info-badge';
-                if (selectedAngkatan.status === 'Aktif') {
-                    statusBadge.style.background = 'var(--success-color)';
-                } else if (selectedAngkatan.status === 'Penuh') {
-                    statusBadge.style.background = 'var(--danger-color)';
-                } else {
-                    statusBadge.style.background = 'var(--warning-color)';
+                    if (data.success) {
+                        // Verification successful
+                        verifiedPeserta = data.peserta;
+                        pendaftaranData = data.pendaftaran;
+                        
+                        // Update UI
+                        currentNipNrp.textContent = verifiedPeserta.nip_nrp;
+                        currentAngkatanName.textContent = pendaftaranData.angkatan ? 
+                            `${pendaftaranData.angkatan.nama_angkatan} (${pendaftaranData.angkatan.tahun})` : 
+                            'Angkatan tidak tersedia';
+                        
+                        // Show verification details
+                        successMessage.textContent = data.message;
+                        detailNama.textContent = verifiedPeserta.nama_lengkap;
+                        detailAngkatan.textContent = pendaftaranData.angkatan ? 
+                            `${pendaftaranData.angkatan.nama_angkatan} (${pendaftaranData.angkatan.tahun})` : 
+                            'Tidak tersedia';
+                        
+                        verificationSuccess.style.display = 'flex';
+                        verificationError.style.display = 'none';
+                        verificationDetails.style.display = 'flex';
+                        verificationAnggaran.style.display = 'flex';
+                        verificationResult.style.display = 'block';
+                        angkatanInfo.style.display = 'none';
+                        
+                        nextToStep3Btn.disabled = false;
+                        
+                    } else {
+                        // Verification failed
+                        errorMessage.textContent = data.message;
+                        verificationError.style.display = 'flex';
+                        verificationSuccess.style.display = 'none';
+                        verificationDetails.style.display = 'none';
+                        verificationAnggaran.style.display = 'none';
+                        verificationResult.style.display = 'block';
+                        angkatanInfo.style.display = 'block';
+                        
+                        nextToStep3Btn.disabled = true;
+                    }
+                } catch (error) {
+                    console.error('Verification error:', error);
+                    showVerificationError('Terjadi kesalahan jaringan. Silakan coba lagi.');
+                    angkatanInfo.style.display = 'block';
+                } finally {
+                    verifyNipBtn.innerHTML = originalText;
+                    verifyNipBtn.disabled = false;
+                }
+            });
+
+            // ============================================
+            // NAVIGATION
+            // ============================================
+            function moveToStep(step) {
+                // Update indicators
+                [step1Indicator, step2Indicator, step3Indicator].forEach(indicator => {
+                    indicator.classList.remove('active');
+                });
+                document.getElementById(`step${step}`).classList.add('active');
+
+                // Update content
+                [step1Content, step2Content, step3Content].forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`step${step}-content`).classList.add('active');
+
+                // Jika pindah ke step 3, load form
+                if (step === 3 && verifiedPeserta) {
+                    loadFormPartial();
                 }
 
-                angkatanInfo.style.display = 'block';
-                nextToStep3Btn.disabled = false;
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            backToStep1Btn.addEventListener('click', () => {
+                moveToStep(1);
+                resetVerification();
+            });
+
+            backToStep2Btn.addEventListener('click', () => moveToStep(2));
+
+            nextToStep3Btn.addEventListener('click', () => {
+                if (verifiedPeserta && pendaftaranData) {
+                    moveToStep(3);
+                }
             });
 
             // ============================================
             // STEP 3: LOAD DYNAMIC FORM
             // ============================================
-            function loadDynamicForm() {
+            async function loadFormPartial() {
+                if (!selectedTraining || !verifiedPeserta || !pendaftaranData) {
+                    return;
+                }
+
                 dynamicFormContainer.innerHTML = `
-                        <div class="form-loading">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <p>Menyiapkan formulir pendaftaran...</p>
-                        </div>
-                    `;
+                    <div class="form-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Menyiapkan formulir pembaruan data...</p>
+                    </div>
+                `;
 
-                setTimeout(() => {
-                    if (selectedTraining.kode === 'PKN_TK_II') {
-                        loadFormPartial('PKN_TK_II');
-                    } else if (selectedTraining.kode === 'LATSAR') {
-                        loadFormPartial('LATSAR');
-                    } else if (selectedTraining.kode === 'PKA' || selectedTraining.kode === 'PKP') {
-                        loadFormPartial('PKA');
-                    }
-                }, 300);
-            }
-
-            async function loadFormPartial(formType) {
                 try {
-                    const response = await fetch(`/form-partial/${formType}`);
+                    const response = await fetch(`/form-partial/${selectedTraining.kode}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            peserta_data: JSON.stringify(verifiedPeserta),
+                            pendaftaran_data: JSON.stringify(pendaftaranData)
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
                     const html = await response.text();
                     dynamicFormContainer.innerHTML = html;
 
-                    // Load provinsi setelah form dimuat
-                    loadProvinsi();
+                    // Setup form interactions
                     setupFormInteractions();
-
-                    // Set old values jika ada
-                    setOldValuesToForm();
 
                 } catch (error) {
                     console.error('Error loading form partial:', error);
                     dynamicFormContainer.innerHTML = `
-                            <div class="alert alert-danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                                Gagal memuat formulir. Silakan coba lagi.
-                            </div>
-                        `;
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Gagal memuat formulir. Silakan coba lagi.
+                        </div>
+                    `;
                 }
             }
 
+            // ============================================
+            // FORM INTERACTIONS
+            // ============================================
             async function loadProvinsi() {
                 const provinsiSelect = document.querySelector('[name="id_provinsi"]');
                 if (!provinsiSelect) return;
@@ -962,14 +1046,14 @@
                         provinsiSelect.appendChild(option);
                     });
 
-                    // Set old value jika ada
-                    if (window.oldValues && window.oldValues.id_provinsi) {
-                        provinsiSelect.value = window.oldValues.id_provinsi;
-                        // Trigger change event untuk load kabupaten
+                    // Set value dari data peserta jika ada
+                    if (verifiedPeserta && verifiedPeserta.kepegawaian && verifiedPeserta.kepegawaian.id_provinsi) {
                         setTimeout(() => {
+                            provinsiSelect.value = verifiedPeserta.kepegawaian.id_provinsi;
                             provinsiSelect.dispatchEvent(new Event('change'));
                         }, 100);
                     }
+
                 } catch (error) {
                     console.error('Provinsi error:', error);
                     provinsiSelect.innerHTML = '<option value="">Error loading</option>';
@@ -997,10 +1081,11 @@
                         kabSelect.appendChild(option);
                     });
 
-                    // Set old value jika ada
-                    if (window.oldValues && window.oldValues.id_kabupaten_kota) {
-                        kabSelect.value = window.oldValues.id_kabupaten_kota;
+                    // Set value dari data peserta jika ada
+                    if (verifiedPeserta && verifiedPeserta.kepegawaian && verifiedPeserta.kepegawaian.id_kabupaten_kota) {
+                        kabSelect.value = verifiedPeserta.kepegawaian.id_kabupaten_kota;
                     }
+
                 } catch (error) {
                     console.error('Kabupaten error:', error);
                     kabSelect.innerHTML = '<option value="">Error loading</option>';
@@ -1009,117 +1094,8 @@
             }
 
             function setupFormInteractions() {
-                // Mentor functionality
-                function setupMentorForm() {
-                    const mentorSelect = document.getElementById('sudah_ada_mentor');
-                    const mentorContainer = document.getElementById('mentor-container');
-                    const mentorModeSelect = document.getElementById('mentor_mode');
-                    const selectMentorForm = document.getElementById('select-mentor-form');
-                    const addMentorForm = document.getElementById('add-mentor-form');
-                    const mentorDropdown = document.getElementById('id_mentor');
-
-                    // Hanya setup jika elemen mentor ada
-                    if (!mentorSelect || !mentorContainer) {
-                        return; // Keluar jika bukan form PD_CPNS
-                    }
-
-                    // Toggle mentor container
-                    mentorSelect.addEventListener('change', function () {
-                        if (this.value === 'Ya') {
-                            mentorContainer.style.display = 'block';
-
-                            // Load mentors jika belum dimuat
-                            if (mentorDropdown.options.length <= 1) {
-                                loadMentors();
-                            }
-                        } else {
-                            mentorContainer.style.display = 'none';
-                        }
-                    });
-
-                    // Toggle between select and add forms
-                    mentorModeSelect.addEventListener('change', function () {
-                        if (this.value === 'pilih') {
-                            selectMentorForm.style.display = 'block';
-                            addMentorForm.style.display = 'none';
-
-                            // Load mentors if not loaded
-                            if (mentorDropdown.options.length <= 1) {
-                                loadMentors();
-                            }
-                        } else {
-                            selectMentorForm.style.display = 'none';
-                            addMentorForm.style.display = 'block';
-                        }
-                    });
-
-                    // Handle mentor selection
-                    mentorDropdown.addEventListener('change', function () {
-                        if (this.value) {
-                            const selectedOption = this.options[this.selectedIndex];
-                            const mentorData = JSON.parse(selectedOption.dataset.mentor || '{}');
-
-                            // Populate fields
-                            document.getElementById('nama_mentor_select').value = mentorData.nama_mentor || '';
-                            document.getElementById('jabatan_mentor_select').value = mentorData.jabatan_mentor || '';
-                            document.getElementById('nomor_rekening_mentor_select').value = mentorData.nomor_rekening_mentor || '';
-                            document.getElementById('npwp_mentor_select').value = mentorData.npwp_mentor || '';
-                        }
-                    });
-                }
-
-                // Load mentors from API
-                async function loadMentors() {
-                    const mentorDropdown = document.getElementById('id_mentor');
-
-                    if (!mentorDropdown) return;
-
-                    mentorDropdown.innerHTML = '<option value="">Memuat daftar mentor...</option>';
-                    mentorDropdown.disabled = true;
-
-                    try {
-                        const response = await fetch('/api/mentors');
-                        const data = await response.json();
-
-                        mentorDropdown.innerHTML = '<option value="">Pilih Mentor</option>';
-                        mentorDropdown.disabled = false;
-
-                        data.forEach(mentor => {
-                            const option = document.createElement('option');
-                            option.value = mentor.id_mentor || mentor.id;
-                            option.textContent = `${mentor.nama_mentor} - ${mentor.jabatan_mentor}`;
-
-                            // Store mentor data as JSON in dataset
-                            option.dataset.mentor = JSON.stringify({
-                                nama_mentor: mentor.nama_mentor,
-                                jabatan_mentor: mentor.jabatan_mentor,
-                                nomor_rekening_mentor: mentor.nomor_rekening,
-                                npwp_mentor: mentor.npwp_mentor
-                            });
-
-                            mentorDropdown.appendChild(option);
-                        });
-
-                        // Set old value if exists
-                        if (window.oldValues && window.oldValues.id_mentor) {
-                            mentorDropdown.value = window.oldValues.id_mentor;
-                            if (mentorDropdown.value) {
-                                mentorDropdown.dispatchEvent(new Event('change'));
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error loading mentors:', error);
-                        mentorDropdown.innerHTML = '<option value="">Error loading mentors</option>';
-                        mentorDropdown.disabled = false;
-                    }
-                }
-                // File input handlers
-                document.querySelectorAll('.form-file-input').forEach(input => {
-                    input.addEventListener('change', function () {
-                        const fileName = this.files[0]?.name || 'Belum ada file dipilih';
-                        this.parentElement.querySelector('.form-file-name').textContent = fileName;
-                    });
-                });
+                // Load provinsi data
+                loadProvinsi();
 
                 // Event listener untuk provinsi change
                 document.addEventListener('change', function (e) {
@@ -1128,79 +1104,117 @@
                     }
                 });
 
-                // Setup mentor form
+                // File input handlers
+                document.querySelectorAll('.form-file-input').forEach(input => {
+                    input.addEventListener('change', function () {
+                        const fileName = this.files[0]?.name || 'Belum ada file dipilih';
+                        this.parentElement.querySelector('.form-file-name').textContent = fileName;
+                    });
+                });
+
+                // Setup mentor form jika ada
                 setupMentorForm();
             }
 
-            function setOldValuesToForm() {
-                if (!window.oldValues) return;
+            function setupMentorForm() {
+                const mentorSelect = document.getElementById('sudah_ada_mentor');
+                const mentorContainer = document.getElementById('mentor-container');
+                const mentorModeSelect = document.getElementById('mentor_mode');
+                const mentorDropdown = document.getElementById('id_mentor');
 
-                setTimeout(() => {
-                    Object.keys(window.oldValues).forEach(fieldName => {
-                        const field = document.querySelector(`[name="${fieldName}"]`);
-                        if (field && field.type !== 'file') {
-                            if (field.type === 'checkbox' || field.type === 'radio') {
-                                field.checked = window.oldValues[fieldName] == field.value;
-                            } else if (field.tagName === 'SELECT') {
-                                field.value = window.oldValues[fieldName];
-                            } else {
-                                field.value = window.oldValues[fieldName];
+                if (!mentorSelect || !mentorContainer) return;
+
+                // Toggle mentor container
+                mentorSelect.addEventListener('change', function () {
+                    if (this.value === 'Ya') {
+                        mentorContainer.style.display = 'block';
+                        if (mentorDropdown && mentorDropdown.options.length <= 1) {
+                            loadMentors();
+                        }
+                    } else {
+                        mentorContainer.style.display = 'none';
+                    }
+                });
+
+                // Toggle between select and add forms
+                if (mentorModeSelect) {
+                    mentorModeSelect.addEventListener('change', function () {
+                        const selectForm = document.getElementById('select-mentor-form');
+                        const addForm = document.getElementById('add-mentor-form');
+                        
+                        if (this.value === 'pilih') {
+                            selectForm.style.display = 'block';
+                            addForm.style.display = 'none';
+                            if (mentorDropdown && mentorDropdown.options.length <= 1) {
+                                loadMentors();
                             }
+                        } else {
+                            selectForm.style.display = 'none';
+                            addForm.style.display = 'block';
                         }
                     });
-                }, 200);
-            }
-
-            // ============================================
-            // NAVIGATION
-            // ============================================
-            function moveToStep(step) {
-                // Update indicators
-                [step1Indicator, step2Indicator, step3Indicator].forEach(indicator => {
-                    indicator.classList.remove('active');
-                });
-                document.getElementById(`step${step}`).classList.add('active');
-
-                // Update content
-                [step1Content, step2Content, step3Content].forEach(content => {
-                    content.classList.remove('active');
-                });
-                document.getElementById(`step${step}-content`).classList.add('active');
-
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            backToStep1Btn.addEventListener('click', () => moveToStep(1));
-            backToStep2Btn.addEventListener('click', () => moveToStep(2));
-
-            nextToStep3Btn.addEventListener('click', () => {
-                if (selectedAngkatan) {
-                    loadDynamicForm();
-                    moveToStep(3);
                 }
-            });
+            }
+
+            async function loadMentors() {
+                const mentorDropdown = document.getElementById('id_mentor');
+                if (!mentorDropdown) return;
+
+                mentorDropdown.innerHTML = '<option value="">Memuat daftar mentor...</option>';
+                mentorDropdown.disabled = true;
+
+                try {
+                    const response = await fetch('/api/mentors');
+                    const data = await response.json();
+
+                    mentorDropdown.innerHTML = '<option value="">Pilih Mentor</option>';
+                    mentorDropdown.disabled = false;
+
+                    data.forEach(mentor => {
+                        const option = document.createElement('option');
+                        option.value = mentor.id_mentor || mentor.id;
+                        option.textContent = `${mentor.nama_mentor} - ${mentor.jabatan_mentor}`;
+                        option.dataset.mentor = JSON.stringify({
+                            nama_mentor: mentor.nama_mentor,
+                            jabatan_mentor: mentor.jabatan_mentor,
+                            nomor_rekening_mentor: mentor.nomor_rekening,
+                            npwp_mentor: mentor.npwp_mentor
+                        });
+                        mentorDropdown.appendChild(option);
+                    });
+
+                    // Set value dari data peserta jika ada
+                    if (verifiedPeserta && verifiedPeserta.id_mentor) {
+                        mentorDropdown.value = verifiedPeserta.id_mentor;
+                        if (mentorDropdown.value) {
+                            mentorDropdown.dispatchEvent(new Event('change'));
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error loading mentors:', error);
+                    mentorDropdown.innerHTML = '<option value="">Error loading mentors</option>';
+                    mentorDropdown.disabled = false;
+                }
+            }
 
             // ============================================
-            // AJAX FORM SUBMISSION
+            // FORM SUBMISSION
             // ============================================
             document.getElementById('pendaftaranForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
-
-                console.log('Form submission via AJAX started...');
 
                 const submitBtn = document.getElementById('submit-form');
                 const originalText = submitBtn.innerHTML;
 
                 // Show loading state
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
                 submitBtn.disabled = true;
 
-                // Validasi client-side sederhana
+                // Validasi client-side
                 const requiredFields = this.querySelectorAll('[required]');
                 let hasEmptyRequired = false;
 
-                // Clear previous client-side errors
                 document.querySelectorAll('.client-error').forEach(el => el.remove());
 
                 requiredFields.forEach(field => {
@@ -1222,7 +1236,6 @@
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
 
-                    // Scroll ke error pertama
                     const firstError = document.querySelector('.error');
                     if (firstError) {
                         firstError.scrollIntoView({
@@ -1237,11 +1250,18 @@
                 // Collect form data
                 const formData = new FormData(this);
 
+                // Add hidden data
+                if (verifiedPeserta && verifiedPeserta.id) {
+                    formData.append('peserta_id', verifiedPeserta.id);
+                }
+                if (pendaftaranData && pendaftaranData.id) {
+                    formData.append('pendaftaran_id', pendaftaranData.id);
+                }
+
                 // Add CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                 try {
-                    // Kirim request AJAX
                     const response = await fetch(this.action, {
                         method: 'POST',
                         body: formData,
@@ -1255,8 +1275,7 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        // Success - redirect ke halaman sukses
-                        showSuccessMessage('Pendaftaran berhasil dikirim!');
+                        showSuccessMessage('Data berhasil diperbarui!');
                         const urlWithId = data.redirect_url + '?id=' + data.pendaftaran_id;
 
                         setTimeout(() => {
@@ -1264,15 +1283,12 @@
                         }, 1500);
 
                     } else {
-                        // Validation errors
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
 
                         // Clear previous errors
                         document.querySelectorAll('.server-error').forEach(el => el.remove());
                         document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-
-                        // Clear file label error styles
                         document.querySelectorAll('.form-file-label').forEach(label => {
                             label.style.borderColor = '';
                             label.style.background = '';
@@ -1280,24 +1296,15 @@
 
                         // Display new errors
                         if (data.errors) {
-                            console.log('Validation errors:', data.errors);
-
                             Object.keys(data.errors).forEach(field => {
                                 let input = document.querySelector(`[name="${field}"]`);
-
-                                // Jika tidak ketemu, coba dengan nama field yang berbeda
-                                if (!input) {
-                                    input = document.querySelector(`[name="${field}[]"]`);
-                                }
-
-                                if (!input) {
-                                    input = document.querySelector(`#${field}`);
-                                }
+                                
+                                if (!input) input = document.querySelector(`[name="${field}[]"]`);
+                                if (!input) input = document.querySelector(`#${field}`);
 
                                 if (input) {
                                     input.classList.add('error');
 
-                                    // Untuk file inputs, juga highlight label
                                     if (input.type === 'file') {
                                         const fileLabel = input.closest('.form-file')?.querySelector('.form-file-label');
                                         if (fileLabel) {
@@ -1306,7 +1313,6 @@
                                         }
                                     }
 
-                                    // Cari form group
                                     let formGroup = input.closest('.form-group');
                                     if (!formGroup) {
                                         formGroup = input.closest('.checkbox-group') ||
@@ -1315,23 +1321,17 @@
                                     }
 
                                     if (formGroup) {
-                                        // Hapus error message sebelumnya
                                         const existingError = formGroup.querySelector('.server-error');
                                         if (existingError) existingError.remove();
 
-                                        // Tambahkan error message baru
                                         const errorMsg = document.createElement('small');
                                         errorMsg.className = 'text-danger server-error';
                                         errorMsg.textContent = data.errors[field][0];
                                         formGroup.appendChild(errorMsg);
                                     }
-                                } else {
-                                    console.warn(`Field "${field}" not found in DOM`);
-                                    showErrorMessage(data.errors[field][0]);
                                 }
                             });
 
-                            // Scroll ke error pertama
                             const firstError = document.querySelector('.error');
                             if (firstError) {
                                 setTimeout(() => {
@@ -1342,7 +1342,6 @@
                                 }, 300);
                             }
                         } else if (data.message) {
-                            // General error message
                             showErrorMessage(data.message);
                         }
                     }
@@ -1358,27 +1357,32 @@
             // ============================================
             // HELPER FUNCTIONS
             // ============================================
-            function showSuccessMessage(message) {
-                // Hapus notifikasi sebelumnya
-                document.querySelectorAll('.notification').forEach(el => el.remove());
+            function showVerificationError(message) {
+                errorMessage.textContent = message;
+                verificationError.style.display = 'flex';
+                verificationSuccess.style.display = 'none';
+                verificationDetails.style.display = 'none';
+                verificationAnggaran.style.display = 'none';
+                verificationResult.style.display = 'block';
+                angkatanInfo.style.display = 'block';
+            }
 
+            function showSuccessMessage(message) {
                 const notification = document.createElement('div');
                 notification.className = 'notification success';
                 notification.innerHTML = `
-                        <div class="notification-content">
-                            <i class="fas fa-check-circle"></i>
-                            <span>${message}</span>
-                        </div>
-                    `;
+                    <div class="notification-content">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
 
                 document.body.appendChild(notification);
 
-                // Animasi masuk
                 setTimeout(() => {
                     notification.classList.add('show');
                 }, 10);
 
-                // Hapus setelah 3 detik
                 setTimeout(() => {
                     notification.classList.remove('show');
                     setTimeout(() => {
@@ -1388,26 +1392,21 @@
             }
 
             function showErrorMessage(message) {
-                // Hapus notifikasi sebelumnya
-                document.querySelectorAll('.notification').forEach(el => el.remove());
-
                 const notification = document.createElement('div');
                 notification.className = 'notification error';
                 notification.innerHTML = `
-                        <div class="notification-content">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>${message}</span>
-                        </div>
-                    `;
+                    <div class="notification-content">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
 
                 document.body.appendChild(notification);
 
-                // Animasi masuk
                 setTimeout(() => {
                     notification.classList.add('show');
                 }, 10);
 
-                // Hapus setelah 5 detik
                 setTimeout(() => {
                     notification.classList.remove('show');
                     setTimeout(() => {
@@ -1416,77 +1415,73 @@
                 }, 5000);
             }
 
-            // Tambahkan CSS untuk notifikasi
+            // Add notification styles
             const notificationStyles = `
-                    .notification {
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        z-index: 9999;
-                        min-width: 300px;
-                        max-width: 400px;
-                        background: white;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                        padding: 15px 20px;
-                        transform: translateX(400px);
-                        transition: transform 0.3s ease;
-                    }
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    min-width: 300px;
+                    max-width: 400px;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    padding: 15px 20px;
+                    transform: translateX(400px);
+                    transition: transform 0.3s ease;
+                }
 
-                    .notification.show {
-                        transform: translateX(0);
-                    }
+                .notification.show {
+                    transform: translateX(0);
+                }
 
-                    .notification.success {
-                        border-left: 4px solid var(--success-color);
-                    }
+                .notification.success {
+                    border-left: 4px solid var(--success-color);
+                }
 
-                    .notification.error {
-                        border-left: 4px solid var(--danger-color);
-                    }
+                .notification.error {
+                    border-left: 4px solid var(--danger-color);
+                }
 
-                    .notification-content {
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                    }
+                .notification-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
 
-                    .notification-content i {
-                        font-size: 1.2rem;
-                    }
+                .notification-content i {
+                    font-size: 1.2rem;
+                }
 
-                    .notification.success .notification-content i {
-                        color: var(--success-color);
-                    }
+                .notification.success .notification-content i {
+                    color: var(--success-color);
+                }
 
-                    .notification.error .notification-content i {
-                        color: var(--danger-color);
-                    }
+                .notification.error .notification-content i {
+                    color: var(--danger-color);
+                }
 
-                    .notification-content span {
-                        flex: 1;
-                        font-size: 0.95rem;
-                    }
-                `;
+                .notification-content span {
+                    flex: 1;
+                    font-size: 0.95rem;
+                }
+            `;
 
-            // Inject styles
             const styleSheet = document.createElement("style");
             styleSheet.textContent = notificationStyles;
             document.head.appendChild(styleSheet);
 
-            // Tambahkan event listener untuk clear error saat input
+            // Clear errors on input
             document.addEventListener('input', function (e) {
                 if (e.target.matches('input, select, textarea')) {
                     e.target.classList.remove('error');
-
-                    // Hapus error messages terkait
                     const formGroup = e.target.closest('.form-group');
                     if (formGroup) {
                         const errorMsg = formGroup.querySelector('.server-error, .client-error');
                         if (errorMsg) errorMsg.remove();
                     }
 
-                    // Reset file label styling
                     if (e.target.type === 'file') {
                         const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
                         if (fileLabel) {
@@ -1497,11 +1492,9 @@
                 }
             });
 
-            // Tambahkan event listener untuk clear error saat file change
             document.addEventListener('change', function (e) {
                 if (e.target.matches('input[type="file"]')) {
                     e.target.classList.remove('error');
-
                     const formGroup = e.target.closest('.form-group');
                     if (formGroup) {
                         const errorMsg = formGroup.querySelector('.server-error, .client-error');

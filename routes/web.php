@@ -32,14 +32,11 @@ Route::get('/profil', function () {return view('profil');})->name('profil');
 Route::get('/publikasi', function () {return view('publikasi');})->name('publikasi');
 
 
-// Routes untuk web (form pendaftaran)
 Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
-Route::post('/pendaftaran/store', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+Route::post('/pendaftaran/update-data', [PendaftaranController::class, 'updateData'])->name('pendaftaran.updateData');
 Route::get('/pendaftaran/success', [PendaftaranController::class, 'success'])->name('pendaftaran.success');
-
-
-// Route untuk form partial
-Route::get('/form-partial/{type}', [PendaftaranController::class, 'formPartial'])->name('form.partial');
+Route::post('/form-partial/{type}', [PendaftaranController::class, 'formPartial'])->name('form.partial');
+Route::post('/api/verify-nip', [PendaftaranController::class, 'verifyNip'])->name('api.verifyNip');
 
 
 // Routes untuk API (digunakan di JavaScript untuk load data dinamis)

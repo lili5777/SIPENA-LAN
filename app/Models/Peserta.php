@@ -40,9 +40,15 @@ class Peserta extends Model
     protected $dates = ['tanggal_lahir'];
 
     // Relasi: hasOne ke KepegawaianPeserta
+    public function kepegawaian()
+    {
+        return $this->hasOne(KepegawaianPeserta::class, 'id_peserta');
+    }
+
+    // Tetap ada method lama untuk kompatibilitas
     public function kepegawaianPeserta()
     {
-        return $this->hasOne(KepegawaianPeserta::class,'id_peserta');
+        return $this->kepegawaian();
     }
 
     // Relasi: hasMany ke Pendaftaran

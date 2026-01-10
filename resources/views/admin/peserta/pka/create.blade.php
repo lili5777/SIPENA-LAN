@@ -39,7 +39,7 @@
                 <h1 class="form-hero-title">{{ $isEdit ? 'Edit Peserta ' . $jenisNama : 'Tambah Peserta ' . $jenisNama }}
                 </h1>
                 <p class="form-hero-text">
-                    {{ $isEdit ? 'Perbarui data peserta untuk program pelatihan ' . $jenisNama . '.' : 'Daftarkan peserta baru untuk mengikuti program pelatihan ' . $jenisNama . '. Isi formulir dengan data yang lengkap dan valid.' }}
+                    {{ $isEdit ? 'Perbarui data peserta untuk program pelatihan ' . $jenisNama . '.' : 'Daftarkan peserta baru untuk mengikuti program pelatihan ' . $jenisNama . '. Hanya Nama Lengkap dan NIP/NRP yang wajib diisi.' }}
                 </p>
                 <div class="progress-indicator">
                     <div class="progress-step active" id="step1">
@@ -92,7 +92,7 @@
 
                         <div class="angkatan-container">
                             <div class="form-group">
-                                <label for="id_angkatan" class="form-label">Angkatan *</label>
+                                <label for="id_angkatan" class="form-label required">Angkatan *</label>
                                 <select name="id_angkatan" id="id_angkatan"
                                     class="form-select @error('id_angkatan') error @enderror" required>
                                     <option value="">Pilih Angkatan</option>
@@ -148,7 +148,7 @@
                     <div class="form-step" id="step2-content">
                         <div class="step-header">
                             <h2 class="step-title">Data Pribadi Peserta</h2>
-                            <p class="step-description">Lengkapi data berikut dengan informasi yang valid</p>
+                            <p class="step-description">Lengkapi data berikut. Hanya Nama Lengkap dan NIP/NRP yang wajib diisi.</p>
                             <div class="selected-info">
                                 <div class="info-badge">
                                     <i class="fas fa-book"></i> <span id="current-training-name">{{ $jenisNama }}</span>
@@ -169,7 +169,7 @@
                                 <div class="form-group">
                                     <label class="form-label required">NIP/NRP *</label>
                                     <input type="text" name="nip_nrp" class="form-input @error('nip_nrp') error @enderror"
-                                        value="{{ $pesertaData ? $pesertaData->nip_nrp : old('nip_nrp') }}" required
+                                        value="{{ $pesertaData ? $pesertaData->nip_nrp : old('nip_nrp') }}" 
                                         placeholder="Masukkan NIP/NRP">
                                     @error('nip_nrp')
                                         <small class="text-danger">{{ $message }}</small>
@@ -180,7 +180,7 @@
                                     <input type="text" name="nama_lengkap"
                                         class="form-input @error('nama_lengkap') error @enderror"
                                         value="{{ $pesertaData ? $pesertaData->nama_lengkap : old('nama_lengkap') }}"
-                                        required placeholder="Masukkan nama lengkap dengan gelar">
+                                        placeholder="Masukkan nama lengkap dengan gelar">
                                     @error('nama_lengkap')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -189,14 +189,13 @@
 
                             <!-- Data Pribadi -->
                             <div class="form-section-header">
-                                <i class="fas fa-user"></i> Data Pribadi
+                                <i class="fas fa-user"></i> Data Pribadi (Opsional)
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Jenis Kelamin *</label>
-                                    <select name="jenis_kelamin" class="form-select @error('jenis_kelamin') error @enderror"
-                                        required>
+                                    <label class="form-label">Jenis Kelamin</label>
+                                    <select name="jenis_kelamin" class="form-select @error('jenis_kelamin') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="Laki-laki" {{ ($pesertaData && $pesertaData->jenis_kelamin == 'Laki-laki') || old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>
                                             Laki-laki
@@ -210,8 +209,8 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Agama *</label>
-                                    <select name="agama" class="form-select @error('agama') error @enderror" required>
+                                    <label class="form-label">Agama</label>
+                                    <select name="agama" class="form-select @error('agama') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="Islam" {{ ($pesertaData && $pesertaData->agama == 'Islam') || old('agama') == 'Islam' ? 'selected' : '' }}>Islam</option>
                                         <option value="Kristen" {{ ($pesertaData && $pesertaData->agama == 'Kristen') || old('agama') == 'Kristen' ? 'selected' : '' }}>Kristen</option>
@@ -228,21 +227,20 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Tempat Lahir *</label>
+                                    <label class="form-label">Tempat Lahir</label>
                                     <input type="text" name="tempat_lahir"
                                         class="form-input @error('tempat_lahir') error @enderror"
                                         value="{{ $pesertaData ? $pesertaData->tempat_lahir : old('tempat_lahir') }}"
-                                        required placeholder="Masukkan tempat lahir">
+                                        placeholder="Masukkan tempat lahir">
                                     @error('tempat_lahir')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Tanggal Lahir *</label>
+                                    <label class="form-label">Tanggal Lahir</label>
                                     <input type="date" name="tanggal_lahir"
                                         class="form-input @error('tanggal_lahir') error @enderror"
-                                        value="{{ $pesertaData ? (is_string($pesertaData->tanggal_lahir) ? \Carbon\Carbon::parse($pesertaData->tanggal_lahir)->format('Y-m-d') : $pesertaData->tanggal_lahir->format('Y-m-d')) : old('tanggal_lahir') }}"
-                                        required>
+                                        value="{{ $pesertaData ? (is_string($pesertaData->tanggal_lahir) ? \Carbon\Carbon::parse($pesertaData->tanggal_lahir)->format('Y-m-d') : ($pesertaData->tanggal_lahir ? $pesertaData->tanggal_lahir->format('Y-m-d') : '')) : old('tanggal_lahir') }}">
                                     @error('tanggal_lahir')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -250,9 +248,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label required">Alamat Rumah *</label>
+                                <label class="form-label">Alamat Rumah</label>
                                 <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror"
-                                    required
                                     placeholder="Masukkan alamat lengkap rumah">{{ $pesertaData ? $pesertaData->alamat_rumah : old('alamat_rumah') }}</textarea>
                                 @error('alamat_rumah')
                                     <small class="text-danger">{{ $message }}</small>
@@ -260,9 +257,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label required">Alamat Kantor *</label>
+                                <label class="form-label">Alamat Kantor</label>
                                 <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror"
-                                    required
                                     placeholder="Masukkan alamat lengkap kantor">{{ $kepegawaianData ? $kepegawaianData->alamat_kantor : old('alamat_kantor') }}</textarea>
                                 @error('alamat_kantor')
                                     <small class="text-danger">{{ $message }}</small>
@@ -271,28 +267,26 @@
 
                             <!-- Data Kepegawaian -->
                             <div class="form-section-header">
-                                <i class="fas fa-building"></i> Data Kepegawaian
+                                <i class="fas fa-building"></i> Data Kepegawaian (Opsional)
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Asal Instansi *</label>
+                                    <label class="form-label">Asal Instansi</label>
                                     <input type="text" name="asal_instansi"
                                         class="form-input @error('asal_instansi') error @enderror"
                                         placeholder="Contoh: Pemerintah Kabupaten Sorong"
-                                        value="{{ $kepegawaianData ? $kepegawaianData->asal_instansi : old('asal_instansi') }}"
-                                        required>
+                                        value="{{ $kepegawaianData ? $kepegawaianData->asal_instansi : old('asal_instansi') }}">
                                     @error('asal_instansi')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Instansi Detail/Unit Kerja *</label>
+                                    <label class="form-label">Instansi Detail/Unit Kerja</label>
                                     <input type="text" name="unit_kerja"
                                         class="form-input @error('unit_kerja') error @enderror"
                                         placeholder="Contoh: Dinas Pendidikan Kota Makassar"
-                                        value="{{ $kepegawaianData ? $kepegawaianData->unit_kerja : old('unit_kerja') }}"
-                                        required>
+                                        value="{{ $kepegawaianData ? $kepegawaianData->unit_kerja : old('unit_kerja') }}">
                                     @error('unit_kerja')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -301,9 +295,9 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Provinsi *</label>
+                                    <label class="form-label">Provinsi</label>
                                     <select name="id_provinsi" id="id_provinsi"
-                                        class="form-select @error('id_provinsi') error @enderror" required>
+                                        class="form-select @error('id_provinsi') error @enderror">
                                         <option value="">Pilih Provinsi</option>
                                         @foreach($provinsiList as $provinsi)
                                             @php
@@ -324,9 +318,9 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Kabupaten/Kota *</label>
+                                    <label class="form-label">Kabupaten/Kota</label>
                                     <select name="id_kabupaten_kota" id="id_kabupaten_kota"
-                                        class="form-select @error('id_kabupaten_kota') error @enderror" required disabled>
+                                        class="form-select @error('id_kabupaten_kota') error @enderror" {{ !$kepegawaianData?->id_kabupaten_kota && !old('id_kabupaten_kota') ? 'disabled' : '' }}>
                                         <option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>
                                         @if($isEdit && $kepegawaianData && $kepegawaianData->id_kabupaten_kota)
                                             @php
@@ -348,17 +342,17 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Jabatan *</label>
+                                    <label class="form-label">Jabatan</label>
                                     <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
-                                        value="{{ $kepegawaianData ? $kepegawaianData->jabatan : old('jabatan') }}" required
+                                        value="{{ $kepegawaianData ? $kepegawaianData->jabatan : old('jabatan') }}"
                                         placeholder="Jabatan saat ini">
                                     @error('jabatan')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Eselon *</label>
-                                    <select name="eselon" class="form-select @error('eselon') error @enderror" required>
+                                    <label class="form-label">Eselon</label>
+                                    <select name="eselon" class="form-select @error('eselon') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="III" {{ ($kepegawaianData && $kepegawaianData->eselon == 'III') || old('eselon') == 'III' ? 'selected' : '' }}>III</option>
                                         <option value="IV" {{ ($kepegawaianData && $kepegawaianData->eselon == 'IV') || old('eselon') == 'IV' ? 'selected' : '' }}>IV</option>
@@ -370,12 +364,11 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label {{ ($isPKA || $isPKP) ? '' : 'required' }}">Unggah Scan fotokopi kelulusan/hasil seleksi calon peserta {{ $jenisNama }} / Sertifikat/Piagam Penghargaan Terbaik (Jika Anda Eselon IV)
-                                    {{ ($isPKA || $isPKP) ? '' : '*' }}</label>
+                                <label class="form-label">Unggah Scan fotokopi kelulusan/hasil seleksi calon peserta {{ $jenisNama }} / Sertifikat/Piagam Penghargaan Terbaik (Jika Anda Eselon IV)</label>
                                 <div class="form-file">
                                     <input type="file" name="file_surat_kelulusan_seleksi" id="file_surat_kelulusan_seleksi"
                                         class="form-file-input @error('file_surat_kelulusan_seleksi') error @enderror"
-                                        accept=".pdf" {{ ($isPKA || $isPKP) ? '' : 'required' }}>
+                                        accept=".pdf">
                                     <label class="form-file-label" for="file_surat_kelulusan_seleksi">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit && $pendaftaran->file_surat_kelulusan_seleksi ? 'Ganti File' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -397,20 +390,19 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label {{ ($isPKA || $isPKP) ? 'required' : '' }}">Tahun Lulus PKP/PIM IV
-                                        {{ ($isPKA || $isPKP) ? '*' : '' }}</label>
+                                    <label class="form-label">Tahun Lulus PKP/PIM IV</label>
                                     <input type="number" name="tahun_lulus_pkp_pim_iv"
                                         class="form-input @error('tahun_lulus_pkp_pim_iv') error @enderror"
                                         value="{{ $kepegawaianData ? $kepegawaianData->tahun_lulus_pkp_pim_iv : old('tahun_lulus_pkp_pim_iv') }}"
-                                        placeholder="Contoh: 2023" {{ ($isPKA || $isPKP) ? 'required' : '' }}>
+                                        placeholder="Contoh: 2023">
                                     @error('tahun_lulus_pkp_pim_iv')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Pangkat / Golongan Ruang *</label>
+                                    <label class="form-label">Pangkat / Golongan Ruang</label>
                                     <select name="golongan_ruang"
-                                        class="form-select @error('golongan_ruang') error @enderror" required>
+                                        class="form-select @error('golongan_ruang') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="Pembina Utama, IV/E" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'Pembina Utama, IV/E') || old('golongan_ruang') == 'Pembina Utama, IV/E' ? 'selected' : '' }}>Pembina Utama,
                                             IV/E</option>
@@ -439,20 +431,20 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Nomor HP/WhatsApp *</label>
+                                    <label class="form-label">Nomor HP/WhatsApp</label>
                                     <input type="tel" name="nomor_hp" class="form-input @error('nomor_hp') error @enderror"
-                                        value="{{ $pesertaData ? $pesertaData->nomor_hp : old('nomor_hp') }}" required
+                                        value="{{ $pesertaData ? $pesertaData->nomor_hp : old('nomor_hp') }}"
                                         placeholder="0812xxxxxxxx">
                                     @error('nomor_hp')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Email Pribadi *</label>
+                                    <label class="form-label">Email Pribadi</label>
                                     <input type="email" name="email_pribadi"
                                         class="form-input @error('email_pribadi') error @enderror"
                                         value="{{ $pesertaData ? $pesertaData->email_pribadi : old('email_pribadi') }}"
-                                        required placeholder="email@contoh.com">
+                                        placeholder="email@contoh.com">
                                     @error('email_pribadi')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -461,14 +453,14 @@
 
                             <!-- Data Pendidikan -->
                             <div class="form-section-header">
-                                <i class="fas fa-graduation-cap"></i> Data Pendidikan
+                                <i class="fas fa-graduation-cap"></i> Data Pendidikan (Opsional)
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Pendidikan Terakhir *</label>
+                                    <label class="form-label">Pendidikan Terakhir</label>
                                     <select name="pendidikan_terakhir"
-                                        class="form-select @error('pendidikan_terakhir') error @enderror" required>
+                                        class="form-select @error('pendidikan_terakhir') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="D3" {{ ($pesertaData && $pesertaData->pendidikan_terakhir == 'D3') || old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3</option>
                                         <option value="S1" {{ ($pesertaData && $pesertaData->pendidikan_terakhir == 'S1') || old('pendidikan_terakhir') == 'S1' ? 'selected' : '' }}>S1</option>
@@ -480,11 +472,11 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Bidang Studi Pendidikan Terakhir *</label>
+                                    <label class="form-label">Bidang Studi Pendidikan Terakhir</label>
                                     <input type="text" name="bidang_studi"
                                         class="form-input @error('bidang_studi') error @enderror"
                                         value="{{ $pesertaData ? $pesertaData->bidang_studi : old('bidang_studi') }}"
-                                        required placeholder="Contoh: Ilmu Administrasi">
+                                        placeholder="Contoh: Ilmu Administrasi">
                                     @error('bidang_studi')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -493,14 +485,14 @@
 
                             <!-- Data Lainnya -->
                             <div class="form-section-header">
-                                <i class="fas fa-heart"></i> Data Lainnya
+                                <i class="fas fa-heart"></i> Data Lainnya (Opsional)
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Status Perkawinan *</label>
+                                    <label class="form-label">Status Perkawinan</label>
                                     <select name="status_perkawinan"
-                                        class="form-select @error('status_perkawinan') error @enderror" required>
+                                        class="form-select @error('status_perkawinan') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="Belum Menikah" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Belum Menikah') || old('status_perkawinan') == 'Belum Menikah' ? 'selected' : '' }}>Belum Menikah
                                         </option>
@@ -526,8 +518,8 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Apakah Anda merokok? *</label>
-                                    <select name="perokok" class="form-select @error('perokok') error @enderror" required>
+                                    <label class="form-label">Apakah Anda merokok?</label>
+                                    <select name="perokok" class="form-select @error('perokok') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="Ya" {{ ($pesertaData && $pesertaData->perokok == 'Ya') || old('perokok') == 'Ya' ? 'selected' : '' }}>Ya</option>
                                         <option value="Tidak" {{ ($pesertaData && $pesertaData->perokok == 'Tidak') || old('perokok') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
@@ -537,11 +529,11 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label required">Olahraga Kegemaran/Hobi *</label>
+                                    <label class="form-label">Olahraga Kegemaran/Hobi</label>
                                     <input type="text" name="olahraga_hobi"
                                         class="form-input @error('olahraga_hobi') error @enderror"
                                         value="{{ $pesertaData ? $pesertaData->olahraga_hobi : old('olahraga_hobi') }}"
-                                        required placeholder="Contoh: Sepakbola, Renang">
+                                        placeholder="Contoh: Sepakbola, Renang">
                                     @error('olahraga_hobi')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -563,7 +555,7 @@
                     <div class="form-step" id="step3-content">
                         <div class="step-header">
                             <h2 class="step-title">Data Mentor & Dokumen</h2>
-                            <p class="step-description">Lengkapi informasi mentor dan dokumen pendukung</p>
+                            <p class="step-description">Lengkapi informasi mentor dan dokumen pendukung (Opsional)</p>
                             <div class="selected-info">
                                 <div class="info-badge">
                                     <i class="fas fa-book"></i> <span id="current-training-name-2">{{ $jenisNama }}</span>
@@ -577,7 +569,7 @@
                         <div class="dynamic-form-container" id="dynamic-form-container-2">
                             <!-- Data Mentor -->
                             <div class="form-section-header">
-                                <i class="fas fa-user-graduate"></i> Data Mentor
+                                <i class="fas fa-user-graduate"></i> Data Mentor (Opsional)
                             </div>
 
                             @php
@@ -587,10 +579,9 @@
                             @endphp
 
                             <div class="form-group">
-                                <label class="form-label {{ ($isCPNS || $isPKA || $isPKP) ? 'required' : '' }}">Apakah sudah
-                                    ada penunjukan Mentor? {{ ($isCPNS || $isPKA || $isPKP) ? '*' : '' }}</label>
+                                <label class="form-label">Apakah sudah ada penunjukan Mentor?</label>
                                 <select name="sudah_ada_mentor" id="sudah_ada_mentor"
-                                    class="form-select @error('sudah_ada_mentor') error @enderror" {{ ($isCPNS || $isPKA || $isPKP) ? 'required' : '' }}>
+                                    class="form-select @error('sudah_ada_mentor') error @enderror">
                                     <option value="">Pilih</option>
                                     <option value="Ya" {{ $hasMentor || old('sudah_ada_mentor') == 'Ya' ? 'selected' : '' }}>
                                         Ya</option>
@@ -604,7 +595,7 @@
                             <div id="mentor-container"
                                 style="display: {{ $hasMentor || old('sudah_ada_mentor') == 'Ya' ? 'block' : 'none' }};">
                                 <div class="form-group">
-                                    <label class="form-label required">Pilih Mentor atau Tambah Baru *</label>
+                                    <label class="form-label">Pilih Mentor atau Tambah Baru</label>
                                     <select name="mentor_mode" id="mentor_mode"
                                         class="form-select @error('mentor_mode') error @enderror">
                                         <option value="">Pilih Menu</option>
@@ -621,7 +612,7 @@
                                 <div id="select-mentor-form"
                                     style="display: {{ $selectedMentorMode == 'pilih' || old('mentor_mode') == 'pilih' ? 'block' : 'none' }};">
                                     <div class="form-group">
-                                        <label class="form-label required">Pilih Mentor *</label>
+                                        <label class="form-label">Pilih Mentor</label>
                                         <select name="id_mentor" id="id_mentor"
                                             class="form-select @error('id_mentor') error @enderror">
                                             <option value="">Pilih Mentor...</option>
@@ -641,7 +632,7 @@
 
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label required">Nama Mentor *</label>
+                                            <label class="form-label">Nama Mentor</label>
                                             <input type="text" name="nama_mentor" id="nama_mentor_select"
                                                 class="form-input @error('nama_mentor') error @enderror"
                                                 value="{{ $mentorData && $mentorData->mentor ? $mentorData->mentor->nama_mentor : old('nama_mentor') }}"
@@ -651,7 +642,7 @@
                                             @enderror
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label required">Jabatan Mentor *</label>
+                                            <label class="form-label">Jabatan Mentor</label>
                                             <input type="text" name="jabatan_mentor" id="jabatan_mentor_select"
                                                 class="form-input @error('jabatan_mentor') error @enderror"
                                                 value="{{ $mentorData && $mentorData->mentor ? $mentorData->mentor->jabatan_mentor : old('jabatan_mentor') }}"
@@ -703,7 +694,7 @@
 
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label required">Nama Mentor *</label>
+                                            <label class="form-label">Nama Mentor</label>
                                             <input type="text" name="nama_mentor_baru" id="nama_mentor_baru"
                                                 class="form-input @error('nama_mentor_baru') error @enderror"
                                                 value="{{ $mentorBaruNama }}" placeholder="Masukkan nama mentor">
@@ -712,7 +703,7 @@
                                             @enderror
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label required">Jabatan Mentor *</label>
+                                            <label class="form-label">Jabatan Mentor</label>
                                             <input type="text" name="jabatan_mentor_baru" id="jabatan_mentor_baru"
                                                 class="form-input @error('jabatan_mentor_baru') error @enderror"
                                                 value="{{ $mentorBaruJabatan }}" placeholder="Masukkan jabatan mentor">
@@ -774,24 +765,8 @@
 
                             <!-- Dokumen Pendukung -->
                             <div class="form-section-header">
-                                <i class="fas fa-file-upload"></i> Dokumen Pendukung
+                                <i class="fas fa-file-upload"></i> Dokumen Pendukung (Opsional)
                             </div>
-
-                            <!-- Alert khusus untuk jenis tertentu -->
-                            @if($isCPNS)
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    <strong>Khusus CPNS:</strong> Pastikan Surat Kesediaan sudah diunggah.
-                                </div>
-                            @endif
-
-                            @if($isPKA || $isPKP)
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    <strong>Khusus {{ $jenisNama }}:</strong> Pastikan Surat Kesediaan dan Persetujuan Mentor
-                                    sudah diunggah.
-                                </div>
-                            @endif
 
                             <!-- Current Document Previews -->
                             @if($isEdit)
@@ -829,12 +804,11 @@
 
                             <!-- Foto KTP -->
                             <div class="form-group">
-                                <label class="form-label {{ (!$isEdit && ($isPKA || $isPKP)) ? 'required' : '' }}">Foto KTP
-                                    {{ (!$isEdit && ($isPKA || $isPKP)) ? '*' : '' }}</label>
+                                <label class="form-label">Foto KTP</label>
                                 <div class="form-file">
                                     <input type="file" name="file_ktp" id="file_ktp"
                                         class="form-file-input @error('file_ktp') error @enderror"
-                                        accept=".jpg,.jpeg,.png" {{ (!$isEdit && ($isPKA || $isPKP)) ? 'required' : '' }}>
+                                        accept=".jpg,.jpeg,.png">
                                     <label class="form-file-label" for="file_ktp">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit ? 'Ganti Foto KTP' : 'Klik untuk mengunggah file JPG/PNG (maks. 5MB)' }}</span>
@@ -857,9 +831,9 @@
                             <!-- Nomor SK Jabatan Terakhir -->
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Nomor SK Jabatan Terakhir *</label>
+                                    <label class="form-label">Nomor SK Jabatan Terakhir</label>
                                     <input type="text" name="nomor_sk_terakhir" class="form-input @error('nomor_sk_terakhir') error @enderror" 
-                                           value="{{ $kepegawaianData ? $kepegawaianData->nomor_sk_terakhir : old('nomor_sk_terakhir') }}" required>
+                                           value="{{ $kepegawaianData ? $kepegawaianData->nomor_sk_terakhir : old('nomor_sk_terakhir') }}">
                                     @error('nomor_sk_terakhir')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -869,9 +843,9 @@
                             <!-- Tanggal SK Jabatan Terakhir -->
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Tanggal SK Jabatan Terakhir *</label>
+                                    <label class="form-label">Tanggal SK Jabatan Terakhir</label>
                                     <input type="date" name="tanggal_sk_jabatan" class="form-input @error('tanggal_sk_jabatan') error @enderror" 
-                                           value="{{ $kepegawaianData ? (is_string($kepegawaianData->tanggal_sk_jabatan) ? \Carbon\Carbon::parse($kepegawaianData->tanggal_sk_jabatan)->format('Y-m-d') : ($kepegawaianData->tanggal_sk_jabatan ? $kepegawaianData->tanggal_sk_jabatan->format('Y-m-d') : '')) : old('tanggal_sk_jabatan') }}" required>
+                                           value="{{ $kepegawaianData ? (is_string($kepegawaianData->tanggal_sk_jabatan) ? \Carbon\Carbon::parse($kepegawaianData->tanggal_sk_jabatan)->format('Y-m-d') : ($kepegawaianData->tanggal_sk_jabatan ? $kepegawaianData->tanggal_sk_jabatan->format('Y-m-d') : '')) : old('tanggal_sk_jabatan') }}">
                                     @error('tanggal_sk_jabatan')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -881,12 +855,10 @@
                             <!-- File SK Jabatan dan SK Pangkat -->
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label {{ (!$isEdit && ($isPKN || $isCPNS || $isPKA || $isPKP)) ? 'required' : '' }}">Unggah Bukti SK Jabatan Terakhir (Definitif)
-                                        {{ (!$isEdit && ($isPKN || $isCPNS || $isPKA || $isPKP)) ? '*' : '' }}</label>
+                                    <label class="form-label">Unggah Bukti SK Jabatan Terakhir (Definitif)</label>
                                     <div class="form-file">
                                         <input type="file" name="file_sk_jabatan" id="file_sk_jabatan"
-                                            class="form-file-input @error('file_sk_jabatan') error @enderror" accept=".pdf"
-                                            {{ (!$isEdit && ($isPKN || $isCPNS || $isPKA || $isPKP)) ? 'required' : '' }}>
+                                            class="form-file-input @error('file_sk_jabatan') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_sk_jabatan">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                             <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_sk_jabatan ? 'Ganti SK Jabatan' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -906,12 +878,10 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label {{ (!$isEdit && $isPKN) ? 'required' : '' }}">Unggah Bukti SK Pangkat / Golongan Ruang Terakhir
-                                        {{ (!$isEdit && $isPKN) ? '*' : '' }}</label>
+                                    <label class="form-label">Unggah Bukti SK Pangkat / Golongan Ruang Terakhir</label>
                                     <div class="form-file">
                                         <input type="file" name="file_sk_pangkat" id="file_sk_pangkat"
-                                            class="form-file-input @error('file_sk_pangkat') error @enderror" accept=".pdf"
-                                            {{ (!$isEdit && $isPKN) ? 'required' : '' }}>
+                                            class="form-file-input @error('file_sk_pangkat') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_sk_pangkat">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                             <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_sk_pangkat ? 'Ganti SK Pangkat' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -947,7 +917,7 @@
                     <div class="form-step" id="step4-content">
                         <div class="step-header">
                             <h2 class="step-title">Dokumen Pendaftaran Lainnya</h2>
-                            <p class="step-description">Unggah dokumen yang diperlukan (dapat diunggah nanti)</p>
+                            <p class="step-description">Unggah dokumen yang diperlukan (Opsional)</p>
                             <div class="selected-info">
                                 <div class="info-badge">
                                     <i class="fas fa-book"></i> <span id="current-training-name-3">{{ $jenisNama }}</span>
@@ -958,24 +928,19 @@
                             </div>
                         </div>
 
-                        @if(!$isEdit)
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <strong>Perhatian:</strong> Dokumen dapat diunggah nanti setelah peserta terdaftar. Namun
-                                disarankan untuk mengunggah dokumen utama terlebih dahulu.
-                            </div>
-                        @endif
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Informasi:</strong> Semua dokumen bersifat opsional dan dapat diunggah nanti setelah peserta terdaftar.
+                        </div>
 
                         <div class="dynamic-form-container" id="dynamic-form-container-3">
                             <!-- Surat Kesediaan -->
                             @if($isCPNS || $isPKA || $isPKP)
                                 <div class="form-group">
-                                    <label class="form-label {{ !$isEdit ? 'required' : '' }}">Unggah Scan Formulir Kesediaan (file dapat diunduh di <a href="https://bit.ly/3VtcljN" target="_blank">Disini</a>)
-                                        {{ !$isEdit ? '*' : '' }}</label>
+                                    <label class="form-label">Unggah Scan Formulir Kesediaan (file dapat diunduh di <a href="https://bit.ly/3VtcljN" target="_blank">Disini</a>)</label>
                                     <div class="form-file">
                                         <input type="file" name="file_surat_kesediaan" id="file_surat_kesediaan"
-                                            class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf"
-                                            {{ !$isEdit ? 'required' : '' }}>
+                                            class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_surat_kesediaan">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                             <span>{{ $isEdit && $pendaftaran->file_surat_kesediaan ? 'Ganti Surat Kesediaan' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -998,12 +963,11 @@
 
                             <!-- Pakta Integritas -->
                             <div class="form-group">
-                                <label class="form-label {{ (!$isEdit && ($isPKN || $isPKA || $isPKP)) ? 'required' : '' }}">Unggah Scan Pakta Integritas (Formulir menggunakan Kop Instansi file dapat diunduh di <a href="https://bit.ly/3VtcljN" target="_blank">Disini</a>)
-                                    {{ (!$isEdit && ($isPKN || $isPKA || $isPKP)) ? '*' : '' }}</label>
+                                <label class="form-label">Unggah Scan Pakta Integritas (Formulir menggunakan Kop Instansi file dapat diunduh di <a href="https://bit.ly/3VtcljN" target="_blank">Disini</a>)</label>
                                 <div class="form-file">
                                     <input type="file" name="file_pakta_integritas" id="file_pakta_integritas"
                                         class="form-file-input @error('file_pakta_integritas') error @enderror"
-                                        accept=".pdf" {{ (!$isEdit && ($isPKN || $isPKA || $isPKP)) ? 'required' : '' }}>
+                                        accept=".pdf">
                                     <label class="form-file-label" for="file_pakta_integritas">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit && $pendaftaran->file_pakta_integritas ? 'Ganti Pakta Integritas' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -1025,12 +989,10 @@
 
                             <!-- Surat Tugas -->
                             <div class="form-group">
-                                <label class="form-label {{ !$isEdit ? 'required' : '' }}">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang (jika surat tugas sudah ada, namun jika belum maka WAJIB disertakan pada masa klasikal di Puslatbang KMP)
-                                    {{ !$isEdit ? '*' : '' }}</label>
+                                <label class="form-label">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang (jika surat tugas sudah ada, namun jika belum maka WAJIB disertakan pada masa klasikal di Puslatbang KMP)</label>
                                 <div class="form-file">
                                     <input type="file" name="file_surat_tugas" id="file_surat_tugas"
-                                        class="form-file-input @error('file_surat_tugas') error @enderror" accept=".pdf"
-                                        {{ !$isEdit ? 'required' : '' }}>
+                                        class="form-file-input @error('file_surat_tugas') error @enderror" accept=".pdf">
                                     <label class="form-file-label" for="file_surat_tugas">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit && $pendaftaran->file_surat_tugas ? 'Ganti Surat Tugas' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -1087,12 +1049,11 @@
                             @endif
 
                             <div class="form-group">
-                                <label class="form-label {{ !$isEdit ? 'required' : '' }}">Unggah Pas Foto peserta
-                                    {{ !$isEdit ? '*' : '' }}</label>
+                                <label class="form-label">Unggah Pas Foto peserta</label>
                                 <div class="form-file">
                                     <input type="file" name="file_pas_foto" id="file_pas_foto"
                                         class="form-file-input @error('file_pas_foto') error @enderror"
-                                        accept=".jpg,.jpeg,.png" {{ !$isEdit ? 'required' : '' }}>
+                                        accept=".jpg,.jpeg,.png">
                                     <label class="form-file-label" for="file_pas_foto">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit ? 'Ganti Pas Foto' : 'Klik untuk mengunggah file JPG/PNG (maks. 5MB)' }}</span>
@@ -1114,12 +1075,10 @@
 
                             <!-- Surat Sehat -->
                             <div class="form-group">
-                                <label class="form-label {{ !$isEdit ? 'required' : '' }}">Unggah Surat Berbadan Sehat
-                                    {{ !$isEdit ? '*' : '' }}</label>
+                                <label class="form-label">Unggah Surat Berbadan Sehat</label>
                                 <div class="form-file">
                                     <input type="file" name="file_surat_sehat" id="file_surat_sehat"
-                                        class="form-file-input @error('file_surat_sehat') error @enderror" accept=".pdf"
-                                        {{ !$isEdit ? 'required' : '' }}>
+                                        class="form-file-input @error('file_surat_sehat') error @enderror" accept=".pdf">
                                     <label class="form-file-label" for="file_surat_sehat">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit && $pendaftaran->file_surat_sehat ? 'Ganti Surat Sehat' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -1141,12 +1100,11 @@
 
                             <!-- Surat Pernyataan Administrasi -->
                             <div class="form-group">
-                                <label class="form-label {{ ($isPKA || $isPKP) ? 'required' : '' }}">Unggah Surat Pernyataan Tidak Sedang Mempertanggungjawabkan Penyelesaian Administrasi
-                                    {{ ($isPKA || $isPKP) ? '*' : '' }}</label>
+                                <label class="form-label">Unggah Surat Pernyataan Tidak Sedang Mempertanggungjawabkan Penyelesaian Administrasi</label>
                                 <div class="form-file">
                                     <input type="file" name="file_surat_pernyataan_administrasi" id="file_surat_pernyataan_administrasi"
                                         class="form-file-input @error('file_surat_pernyataan_administrasi') error @enderror"
-                                        accept=".pdf" {{ ($isPKA || $isPKP) ? 'required' : '' }}>
+                                        accept=".pdf">
                                     <label class="form-file-label" for="file_surat_pernyataan_administrasi">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit && $pendaftaran->file_surat_pernyataan_administrasi ? 'Ganti Surat Pernyataan' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -1168,12 +1126,11 @@
 
                             <!-- Surat Bebas Narkoba -->
                             <div class="form-group">
-                                <label class="form-label {{ !$isEdit ? 'required' : '' }}">Unggah Surat Keterangan Bebas Narkoba
-                                    {{ !$isEdit ? '*' : '' }}</label>
+                                <label class="form-label">Unggah Surat Keterangan Bebas Narkoba</label>
                                 <div class="form-file">
                                     <input type="file" name="file_surat_bebas_narkoba" id="file_surat_bebas_narkoba"
                                         class="form-file-input @error('file_surat_bebas_narkoba') error @enderror"
-                                        accept=".pdf" {{ !$isEdit ? 'required' : '' }}>
+                                        accept=".pdf">
                                     <label class="form-file-label" for="file_surat_bebas_narkoba">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit && $pendaftaran->file_surat_bebas_narkoba ? 'Ganti Surat Bebas Narkoba' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -1197,16 +1154,15 @@
                             <!-- Dokumen tambahan untuk CPNS -->
                             @if($isCPNS)
                                 <div class="form-section-header">
-                                    <i class="fas fa-file-alt"></i> Dokumen Tambahan CPNS
+                                    <i class="fas fa-file-alt"></i> Dokumen Tambahan CPNS (Opsional)
                                 </div>
 
                                 <!-- File SK CPNS -->
                                 <div class="form-group">
-                                    <label class="form-label {{ !$isEdit ? 'required' : '' }}">Unggah SK CPNS
-                                        {{ !$isEdit ? '*' : '' }}</label>
+                                    <label class="form-label">Unggah SK CPNS</label>
                                     <div class="form-file">
                                         <input type="file" name="file_sk_cpns" id="file_sk_cpns"
-                                            class="form-file-input @error('file_sk_cpns') error @enderror" accept=".pdf" {{ !$isEdit ? 'required' : '' }}>
+                                            class="form-file-input @error('file_sk_cpns') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_sk_cpns">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                             <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_sk_cpns ? 'Ganti SK CPNS' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -1228,11 +1184,10 @@
 
                                 <!-- File SPMT -->
                                 <div class="form-group">
-                                    <label class="form-label {{ !$isEdit ? 'required' : '' }}">Unggah SPMT
-                                        {{ !$isEdit ? '*' : '' }}</label>
+                                    <label class="form-label">Unggah SPMT</label>
                                     <div class="form-file">
                                         <input type="file" name="file_spmt" id="file_spmt"
-                                            class="form-file-input @error('file_spmt') error @enderror" accept=".pdf" {{ !$isEdit ? 'required' : '' }}>
+                                            class="form-file-input @error('file_spmt') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_spmt">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                             <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_spmt ? 'Ganti SPMT' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
@@ -1917,11 +1872,6 @@
                         moveToStep(1);
                     }, 800);
                 }, 500);
-
-                // Untuk edit, file input tidak required
-                document.querySelectorAll('input[type="file"]').forEach(input => {
-                    input.removeAttribute('required');
-                });
             }
 
             // ============================================
@@ -2194,23 +2144,48 @@
             });
 
             nextToStep3Btn.addEventListener('click', () => {
-                // Validate required fields in step 2
-                const requiredFields = document.querySelectorAll('#step2-content [required]');
+                // Validate required fields in step 2 (hanya nama lengkap dan nip/nrp)
+                const namaLengkap = document.querySelector('input[name="nama_lengkap"]');
+                const nipNrp = document.querySelector('input[name="nip_nrp"]');
                 let isValid = true;
                 let firstInvalidField = null;
 
-                requiredFields.forEach(field => {
-                    if (!field.value.trim() && field.type !== 'file') {
-                        if (!firstInvalidField) firstInvalidField = field;
-                        field.classList.add('error');
-                        isValid = false;
-                    } else {
-                        field.classList.remove('error');
+                // Reset errors
+                document.querySelectorAll('#step2-content .error').forEach(el => el.classList.remove('error'));
+                document.querySelectorAll('#step2-content .server-error, #step2-content .client-error').forEach(el => el.remove());
+
+                // Validate nama lengkap
+                if (!namaLengkap.value.trim()) {
+                    namaLengkap.classList.add('error');
+                    isValid = false;
+                    firstInvalidField = namaLengkap;
+                    
+                    const formGroup = namaLengkap.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = document.createElement('small');
+                        errorMsg.className = 'text-danger client-error';
+                        errorMsg.textContent = 'Nama lengkap wajib diisi';
+                        formGroup.appendChild(errorMsg);
                     }
-                });
+                }
+
+                // Validate NIP/NRP
+                if (!nipNrp.value.trim()) {
+                    nipNrp.classList.add('error');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = nipNrp;
+                    
+                    const formGroup = nipNrp.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = document.createElement('small');
+                        errorMsg.className = 'text-danger client-error';
+                        errorMsg.textContent = 'NIP/NRP wajib diisi';
+                        formGroup.appendChild(errorMsg);
+                    }
+                }
 
                 if (!isValid) {
-                    showNotification('error', 'Silakan lengkapi semua field yang wajib diisi');
+                    showNotification('error', 'Silakan isi Nama Lengkap dan NIP/NRP');
                     if (firstInvalidField) {
                         firstInvalidField.focus();
                         firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2222,49 +2197,7 @@
             });
 
             nextToStep4Btn.addEventListener('click', () => {
-                // Validate required fields in step 3
-                const requiredFields = document.querySelectorAll('#step3-content [required]');
-                let isValid = true;
-                let firstInvalidField = null;
-
-                requiredFields.forEach(field => {
-                    if (!field.value.trim() && field.type !== 'file') {
-                        if (!firstInvalidField) firstInvalidField = field;
-                        field.classList.add('error');
-                        isValid = false;
-                    } else {
-                        field.classList.remove('error');
-                    }
-                });
-
-                // Validate mentor fields if mentor is selected
-                if (sudahAdaMentorSelect && sudahAdaMentorSelect.value === 'Ya') {
-                    if (!mentorModeSelect.value) {
-                        mentorModeSelect.classList.add('error');
-                        isValid = false;
-                        if (!firstInvalidField) firstInvalidField = mentorModeSelect;
-                    } else {
-                        mentorModeSelect.classList.remove('error');
-                    }
-
-                    if (mentorModeSelect.value === 'pilih' && !mentorSelect.value) {
-                        mentorSelect.classList.add('error');
-                        isValid = false;
-                        if (!firstInvalidField) firstInvalidField = mentorSelect;
-                    } else if (mentorModeSelect.value === 'pilih') {
-                        mentorSelect.classList.remove('error');
-                    }
-                }
-
-                if (!isValid) {
-                    showNotification('error', 'Silakan lengkapi semua field yang wajib diisi');
-                    if (firstInvalidField) {
-                        firstInvalidField.focus();
-                        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                    return;
-                }
-
+                // Tidak ada validasi required di step 3 karena semua field opsional
                 moveToStep(4);
             });
 
@@ -2285,48 +2218,72 @@
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (isEdit ? 'Mengupdate...' : 'Menyimpan...');
                 submitBtn.disabled = true;
 
-                // Validasi client-side untuk field required
-                const requiredFields = this.querySelectorAll('[required]');
+                // Validasi client-side hanya untuk field required
+                const namaLengkap = this.querySelector('input[name="nama_lengkap"]');
+                const nipNrp = this.querySelector('input[name="nip_nrp"]');
+                const idAngkatan = this.querySelector('select[name="id_angkatan"]');
                 let hasEmptyRequired = false;
 
                 // Clear previous client-side errors
                 document.querySelectorAll('.client-error').forEach(el => el.remove());
+                document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
 
-                requiredFields.forEach(field => {
-                    if (!field.value && field.type !== 'file') {
-                        hasEmptyRequired = true;
-                        field.classList.add('error');
-
-                        const formGroup = field.closest('.form-group');
-                        if (formGroup) {
-                            const errorMsg = document.createElement('small');
-                            errorMsg.className = 'text-danger client-error';
-                            errorMsg.textContent = 'Field ini wajib diisi';
-                            formGroup.appendChild(errorMsg);
-                        }
+                // Validasi nama lengkap
+                if (!namaLengkap.value.trim()) {
+                    hasEmptyRequired = true;
+                    namaLengkap.classList.add('error');
+                    
+                    const formGroup = namaLengkap.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = document.createElement('small');
+                        errorMsg.className = 'text-danger client-error';
+                        errorMsg.textContent = 'Nama lengkap wajib diisi';
+                        formGroup.appendChild(errorMsg);
                     }
-                });
+                }
+
+                // Validasi NIP/NRP
+                if (!nipNrp.value.trim()) {
+                    hasEmptyRequired = true;
+                    nipNrp.classList.add('error');
+                    
+                    const formGroup = nipNrp.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = document.createElement('small');
+                        errorMsg.className = 'text-danger client-error';
+                        errorMsg.textContent = 'NIP/NRP wajib diisi';
+                        formGroup.appendChild(errorMsg);
+                    }
+                }
+
+                // Validasi angkatan
+                if (!idAngkatan.value) {
+                    hasEmptyRequired = true;
+                    idAngkatan.classList.add('error');
+                    
+                    const formGroup = idAngkatan.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = document.createElement('small');
+                        errorMsg.className = 'text-danger client-error';
+                        errorMsg.textContent = 'Angkatan wajib dipilih';
+                        formGroup.appendChild(errorMsg);
+                    }
+                }
 
                 if (hasEmptyRequired) {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
 
-                    // Scroll ke error pertama
-                    const firstError = document.querySelector('.error');
-                    if (firstError) {
-                        // Determine which step has the error
-                        if (firstError.closest('#step2-content')) {
-                            moveToStep(2);
-                        } else if (firstError.closest('#step3-content')) {
-                            moveToStep(3);
-                        } else if (firstError.closest('#step4-content')) {
-                            moveToStep(4);
+                    // Scroll ke step yang memiliki error
+                    if (!idAngkatan.value) {
+                        moveToStep(1);
+                        idAngkatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        moveToStep(2);
+                        const firstError = document.querySelector('#step2-content .error');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }
-
-                        firstError.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
                     }
 
                     return false;
