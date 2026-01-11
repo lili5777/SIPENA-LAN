@@ -105,7 +105,7 @@
                                             </span>
                                         </div>
                                         <div class="info-item" id="verification-error" style="display: none;">
-                                            <span class="info-label">Status:</span>
+                                            {{-- <span class="info-label">Status:</span> --}}
                                             <span class="info-value text-danger">
                                                 <i class="fas fa-exclamation-circle"></i> 
                                                 <span id="error-message"></span>
@@ -123,7 +123,7 @@
                                 </div>
                             </div>
 
-                            <div class="angkatan-info" id="angkatan-info" style="display: none;">
+                            {{-- <div class="angkatan-info" id="angkatan-info" style="display: none;">
                                 <div class="info-card">
                                     <h4><i class="fas fa-info-circle"></i> Informasi Sistem</h4>
                                     <div class="info-details">
@@ -141,7 +141,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="step-navigation">
@@ -860,7 +860,7 @@
                 pendaftaranData = null;
                 nipNrpInput.value = '';
                 dynamicFormContainer.innerHTML = '';
-                angkatanInfo.style.display = 'block';
+                // angkatanInfo.style.display = 'block';
             }
 
             verifyNipBtn.addEventListener('click', async function () {
@@ -912,7 +912,7 @@
                         verificationDetails.style.display = 'flex';
                         verificationAnggaran.style.display = 'flex';
                         verificationResult.style.display = 'block';
-                        angkatanInfo.style.display = 'none';
+                        // angkatanInfo.style.display = 'none';
                         
                         nextToStep3Btn.disabled = false;
                         
@@ -924,14 +924,14 @@
                         verificationDetails.style.display = 'none';
                         verificationAnggaran.style.display = 'none';
                         verificationResult.style.display = 'block';
-                        angkatanInfo.style.display = 'block';
+                        // angkatanInfo.style.display = 'block';
                         
                         nextToStep3Btn.disabled = true;
                     }
                 } catch (error) {
                     console.error('Verification error:', error);
                     showVerificationError('Terjadi kesalahan jaringan. Silakan coba lagi.');
-                    angkatanInfo.style.display = 'block';
+                    // angkatanInfo.style.display = 'block';
                 } finally {
                     verifyNipBtn.innerHTML = originalText;
                     verifyNipBtn.disabled = false;
@@ -1028,6 +1028,7 @@
             // ============================================
             // FORM INTERACTIONS
             // ============================================
+            // Ganti fungsi loadProvinsi
             async function loadProvinsi() {
                 const provinsiSelect = document.querySelector('[name="id_provinsi"]');
                 if (!provinsiSelect) return;
@@ -1035,31 +1036,39 @@
                 provinsiSelect.innerHTML = '<option value="">Memuat provinsi...</option>';
 
                 try {
-                    const response = await fetch('/proxy/provinces');
+                    // Ganti endpoint
+                    const response = await fetch('/api/get-provinces');
                     const result = await response.json();
 
-                    provinsiSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
-                    result.data.forEach(prov => {
-                        const option = document.createElement('option');
-                        option.value = prov.id || prov.code;
-                        option.textContent = prov.name;
-                        provinsiSelect.appendChild(option);
-                    });
+                    if (result.success) {
+                        provinsiSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
+                        result.data.forEach(prov => {
+                            const option = document.createElement('option');
+                            option.value = prov.id; // Menggunakan id sebagai value
+                            option.textContent = prov.name;
+                            option.dataset.code = prov.code; // Simpan code sebagai data attribute
+                            provinsiSelect.appendChild(option);
+                        });
 
-                    // Set value dari data peserta jika ada
-                    if (verifiedPeserta && verifiedPeserta.kepegawaian && verifiedPeserta.kepegawaian.id_provinsi) {
-                        setTimeout(() => {
-                            provinsiSelect.value = verifiedPeserta.kepegawaian.id_provinsi;
-                            provinsiSelect.dispatchEvent(new Event('change'));
-                        }, 100);
+                        // Set value dari data peserta jika ada
+                        if (verifiedPeserta && verifiedPeserta.kepegawaian && verifiedPeserta.kepegawaian.id_provinsi) {
+                            setTimeout(() => {
+                                provinsiSelect.value = verifiedPeserta.kepegawaian.id_provinsi;
+                                provinsiSelect.dispatchEvent(new Event('change'));
+                            }, 100);
+                        }
+                    } else {
+                        throw new Error(result.message);
                     }
 
                 } catch (error) {
                     console.error('Provinsi error:', error);
                     provinsiSelect.innerHTML = '<option value="">Error loading</option>';
+                    showErrorMessage('Gagal memuat data provinsi');
                 }
             }
 
+            // Ganti fungsi loadKabupaten
             async function loadKabupaten(provId) {
                 const kabSelect = document.querySelector('[name="id_kabupaten_kota"]');
                 if (!kabSelect) return;
@@ -1068,31 +1077,39 @@
                 kabSelect.disabled = true;
 
                 try {
-                    const response = await fetch(`/proxy/regencies/${provId}`);
+                    // Ganti endpoint
+                    const response = await fetch(`/api/get-regencies/${provId}`);
                     const result = await response.json();
 
-                    kabSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-                    kabSelect.disabled = false;
+                    if (result.success) {
+                        kabSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+                        kabSelect.disabled = false;
 
-                    result.data.forEach(kab => {
-                        const option = document.createElement('option');
-                        option.value = kab.id || kab.code;
-                        option.textContent = kab.name;
-                        kabSelect.appendChild(option);
-                    });
+                        result.data.forEach(kab => {
+                            const option = document.createElement('option');
+                            option.value = kab.id; // Menggunakan id sebagai value
+                            option.textContent = kab.name;
+                            kabSelect.appendChild(option);
+                        });
 
-                    // Set value dari data peserta jika ada
-                    if (verifiedPeserta && verifiedPeserta.kepegawaian && verifiedPeserta.kepegawaian.id_kabupaten_kota) {
-                        kabSelect.value = verifiedPeserta.kepegawaian.id_kabupaten_kota;
+                        // Set value dari data peserta jika ada
+                        if (verifiedPeserta && verifiedPeserta.kepegawaian && verifiedPeserta.kepegawaian.id_kabupaten_kota) {
+                            kabSelect.value = verifiedPeserta.kepegawaian.id_kabupaten_kota;
+                        }
+                    } else {
+                        throw new Error(result.message);
                     }
 
                 } catch (error) {
                     console.error('Kabupaten error:', error);
                     kabSelect.innerHTML = '<option value="">Error loading</option>';
                     kabSelect.disabled = false;
+                    showErrorMessage('Gagal memuat data kabupaten/kota');
                 }
             }
 
+
+            
             function setupFormInteractions() {
                 // Load provinsi data
                 loadProvinsi();
@@ -1364,7 +1381,7 @@
                 verificationDetails.style.display = 'none';
                 verificationAnggaran.style.display = 'none';
                 verificationResult.style.display = 'block';
-                angkatanInfo.style.display = 'block';
+                // angkatanInfo.style.display = 'block';
             }
 
             function showSuccessMessage(message) {

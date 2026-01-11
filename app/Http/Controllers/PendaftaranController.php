@@ -389,9 +389,9 @@ class PendaftaranController extends Controller
             ]);
 
             // 6. UPDATE KEPEGAWAIAN PESERTA
-            $provinsi = Provinsi::where('code', $request->id_provinsi)->orWhere('id', $request->id_provinsi)->first();
+            $provinsi = Provinsi::where('id', $request->id_provinsi)->first();
             $kabupaten = $request->id_kabupaten_kota ?
-                Kabupaten::where('code', $request->id_kabupaten_kota)->orWhere('id', $request->id_kabupaten_kota)->first() :
+                Kabupaten::where('id', $request->id_kabupaten_kota)->first() :
                 null;
 
             if (!$provinsi) {
@@ -538,5 +538,62 @@ class PendaftaranController extends Controller
         $mentors = Mentor::where('status_aktif', true)->get();
 
         return response()->json($mentors);
+    }
+
+    /**
+     * API untuk mendapatkan daftar provinsi
+     */
+    public function getProvinces()
+    {
+        try {
+            // HAPUS kondisi where('active', true) karena kolom tidak ada
+            $provinces = Provinsi::orderBy('name')
+                ->get(['id', 'code', 'name']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $provinces,
+                'message' => 'Data provinsi berhasil diambil'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data provinsi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API untuk mendapatkan daftar kabupaten/kota berdasarkan provinsi
+     */
+    public function getRegencies($provinceId)
+    {
+        try {
+            // Cari provinsi berdasarkan ID (tanpa mencari by code karena id sudah pasti)
+            $provinsi = Provinsi::find($provinceId);
+
+            if (!$provinsi) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Provinsi tidak ditemukan'
+                ], 404);
+            }
+
+            // CARA 1: Jika kabupaten menggunakan province_id (sesuai struktur tabel kabupatens)
+            $regencies = Kabupaten::where('province_id', $provinsi->id)
+                ->orderBy('name')
+                ->get(['id', 'code', 'name', 'province_id']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $regencies,
+                'message' => 'Data kabupaten/kota berhasil diambil'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data kabupaten/kota: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

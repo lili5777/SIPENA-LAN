@@ -37,6 +37,8 @@ Route::post('/pendaftaran/update-data', [PendaftaranController::class, 'updateDa
 Route::get('/pendaftaran/success', [PendaftaranController::class, 'success'])->name('pendaftaran.success');
 Route::post('/form-partial/{type}', [PendaftaranController::class, 'formPartial'])->name('form.partial');
 Route::post('/api/verify-nip', [PendaftaranController::class, 'verifyNip'])->name('api.verifyNip');
+Route::get('/api/get-provinces', [PendaftaranController::class, 'getProvinces']);
+Route::get('/api/get-regencies/{provinceId}', [PendaftaranController::class, 'getRegencies']);
 
 
 // Routes untuk API (digunakan di JavaScript untuk load data dinamis)

@@ -1,6 +1,6 @@
 @extends('admin.partials.layout')
 
-@section('title', 'Peserta PKN TK II - Sistem Pelatihan')
+@section('title', 'Peserta PKA - Sistem Pelatihan')
 
 @section('content')
     <!-- Page Header -->
