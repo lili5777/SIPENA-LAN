@@ -310,12 +310,6 @@
 <div class="form-section-header">
     <i class="fas fa-file-upload"></i> Dokumen Pendukung
 </div>
-
-<div class="alert alert-info">
-    <i class="fas fa-info-circle"></i>
-    <strong>Catatan:</strong> File yang sudah diupload sebelumnya akan tetap tersimpan. Upload ulang hanya jika ingin mengganti file.
-</div>
-
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Unggah Bukti SK Jabatan Terakhir (Definitif)</label>
@@ -327,12 +321,24 @@
                 Klik untuk mengunggah file PDF (maks. 5MB)
             </label>
             <div class="form-file-name">
-                @if($peserta['kepegawaian']['file_sk_jabatan'] ?? false)
-                    File sudah diupload sebelumnya
+                @if(isset($peserta['kepegawaian']['file_sk_jabatan']) && $peserta['kepegawaian']['file_sk_jabatan'])
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload: {{ basename($peserta['kepegawaian']['file_sk_jabatan']) }}</span>
+                        <button type="button" class="btn-change-file" data-target="file_sk_jabatan">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
                 @elseif(old('file_sk_jabatan'))
-                    File sudah diupload sebelumnya
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload sebelumnya</span>
+                        <button type="button" class="btn-change-file" data-target="file_sk_jabatan">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
                 @else
-                    Belum ada file dipilih
+                    <span class="no-file">Belum ada file dipilih</span>
                 @endif
             </div>
         </div>
@@ -350,12 +356,24 @@
                 Klik untuk mengunggah file PDF (maks. 5MB)
             </label>
             <div class="form-file-name">
-                @if($peserta['kepegawaian']['file_sk_pangkat'] ?? false)
-                    File sudah diupload sebelumnya
+                @if(isset($peserta['kepegawaian']['file_sk_pangkat']) && $peserta['kepegawaian']['file_sk_pangkat'])
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload: {{ basename($peserta['kepegawaian']['file_sk_pangkat']) }}</span>
+                        <button type="button" class="btn-change-file" data-target="file_sk_pangkat">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
                 @elseif(old('file_sk_pangkat'))
-                    File sudah diupload sebelumnya
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload sebelumnya</span>
+                        <button type="button" class="btn-change-file" data-target="file_sk_pangkat">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
                 @else
-                    Belum ada file dipilih
+                    <span class="no-file">Belum ada file dipilih</span>
                 @endif
             </div>
         </div>
@@ -375,12 +393,24 @@
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($pendaftaran['file_surat_komitmen'] ?? false)
-                File sudah diupload sebelumnya
+            @if(isset($pendaftaran['file_surat_komitmen']) && $pendaftaran['file_surat_komitmen'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($pendaftaran['file_surat_komitmen']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_komitmen">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @elseif(old('file_surat_komitmen'))
-                File sudah diupload sebelumnya
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload sebelumnya</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_komitmen">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -399,12 +429,24 @@
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($pendaftaran['file_pakta_integritas'] ?? false)
-                File sudah diupload sebelumnya
+            @if(isset($pendaftaran['file_pakta_integritas']) && $pendaftaran['file_pakta_integritas'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($pendaftaran['file_pakta_integritas']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_pakta_integritas">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @elseif(old('file_pakta_integritas'))
-                File sudah diupload sebelumnya
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload sebelumnya</span>
+                    <button type="button" class="btn-change-file" data-target="file_pakta_integritas">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -423,12 +465,24 @@
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($pendaftaran['file_surat_tugas'] ?? false)
-                File sudah diupload sebelumnya
+            @if(isset($pendaftaran['file_surat_tugas']) && $pendaftaran['file_surat_tugas'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($pendaftaran['file_surat_tugas']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_tugas">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @elseif(old('file_surat_tugas'))
-                File sudah diupload sebelumnya
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload sebelumnya</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_tugas">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -447,12 +501,24 @@
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($pendaftaran['file_surat_kelulusan_seleksi'] ?? false)
-                File sudah diupload sebelumnya
+            @if(isset($pendaftaran['file_surat_kelulusan_seleksi']) && $pendaftaran['file_surat_kelulusan_seleksi'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($pendaftaran['file_surat_kelulusan_seleksi']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_kelulusan_seleksi">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @elseif(old('file_surat_kelulusan_seleksi'))
-                File sudah diupload sebelumnya
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload sebelumnya</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_kelulusan_seleksi">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -472,12 +538,24 @@
                 Klik untuk mengunggah file PDF (maks. 5MB)
             </label>
             <div class="form-file-name">
-                @if($pendaftaran['file_surat_sehat'] ?? false)
-                    File sudah diupload sebelumnya
+                @if(isset($pendaftaran['file_surat_sehat']) && $pendaftaran['file_surat_sehat'])
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload: {{ basename($pendaftaran['file_surat_sehat']) }}</span>
+                        <button type="button" class="btn-change-file" data-target="file_surat_sehat">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
                 @elseif(old('file_surat_sehat'))
-                    File sudah diupload sebelumnya
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload sebelumnya</span>
+                        <button type="button" class="btn-change-file" data-target="file_surat_sehat">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
                 @else
-                    Belum ada file dipilih
+                    <span class="no-file">Belum ada file dipilih</span>
                 @endif
             </div>
         </div>
@@ -495,12 +573,24 @@
                 Klik untuk mengunggah file PDF (maks. 5MB)
             </label>
             <div class="form-file-name">
-                @if($pendaftaran['file_surat_bebas_narkoba'] ?? false)
-                    File sudah diupload sebelumnya
+                @if(isset($pendaftaran['file_surat_bebas_narkoba']) && $pendaftaran['file_surat_bebas_narkoba'])
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload: {{ basename($pendaftaran['file_surat_bebas_narkoba']) }}</span>
+                        <button type="button" class="btn-change-file" data-target="file_surat_bebas_narkoba">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
                 @elseif(old('file_surat_bebas_narkoba'))
-                    File sudah diupload sebelumnya
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload sebelumnya</span>
+                        <button type="button" class="btn-change-file" data-target="file_surat_bebas_narkoba">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
                 @else
-                    Belum ada file dipilih
+                    <span class="no-file">Belum ada file dipilih</span>
                 @endif
             </div>
         </div>
@@ -520,12 +610,24 @@
             Klik untuk mengunggah file JPG/PNG (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($peserta['file_pas_foto'] ?? false)
-                File sudah diupload sebelumnya
+            @if(isset($peserta['file_pas_foto']) && $peserta['file_pas_foto'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($peserta['file_pas_foto']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_pas_foto">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @elseif(old('file_pas_foto'))
-                File sudah diupload sebelumnya
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload sebelumnya</span>
+                    <button type="button" class="btn-change-file" data-target="file_pas_foto">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>

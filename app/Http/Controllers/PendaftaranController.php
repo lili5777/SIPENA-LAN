@@ -206,7 +206,6 @@ class PendaftaranController extends Controller
                 'nomor_rekening_mentor_baru' => 'nullable|string|max:200',
                 'npwp_mentor_baru' => 'nullable|string|max:50',
             ], [
-                // Pesan untuk data pribadi
                 'nama_lengkap.required' => 'Nama lengkap wajib diisi',
                 'nama_lengkap.max' => 'Nama lengkap maksimal 200 karakter',
                 'nip_nrp.required' => 'NIP/NRP wajib diisi',
@@ -226,22 +225,16 @@ class PendaftaranController extends Controller
                 'pendidikan_terakhir.in' => 'Pendidikan terakhir tidak valid',
                 'perokok.required' => 'Status perokok wajib dipilih',
                 'perokok.in' => 'Status perokok tidak valid',
-
-                // Pesan untuk file upload
                 'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
                 'file_ktp.max' => 'Ukuran file KTP maksimal 5MB',
                 'file_pas_foto.mimes' => 'File pas foto harus berformat JPG, JPEG, atau PNG',
                 'file_pas_foto.max' => 'Ukuran file pas foto maksimal 5MB',
-
-                // Pesan untuk data kepegawaian
                 'asal_instansi.required' => 'Asal instansi wajib diisi',
                 'id_provinsi.required' => 'Provinsi wajib dipilih',
                 'alamat_kantor.required' => 'Alamat kantor wajib diisi',
                 'email_kantor.email' => 'Format email kantor tidak valid',
                 'jabatan.required' => 'Jabatan wajib diisi',
                 'golongan_ruang.required' => 'Golongan ruang wajib diisi',
-
-                // Pesan untuk file dokumen kepegawaian
                 'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
                 'file_sk_jabatan.max' => 'Ukuran file SK Jabatan maksimal 5MB',
                 'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
@@ -252,8 +245,6 @@ class PendaftaranController extends Controller
                 'file_surat_sehat.max' => 'Ukuran file Surat Sehat maksimal 5MB',
                 'file_surat_bebas_narkoba.mimes' => 'File Surat Bebas Narkoba harus berformat PDF',
                 'file_surat_bebas_narkoba.max' => 'Ukuran file Surat Bebas Narkoba maksimal 5MB',
-
-                // Pesan untuk relasi
                 'peserta_id.exists' => 'Data peserta tidak ditemukan',
                 'pendaftaran_id.exists' => 'Data pendaftaran tidak ditemukan',
                 'id_jenis_pelatihan.exists' => 'Jenis pelatihan tidak ditemukan',
@@ -306,8 +297,56 @@ class PendaftaranController extends Controller
                     'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:5120',
                 ];
 
+                if (!$kepegawaian->file_sk_jabatan) {
+                    $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:5120';
+                }
+
+                if (!$kepegawaian->file_sk_pangkat) {
+                    $additionalRules['file_sk_pangkat'] = 'required|file|mimes:pdf|max:5120';
+                }
+
+                if (!$pendaftaran->file_pakta_integritas) {
+                    $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:5120';
+                }
+
+                if (!$pendaftaran->file_surat_sehat) {
+                    $additionalRules['file_surat_sehat'] = 'required|file|mimes:pdf|max:5120';
+                }
+
+                if (!$pendaftaran->file_surat_bebas_narkoba) {
+                    $additionalRules['file_surat_bebas_narkoba'] = 'required|file|mimes:pdf|max:5120';
+                }
+
                 $additionalMessages = [
                     'eselon.required' => 'Eselon wajib diisi untuk pelatihan PKN TK II',
+                    'eselon.string' => 'Eselon harus berupa teks',
+                    'eselon.max' => 'Eselon maksimal 50 karakter',
+                    'file_pakta_integritas.required' => 'File Pakta Integritas wajib diunggah',
+                    'file_pakta_integritas.file' => 'File Pakta Integritas harus berupa file',
+                    'file_pakta_integritas.mimes' => 'File Pakta Integritas harus berformat PDF',
+                    'file_pakta_integritas.max' => 'File Pakta Integritas maksimal 5MB',
+                    'file_surat_kelulusan_seleksi.file' => 'File Surat Kelulusan Seleksi harus berupa file',
+                    'file_surat_kelulusan_seleksi.mimes' => 'File Surat Kelulusan Seleksi harus berformat PDF',
+                    'file_surat_kelulusan_seleksi.max' => 'File Surat Kelulusan Seleksi maksimal 5MB',
+                    'file_sk_jabatan.required' => 'File SK Jabatan wajib diunggah',
+                    'file_sk_jabatan.file' => 'File SK Jabatan harus berupa file',
+                    'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
+                    'file_sk_jabatan.max' => 'File SK Jabatan maksimal 5MB',
+                    'file_sk_pangkat.required' => 'File SK Pangkat wajib diunggah',
+                    'file_sk_pangkat.file' => 'File SK Pangkat harus berupa file',
+                    'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
+                    'file_sk_pangkat.max' => 'File SK Pangkat maksimal 5MB',
+                    'file_surat_komitmen.file' => 'File Surat Komitmen harus berupa file',
+                    'file_surat_komitmen.mimes' => 'File Surat Komitmen harus berformat PDF',
+                    'file_surat_komitmen.max' => 'File Surat Komitmen maksimal 5MB',
+                    'file_surat_sehat.required' => 'File Surat Sehat wajib diunggah',
+                    'file_surat_sehat.file' => 'File Surat Sehat harus berupa file',
+                    'file_surat_sehat.mimes' => 'File Surat Sehat harus berformat PDF',
+                    'file_surat_sehat.max' => 'File Surat Sehat maksimal 5MB',
+                    'file_surat_bebas_narkoba.required' => 'File Surat Bebas Narkoba wajib diunggah',
+                    'file_surat_bebas_narkoba.file' => 'File Surat Bebas Narkoba harus berupa file',
+                    'file_surat_bebas_narkoba.mimes' => 'File Surat Bebas Narkoba harus berformat PDF',
+                    'file_surat_bebas_narkoba.max' => 'File Surat Bebas Narkoba maksimal 5MB',
                 ];
             }
 
@@ -323,26 +362,18 @@ class PendaftaranController extends Controller
 
                 if (!$kepegawaian || !$kepegawaian->file_sk_cpns) {
                     $additionalRules['file_sk_cpns'] = 'required|file|mimes:pdf|max:5120';
-                } else {
-                    $additionalRules['file_sk_cpns'] = 'nullable|file|mimes:pdf|max:5120';
                 }
 
                 if (!$kepegawaian || !$kepegawaian->file_spmt) {
                     $additionalRules['file_spmt'] = 'required|file|mimes:pdf|max:5120';
-                } else {
-                    $additionalRules['file_spmt'] = 'nullable|file|mimes:pdf|max:5120';
                 }
 
                 if (!$pendaftaran || !$pendaftaran->file_surat_kesediaan) {
                     $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:5120';
-                } else {
-                    $additionalRules['file_surat_kesediaan'] = 'nullable|file|mimes:pdf|max:5120';
                 }
 
                 if (!$peserta->file_ktp) {
                     $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
-                } else {
-                    $additionalRules['file_ktp'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120';
                 }
 
                 $additionalMessages = [
@@ -407,7 +438,6 @@ class PendaftaranController extends Controller
                 if ($request->mentor_mode === 'pilih') {
                     $additionalRules['id_mentor'] = 'required|exists:mentor,id';
                     $additionalMessages['id_mentor.required'] = 'Pilih mentor dari daftar';
-                    $additionalMessages['id_mentor.exists'] = 'Mentor yang dipilih tidak ditemukan';
                 } elseif ($request->mentor_mode === 'tambah') {
                     $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
                     $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
@@ -421,7 +451,7 @@ class PendaftaranController extends Controller
                 $request->validate($additionalRules, $additionalMessages);
             }
 
-            // 4. SIMPAN FILE UPLOADS
+            // 4. SIMPAN FILE UPLOADS DENGAN STRUKTUR FOLDER TERPERINCI
             $fileFields = [
                 'file_ktp',
                 'file_pas_foto',
@@ -445,32 +475,73 @@ class PendaftaranController extends Controller
             $files = [];
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
-                    $fileName = time() . '_' . $field . '_' . $peserta->id . '.' . $request->file($field)->getClientOriginalExtension();
-                    $path = $request->file($field)->move(public_path('uploads'), $fileName);
-                    $files[$field] = 'uploads/' . $fileName;
+                    try {
+                        // Struktur folder: uploads/jenis_pelatihan/tahun/bulan/nama_lengkap peserta/
+                        $folderName = strtolower(str_replace(' ', '_', $kode));
+                        $year = date('Y');
+                        $month = date('m');
+
+                        // Sanitize nama lengkap untuk folder
+                        $namaFolderPeserta = preg_replace('/[^A-Za-z0-9_-]/', '_', $request->nama_lengkap);
+
+                        $folderPath = public_path("uploads/{$folderName}/{$year}/{$month}/{$namaFolderPeserta}");
+
+                        // Buat folder struktur lengkap jika belum ada
+                        if (!file_exists($folderPath)) {
+                            mkdir($folderPath, 0755, true);
+                        }
+
+                        // Dapatkan file object
+                        $file = $request->file($field);
+
+                        // Dapatkan informasi file
+                        $originalName = $file->getClientOriginalName();
+                        $extension = $file->getClientOriginalExtension();
+
+                        // Sanitize nama file
+                        $safeOriginalName = preg_replace('/[^A-Za-z0-9_-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+
+                        // Format nama file: field_nip_timestamp.extension
+                        $fileName = "{$field}_{$peserta->nip_nrp}_{$safeOriginalName}_" . time() . '.' . $extension;
+
+                        // Pindahkan file ke folder
+                        $path = $file->move($folderPath, $fileName);
+
+                        // Simpan path relatif untuk database
+                        $relativePath = "uploads/{$folderName}/{$year}/{$month}/{$namaFolderPeserta}/{$fileName}";
+                        $files[$field] = $relativePath;
+
+                        // Hapus file lama jika ada
+                        $this->deleteOldFile($peserta, $pendaftaran, $kepegawaian, $field);
+                    } catch (\Exception $e) {
+                        throw ValidationException::withMessages([
+                            $field => ['Gagal mengupload file: ' . $e->getMessage()]
+                        ]);
+                    }
                 }
             }
 
             // 5. UPDATE DATA PESERTA
             $pesertaUpdateData = [
-                'nama_lengkap' => $request->nama_lengkap ?? $peserta->nama_lengkap,
-                'jenis_kelamin' => $request->jenis_kelamin ?? $peserta->jenis_kelamin,
-                'agama' => $request->agama ?? $peserta->agama,
-                'tempat_lahir' => $request->tempat_lahir ?? $peserta->tempat_lahir,
-                'tanggal_lahir' => $request->tanggal_lahir ?? $peserta->tanggal_lahir,
-                'pendidikan_terakhir' => $request->pendidikan_terakhir ?? $peserta->pendidikan_terakhir,
-                'nama_panggilan' => $request->nama_panggilan ?? $peserta->nama_panggilan,
-                'alamat_rumah' => $request->alamat_rumah ?? $peserta->alamat_rumah,
-                'email_pribadi' => $request->email_pribadi ?? $peserta->email_pribadi,
-                'nomor_hp' => $request->nomor_hp ?? $peserta->nomor_hp,
-                'bidang_studi' => $request->bidang_studi ?? $peserta->bidang_studi,
-                'bidang_keahlian' => $request->bidang_keahlian ?? $peserta->bidang_keahlian,
-                'status_perkawinan' => $request->status_perkawinan ?? $peserta->status_perkawinan,
-                'nama_pasangan' => $request->nama_pasangan ?? $peserta->nama_pasangan,
-                'olahraga_hobi' => $request->olahraga_hobi ?? $peserta->olahraga_hobi,
-                'perokok' => $request->perokok ?? $peserta->perokok,
-                'ukuran_kaos' => $request->ukuran_kaos ?? $peserta->ukuran_kaos,
-                'kondisi_peserta' => $request->kondisi_peserta ?? $peserta->kondisi_peserta,
+                'nama_lengkap' => $request->nama_lengkap,
+                'nip_nrp' => $request->nip_nrp,
+                'nama_panggilan' => $request->nama_panggilan,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'agama' => $request->agama,
+                'tempat_lahir' => $request->tempat_lahir,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'pendidikan_terakhir' => $request->pendidikan_terakhir,
+                'alamat_rumah' => $request->alamat_rumah,
+                'email_pribadi' => $request->email_pribadi,
+                'nomor_hp' => $request->nomor_hp,
+                'bidang_studi' => $request->bidang_studi,
+                'bidang_keahlian' => $request->bidang_keahlian,
+                'status_perkawinan' => $request->status_perkawinan,
+                'nama_pasangan' => $request->nama_pasangan,
+                'olahraga_hobi' => $request->olahraga_hobi,
+                'perokok' => $request->perokok,
+                'ukuran_kaos' => $request->ukuran_kaos,
+                'kondisi_peserta' => $request->kondisi_peserta,
             ];
 
             // Tambahkan file KTP dan pas foto jika ada
@@ -521,7 +592,7 @@ class PendaftaranController extends Controller
                 'file_sk_pangkat',
                 'file_sk_cpns',
                 'file_spmt',
-                'file_skp'
+                'file_skp',
             ];
 
             foreach ($kepegawaianFileFields as $field) {
@@ -631,6 +702,34 @@ class PendaftaranController extends Controller
                 ->back()
                 ->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi atau hubungi administrator.')
                 ->withInput();
+        }
+    }
+
+    // FUNGSI HELPER UNTUK MENGHAPUS FILE LAMA
+    private function deleteOldFile($peserta, $pendaftaran, $kepegawaian, $field)
+    {
+        try {
+            $oldFilePath = null;
+
+            // Cek di model Peserta
+            if (in_array($field, ['file_ktp', 'file_pas_foto']) && $peserta->$field) {
+                $oldFilePath = public_path($peserta->$field);
+            }
+            // Cek di model KepegawaianPeserta
+            elseif (in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp']) && $kepegawaian && $kepegawaian->$field) {
+                $oldFilePath = public_path($kepegawaian->$field);
+            }
+            // Cek di model Pendaftaran
+            elseif ($pendaftaran->$field) {
+                $oldFilePath = public_path($pendaftaran->$field);
+            }
+
+            // Hapus file lama jika ada
+            if ($oldFilePath && file_exists($oldFilePath)) {
+                unlink($oldFilePath);
+            }
+        } catch (\Exception $e) {
+            // Tidak melakukan logging
         }
     }
     /**
