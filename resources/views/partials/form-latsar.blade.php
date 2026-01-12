@@ -83,7 +83,7 @@
 
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label required">Tempat Lahir (sesuai KTP)</label>
+        <label class="form-label required">Tempat Lahir (sesuai SK)</label>
         <input type="text" name="tempat_lahir" class="form-input @error('tempat_lahir') error @enderror"
             value="{{ $peserta['tempat_lahir'] ?? old('tempat_lahir') }}" required>
         @error('tempat_lahir')
@@ -105,15 +105,6 @@
     <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror"
         required>{{ $peserta['alamat_rumah'] ?? old('alamat_rumah') }}</textarea>
     @error('alamat_rumah')
-        <small class="text-danger">{{ $message }}</small>
-    @enderror
-</div>
-
-<div class="form-group">
-    <label class="form-label required">Alamat Kantor</label>
-    <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror"
-        required>{{ $peserta['alamat_kantor'] ?? old('alamat_kantor') }}</textarea>
-    @error('alamat_kantor')
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
@@ -167,10 +158,10 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label">Alamat Instansi</label>
-    <textarea name="alamat_instansi"
-        class="form-textarea @error('alamat_instansi') error @enderror">{{ $peserta['kepegawaian']['alamat_kantor'] ?? old('alamat_instansi') }}</textarea>
-    @error('alamat_instansi')
+    <label class="form-label">Alamat Kantor</label>
+    <textarea name="alamat_kantor"
+        class="form-textarea @error('alamat_kantor') error @enderror">{{ $peserta['kepegawaian']['alamat_kantor'] ?? old('alamat_kantor') }}</textarea>
+    @error('alamat_kantor')
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
@@ -300,7 +291,7 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Status Perkawinan</label>
-        <select name="status_perkawinan" class="form-select @error('status_perkawinan') error @enderror" required>
+        <select name="status_perkawinan" id="status_perkawinan" class="form-select @error('status_perkawinan') error @enderror" required>
             <option value="">Pilih</option>
             <option value="Belum Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Belum Menikah' ? 'selected' : '' }}>Belum
                 Menikah</option>
@@ -314,11 +305,13 @@
     </div>
     <div class="form-group">
         <label class="form-label">Nama Istri/Suami</label>
-        <input type="text" name="nama_pasangan" class="form-input @error('nama_pasangan') error @enderror"
-            value="{{ $peserta['nama_pasangan'] ?? old('nama_pasangan') }}">
+        <input type="text" name="nama_pasangan" id="nama_pasangan" class="form-input @error('nama_pasangan') error @enderror"
+            value="{{ $peserta['nama_pasangan'] ?? old('nama_pasangan') }}"
+            {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) != 'Menikah' ? 'disabled' : '' }}>
         @error('nama_pasangan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
+        <small class="form-hint">Hanya bisa diisi jika status "Menikah"</small>
     </div>
     <div class="form-group">
         <label class="form-label">Ukuran Kaos olahraga</label>
@@ -475,22 +468,16 @@
     </div>
 </div>
 
-<div class="form-section-header">
-    <i class="fas fa-calendar-alt"></i> Informasi Angkatan
-</div>
 
-<div class="form-row">
-    <div class="form-group">
-        <label class="form-label">Nama Angkatan</label>
-        <input type="text" class="form-input" 
+
+        <input type="hidden" class="form-input" 
             value="{{ $pendaftaran['angkatan']['nama_angkatan'] ?? 'Tidak tersedia' }}" readonly>
-    </div>
-    <div class="form-group">
-        <label class="form-label">Tahun Angkatan</label>
-        <input type="text" class="form-input" 
+ 
+    
+        <input type="hidden" class="form-input" 
             value="{{ $pendaftaran['angkatan']['tahun'] ?? 'Tidak tersedia' }}" readonly>
-    </div>
-</div>
+    
+
 
 <div class="form-section-header">
     <i class="fas fa-file-upload"></i> Dokumen Pendukung
@@ -510,12 +497,16 @@
             Klik untuk mengunggah file PDF/JPG/PNG (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($peserta['file_ktp'] ?? false)
-                File sudah diupload sebelumnya
-            @elseif(old('file_ktp'))
-                File sudah diupload sebelumnya
+            @if(isset($peserta['file_ktp']) && $peserta['file_ktp'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($peserta['file_ktp']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_ktp">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -523,72 +514,82 @@
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
-
-<div class="form-row">
-    <div class="form-group">
-        <label class="form-label required">Unggah scan SK CPNS</label>
-        <div class="form-file">
-            <input type="file" name="file_sk_cpns" class="form-file-input @error('file_sk_cpns') error @enderror"
-                accept=".pdf">
-            <label class="form-file-label">
-                <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file PDF (maks. 5MB)
-            </label>
-            <div class="form-file-name">
-                @if($peserta['kepegawaian']['file_sk_cpns'] ?? false)
-                    File sudah diupload sebelumnya
-                @elseif(old('file_sk_cpns'))
-                    File sudah diupload sebelumnya
-                @else
-                    Belum ada file dipilih
-                @endif
-            </div>
-        </div>
-        @error('file_sk_cpns')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-    <div class="form-group">
-        <label class="form-label required">Unggah scan SPMT</label>
-        <div class="form-file">
-            <input type="file" name="file_spmt" class="form-file-input @error('file_spmt') error @enderror"
-                accept=".pdf">
-            <label class="form-file-label">
-                <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file PDF (maks. 5MB)
-            </label>
-            <div class="form-file-name">
-                @if($peserta['kepegawaian']['file_spmt'] ?? false)
-                    File sudah diupload sebelumnya
-                @elseif(old('file_spmt'))
-                    File sudah diupload sebelumnya
-                @else
-                    Belum ada file dipilih
-                @endif
-            </div>
-        </div>
-        @error('file_spmt')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-</div>
-
+<!-- Unggah scan SK CPNS -->
 <div class="form-group">
-    <label class="form-label required">Unggah scan Surat Penyataan Kesediaan</label>
+    <label class="form-label required">Unggah scan SK CPNS</label>
     <div class="form-file">
-        <input type="file" name="file_surat_kesediaan"
-            class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf">
+        <input type="file" name="file_sk_cpns" class="form-file-input @error('file_sk_cpns') error @enderror" accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($pendaftaran['file_surat_kesediaan'] ?? false)
-                File sudah diupload sebelumnya
-            @elseif(old('file_surat_kesediaan'))
-                File sudah diupload sebelumnya
+            @if(isset($peserta['kepegawaian']['file_sk_cpns']) && $peserta['kepegawaian']['file_sk_cpns'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($peserta['kepegawaian']['file_sk_cpns']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_sk_cpns">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
+            @endif
+        </div>
+    </div>
+    @error('file_sk_cpns')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<!-- Unggah scan SPMT -->
+<div class="form-group">
+    <label class="form-label required">Unggah scan SPMT</label>
+    <div class="form-file">
+        <input type="file" name="file_spmt" class="form-file-input @error('file_spmt') error @enderror" accept=".pdf">
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file PDF (maks. 5MB)
+        </label>
+        <div class="form-file-name">
+            @if(isset($peserta['kepegawaian']['file_spmt']) && $peserta['kepegawaian']['file_spmt'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($peserta['kepegawaian']['file_spmt']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_spmt">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
+            @else
+                <span class="no-file">Belum ada file dipilih</span>
+            @endif
+        </div>
+    </div>
+    @error('file_spmt')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<!-- Unggah scan Surat Penyataan Kesediaan -->
+<div class="form-group">
+    <label class="form-label required">Unggah scan Surat Penyataan Kesediaan</label>
+    <div class="form-file">
+        <input type="file" name="file_surat_kesediaan" class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf">
+        <label class="form-file-label">
+            <i class="fas fa-cloud-upload-alt"></i><br>
+            Klik untuk mengunggah file PDF (maks. 5MB)
+        </label>
+        <div class="form-file-name">
+            @if(isset($pendaftaran['file_surat_kesediaan']) && $pendaftaran['file_surat_kesediaan'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($pendaftaran['file_surat_kesediaan']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_kesediaan">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
+            @else
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -597,23 +598,26 @@
     @enderror
 </div>
 
+<!-- Unggah Scan Surat Tugas -->
 <div class="form-group">
-    <label class="form-label ">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang
-        berwenang (jika belum maka WAJIB disertakan saat masa klasikal)</label>
+    <label class="form-label">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang (jika belum maka WAJIB disertakan saat masa klasikal)</label>
     <div class="form-file">
-        <input type="file" name="file_surat_tugas" class="form-file-input @error('file_surat_tugas') error @enderror"
-            accept=".pdf">
+        <input type="file" name="file_surat_tugas" class="form-file-input @error('file_surat_tugas') error @enderror" accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($pendaftaran['file_surat_tugas'] ?? false)
-                File sudah diupload sebelumnya
-            @elseif(old('file_surat_tugas'))
-                File sudah diupload sebelumnya
+            @if(isset($pendaftaran['file_surat_tugas']) && $pendaftaran['file_surat_tugas'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($pendaftaran['file_surat_tugas']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_tugas">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -622,6 +626,7 @@
     @enderror
 </div>
 
+<!-- Sasaran Kinerja Pegawai (SKP) -->
 <div class="form-group">
     <label class="form-label">Sasaran Kinerja Pegawai (SKP)</label>
     <div class="form-file">
@@ -631,12 +636,16 @@
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($peserta['kepegawaian']['file_skp'] ?? false)
-                File sudah diupload sebelumnya
-            @elseif(old('file_skp'))
-                File sudah diupload sebelumnya
+            @if(isset($peserta['kepegawaian']['file_skp']) && $peserta['kepegawaian']['file_skp'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($peserta['kepegawaian']['file_skp']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_skp">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -645,22 +654,26 @@
     @enderror
 </div>
 
+<!-- Pas Foto peserta -->
 <div class="form-group">
     <label class="form-label required">Unggah Pas Foto peserta (untuk digunakan di name tag peserta)</label>
     <div class="form-file">
-        <input type="file" name="file_pas_foto" class="form-file-input @error('file_pas_foto') error @enderror"
-            accept=".jpg,.jpeg,.png">
+        <input type="file" name="file_pas_foto" class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file JPG/PNG (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($peserta['file_pas_foto'] ?? false)
-                File sudah diupload sebelumnya
-            @elseif(old('file_pas_foto'))
-                File sudah diupload sebelumnya
+            @if(isset($peserta['file_pas_foto']) && $peserta['file_pas_foto'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($peserta['file_pas_foto']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_pas_foto">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>
@@ -669,22 +682,26 @@
     @enderror
 </div>
 
+<!-- Surat Keterangan Berbadan Sehat -->
 <div class="form-group">
     <label class="form-label">Unggah Surat Keterangan Berbadan Sehat</label>
     <div class="form-file">
-        <input type="file" name="file_surat_sehat" class="form-file-input @error('file_surat_sehat') error @enderror"
-            accept=".pdf">
+        <input type="file" name="file_surat_sehat" class="form-file-input @error('file_surat_sehat') error @enderror" accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
             Klik untuk mengunggah file PDF (maks. 5MB)
         </label>
         <div class="form-file-name">
-            @if($pendaftaran['file_surat_sehat'] ?? false)
-                File sudah diupload sebelumnya
-            @elseif(old('file_surat_sehat'))
-                File sudah diupload sebelumnya
+            @if(isset($pendaftaran['file_surat_sehat']) && $pendaftaran['file_surat_sehat'])
+                <div class="file-info">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>File sudah diupload: {{ basename($pendaftaran['file_surat_sehat']) }}</span>
+                    <button type="button" class="btn-change-file" data-target="file_surat_sehat">
+                        <i class="fas fa-exchange-alt"></i> Ganti File
+                    </button>
+                </div>
             @else
-                Belum ada file dipilih
+                <span class="no-file">Belum ada file dipilih</span>
             @endif
         </div>
     </div>

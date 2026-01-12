@@ -123,25 +123,6 @@
                                 </div>
                             </div>
 
-                            {{-- <div class="angkatan-info" id="angkatan-info" style="display: none;">
-                                <div class="info-card">
-                                    <h4><i class="fas fa-info-circle"></i> Informasi Sistem</h4>
-                                    <div class="info-details">
-                                        <div class="info-item">
-                                            <span class="info-label">Sistem ini:</span>
-                                            <span class="info-value">Hanya untuk pembaruan data peserta terdaftar</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">Validasi:</span>
-                                            <span class="info-value">NIP/NRP harus sudah didaftarkan oleh admin</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">Bantuan:</span>
-                                            <span class="info-value">Hubungi admin jika mengalami kendala</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> --}}
                         </div>
 
                         <div class="step-navigation">
@@ -169,10 +150,6 @@
                                 <div class="info-badge">
                                     <i class="fas fa-calendar-alt"></i> Angkatan: <span id="current-angkatan-name"></span>
                                 </div>
-                            </div>
-                            <div class="alert alert-info" style="margin-top: 20px;">
-                                <i class="fas fa-info-circle"></i>
-                                <strong>Catatan:</strong> Form ini hanya untuk pembaruan data peserta yang sudah terdaftar. Pastikan data yang Anda isi sesuai dengan kondisi terkini.
                             </div>
                         </div>
 
@@ -769,6 +746,59 @@
                 width: 100%;
             }
         }
+
+        /* CSS untuk input yang disabled */
+        .form-input:disabled {
+            background-color: #f7fafc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Styling untuk form-hint tambahan */
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+            margin-top: 5px;
+            display: block;
+        }
+        /* File Upload Styling */
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: rgba(72, 187, 120, 0.1);
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+.file-info i {
+    font-size: 1rem;
+}
+
+.btn-change-file {
+    background: none;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-change-file:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+.no-file {
+    color: var(--gray-color);
+    font-style: italic;
+}
     </style>
 @endpush
 
@@ -805,7 +835,6 @@
             const detailNama = document.getElementById('detail-nama');
             const detailAngkatan = document.getElementById('detail-angkatan');
             const submitFormBtn = document.getElementById('submit-form');
-            const angkatanInfo = document.getElementById('angkatan-info');
 
             let selectedTraining = null;
             let verifiedPeserta = null;
@@ -860,7 +889,6 @@
                 pendaftaranData = null;
                 nipNrpInput.value = '';
                 dynamicFormContainer.innerHTML = '';
-                // angkatanInfo.style.display = 'block';
             }
 
             verifyNipBtn.addEventListener('click', async function () {
@@ -912,7 +940,6 @@
                         verificationDetails.style.display = 'flex';
                         verificationAnggaran.style.display = 'flex';
                         verificationResult.style.display = 'block';
-                        // angkatanInfo.style.display = 'none';
                         
                         nextToStep3Btn.disabled = false;
                         
@@ -924,14 +951,12 @@
                         verificationDetails.style.display = 'none';
                         verificationAnggaran.style.display = 'none';
                         verificationResult.style.display = 'block';
-                        // angkatanInfo.style.display = 'block';
                         
                         nextToStep3Btn.disabled = true;
                     }
                 } catch (error) {
                     console.error('Verification error:', error);
                     showVerificationError('Terjadi kesalahan jaringan. Silakan coba lagi.');
-                    // angkatanInfo.style.display = 'block';
                 } finally {
                     verifyNipBtn.innerHTML = originalText;
                     verifyNipBtn.disabled = false;
@@ -1108,7 +1133,55 @@
                 }
             }
 
-
+            // ============================================
+            // FUNGSI UNTUK MENGATUR STATUS PERKAWINAN
+            // ============================================
+            function setupMaritalStatusLogic() {
+                const maritalStatusSelect = document.getElementById('status_perkawinan');
+                const spouseNameInput = document.getElementById('nama_pasangan');
+                
+                if (!maritalStatusSelect || !spouseNameInput) return;
+                
+                function toggleSpouseNameInput() {
+                    const isMarried = maritalStatusSelect.value === 'Menikah';
+                    
+                    if (isMarried) {
+                        spouseNameInput.disabled = false;
+                        spouseNameInput.required = true;
+                        spouseNameInput.placeholder = "Masukkan nama istri/suami";
+                    } else {
+                        spouseNameInput.disabled = true;
+                        spouseNameInput.required = false;
+                        spouseNameInput.value = ''; // Kosongkan nilai jika tidak menikah
+                        spouseNameInput.placeholder = "Hanya untuk yang berstatus Menikah";
+                    }
+                    
+                    // Update label dan validasi
+                    const label = spouseNameInput.parentElement.querySelector('.form-label');
+                    if (label) {
+                        if (isMarried) {
+                            label.classList.add('required');
+                            label.textContent = 'Nama Istri/Suami';
+                        } else {
+                            label.classList.remove('required');
+                            label.textContent = 'Nama Istri/Suami';
+                        }
+                    }
+                    
+                    // Clear error jika ada
+                    spouseNameInput.classList.remove('error');
+                    const errorMsg = spouseNameInput.parentElement.querySelector('.text-danger');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                    }
+                }
+                
+                // Inisialisasi saat pertama kali load
+                toggleSpouseNameInput();
+                
+                // Event listener untuk perubahan
+                maritalStatusSelect.addEventListener('change', toggleSpouseNameInput);
+            }
             
             function setupFormInteractions() {
                 // Load provinsi data
@@ -1131,6 +1204,7 @@
 
                 // Setup mentor form jika ada
                 setupMentorForm();
+                setupMaritalStatusLogic();
             }
 
             function setupMentorForm() {
@@ -1381,7 +1455,6 @@
                 verificationDetails.style.display = 'none';
                 verificationAnggaran.style.display = 'none';
                 verificationResult.style.display = 'block';
-                // angkatanInfo.style.display = 'block';
             }
 
             function showSuccessMessage(message) {

@@ -39,7 +39,7 @@
         @enderror
     </div>
     <div class="form-group">
-        <label class="form-label required">Tempat Lahir</label>
+        <label class="form-label required">Tempat Lahir (sesuai SK)</label>
         <input type="text" name="tempat_lahir" class="form-input @error('tempat_lahir') error @enderror" 
                value="{{ $peserta['tempat_lahir'] ?? old('tempat_lahir') }}" required>
         @error('tempat_lahir')
@@ -134,9 +134,10 @@
     </div>
     <div class="form-group">
         <label class="form-label required">Status Perkawinan</label>
-        <select name="status_perkawinan" class="form-select @error('status_perkawinan') error @enderror" required>
+        <select name="status_perkawinan" id="status_perkawinan" class="form-select @error('status_perkawinan') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="Belum Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Belum Menikah' ? 'selected' : '' }}>Belum Menikah</option>
+            <option value="Belum Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Belum Menikah' ? 'selected' : '' }}>Belum
+                Menikah</option>
             <option value="Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Menikah' ? 'selected' : '' }}>Menikah</option>
             <option value="Duda" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Duda' ? 'selected' : '' }}>Duda</option>
             <option value="Janda" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Janda' ? 'selected' : '' }}>Janda</option>
@@ -147,11 +148,13 @@
     </div>
     <div class="form-group">
         <label class="form-label">Nama Istri/Suami</label>
-        <input type="text" name="nama_pasangan" class="form-input @error('nama_pasangan') error @enderror" 
-               value="{{ $peserta['nama_pasangan'] ?? old('nama_pasangan') }}">
+        <input type="text" name="nama_pasangan" id="nama_pasangan" class="form-input @error('nama_pasangan') error @enderror"
+            value="{{ $peserta['nama_pasangan'] ?? old('nama_pasangan') }}"
+            {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) != 'Menikah' ? 'disabled' : '' }}>
         @error('nama_pasangan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
+        <small class="form-hint">Hanya bisa diisi jika status "Menikah"</small>
     </div>
 </div>
 
