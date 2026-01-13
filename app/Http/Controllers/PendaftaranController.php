@@ -190,6 +190,7 @@ class PendaftaranController extends Controller
                 'file_skp' => 'nullable|file|mimes:pdf|max:5120',
                 'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:5120',
                 'nomor_sk_cpns' => 'nullable|string|max:100',
+                'nomor_sk_terakhir' => 'nullable|string|max:100',
                 'tanggal_sk_cpns' => 'nullable|date',
                 'tanggal_sk_jabatan' => 'nullable|date',
                 'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
@@ -375,6 +376,7 @@ class PendaftaranController extends Controller
                 if (!$peserta->file_ktp) {
                     $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
                 }
+                
 
                 $additionalMessages = [
                     'nomor_sk_cpns.required' => 'Nomor SK CPNS wajib diisi untuk pelatihan LATSAR',
@@ -418,14 +420,114 @@ class PendaftaranController extends Controller
                     'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:5120',
                     'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
                     'sudah_ada_mentor' => 'required|in:Ya,Tidak',
+                    'nomor_sk_terakhir' => 'required|string|max:100',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
+
                 ];
 
+                if (!$pendaftaran->file_surat_kesediaan) {
+                    $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:5120';
+                }
+                if (!$peserta->file_ktp) {
+                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
+                }
+                if (!$peserta->file_pas_foto) {
+                    $additionalRules['file_pas_foto'] = 'required|file|mimes:jpg,jpeg,png|max:5120';
+                }
+                if (!$kepegawaian->file_sk_jabatan) {
+                    $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:5120';
+                }
+                if (!$kepegawaian->file_sk_pangkat) {
+                    $additionalRules['file_sk_pangkat'] = 'required|file|mimes:pdf|max:5120';
+                }
+                if (!$pendaftaran->file_pakta_integritas) {
+                    $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:5120';
+                }
+                if (!$pendaftaran->file_surat_tugas) {
+                    $additionalRules['file_surat_tugas'] = 'required|file|mimes:pdf|max:5120';
+                }
+
                 $additionalMessages = [
+                    // Validasi untuk eselon
                     'eselon.required' => 'Eselon wajib diisi untuk pelatihan ' . $kode,
+                    'eselon.string' => 'Eselon harus berupa teks',
+                    'eselon.max' => 'Eselon maksimal 50 karakter',
+
+                    // Validasi untuk tanggal SK jabatan
                     'tanggal_sk_jabatan.required' => 'Tanggal SK Jabatan wajib diisi untuk pelatihan ' . $kode,
                     'tanggal_sk_jabatan.date' => 'Format tanggal SK Jabatan tidak valid',
+
+                    // Validasi untuk tahun lulus PKP/PIM IV
+                    'tahun_lulus_pkp_pim_iv.integer' => 'Tahun lulus PKP/PIM IV harus berupa angka',
+
+                    // Validasi untuk status mentor
                     'sudah_ada_mentor.required' => 'Status mentor wajib dipilih untuk pelatihan ' . $kode,
                     'sudah_ada_mentor.in' => 'Status mentor tidak valid (Ya/Tidak)',
+
+                    // Validasi untuk nomor SK terakhir
+                    'nomor_sk_terakhir.required' => 'Nomor SK Jabatan Terakhir wajib diisi untuk pelatihan ' . $kode,
+                    'nomor_sk_terakhir.string' => 'Nomor SK Jabatan Terakhir harus berupa teks',
+                    'nomor_sk_terakhir.max' => 'Nomor SK Jabatan Terakhir maksimal 100 karakter',
+
+                    // Validasi untuk file SK jabatan
+                    'file_sk_jabatan.required' => 'File SK Jabatan Terakhir wajib diunggah untuk pelatihan ' . $kode,
+                    'file_sk_jabatan.file' => 'File SK Jabatan harus berupa file',
+                    'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
+                    'file_sk_jabatan.max' => 'Ukuran file SK Jabatan maksimal 5MB',
+
+                    // Validasi untuk file SK pangkat
+                    'file_sk_pangkat.required' => 'File SK Pangkat/Golongan Ruang wajib diunggah untuk pelatihan ' . $kode,
+                    'file_sk_pangkat.file' => 'File SK Pangkat harus berupa file',
+                    'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
+                    'file_sk_pangkat.max' => 'Ukuran file SK Pangkat maksimal 5MB',
+
+                    // Validasi untuk file KTP
+                    'file_ktp.required' => 'Foto KTP wajib diunggah untuk pelatihan ' . $kode,
+                    'file_ktp.file' => 'File KTP harus berupa file',
+                    'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
+                    'file_ktp.max' => 'Ukuran file KTP maksimal 5MB',
+
+                    // Validasi untuk file surat kesediaan
+                    'file_surat_kesediaan.required' => 'File Formulir Kesediaan wajib diunggah untuk pelatihan ' . $kode,
+                    'file_surat_kesediaan.file' => 'File Formulir Kesediaan harus berupa file',
+                    'file_surat_kesediaan.mimes' => 'File Formulir Kesediaan harus berformat PDF',
+                    'file_surat_kesediaan.max' => 'Ukuran file Formulir Kesediaan maksimal 5MB',
+
+                    // Validasi untuk file pakta integritas
+                    'file_pakta_integritas.required' => 'File Pakta Integritas wajib diunggah untuk pelatihan ' . $kode,
+                    'file_pakta_integritas.file' => 'File Pakta Integritas harus berupa file',
+                    'file_pakta_integritas.mimes' => 'File Pakta Integritas harus berformat PDF',
+                    'file_pakta_integritas.max' => 'Ukuran file Pakta Integritas maksimal 5MB',
+
+                    // Validasi untuk file surat tugas
+                    'file_surat_tugas.required' => 'File Surat Tugas wajib diunggah untuk pelatihan ' . $kode,
+                    'file_surat_tugas.file' => 'File Surat Tugas harus berupa file',
+                    'file_surat_tugas.mimes' => 'File Surat Tugas harus berformat PDF',
+                    'file_surat_tugas.max' => 'Ukuran file Surat Tugas maksimal 5MB',
+
+                    // Validasi untuk file surat pernyataan administrasi
+                    'file_surat_pernyataan_administrasi.file' => 'File Surat Pernyataan Administrasi harus berupa file',
+                    'file_surat_pernyataan_administrasi.mimes' => 'File Surat Pernyataan Administrasi harus berformat PDF',
+                    'file_surat_pernyataan_administrasi.max' => 'Ukuran file Surat Pernyataan Administrasi maksimal 5MB',
+
+                    // Validasi untuk file surat kelulusan seleksi
+                    'file_surat_kelulusan_seleksi.file' => 'File Kelulusan Seleksi/Sertifikat harus berupa file',
+                    'file_surat_kelulusan_seleksi.mimes' => 'File Kelulusan Seleksi/Sertifikat harus berformat PDF',
+                    'file_surat_kelulusan_seleksi.max' => 'Ukuran file Kelulusan Seleksi/Sertifikat maksimal 5MB',
+
+                    // Validasi untuk file persetujuan mentor
+                    'file_persetujuan_mentor.file' => 'File Persetujuan Mentor harus berupa file',
+                    'file_persetujuan_mentor.mimes' => 'File Persetujuan Mentor harus berformat PDF',
+                    'file_persetujuan_mentor.max' => 'Ukuran file Persetujuan Mentor maksimal 5MB',
+
+                    // Validasi untuk file pas foto
+                    'file_pas_foto.required' => 'File Pas Foto wajib diunggah ',
+                    'file_pas_foto.file' => 'File Pas Foto harus berupa file',
+                    'file_pas_foto.mimes' => 'File Pas Foto harus berformat JPG, JPEG, atau PNG',
+                    'file_pas_foto.max' => 'Ukuran file Pas Foto maksimal 5MB',
                 ];
             }
 
@@ -584,6 +686,7 @@ class PendaftaranController extends Controller
                 'nomor_sk_cpns' => $request->nomor_sk_cpns,
                 'tanggal_sk_cpns' => $request->tanggal_sk_cpns,
                 'tahun_lulus_pkp_pim_iv' => $request->tahun_lulus_pkp_pim_iv,
+                'nomor_sk_terakhir' => $request->nomor_sk_terakhir,
             ];
 
             // Tambahkan file-field hanya jika ada file baru diupload
