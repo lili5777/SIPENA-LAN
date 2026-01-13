@@ -178,9 +178,12 @@
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
+    
+</div>
+<div class="form-row">
     <div class="form-group">
-        <label class="form-label required">Ukuran Kaos Olahraga/Celana Training</label>
-        <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror" required>
+        <label class="form-label">Ukuran Kaos</label>
+        <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
             <option value="">Pilih</option>
             <option value="S" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'S' ? 'selected' : '' }}>S</option>
             <option value="M" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'M' ? 'selected' : '' }}>M</option>
@@ -190,6 +193,36 @@
             <option value="XXXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
         </select>
         @error('ukuran_kaos')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label">Ukuran Kaos Olahraga</label>
+        <select name="ukuran_training" class="form-select @error('ukuran_training') error @enderror">
+            <option value="">Pilih</option>
+            <option value="S" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'S' ? 'selected' : '' }}>S</option>
+            <option value="M" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'M' ? 'selected' : '' }}>M</option>
+            <option value="L" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'L' ? 'selected' : '' }}>L</option>
+            <option value="XL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XL' ? 'selected' : '' }}>XL</option>
+            <option value="XXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXL' ? 'selected' : '' }}>XXL</option>
+            <option value="XXXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+        </select>
+        @error('ukuran_training')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label">Ukuran Celana</label>
+        <select name="ukuran_celana" class="form-select @error('ukuran_celana') error @enderror">
+            <option value="">Pilih</option>
+            <option value="S" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'S' ? 'selected' : '' }}>S</option>
+            <option value="M" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'M' ? 'selected' : '' }}>M</option>
+            <option value="L" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'L' ? 'selected' : '' }}>L</option>
+            <option value="XL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XL' ? 'selected' : '' }}>XL</option>
+            <option value="XXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXL' ? 'selected' : '' }}>XXL</option>
+            <option value="XXXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+        </select>
+        @error('ukuran_celana')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
@@ -318,7 +351,7 @@
                    accept=".pdf">
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file PDF (maks. 5MB)
+                Klik untuk mengunggah file PDF (maks. 1MB)
             </label>
             <div class="form-file-name">
                 @if(isset($peserta['kepegawaian']['file_sk_jabatan']) && $peserta['kepegawaian']['file_sk_jabatan'])
@@ -353,7 +386,7 @@
                    accept=".pdf">
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file PDF (maks. 5MB)
+                Klik untuk mengunggah file PDF (maks. 1MB)
             </label>
             <div class="form-file-name">
                 @if(isset($peserta['kepegawaian']['file_sk_pangkat']) && $peserta['kepegawaian']['file_sk_pangkat'])
@@ -390,7 +423,7 @@
                accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file PDF (maks. 5MB)
+            Klik untuk mengunggah file PDF (maks. 1MB)
         </label>
         <div class="form-file-name">
             @if(isset($pendaftaran['file_surat_komitmen']) && $pendaftaran['file_surat_komitmen'])
@@ -426,7 +459,7 @@
                accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file PDF (maks. 5MB)
+            Klik untuk mengunggah file PDF (maks. 1MB)
         </label>
         <div class="form-file-name">
             @if(isset($pendaftaran['file_pakta_integritas']) && $pendaftaran['file_pakta_integritas'])
@@ -462,7 +495,7 @@
                accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file PDF (maks. 5MB)
+            Klik untuk mengunggah file PDF (maks. 1MB)
         </label>
         <div class="form-file-name">
             @if(isset($pendaftaran['file_surat_tugas']) && $pendaftaran['file_surat_tugas'])
@@ -498,7 +531,7 @@
                accept=".pdf">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file PDF (maks. 5MB)
+            Klik untuk mengunggah file PDF (maks. 1MB)
         </label>
         <div class="form-file-name">
             @if(isset($pendaftaran['file_surat_kelulusan_seleksi']) && $pendaftaran['file_surat_kelulusan_seleksi'])
@@ -535,7 +568,7 @@
                    accept=".pdf">
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file PDF (maks. 5MB)
+                Klik untuk mengunggah file PDF (maks. 1MB)
             </label>
             <div class="form-file-name">
                 @if(isset($pendaftaran['file_surat_sehat']) && $pendaftaran['file_surat_sehat'])
@@ -570,7 +603,7 @@
                    accept=".pdf">
             <label class="form-file-label">
                 <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file PDF (maks. 5MB)
+                Klik untuk mengunggah file PDF (maks. 1MB)
             </label>
             <div class="form-file-name">
                 @if(isset($pendaftaran['file_surat_bebas_narkoba']) && $pendaftaran['file_surat_bebas_narkoba'])
@@ -607,7 +640,7 @@
                accept=".jpg,.jpeg,.png">
         <label class="form-file-label">
             <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file JPG/PNG (maks. 5MB)
+            Klik untuk mengunggah file JPG/PNG (maks. 1MB)
         </label>
         <div class="form-file-name">
             @if(isset($peserta['file_pas_foto']) && $peserta['file_pas_foto'])

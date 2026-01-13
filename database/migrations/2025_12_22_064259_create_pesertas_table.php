@@ -27,7 +27,9 @@ return new class extends Migration
             $table->string('nama_pasangan', 200)->nullable();
             $table->string('olahraga_hobi', 100)->nullable();
             $table->enum('perokok', ['Ya', 'Tidak'])->nullable();
+            $table->enum('ukuran_training', ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'])->nullable();
             $table->enum('ukuran_kaos', ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'])->nullable();
+            $table->enum('ukuran_celana', ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'])->nullable();
             $table->text('kondisi_peserta')->nullable();
             $table->string('file_ktp', 255)->nullable();
             $table->string('file_pas_foto', 255)->nullable();

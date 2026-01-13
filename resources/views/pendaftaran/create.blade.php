@@ -78,7 +78,7 @@
 
                         <div class="angkatan-container">
                             <div class="form-group">
-                                <label for="nip_nrp" class="form-label required">NIP/NRP *</label>
+                                <label for="nip_nrp" class="form-label required">NIP/NRP </label>
                                 <input type="text" name="nip_nrp" id="nip_nrp" 
                                     class="form-input @error('nip_nrp') error @enderror"
                                     placeholder="Masukkan NIP/NRP Anda" required>

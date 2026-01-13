@@ -160,9 +160,11 @@ class PendaftaranController extends Controller
                 'olahraga_hobi' => 'nullable|string|max:100',
                 'perokok' => 'required|in:Ya,Tidak',
                 'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                'ukuran_celana' => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                 'kondisi_peserta' => 'nullable|string',
-                'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-                'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
+                'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
+                'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
                 'asal_instansi' => 'required|string|max:200',
                 'unit_kerja' => 'nullable|string|max:200',
                 'id_provinsi' => 'required',
@@ -174,21 +176,21 @@ class PendaftaranController extends Controller
                 'pangkat' => 'nullable|string|max:50',
                 'golongan_ruang' => 'required|string|max:50',
                 'eselon' => 'nullable|string|max:50',
-                'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:5120',
-                'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_sehat' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:5120',
-                'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:5120',
-                'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:5120',
-                'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:5120',
-                'file_sk_cpns' => 'nullable|file|mimes:pdf|max:5120',
-                'file_spmt' => 'nullable|file|mimes:pdf|max:5120',
-                'file_skp' => 'nullable|file|mimes:pdf|max:5120',
-                'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:5120',
+                'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
+                'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024',
+                'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
+                'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:1024',
+                'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
+                'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
+                'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+                'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
                 'nomor_sk_cpns' => 'nullable|string|max:100',
                 'nomor_sk_terakhir' => 'nullable|string|max:100',
                 'tanggal_sk_cpns' => 'nullable|date',
@@ -227,9 +229,9 @@ class PendaftaranController extends Controller
                 'perokok.required' => 'Status perokok wajib dipilih',
                 'perokok.in' => 'Status perokok tidak valid',
                 'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
-                'file_ktp.max' => 'Ukuran file KTP maksimal 5MB',
+                'file_ktp.max' => 'Ukuran file KTP maksimal 1MB',
                 'file_pas_foto.mimes' => 'File pas foto harus berformat JPG, JPEG, atau PNG',
-                'file_pas_foto.max' => 'Ukuran file pas foto maksimal 5MB',
+                'file_pas_foto.max' => 'Ukuran file pas foto maksimal 1MB',
                 'asal_instansi.required' => 'Asal instansi wajib diisi',
                 'id_provinsi.required' => 'Provinsi wajib dipilih',
                 'alamat_kantor.required' => 'Alamat kantor wajib diisi',
@@ -237,15 +239,15 @@ class PendaftaranController extends Controller
                 'jabatan.required' => 'Jabatan wajib diisi',
                 'golongan_ruang.required' => 'Golongan ruang wajib diisi',
                 'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
-                'file_sk_jabatan.max' => 'Ukuran file SK Jabatan maksimal 5MB',
+                'file_sk_jabatan.max' => 'Ukuran file SK Jabatan maksimal 1MB',
                 'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
-                'file_sk_pangkat.max' => 'Ukuran file SK Pangkat maksimal 5MB',
+                'file_sk_pangkat.max' => 'Ukuran file SK Pangkat maksimal 1MB',
                 'file_surat_tugas.mimes' => 'File Surat Tugas harus berformat PDF',
-                'file_surat_tugas.max' => 'Ukuran file Surat Tugas maksimal 5MB',
+                'file_surat_tugas.max' => 'Ukuran file Surat Tugas maksimal 1MB',
                 'file_surat_sehat.mimes' => 'File Surat Sehat harus berformat PDF',
-                'file_surat_sehat.max' => 'Ukuran file Surat Sehat maksimal 5MB',
+                'file_surat_sehat.max' => 'Ukuran file Surat Sehat maksimal 1MB',
                 'file_surat_bebas_narkoba.mimes' => 'File Surat Bebas Narkoba harus berformat PDF',
-                'file_surat_bebas_narkoba.max' => 'Ukuran file Surat Bebas Narkoba maksimal 5MB',
+                'file_surat_bebas_narkoba.max' => 'Ukuran file Surat Bebas Narkoba maksimal 1MB',
                 'peserta_id.exists' => 'Data peserta tidak ditemukan',
                 'pendaftaran_id.exists' => 'Data pendaftaran tidak ditemukan',
                 'id_jenis_pelatihan.exists' => 'Jenis pelatihan tidak ditemukan',
@@ -289,33 +291,33 @@ class PendaftaranController extends Controller
             if ($kode === 'PKN_TK_II') {
                 $additionalRules = [
                     'eselon' => 'required|string|max:50',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:5120',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024',
                 ];
 
                 if (!$kepegawaian->file_sk_jabatan) {
-                    $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 if (!$kepegawaian->file_sk_pangkat) {
-                    $additionalRules['file_sk_pangkat'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_sk_pangkat'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 if (!$pendaftaran->file_pakta_integritas) {
-                    $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 if (!$pendaftaran->file_surat_sehat) {
-                    $additionalRules['file_surat_sehat'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_surat_sehat'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 if (!$pendaftaran->file_surat_bebas_narkoba) {
-                    $additionalRules['file_surat_bebas_narkoba'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_surat_bebas_narkoba'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 $additionalMessages = [
@@ -325,29 +327,29 @@ class PendaftaranController extends Controller
                     'file_pakta_integritas.required' => 'File Pakta Integritas wajib diunggah',
                     'file_pakta_integritas.file' => 'File Pakta Integritas harus berupa file',
                     'file_pakta_integritas.mimes' => 'File Pakta Integritas harus berformat PDF',
-                    'file_pakta_integritas.max' => 'File Pakta Integritas maksimal 5MB',
+                    'file_pakta_integritas.max' => 'File Pakta Integritas maksimal 1MB',
                     'file_surat_kelulusan_seleksi.file' => 'File Surat Kelulusan Seleksi harus berupa file',
                     'file_surat_kelulusan_seleksi.mimes' => 'File Surat Kelulusan Seleksi harus berformat PDF',
-                    'file_surat_kelulusan_seleksi.max' => 'File Surat Kelulusan Seleksi maksimal 5MB',
+                    'file_surat_kelulusan_seleksi.max' => 'File Surat Kelulusan Seleksi maksimal 1MB',
                     'file_sk_jabatan.required' => 'File SK Jabatan wajib diunggah',
                     'file_sk_jabatan.file' => 'File SK Jabatan harus berupa file',
                     'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
-                    'file_sk_jabatan.max' => 'File SK Jabatan maksimal 5MB',
+                    'file_sk_jabatan.max' => 'File SK Jabatan maksimal 1MB',
                     'file_sk_pangkat.required' => 'File SK Pangkat wajib diunggah',
                     'file_sk_pangkat.file' => 'File SK Pangkat harus berupa file',
                     'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
-                    'file_sk_pangkat.max' => 'File SK Pangkat maksimal 5MB',
+                    'file_sk_pangkat.max' => 'File SK Pangkat maksimal 1MB',
                     'file_surat_komitmen.file' => 'File Surat Komitmen harus berupa file',
                     'file_surat_komitmen.mimes' => 'File Surat Komitmen harus berformat PDF',
-                    'file_surat_komitmen.max' => 'File Surat Komitmen maksimal 5MB',
+                    'file_surat_komitmen.max' => 'File Surat Komitmen maksimal 1MB',
                     'file_surat_sehat.required' => 'File Surat Sehat wajib diunggah',
                     'file_surat_sehat.file' => 'File Surat Sehat harus berupa file',
                     'file_surat_sehat.mimes' => 'File Surat Sehat harus berformat PDF',
-                    'file_surat_sehat.max' => 'File Surat Sehat maksimal 5MB',
+                    'file_surat_sehat.max' => 'File Surat Sehat maksimal 1MB',
                     'file_surat_bebas_narkoba.required' => 'File Surat Bebas Narkoba wajib diunggah',
                     'file_surat_bebas_narkoba.file' => 'File Surat Bebas Narkoba harus berupa file',
                     'file_surat_bebas_narkoba.mimes' => 'File Surat Bebas Narkoba harus berformat PDF',
-                    'file_surat_bebas_narkoba.max' => 'File Surat Bebas Narkoba maksimal 5MB',
+                    'file_surat_bebas_narkoba.max' => 'File Surat Bebas Narkoba maksimal 1MB',
                 ];
             }
 
@@ -362,19 +364,19 @@ class PendaftaranController extends Controller
                 ];
 
                 if (!$kepegawaian || !$kepegawaian->file_sk_cpns) {
-                    $additionalRules['file_sk_cpns'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_sk_cpns'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 if (!$kepegawaian || !$kepegawaian->file_spmt) {
-                    $additionalRules['file_spmt'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_spmt'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 if (!$pendaftaran || !$pendaftaran->file_surat_kesediaan) {
-                    $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 if (!$peserta->file_ktp) {
-                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
+                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
                 }
                 
 
@@ -386,15 +388,15 @@ class PendaftaranController extends Controller
                     'file_sk_cpns.required' => 'File SK CPNS wajib diupload',
                     'file_sk_cpns.file' => 'File SK CPNS harus berupa file',
                     'file_sk_cpns.mimes' => 'File SK CPNS harus berformat PDF',
-                    'file_sk_cpns.max' => 'File SK CPNS maksimal 5MB',
+                    'file_sk_cpns.max' => 'File SK CPNS maksimal 1MB',
                     'file_spmt.required' => 'File SPMT wajib diupload',
                     'file_spmt.file' => 'File SPMT harus berupa file',
                     'file_spmt.mimes' => 'File SPMT harus berformat PDF',
-                    'file_spmt.max' => 'File SPMT maksimal 5MB',
+                    'file_spmt.max' => 'File SPMT maksimal 1MB',
                     'file_surat_kesediaan.required' => 'File Surat Kesediaan wajib diupload',
                     'file_surat_kesediaan.file' => 'File Surat Kesediaan harus berupa file',
                     'file_surat_kesediaan.mimes' => 'File Surat Kesediaan harus berformat PDF',
-                    'file_surat_kesediaan.max' => 'File Surat Kesediaan maksimal 5MB',
+                    'file_surat_kesediaan.max' => 'File Surat Kesediaan maksimal 1MB',
                     'pangkat.required' => 'Pangkat wajib diisi untuk pelatihan LATSAR',
                     'pangkat.max' => 'Pangkat maksimal 50 karakter',
                     'sudah_ada_mentor.required' => 'Status mentor wajib dipilih untuk pelatihan LATSAR',
@@ -404,7 +406,7 @@ class PendaftaranController extends Controller
                     'file_ktp.required' => 'File KTP wajib diupload',
                     'file_ktp.file' => 'File KTP harus berupa file',
                     'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
-                    'file_ktp.max' => 'File KTP maksimal 5MB',
+                    'file_ktp.max' => 'File KTP maksimal 1MB',
                 ];
             }
 
@@ -413,41 +415,41 @@ class PendaftaranController extends Controller
                     'eselon' => 'required|string|max:50',
                     'tanggal_sk_jabatan' => 'required|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
                     'sudah_ada_mentor' => 'required|in:Ya,Tidak',
                     'nomor_sk_terakhir' => 'required|string|max:100',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
-                    'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
 
                 ];
 
                 if (!$pendaftaran->file_surat_kesediaan) {
-                    $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:1024';
                 }
                 if (!$peserta->file_ktp) {
-                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
+                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
                 }
                 if (!$peserta->file_pas_foto) {
-                    $additionalRules['file_pas_foto'] = 'required|file|mimes:jpg,jpeg,png|max:5120';
+                    $additionalRules['file_pas_foto'] = 'required|file|mimes:jpg,jpeg,png|max:1024';
                 }
                 if (!$kepegawaian->file_sk_jabatan) {
-                    $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:1024';
                 }
                 if (!$kepegawaian->file_sk_pangkat) {
-                    $additionalRules['file_sk_pangkat'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_sk_pangkat'] = 'required|file|mimes:pdf|max:1024';
                 }
                 if (!$pendaftaran->file_pakta_integritas) {
-                    $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:1024';
                 }
                 if (!$pendaftaran->file_surat_tugas) {
-                    $additionalRules['file_surat_tugas'] = 'required|file|mimes:pdf|max:5120';
+                    $additionalRules['file_surat_tugas'] = 'required|file|mimes:pdf|max:1024';
                 }
 
                 $additionalMessages = [
@@ -476,58 +478,58 @@ class PendaftaranController extends Controller
                     'file_sk_jabatan.required' => 'File SK Jabatan Terakhir wajib diunggah untuk pelatihan ' . $kode,
                     'file_sk_jabatan.file' => 'File SK Jabatan harus berupa file',
                     'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
-                    'file_sk_jabatan.max' => 'Ukuran file SK Jabatan maksimal 5MB',
+                    'file_sk_jabatan.max' => 'Ukuran file SK Jabatan maksimal 1MB',
 
                     // Validasi untuk file SK pangkat
                     'file_sk_pangkat.required' => 'File SK Pangkat/Golongan Ruang wajib diunggah untuk pelatihan ' . $kode,
                     'file_sk_pangkat.file' => 'File SK Pangkat harus berupa file',
                     'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
-                    'file_sk_pangkat.max' => 'Ukuran file SK Pangkat maksimal 5MB',
+                    'file_sk_pangkat.max' => 'Ukuran file SK Pangkat maksimal 1MB',
 
                     // Validasi untuk file KTP
                     'file_ktp.required' => 'Foto KTP wajib diunggah untuk pelatihan ' . $kode,
                     'file_ktp.file' => 'File KTP harus berupa file',
                     'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
-                    'file_ktp.max' => 'Ukuran file KTP maksimal 5MB',
+                    'file_ktp.max' => 'Ukuran file KTP maksimal 1MB',
 
                     // Validasi untuk file surat kesediaan
                     'file_surat_kesediaan.required' => 'File Formulir Kesediaan wajib diunggah untuk pelatihan ' . $kode,
                     'file_surat_kesediaan.file' => 'File Formulir Kesediaan harus berupa file',
                     'file_surat_kesediaan.mimes' => 'File Formulir Kesediaan harus berformat PDF',
-                    'file_surat_kesediaan.max' => 'Ukuran file Formulir Kesediaan maksimal 5MB',
+                    'file_surat_kesediaan.max' => 'Ukuran file Formulir Kesediaan maksimal 1MB',
 
                     // Validasi untuk file pakta integritas
                     'file_pakta_integritas.required' => 'File Pakta Integritas wajib diunggah untuk pelatihan ' . $kode,
                     'file_pakta_integritas.file' => 'File Pakta Integritas harus berupa file',
                     'file_pakta_integritas.mimes' => 'File Pakta Integritas harus berformat PDF',
-                    'file_pakta_integritas.max' => 'Ukuran file Pakta Integritas maksimal 5MB',
+                    'file_pakta_integritas.max' => 'Ukuran file Pakta Integritas maksimal 1MB',
 
                     // Validasi untuk file surat tugas
                     'file_surat_tugas.required' => 'File Surat Tugas wajib diunggah untuk pelatihan ' . $kode,
                     'file_surat_tugas.file' => 'File Surat Tugas harus berupa file',
                     'file_surat_tugas.mimes' => 'File Surat Tugas harus berformat PDF',
-                    'file_surat_tugas.max' => 'Ukuran file Surat Tugas maksimal 5MB',
+                    'file_surat_tugas.max' => 'Ukuran file Surat Tugas maksimal 1MB',
 
                     // Validasi untuk file surat pernyataan administrasi
                     'file_surat_pernyataan_administrasi.file' => 'File Surat Pernyataan Administrasi harus berupa file',
                     'file_surat_pernyataan_administrasi.mimes' => 'File Surat Pernyataan Administrasi harus berformat PDF',
-                    'file_surat_pernyataan_administrasi.max' => 'Ukuran file Surat Pernyataan Administrasi maksimal 5MB',
+                    'file_surat_pernyataan_administrasi.max' => 'Ukuran file Surat Pernyataan Administrasi maksimal 1MB',
 
                     // Validasi untuk file surat kelulusan seleksi
                     'file_surat_kelulusan_seleksi.file' => 'File Kelulusan Seleksi/Sertifikat harus berupa file',
                     'file_surat_kelulusan_seleksi.mimes' => 'File Kelulusan Seleksi/Sertifikat harus berformat PDF',
-                    'file_surat_kelulusan_seleksi.max' => 'Ukuran file Kelulusan Seleksi/Sertifikat maksimal 5MB',
+                    'file_surat_kelulusan_seleksi.max' => 'Ukuran file Kelulusan Seleksi/Sertifikat maksimal 1MB',
 
                     // Validasi untuk file persetujuan mentor
                     'file_persetujuan_mentor.file' => 'File Persetujuan Mentor harus berupa file',
                     'file_persetujuan_mentor.mimes' => 'File Persetujuan Mentor harus berformat PDF',
-                    'file_persetujuan_mentor.max' => 'Ukuran file Persetujuan Mentor maksimal 5MB',
+                    'file_persetujuan_mentor.max' => 'Ukuran file Persetujuan Mentor maksimal 1MB',
 
                     // Validasi untuk file pas foto
                     'file_pas_foto.required' => 'File Pas Foto wajib diunggah ',
                     'file_pas_foto.file' => 'File Pas Foto harus berupa file',
                     'file_pas_foto.mimes' => 'File Pas Foto harus berformat JPG, JPEG, atau PNG',
-                    'file_pas_foto.max' => 'Ukuran file Pas Foto maksimal 5MB',
+                    'file_pas_foto.max' => 'Ukuran file Pas Foto maksimal 1MB',
                 ];
             }
 
@@ -643,6 +645,8 @@ class PendaftaranController extends Controller
                 'olahraga_hobi' => $request->olahraga_hobi,
                 'perokok' => $request->perokok,
                 'ukuran_kaos' => $request->ukuran_kaos,
+                'ukuran_celana' => $request->ukuran_celana,
+                'ukuran_training' => $request->ukuran_training,
                 'kondisi_peserta' => $request->kondisi_peserta,
             ];
 
