@@ -57,6 +57,8 @@ Route::middleware('auth')->group(function () {
 
     // Route Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/edit', [AdminController::class, 'editData'])->name('admin.dashboard.edit');
+    Route::post('/dashboard/update', [AdminController::class, 'updateData'])->name('admin.dashboard.update');
     
     
     // Route Role

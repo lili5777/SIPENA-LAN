@@ -1025,7 +1025,7 @@
                 <span>Data Peserta</span>
             </div>
             <div class="section-actions">
-                <a href="#" class="btn-edit" title="Edit Data Peserta">
+                <a href="{{ route('admin.dashboard.edit') }}" class="btn-edit" title="Edit Data Peserta">
                     <i class="fas fa-edit"></i>
                     Edit Data
                 </a>
@@ -1074,9 +1074,7 @@
                                 <i class="fas fa-id-card"></i>
                                 Informasi Personal
                             </div>
-                            <button class="edit-card-btn" title="Edit Data Personal">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1114,9 +1112,6 @@
                                 <i class="fas fa-info-circle"></i>
                                 Data Kelahiran & Kontak
                             </div>
-                            <button class="edit-card-btn" title="Edit Data Kontak">
-                                <i class="fas fa-edit"></i>
-                            </button>
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1156,9 +1151,6 @@
                                 <i class="fas fa-address-card"></i>
                                 Kontak & Alamat
                             </div>
-                            <button class="edit-card-btn" title="Edit Kontak & Alamat">
-                                <i class="fas fa-edit"></i>
-                            </button>
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1196,9 +1188,7 @@
                                 <i class="fas fa-graduation-cap"></i>
                                 Pendidikan & Ukuran
                             </div>
-                            <button class="edit-card-btn" title="Edit Pendidikan & Ukuran">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1242,9 +1232,7 @@
                                 <i class="fas fa-building"></i>
                                 Instansi & Unit Kerja
                             </div>
-                            <button class="edit-card-btn" title="Edit Data Instansi">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1282,9 +1270,7 @@
                                 <i class="fas fa-user-tie"></i>
                                 Jabatan & Pangkat
                             </div>
-                            <button class="edit-card-btn" title="Edit Jabatan & Pangkat">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1322,9 +1308,7 @@
                                 <i class="fas fa-address-book"></i>
                                 Kontak Kantor & SK
                             </div>
-                            <button class="edit-card-btn" title="Edit Kontak Kantor">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1362,9 +1346,7 @@
                                 <i class="fas fa-calendar-alt"></i>
                                 Tanggal & Alamat Kantor
                             </div>
-                            <button class="edit-card-btn" title="Edit Tanggal & Alamat">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1424,9 +1406,7 @@
                                 <i class="fas fa-chalkboard-teacher"></i>
                                 Jenis Pelatihan
                             </div>
-                            <button class="edit-card-btn" title="Edit Data Pelatihan">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1473,9 +1453,7 @@
                                 <i class="fas fa-users"></i>
                                 Angkatan
                             </div>
-                            <button class="edit-card-btn" title="Edit Data Angkatan">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1518,9 +1496,7 @@
                                 <i class="fas fa-clipboard-check"></i>
                                 Status Pendaftaran
                             </div>
-                            <button class="edit-card-btn" title="Edit Status Pendaftaran">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1592,9 +1568,7 @@
                                 <i class="fas fa-info-circle"></i>
                                 Informasi Tambahan
                             </div>
-                            <button class="edit-card-btn" title="Edit Informasi">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1718,9 +1692,7 @@
                                 <i class="fas fa-user-tie"></i>
                                 Data Mentor
                             </div>
-                            <button class="edit-card-btn" title="Edit Data Mentor">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1758,9 +1730,6 @@
                                 <i class="fas fa-file-invoice-dollar"></i>
                                 Data Keuangan
                             </div>
-                            <button class="edit-card-btn" title="Edit Data Keuangan">
-                                <i class="fas fa-edit"></i>
-                            </button>
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1807,9 +1776,6 @@
                                 <i class="fas fa-comments"></i>
                                 Status Mentoring
                             </div>
-                            <button class="edit-card-btn" title="Edit Status Mentoring">
-                                <i class="fas fa-edit"></i>
-                            </button>
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1883,13 +1849,9 @@
                                     <button class="btn-icon view" title="Lihat Dokumen" onclick="viewDocument('KTP', '{{ $peserta->file_ktp }}')">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <a href="{{ Storage::url($peserta->file_ktp) }}" class="btn-icon download" title="Unduh Dokumen" download>
+                                    <a href="{{ url($peserta->file_ktp) }}" class="btn-icon download" title="Unduh Dokumen" download>
                                         <i class="fas fa-download"></i>
                                     </a>
-                                @else
-                                    <button class="btn-icon upload" title="Unggah Dokumen" onclick="uploadDocument('ktp')">
-                                        <i class="fas fa-upload"></i>
-                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -1914,13 +1876,9 @@
                                     <button class="btn-icon view" title="Lihat Dokumen" onclick="viewDocument('Pas Foto', '{{ $peserta->file_pas_foto }}')">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <a href="{{ Storage::url($peserta->file_pas_foto) }}" class="btn-icon download" title="Unduh Dokumen" download>
+                                    <a href="{{ url($peserta->file_pas_foto) }}" class="btn-icon download" title="Unduh Dokumen" download>
                                         <i class="fas fa-download"></i>
                                     </a>
-                                @else
-                                    <button class="btn-icon upload" title="Unggah Dokumen" onclick="uploadDocument('pas_foto')">
-                                        <i class="fas fa-upload"></i>
-                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -1968,13 +1926,9 @@
                                         <button class="btn-icon view" title="Lihat Dokumen" onclick="viewDocument('{{ $dokumen['name'] }}', '{{ $filePath }}')">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <a href="{{ Storage::url($filePath) }}" class="btn-icon download" title="Unduh Dokumen" download>
+                                        <a href="{{ url($filePath) }}" class="btn-icon download" title="Unduh Dokumen" download>
                                             <i class="fas fa-download"></i>
                                         </a>
-                                    @else
-                                        <button class="btn-icon upload" title="Unggah Dokumen" onclick="uploadDocument('{{ $dokumen['field'] }}')">
-                                            <i class="fas fa-upload"></i>
-                                        </button>
                                     @endif
                                 </div>
                             </div>
@@ -2029,13 +1983,9 @@
                                         <button class="btn-icon view" title="Lihat Dokumen" onclick="viewDocument('{{ $dokumen['name'] }}', '{{ $filePath }}')">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <a href="{{ Storage::url($filePath) }}" class="btn-icon download" title="Unduh Dokumen" download>
+                                        <a href="{{ url($filePath) }}" class="btn-icon download" title="Unduh Dokumen" download>
                                             <i class="fas fa-download"></i>
                                         </a>
-                                    @else
-                                        <button class="btn-icon upload" title="Unggah Dokumen" onclick="uploadDocument('{{ $dokumen['field'] }}')">
-                                            <i class="fas fa-upload"></i>
-                                        </button>
                                     @endif
                                 </div>
                             </div>
@@ -2119,41 +2069,7 @@
             });
         });
 
-        // Edit data button
-        const editDataButton = document.querySelector('.btn-edit');
-        if (editDataButton) {
-            editDataButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Arahkan ke form edit - route akan diisi nanti
-                const currentTab = document.querySelector('.tab-button.active').getAttribute('data-tab');
-                let editUrl = '#';
-                
-                // Tentukan URL edit berdasarkan tab aktif
-                switch(currentTab) {
-                    case 'tab-data-pribadi':
-                        editUrl = '{{-- route("peserta.edit") --}}';
-                        break;
-                    case 'tab-kepegawaian':
-                        editUrl = '{{-- route("kepegawaian.edit") --}}';
-                        break;
-                    case 'tab-pelatihan':
-                        editUrl = '{{-- route("pelatihan.edit") --}}';
-                        break;
-                    case 'tab-mentor':
-                        editUrl = '{{-- route("mentor.edit") --}}';
-                        break;
-                    case 'tab-dokumen':
-                        editUrl = '{{-- route("dokumen.edit") --}}';
-                        break;
-                }
-                
-                // Untuk sekarang, tampilkan alert
-                alert(`Akan mengedit data dari tab: ${currentTab}\n\nRoute edit akan diarahkan ke:\n${editUrl}`);
-                
-                // Nanti ketika route sudah dibuat, ganti alert dengan:
-                // window.location.href = editUrl;
-            });
-        }
+        
 
         // Smooth scroll for tabs on mobile
         const tabsNav = document.querySelector('.tabs-nav');
@@ -2205,7 +2121,7 @@
                     <h4>Dokumen Word</h4>
                     <p>Format dokumen ini tidak dapat ditampilkan secara langsung.</p>
                     <p>Silakan unduh untuk membuka.</p>
-                    <a href="/${filePath}" class="btn-edit mt-3" download>
+                    <a href="${filePath}" class="btn-edit mt-3" download>
                         <i class="fas fa-download"></i> Unduh Dokumen
                     </a>
                 </div>
@@ -2218,7 +2134,7 @@
                     <h4>Format Dokumen Tidak Didukung</h4>
                     <p>Dokumen ini tidak dapat ditampilkan secara langsung.</p>
                     <p>Silakan unduh untuk membuka.</p>
-                    <a href="/${filePath}" class="btn-edit mt-3" download>
+                    <a href="${filePath}" class="btn-edit mt-3" download>
                         <i class="fas fa-download"></i> Unduh Dokumen
                     </a>
                 </div>
