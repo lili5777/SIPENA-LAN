@@ -115,13 +115,19 @@ class PesertaController extends Controller
         $role = Role::where('name', 'user')->first();
 
         if ($request->status_pendaftaran == 'Diterima') {
-            User::create([
-                'name' => $pendaftaran->peserta->nama_lengkap,
-                'email' => $pendaftaran->peserta->email_pribadi,
-                'password' => $pendaftaran->peserta->nip_nrp,
-                'role_id' => $role->id,
-                'peserta_id' => $pendaftaran->peserta->id
-            ]);
+            // Gunakan updateOrCreate untuk lebih efisien
+            $user = User::updateOrCreate(
+                // Kondisi pencarian
+                ['peserta_id' => $pendaftaran->peserta->id],
+
+                // Data untuk update/create
+                [
+                    'name' => $pendaftaran->peserta->nama_lengkap,
+                    'email' => $pendaftaran->peserta->email_pribadi,
+                    'password' => bcrypt($pendaftaran->peserta->nip_nrp),
+                    'role_id' => $role->id,
+                ]
+            );
         }
 
         

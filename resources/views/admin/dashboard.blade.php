@@ -12,6 +12,7 @@
         --success-color: #10b981;
         --warning-color: #f59e0b;
         --danger-color: #ef4444;
+        --info-color: #3b82f6;
     }
 
     .welcome-card {
@@ -358,6 +359,7 @@
         font-style: italic;
     }
 
+    /* File List Styles */
     .file-list {
         display: flex;
         flex-direction: column;
@@ -365,7 +367,7 @@
     }
 
     .file-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
 
     .file-section h5 {
@@ -400,6 +402,18 @@
         transform: translateX(5px);
     }
 
+    .file-item.empty {
+        background: #f8fafc;
+        border-style: dashed;
+        border-color: #cbd5e1;
+    }
+
+    .file-item.empty:hover {
+        border-color: #94a3b8;
+        background: #f1f5f9;
+        transform: none;
+    }
+
     .file-info {
         display: flex;
         align-items: center;
@@ -410,7 +424,6 @@
     .file-icon {
         width: 40px;
         height: 40px;
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -418,6 +431,14 @@
         color: white;
         font-size: 1.25rem;
         flex-shrink: 0;
+    }
+
+    .file-icon.has-file {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .file-icon.no-file {
+        background: linear-gradient(135deg, #94a3b8, #cbd5e1);
     }
 
     .file-details {
@@ -434,9 +455,19 @@
         text-overflow: ellipsis;
     }
 
+    .file-name.empty {
+        color: #94a3b8;
+        font-style: italic;
+    }
+
     .file-size {
         font-size: 0.85rem;
         color: #64748b;
+    }
+
+    .file-size.empty {
+        font-style: italic;
+        color: #cbd5e1;
     }
 
     .file-action {
@@ -463,6 +494,36 @@
         background: var(--primary-color);
         color: white;
         transform: scale(1.1);
+    }
+
+    .btn-icon.view {
+        background: #dbeafe;
+        color: var(--primary-color);
+    }
+
+    .btn-icon.view:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-icon.download {
+        background: #dcfce7;
+        color: var(--success-color);
+    }
+
+    .btn-icon.download:hover {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .btn-icon.upload {
+        background: #fef3c7;
+        color: var(--warning-color);
+    }
+
+    .btn-icon.upload:hover {
+        background: var(--warning-color);
+        color: white;
     }
 
     .no-data {
@@ -568,6 +629,108 @@
         white-space: nowrap;
     }
 
+    /* Document Viewer Modal */
+    .document-viewer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        padding: 2rem;
+    }
+
+    .document-viewer.active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .document-container {
+        background: white;
+        border-radius: 12px;
+        width: 100%;
+        height: 100%;
+        max-width: 1000px;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .document-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .document-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 1.1rem;
+    }
+
+    .document-close {
+        background: none;
+        border: none;
+        color: #64748b;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .document-close:hover {
+        color: var(--danger-color);
+        background: #fee2e2;
+    }
+
+    .document-content {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        max-height: calc(90vh - 70px);
+    }
+
+    .document-preview {
+        width: 100%;
+        height: 100%;
+        min-height: 400px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .document-preview iframe,
+    .document-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .document-notice {
+        text-align: center;
+        padding: 3rem;
+        color: #94a3b8;
+    }
+
+    .document-notice i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
     /* Animations */
     @keyframes fadeInUp {
         from {
@@ -629,6 +792,10 @@
         .data-grid {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
+        }
+
+        .document-container {
+            width: 95%;
         }
     }
 
@@ -715,6 +882,19 @@
         .table {
             min-width: 600px;
         }
+
+        .document-viewer {
+            padding: 1rem;
+        }
+
+        .document-container {
+            width: 100%;
+            max-height: 85vh;
+        }
+
+        .document-content {
+            max-height: calc(85vh - 70px);
+        }
     }
 
     @media (max-width: 576px) {
@@ -752,6 +932,18 @@
             min-width: 110px;
             padding: 0.75rem 0.875rem;
             font-size: 0.85rem;
+        }
+
+        .document-header {
+            padding: 0.75rem 1rem;
+        }
+
+        .document-title {
+            font-size: 1rem;
+        }
+
+        .document-content {
+            padding: 1rem;
         }
     }
 
@@ -859,10 +1051,10 @@
                     <i class="fas fa-briefcase"></i>
                     Data Kepegawaian
                 </button>
-                <button class="tab-button" data-tab="tab-pelatihan">
+                {{-- <button class="tab-button" data-tab="tab-pelatihan">
                     <i class="fas fa-chalkboard-teacher"></i>
                     Data Pelatihan
-                </button>
+                </button> --}}
                 <button class="tab-button" data-tab="tab-mentor">
                     <i class="fas fa-user-tie"></i>
                     Data Mentor
@@ -946,7 +1138,7 @@
                                 Tanggal Lahir
                             </span>
                             <span class="data-value">
-                                {{ $peserta->tanggal_lahir ? $peserta->tanggal_lahir->format('d F Y') : 'Belum diisi' }}
+                                {{ $peserta->tanggal_lahir ? \Carbon\Carbon::parse($peserta->tanggal_lahir)->format('d F Y') : 'Belum diisi' }}
                             </span>
                         </div>
                         <div class="data-item">
@@ -1180,7 +1372,7 @@
                                 Tanggal SK Jabatan
                             </span>
                             <span class="data-value">
-                                {{ $kepegawaian->tanggal_sk_jabatan ? $kepegawaian->tanggal_sk_jabatan->format('d F Y') : 'Belum diisi' }}
+                                {{ $kepegawaian->tanggal_sk_jabatan ? \Carbon\Carbon::parse($kepegawaian->tanggal_sk_jabatan)->format('d F Y') : 'Belum diisi' }}
                             </span>
                         </div>
                         <div class="data-item">
@@ -1189,7 +1381,7 @@
                                 Tanggal SK CPNS
                             </span>
                             <span class="data-value">
-                                {{ $kepegawaian->tanggal_sk_cpns ? $kepegawaian->tanggal_sk_cpns->format('d F Y') : 'Belum diisi' }}
+                                {{ $kepegawaian->tanggal_sk_cpns ? \Carbon\Carbon::parse($kepegawaian->tanggal_sk_cpns)->format('d F Y') : 'Belum diisi' }}
                             </span>
                         </div>
                         <div class="data-item">
@@ -1222,7 +1414,7 @@
             </div>
 
             <!-- Tab 3: Data Pelatihan -->
-            <div id="tab-pelatihan" class="tab-content">
+            {{-- <div id="tab-pelatihan" class="tab-content">
                 @if ($pendaftaranTerbaru)
                 <div class="data-grid">
                     <!-- Data Jenis Pelatihan -->
@@ -1305,7 +1497,7 @@
                                 Tanggal Mulai
                             </span>
                             <span class="data-value">
-                                {{ $angkatanData->tanggal_mulai ? $angkatanData->tanggal_mulai->format('d F Y') : 'Belum diisi' }}
+                                {{ $angkatanData->tanggal_mulai ? \Carbon\Carbon::parse($angkatanData->tanggal_mulai)->format('d F Y') : 'Belum diisi' }}
                             </span>
                         </div>
                         <div class="data-item">
@@ -1314,7 +1506,7 @@
                                 Tanggal Selesai
                             </span>
                             <span class="data-value">
-                                {{ $angkatanData->tanggal_selesai ? $angkatanData->tanggal_selesai->format('d F Y') : 'Belum diisi' }}
+                                {{ $angkatanData->tanggal_selesai ? \Carbon\Carbon::parse($angkatanData->tanggal_selesai)->format('d F Y') : 'Belum diisi' }}
                             </span>
                         </div>
                     </div>
@@ -1372,7 +1564,7 @@
                                 Tanggal Daftar
                             </span>
                             <span class="data-value">
-                                {{ $pendaftaranTerbaru->tanggal_daftar ? $pendaftaranTerbaru->tanggal_daftar->format('d F Y H:i') : 'Belum diisi' }}
+                                {{ $pendaftaranTerbaru->tanggal_daftar ? \Carbon\Carbon::parse($pendaftaranTerbaru->tanggal_daftar)->format('d F Y H:i') : 'Belum diisi' }}
                             </span>
                         </div>
                         <div class="data-item">
@@ -1381,7 +1573,7 @@
                                 Tanggal Verifikasi
                             </span>
                             <span class="data-value">
-                                {{ $pendaftaranTerbaru->tanggal_verifikasi ? $pendaftaranTerbaru->tanggal_verifikasi->format('d F Y H:i') : 'Belum diverifikasi' }}
+                                {{ $pendaftaranTerbaru->tanggal_verifikasi ? \Carbon\Carbon::parse($pendaftaranTerbaru->tanggal_verifikasi)->format('d F Y H:i') : 'Belum diverifikasi' }}
                             </span>
                         </div>
                         <div class="data-item">
@@ -1432,7 +1624,7 @@
                                 Dibuat Pada
                             </span>
                             <span class="data-value">
-                                {{ $angkatanData->dibuat_pada ? $angkatanData->dibuat_pada->format('d F Y H:i') : 'Tidak tersedia' }}
+                                {{ $angkatanData->dibuat_pada ? \Carbon\Carbon::parse($angkatanData->dibuat_pada)->format('d F Y H:i') : 'Tidak tersedia' }}
                             </span>
                         </div>
                         <div class="data-item">
@@ -1477,7 +1669,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $pendaftaran->jenisPelatihan->nama_pelatihan ?? 'Tidak tersedia' }}</td>
                                     <td>{{ $pendaftaran->angkatan->nama_angkatan ?? 'Tidak tersedia' }}</td>
-                                    <td>{{ $pendaftaran->tanggal_daftar ? $pendaftaran->tanggal_daftar->format('d/m/Y') : '-' }}</td>
+                                    <td>{{ $pendaftaran->tanggal_daftar ? \Carbon\Carbon::parse($pendaftaran->tanggal_daftar)->format('d/m/Y') : '-' }}</td>
                                     <td>
                                         @php
                                             $status = $pendaftaran->status_pendaftaran ?? null;
@@ -1514,7 +1706,7 @@
                     </a>
                 </div>
                 @endif
-            </div>
+            </div> --}}
 
             <!-- Tab 4: Data Mentor -->
             <div id="tab-mentor" class="tab-content">
@@ -1602,7 +1794,7 @@
                                 Tanggal Penunjukan
                             </span>
                             <span class="data-value">
-                                {{ $pendaftaranTerbaru->pesertaMentor->first()->tanggal_penunjukan ? $pendaftaranTerbaru->pesertaMentor->first()->tanggal_penunjukan->format('d F Y') : 'Belum diisi' }}
+                                {{ $pendaftaranTerbaru->pesertaMentor->first()->tanggal_penunjukan ? \Carbon\Carbon::parse($pendaftaranTerbaru->pesertaMentor->first()->tanggal_penunjukan)->format('d F Y') : 'Belum diisi' }}
                             </span>
                         </div>
                         @endif
@@ -1665,63 +1857,74 @@
             <div id="tab-dokumen" class="tab-content">
                 <div class="file-list">
                     <!-- Dokumen Peserta -->
-                    @if($peserta->file_ktp || $peserta->file_pas_foto)
                     <div class="file-section">
                         <h5 class="mb-3">
                             <i class="fas fa-user-circle"></i>
                             Dokumen Pribadi
                         </h5>
-                        @if($peserta->file_ktp)
-                        <div class="file-item">
+                        
+                        <!-- KTP -->
+                        <div class="file-item {{ !$peserta->file_ktp ? 'empty' : '' }}">
                             <div class="file-info">
-                                <div class="file-icon">
-                                    <i class="fas fa-id-card"></i>
+                                <div class="file-icon {{ $peserta->file_ktp ? 'has-file' : 'no-file' }}">
+                                    <i class="fas {{ $peserta->file_ktp ? 'fa-id-card' : 'fa-times' }}"></i>
                                 </div>
                                 <div class="file-details">
-                                    <div class="file-name">KTP</div>
-                                    <div class="file-size">Dokumen Identitas</div>
+                                    <div class="file-name {{ !$peserta->file_ktp ? 'empty' : '' }}">
+                                        KTP
+                                    </div>
+                                    <div class="file-size {{ !$peserta->file_ktp ? 'empty' : '' }}">
+                                        {{ $peserta->file_ktp ? 'Dokumen Identitas' : 'Belum diunggah' }}
+                                    </div>
                                 </div>
                             </div>
                             <div class="file-action">
-                                <button class="btn-icon" title="Lihat">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-icon" title="Unduh">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                                <button class="btn-icon" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                                @if($peserta->file_ktp)
+                                    <button class="btn-icon view" title="Lihat Dokumen" onclick="viewDocument('KTP', '{{ $peserta->file_ktp }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="{{ Storage::url($peserta->file_ktp) }}" class="btn-icon download" title="Unduh Dokumen" download>
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                @else
+                                    <button class="btn-icon upload" title="Unggah Dokumen" onclick="uploadDocument('ktp')">
+                                        <i class="fas fa-upload"></i>
+                                    </button>
+                                @endif
                             </div>
                         </div>
-                        @endif
 
-                        @if($peserta->file_pas_foto)
-                        <div class="file-item">
+                        <!-- Pas Foto -->
+                        <div class="file-item {{ !$peserta->file_pas_foto ? 'empty' : '' }}">
                             <div class="file-info">
-                                <div class="file-icon">
-                                    <i class="fas fa-camera"></i>
+                                <div class="file-icon {{ $peserta->file_pas_foto ? 'has-file' : 'no-file' }}">
+                                    <i class="fas {{ $peserta->file_pas_foto ? 'fa-camera' : 'fa-times' }}"></i>
                                 </div>
                                 <div class="file-details">
-                                    <div class="file-name">Pas Foto</div>
-                                    <div class="file-size">Foto Resmi</div>
+                                    <div class="file-name {{ !$peserta->file_pas_foto ? 'empty' : '' }}">
+                                        Pas Foto
+                                    </div>
+                                    <div class="file-size {{ !$peserta->file_pas_foto ? 'empty' : '' }}">
+                                        {{ $peserta->file_pas_foto ? 'Foto Resmi' : 'Belum diunggah' }}
+                                    </div>
                                 </div>
                             </div>
                             <div class="file-action">
-                                <button class="btn-icon" title="Lihat">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-icon" title="Unduh">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                                <button class="btn-icon" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                                @if($peserta->file_pas_foto)
+                                    <button class="btn-icon view" title="Lihat Dokumen" onclick="viewDocument('Pas Foto', '{{ $peserta->file_pas_foto }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="{{ Storage::url($peserta->file_pas_foto) }}" class="btn-icon download" title="Unduh Dokumen" download>
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                @else
+                                    <button class="btn-icon upload" title="Unggah Dokumen" onclick="uploadDocument('pas_foto')">
+                                        <i class="fas fa-upload"></i>
+                                    </button>
+                                @endif
                             </div>
                         </div>
-                        @endif
                     </div>
-                    @endif
 
                     <!-- Dokumen Kepegawaian -->
                     @if($kepegawaian)
@@ -1730,41 +1933,51 @@
                             <i class="fas fa-briefcase"></i>
                             Dokumen Kepegawaian
                         </h5>
+                        
                         @php
                             $dokumenKepegawaian = [
-                                ['field' => 'file_sk_jabatan', 'name' => 'SK Jabatan', 'icon' => 'fa-file-contract'],
-                                ['field' => 'file_sk_pangkat', 'name' => 'SK Pangkat', 'icon' => 'fa-medal'],
-                                ['field' => 'file_sk_cpns', 'name' => 'SK CPNS', 'icon' => 'fa-file-signature'],
-                                ['field' => 'file_spmt', 'name' => 'SPMT', 'icon' => 'fa-handshake'],
-                                ['field' => 'file_skp', 'name' => 'SKP', 'icon' => 'fa-chart-line'],
+                                ['field' => 'file_sk_jabatan', 'name' => 'SK Jabatan', 'icon' => 'fa-file-contract', 'empty_icon' => 'fa-file'],
+                                ['field' => 'file_sk_pangkat', 'name' => 'SK Pangkat', 'icon' => 'fa-medal', 'empty_icon' => 'fa-file'],
+                                ['field' => 'file_sk_cpns', 'name' => 'SK CPNS', 'icon' => 'fa-file-signature', 'empty_icon' => 'fa-file'],
+                                ['field' => 'file_spmt', 'name' => 'SPMT', 'icon' => 'fa-handshake', 'empty_icon' => 'fa-file'],
+                                ['field' => 'file_skp', 'name' => 'SKP', 'icon' => 'fa-chart-line', 'empty_icon' => 'fa-file'],
                             ];
                         @endphp
 
                         @foreach($dokumenKepegawaian as $dokumen)
-                            @if($kepegawaian->{$dokumen['field']})
-                            <div class="file-item">
+                            @php
+                                $hasFile = !empty($kepegawaian->{$dokumen['field']});
+                                $filePath = $hasFile ? $kepegawaian->{$dokumen['field']} : '';
+                            @endphp
+                            <div class="file-item {{ !$hasFile ? 'empty' : '' }}">
                                 <div class="file-info">
-                                    <div class="file-icon">
-                                        <i class="fas {{ $dokumen['icon'] }}"></i>
+                                    <div class="file-icon {{ $hasFile ? 'has-file' : 'no-file' }}">
+                                        <i class="fas {{ $hasFile ? $dokumen['icon'] : $dokumen['empty_icon'] }}"></i>
                                     </div>
                                     <div class="file-details">
-                                        <div class="file-name">{{ $dokumen['name'] }}</div>
-                                        <div class="file-size">Dokumen Kepegawaian</div>
+                                        <div class="file-name {{ !$hasFile ? 'empty' : '' }}">
+                                            {{ $dokumen['name'] }}
+                                        </div>
+                                        <div class="file-size {{ !$hasFile ? 'empty' : '' }}">
+                                            {{ $hasFile ? 'Dokumen Kepegawaian' : 'Belum diunggah' }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="file-action">
-                                    <button class="btn-icon" title="Lihat">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn-icon" title="Unduh">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                    <button class="btn-icon" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                    @if($hasFile)
+                                        <button class="btn-icon view" title="Lihat Dokumen" onclick="viewDocument('{{ $dokumen['name'] }}', '{{ $filePath }}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ Storage::url($filePath) }}" class="btn-icon download" title="Unduh Dokumen" download>
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    @else
+                                        <button class="btn-icon upload" title="Unggah Dokumen" onclick="uploadDocument('{{ $dokumen['field'] }}')">
+                                            <i class="fas fa-upload"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
-                            @endif
                         @endforeach
                     </div>
                     @endif
@@ -1776,59 +1989,57 @@
                             <i class="fas fa-file-alt"></i>
                             Dokumen Pendaftaran
                         </h5>
+                        
                         @php
                             $dokumenPendaftaran = [
-                                ['field' => 'file_surat_tugas', 'name' => 'Surat Tugas', 'icon' => 'fa-envelope'],
-                                ['field' => 'file_surat_kesediaan', 'name' => 'Surat Kesediaan', 'icon' => 'fa-hand-paper'],
-                                ['field' => 'file_pakta_integritas', 'name' => 'Pakta Integritas', 'icon' => 'fa-scroll'],
-                                ['field' => 'file_surat_komitmen', 'name' => 'Surat Komitmen', 'icon' => 'fa-file-signature'],
-                                ['field' => 'file_surat_kelulusan_seleksi', 'name' => 'Surat Kelulusan Seleksi', 'icon' => 'fa-graduation-cap'],
-                                ['field' => 'file_surat_sehat', 'name' => 'Surat Sehat', 'icon' => 'fa-heart'],
-                                ['field' => 'file_surat_bebas_narkoba', 'name' => 'Surat Bebas Narkoba', 'icon' => 'fa-ban'],
-                                ['field' => 'file_surat_pernyataan_administrasi', 'name' => 'Pernyataan Administrasi', 'icon' => 'fa-clipboard-check'],
-                                ['field' => 'file_sertifikat_penghargaan', 'name' => 'Sertifikat Penghargaan', 'icon' => 'fa-award'],
-                                ['field' => 'file_persetujuan_mentor', 'name' => 'Persetujuan Mentor', 'icon' => 'fa-user-check'],
+                                ['field' => 'file_surat_tugas', 'name' => 'Surat Tugas', 'icon' => 'fa-envelope', 'empty_icon' => 'fa-envelope-open'],
+                                ['field' => 'file_surat_kesediaan', 'name' => 'Surat Kesediaan', 'icon' => 'fa-hand-paper', 'empty_icon' => 'fa-hand'],
+                                ['field' => 'file_pakta_integritas', 'name' => 'Pakta Integritas', 'icon' => 'fa-scroll', 'empty_icon' => 'fa-scroll'],
+                                ['field' => 'file_surat_komitmen', 'name' => 'Surat Komitmen', 'icon' => 'fa-file-signature', 'empty_icon' => 'fa-file'],
+                                ['field' => 'file_surat_kelulusan_seleksi', 'name' => 'Surat Kelulusan Seleksi', 'icon' => 'fa-graduation-cap', 'empty_icon' => 'fa-graduation-cap'],
+                                ['field' => 'file_surat_sehat', 'name' => 'Surat Sehat', 'icon' => 'fa-heart', 'empty_icon' => 'fa-heart'],
+                                ['field' => 'file_surat_bebas_narkoba', 'name' => 'Surat Bebas Narkoba', 'icon' => 'fa-ban', 'empty_icon' => 'fa-ban'],
+                                ['field' => 'file_surat_pernyataan_administrasi', 'name' => 'Pernyataan Administrasi', 'icon' => 'fa-clipboard-check', 'empty_icon' => 'fa-clipboard'],
+                                ['field' => 'file_sertifikat_penghargaan', 'name' => 'Sertifikat Penghargaan', 'icon' => 'fa-award', 'empty_icon' => 'fa-award'],
+                                ['field' => 'file_persetujuan_mentor', 'name' => 'Persetujuan Mentor', 'icon' => 'fa-user-check', 'empty_icon' => 'fa-user'],
                             ];
                         @endphp
 
                         @foreach($dokumenPendaftaran as $dokumen)
-                            @if($pendaftaranTerbaru->{$dokumen['field']})
-                            <div class="file-item">
+                            @php
+                                $hasFile = !empty($pendaftaranTerbaru->{$dokumen['field']});
+                                $filePath = $hasFile ? $pendaftaranTerbaru->{$dokumen['field']} : '';
+                            @endphp
+                            <div class="file-item {{ !$hasFile ? 'empty' : '' }}">
                                 <div class="file-info">
-                                    <div class="file-icon">
-                                        <i class="fas {{ $dokumen['icon'] }}"></i>
+                                    <div class="file-icon {{ $hasFile ? 'has-file' : 'no-file' }}">
+                                        <i class="fas {{ $hasFile ? $dokumen['icon'] : $dokumen['empty_icon'] }}"></i>
                                     </div>
                                     <div class="file-details">
-                                        <div class="file-name">{{ $dokumen['name'] }}</div>
-                                        <div class="file-size">Dokumen Pendaftaran</div>
+                                        <div class="file-name {{ !$hasFile ? 'empty' : '' }}">
+                                            {{ $dokumen['name'] }}
+                                        </div>
+                                        <div class="file-size {{ !$hasFile ? 'empty' : '' }}">
+                                            {{ $hasFile ? 'Dokumen Pendaftaran' : 'Belum diunggah' }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="file-action">
-                                    <button class="btn-icon" title="Lihat">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn-icon" title="Unduh">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                    <button class="btn-icon" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                    @if($hasFile)
+                                        <button class="btn-icon view" title="Lihat Dokumen" onclick="viewDocument('{{ $dokumen['name'] }}', '{{ $filePath }}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ Storage::url($filePath) }}" class="btn-icon download" title="Unduh Dokumen" download>
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    @else
+                                        <button class="btn-icon upload" title="Unggah Dokumen" onclick="uploadDocument('{{ $dokumen['field'] }}')">
+                                            <i class="fas fa-upload"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
-                            @endif
                         @endforeach
-                    </div>
-                    @endif
-
-                    @if(!$peserta->file_ktp && !$peserta->file_pas_foto && (!$kepegawaian || !$pendaftaranTerbaru))
-                    <div class="no-data">
-                        <i class="fas fa-file-alt"></i>
-                        <h4>Belum Ada Dokumen</h4>
-                        <p>Silakan upload dokumen-dokumen yang diperlukan</p>
-                        <a href="#" class="btn-edit mt-3">
-                            <i class="fas fa-upload"></i>
-                            Upload Dokumen
-                        </a>
                     </div>
                     @endif
                 </div>
@@ -1836,6 +2047,23 @@
         </div>
     </div>
     @endif
+
+    <!-- Document Viewer Modal -->
+    <div id="documentViewer" class="document-viewer">
+        <div class="document-container">
+            <div class="document-header">
+                <div class="document-title" id="documentTitle">Pratinjau Dokumen</div>
+                <button class="document-close" onclick="closeDocumentViewer()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="document-content">
+                <div id="documentPreview" class="document-preview">
+                    <!-- Dokumen akan ditampilkan di sini -->
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -1881,24 +2109,6 @@
                 firstTabContent.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
             }, 100);
         }
-
-        // File action buttons
-        const fileActionButtons = document.querySelectorAll('.btn-icon');
-        fileActionButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const action = this.getAttribute('title');
-                const fileName = this.closest('.file-item').querySelector('.file-name').textContent;
-                
-                // For demo purposes - you would implement actual file handling here
-                if (action === 'Lihat') {
-                    alert(`Akan membuka pratinjau: ${fileName}`);
-                } else if (action === 'Unduh') {
-                    alert(`Akan mengunduh: ${fileName}`);
-                } else if (action === 'Edit') {
-                    alert(`Akan mengedit: ${fileName}`);
-                }
-            });
-        });
 
         // Edit card buttons
         const editCardButtons = document.querySelectorAll('.edit-card-btn');
@@ -1958,6 +2168,94 @@
             }
         }
     });
+
+    // Document Viewer Functions
+    function viewDocument(title, filePath) {
+        const viewer = document.getElementById('documentViewer');
+        const preview = document.getElementById('documentPreview');
+        const docTitle = document.getElementById('documentTitle');
+        
+        // Set document title
+        docTitle.textContent = title;
+        
+        // Clear previous content
+        preview.innerHTML = '';
+        
+        // Get file extension
+        const fileExt = filePath.split('.').pop().toLowerCase();
+        
+        // Check file type and display accordingly
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExt)) {
+            // Image file
+            const img = document.createElement('img');
+            img.src =   filePath;
+            img.alt = title;
+            preview.appendChild(img);
+        } else if (['pdf'].includes(fileExt)) {
+            // PDF file
+            const iframe = document.createElement('iframe');
+            iframe.src =  filePath + '#toolbar=0&navpanes=0';
+            iframe.title = title;
+            preview.appendChild(iframe);
+        } else if (['doc', 'docx'].includes(fileExt)) {
+            // Word document - show download link
+            preview.innerHTML = `
+                <div class="document-notice">
+                    <i class="fas fa-file-word"></i>
+                    <h4>Dokumen Word</h4>
+                    <p>Format dokumen ini tidak dapat ditampilkan secara langsung.</p>
+                    <p>Silakan unduh untuk membuka.</p>
+                    <a href="/${filePath}" class="btn-edit mt-3" download>
+                        <i class="fas fa-download"></i> Unduh Dokumen
+                    </a>
+                </div>
+            `;
+        } else {
+            // Other file types
+            preview.innerHTML = `
+                <div class="document-notice">
+                    <i class="fas fa-file"></i>
+                    <h4>Format Dokumen Tidak Didukung</h4>
+                    <p>Dokumen ini tidak dapat ditampilkan secara langsung.</p>
+                    <p>Silakan unduh untuk membuka.</p>
+                    <a href="/${filePath}" class="btn-edit mt-3" download>
+                        <i class="fas fa-download"></i> Unduh Dokumen
+                    </a>
+                </div>
+            `;
+        }
+        
+        // Show viewer
+        viewer.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDocumentViewer() {
+        const viewer = document.getElementById('documentViewer');
+        viewer.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close viewer when clicking outside
+    document.getElementById('documentViewer').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDocumentViewer();
+        }
+    });
+
+    // Close viewer with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDocumentViewer();
+        }
+    });
+
+    // Upload document function
+    function uploadDocument(fieldName) {
+        alert(`Akan mengunggah dokumen untuk: ${fieldName}`);
+        // Di sini Anda bisa menambahkan modal untuk upload
+        // Contoh: showUploadModal(fieldName);
+    }
 
     // Update time and date
     function updateDateTime() {

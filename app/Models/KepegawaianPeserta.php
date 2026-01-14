@@ -39,6 +39,10 @@ class KepegawaianPeserta extends Model
     ];
 
     protected $dates = ['tanggal_sk_jabatan', 'tanggal_sk_cpns'];
+    protected $casts = [
+        'tanggal_sk_jabatan' => 'datetime',
+        'tanggal_sk_cpns' => 'datetime',
+    ];
 
     // Relasi: belongsTo ke Peserta
     public function peserta()

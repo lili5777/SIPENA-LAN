@@ -22,6 +22,9 @@ class PesertaMentor extends Model
     ];
 
     protected $dates = ['tanggal_penunjukan'];
+    protected $casts = [
+        'tanggal_penunjukan' => 'datetime',
+    ];
 
     // Relasi: belongsTo ke Pendaftaran
     public function pendaftaran()
