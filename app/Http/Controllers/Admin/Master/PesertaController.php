@@ -12,6 +12,8 @@ use App\Models\Kabupaten;
 use App\Models\PesertaMentor;
 use App\Models\Mentor;
 use App\Models\Provinsi;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -110,11 +112,28 @@ class PesertaController extends Controller
         ]);
 
         $pendaftaran = Pendaftaran::findOrFail($id);
+        $role = Role::where('name', 'user')->first();
+
+        if ($request->status_pendaftaran == 'Diterima') {
+            User::create([
+                'name' => $pendaftaran->peserta->nama_lengkap,
+                'email' => $pendaftaran->peserta->email_pribadi,
+                'password' => $pendaftaran->peserta->nip_nrp,
+                'role_id' => $role->id,
+                'peserta_id' => $pendaftaran->peserta->id
+            ]);
+        }
+
+        
         $pendaftaran->update([
             'status_pendaftaran' => $request->status_pendaftaran,
             'catatan_verifikasi' => $request->catatan_verifikasi,
             'tanggal_verifikasi' => now()
         ]);
+
+        
+
+        
 
         return response()->json([
             'success' => true,

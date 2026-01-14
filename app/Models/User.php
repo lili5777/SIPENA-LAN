@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'no_telp',
+        'peserta_id',
         'role_id',
         'password',
     ];
@@ -59,5 +60,10 @@ class User extends Authenticatable
             ->permissions()
             ->where('name', $permissionName)
             ->exists();
+    }
+
+    public function peserta()
+    {
+        return $this->belongsTo(Peserta::class);
     }
 }
