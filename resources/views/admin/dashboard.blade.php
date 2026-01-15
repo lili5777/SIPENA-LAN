@@ -1068,13 +1068,13 @@
             <!-- Tab 1: Data Pribadi -->
             <div id="tab-data-pribadi" class="tab-content active">
                 <div class="data-grid">
+                    <!-- Informasi Personal -->
                     <div class="data-card">
                         <div class="data-card-header">
                             <div class="data-card-title">
                                 <i class="fas fa-id-card"></i>
                                 Informasi Personal
                             </div>
-                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1106,6 +1106,7 @@
                         </div>
                     </div>
 
+                    <!-- Data Kelahiran & Kontak -->
                     <div class="data-card">
                         <div class="data-card-header">
                             <div class="data-card-title">
@@ -1143,8 +1144,18 @@
                             </span>
                             <span class="data-value">{{ $peserta->status_perkawinan ?? 'Belum diisi' }}</span>
                         </div>
+                        @if($peserta->status_perkawinan && strtolower($peserta->status_perkawinan) != 'belum menikah')
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-heart"></i>
+                                Nama Pasangan
+                            </span>
+                            <span class="data-value">{{ $peserta->nama_pasangan ?? 'Belum diisi' }}</span>
+                        </div>
+                        @endif
                     </div>
 
+                    <!-- Kontak & Alamat -->
                     <div class="data-card">
                         <div class="data-card-header">
                             <div class="data-card-title">
@@ -1173,6 +1184,16 @@
                             </span>
                             <span class="data-value">{{ $peserta->alamat_rumah ?? 'Belum diisi' }}</span>
                         </div>
+                    </div>
+
+                    <!-- Hobi & Kebiasaan -->
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <div class="data-card-title">
+                                <i class="fas fa-heartbeat"></i>
+                                Hobi & Kebiasaan
+                            </div>
+                        </div>
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-futbol"></i>
@@ -1180,15 +1201,28 @@
                             </span>
                             <span class="data-value">{{ $peserta->olahraga_hobi ?? 'Belum diisi' }}</span>
                         </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-smoking"></i>
+                                Perokok
+                            </span>
+                            <span class="data-value">
+                                @if(isset($peserta->perokok))
+                                    {{ $peserta->perokok == 1 ? 'Ya' : 'Tidak' }}
+                                @else
+                                    Belum diisi
+                                @endif
+                            </span>
+                        </div>
                     </div>
 
+                    <!-- Pendidikan & Keahlian -->
                     <div class="data-card">
                         <div class="data-card-header">
                             <div class="data-card-title">
                                 <i class="fas fa-graduation-cap"></i>
-                                Pendidikan & Ukuran
+                                Pendidikan & Keahlian
                             </div>
-                            
                         </div>
                         <div class="data-item">
                             <span class="data-label">
@@ -1211,12 +1245,91 @@
                             </span>
                             <span class="data-value">{{ $peserta->bidang_keahlian ?? 'Belum diisi' }}</span>
                         </div>
+                    </div>
+
+                    <!-- Ukuran Pakaian -->
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <div class="data-card-title">
+                                <i class="fas fa-tshirt"></i>
+                                Ukuran Pakaian
+                            </div>
+                        </div>
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-tshirt"></i>
                                 Ukuran Kaos
                             </span>
                             <span class="data-value">{{ $peserta->ukuran_kaos ?? 'Belum diisi' }}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-vest"></i>
+                                Ukuran Training
+                            </span>
+                            <span class="data-value">{{ $peserta->ukuran_training ?? 'Belum diisi' }}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-vest-patches"></i>
+                                Ukuran Celana
+                            </span>
+                            <span class="data-value">{{ $peserta->ukuran_celana ?? 'Belum diisi' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Kondisi & Kesehatan -->
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <div class="data-card-title">
+                                <i class="fas fa-user-md"></i>
+                                Kondisi & Kesehatan
+                            </div>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-stethoscope"></i>
+                                Kondisi Peserta
+                            </span>
+                            <span class="data-value">{{ $peserta->kondisi_peserta ?? 'Belum diisi' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Data Pelatihan -->
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <div class="data-card-title">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                Informasi Pelatihan
+                            </div>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-book"></i>
+                                Nama Pelatihan
+                            </span>
+                            <span class="data-value">{{ $jenisPelatihanData->nama_pelatihan ?? 'Belum diisi' }}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-align-left"></i>
+                                Deskripsi
+                            </span>
+                            <span class="data-value">{{ $jenisPelatihanData->deskripsi ?? 'Belum diisi' }}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-user-friends"></i>
+                                Nama Angkatan
+                            </span>
+                            <span class="data-value">{{ $angkatanData->nama_angkatan ?? 'Belum diisi' }}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-calendar"></i>
+                                Tahun
+                            </span>
+                            <span class="data-value">{{ $angkatanData->tahun ?? 'Belum diisi' }}</span>
                         </div>
                     </div>
                 </div>
@@ -1279,13 +1392,16 @@
                             </span>
                             <span class="data-value">{{ $kepegawaian->jabatan ?? 'Belum diisi' }}</span>
                         </div>
-                        <div class="data-item">
-                            <span class="data-label">
-                                <i class="fas fa-layer-group"></i>
-                                Eselon
-                            </span>
-                            <span class="data-value">{{ $kepegawaian->eselon ?? 'Belum diisi' }}</span>
-                        </div>
+                        @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
+                            <div class="data-item">
+                                <span class="data-label">
+                                    <i class="fas fa-layer-group"></i>
+                                    Eselon
+                                </span>
+                                <span class="data-value">{{ $kepegawaian->eselon ?? 'Belum diisi' }}</span>
+                            </div>
+                        @endif
+                        
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-medal"></i>
@@ -1324,6 +1440,7 @@
                             </span>
                             <span class="data-value">{{ $kepegawaian->nomor_telepon_kantor ?? 'Belum diisi' }}</span>
                         </div>
+                        @if ($jenisPelatihanData->kode_pelatihan == "LATSAR")
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-file-signature"></i>
@@ -1331,6 +1448,8 @@
                             </span>
                             <span class="data-value">{{ $kepegawaian->nomor_sk_cpns ?? 'Belum diisi' }}</span>
                         </div>
+                        @endif
+                        @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR" || $jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-file-contract"></i>
@@ -1338,6 +1457,7 @@
                             </span>
                             <span class="data-value">{{ $kepegawaian->nomor_sk_terakhir ?? 'Belum diisi' }}</span>
                         </div>
+                        @endif
                     </div>
 
                     <div class="data-card">
@@ -1348,6 +1468,7 @@
                             </div>
                             
                         </div>
+                        @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR" || $jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-calendar-check"></i>
@@ -1357,6 +1478,8 @@
                                 {{ $kepegawaian->tanggal_sk_jabatan ? \Carbon\Carbon::parse($kepegawaian->tanggal_sk_jabatan)->format('d F Y') : 'Belum diisi' }}
                             </span>
                         </div>
+                        @endif
+                        @if ($jenisPelatihanData->kode_pelatihan == "LATSAR")
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-calendar-day"></i>
@@ -1366,6 +1489,7 @@
                                 {{ $kepegawaian->tanggal_sk_cpns ? \Carbon\Carbon::parse($kepegawaian->tanggal_sk_cpns)->format('d F Y') : 'Belum diisi' }}
                             </span>
                         </div>
+                        @endif
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-map-pin"></i>
@@ -1373,6 +1497,7 @@
                             </span>
                             <span class="data-value">{{ $kepegawaian->alamat_kantor ?? 'Belum diisi' }}</span>
                         </div>
+                        @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR" || $jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-award"></i>
@@ -1380,6 +1505,7 @@
                             </span>
                             <span class="data-value">{{ $kepegawaian->tahun_lulus_pkp_pim_iv ?? 'Belum diisi' }}</span>
                         </div>
+                        @endif
                     </div>
                 </div>
                 @else
@@ -1900,6 +2026,24 @@
                                 ['field' => 'file_spmt', 'name' => 'SPMT', 'icon' => 'fa-handshake', 'empty_icon' => 'fa-file'],
                                 ['field' => 'file_skp', 'name' => 'SKP', 'icon' => 'fa-chart-line', 'empty_icon' => 'fa-file'],
                             ];
+
+                            if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
+                                $dokumenKepegawaian = array_filter($dokumenKepegawaian, function($dokumen) {
+                                    return !in_array($dokumen['field'], ['file_sk_jabatan', 'file_sk_pangkat']);
+                                });
+                            }
+
+                            if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
+                                $dokumenKepegawaian = array_filter($dokumenKepegawaian, function($dokumen) {
+                                    return !in_array($dokumen['field'], ['file_sk_cpns', 'file_spmt','file_skp']);
+                                });
+                            }
+
+                          if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
+                                $dokumenKepegawaian = array_filter($dokumenKepegawaian, function($dokumen) {
+                                    return !in_array($dokumen['field'], ['file_sk_cpns', 'file_spmt','file_skp']);
+                                });
+                            }
                         @endphp
 
                         @foreach($dokumenKepegawaian as $dokumen)
@@ -1957,6 +2101,24 @@
                                 ['field' => 'file_sertifikat_penghargaan', 'name' => 'Sertifikat Penghargaan', 'icon' => 'fa-award', 'empty_icon' => 'fa-award'],
                                 ['field' => 'file_persetujuan_mentor', 'name' => 'Persetujuan Mentor', 'icon' => 'fa-user-check', 'empty_icon' => 'fa-user'],
                             ];
+
+                            if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
+                                $dokumenPendaftaran = array_filter($dokumenPendaftaran, function($dokumen) {
+                                    return !in_array($dokumen['field'], ['file_pakta_integritas', 'file_surat_komitmen','file_surat_kelulusan_seleksi','file_surat_bebas_narkoba','file_surat_pernyataan_administrasi','file_sertifikat_penghargaan','file_persetujuan_mentor']);
+                                });
+                            }
+
+                            if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
+                                $dokumenPendaftaran = array_filter($dokumenPendaftaran, function($dokumen) {
+                                    return !in_array($dokumen['field'], ['file_surat_kesediaan', 'file_surat_pernyataan_administrasi','file_sertifikat_penghargaan','file_persetujuan_mentor']);
+                                });
+                            }
+
+                            if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
+                                $dokumenPendaftaran = array_filter($dokumenPendaftaran, function($dokumen) {
+                                    return !in_array($dokumen['field'], ['file_surat_komitmen','file_sertifikat_penghargaan','file_surat_pernyataan_administrasi']);
+                                });
+                            }
                         @endphp
 
                         @foreach($dokumenPendaftaran as $dokumen)
