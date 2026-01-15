@@ -20,7 +20,7 @@ class Kabupaten extends Model
     // Relasi: belongsTo ke Provinsi
     public function provinsi()
     {
-        return $this->belongsTo(Provinsi::class, 'id_provinsi');
+        return $this->belongsTo(Provinsi::class, 'province_id', 'id'); // Perhatikan foreign key
     }
 
     // Relasi: hasMany ke KepegawaianPeserta

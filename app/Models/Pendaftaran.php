@@ -35,11 +35,7 @@ class Pendaftaran extends Model
     ];
 
     protected $dates = ['tanggal_daftar', 'tanggal_verifikasi'];
-    protected $casts = [
-        'tanggal_daftar' => 'datetime',
-        'tanggal_verifikasi' => 'datetime',
-    ];
-
+ 
     // Relasi: belongsTo ke Peserta
     public function peserta()
     {

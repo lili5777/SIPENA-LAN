@@ -97,7 +97,7 @@ class AdminController extends Controller
         try {
             $user = Auth::user();
 
-            // Ambil data peserta berdasarkan user yang login
+            // Ambil data peserta dengan relasi terkait
             $peserta = Peserta::where('id', $user->peserta_id)
                 ->with([
                     'kepegawaian' => function ($query) {
@@ -122,30 +122,21 @@ class AdminController extends Controller
 
             // Ambil data terkait
             $kepegawaian = $peserta->kepegawaian;
-            $pendaftaranTerbaru = $peserta->pendaftaran->first(); // Mengambil dari collection yang sudah di-load
+            $pendaftaranTerbaru = $peserta->pendaftaran->first();
 
-            // Debug untuk melihat struktur
-            // dd($pendaftaranTerbaru);
-
+            // Dapatkan list provinsi dan SEMUA kabupaten
             $provinsiList = Provinsi::orderBy('name')->get();
-            $kabupatenList = [];
-            
+            $kabupatenList = Kabupaten::orderBy('name')->get(); // Ambil semua kabupaten
 
-            if ($kepegawaian && $kepegawaian->id_provinsi) {
-                $kabupatenList = Kabupaten::where('province_id', $kepegawaian->id_provinsi)
-                    ->orderBy('name')
-                    ->get();
-                // dd($kabupatenList);
-            }
-            
+            // Dapatkan list mentor
             $mentorList = Mentor::where('status_aktif', true)->orderBy('nama_mentor')->get();
-           
+
             return view('admin.edit', compact(
                 'peserta',
                 'kepegawaian',
                 'pendaftaranTerbaru',
                 'provinsiList',
-                'kabupatenList',
+                'kabupatenList', // Kirim semua kabupaten
                 'mentorList'
             ));
         } catch (\Exception $e) {
@@ -154,14 +145,12 @@ class AdminController extends Controller
         }
     }
 
+
     public function updateData(Request $request)
     {
         try {
             $user = Auth::user();
-
-            // Ambil data peserta
-            $peserta = Peserta::where('user_id', $user->id)->first();
-            dd($peserta);
+            $peserta = Peserta::where('id', $user->peserta_id)->first();
 
             if (!$peserta) {
                 throw ValidationException::withMessages([
@@ -169,11 +158,10 @@ class AdminController extends Controller
                 ]);
             }
 
-            // Ambil pendaftaran terbaru
-            $pendaftaranTerbaru = $peserta->pendaftaran()->latest()->first();
+            $pendaftaranTerbaru = $peserta->pendaftaran()->first();
             $kepegawaian = $peserta->kepegawaian;
 
-            // 1. VALIDASI DASAR
+            // 1. VALIDASI DASAR (tanpa validasi file required di sini)
             $validated = $request->validate([
                 'nama_lengkap' => 'required|string|max:200',
                 'nip_nrp' => 'required|string|max:50',
@@ -189,15 +177,18 @@ class AdminController extends Controller
                 'bidang_studi' => 'nullable|string|max:100',
                 'bidang_keahlian' => 'nullable|string|max:100',
                 'status_perkawinan' => 'nullable|in:Belum Menikah,Menikah,Duda,Janda',
-                'nama_pasangan' => 'nullable|string|max:200',
                 'olahraga_hobi' => 'nullable|string|max:100',
                 'perokok' => 'required|in:Ya,Tidak',
                 'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                 'ukuran_celana' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                 'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                 'kondisi_peserta' => 'nullable|string',
+
+                // FILE VALIDATION HANYA JIKA ADA UPLOAD BARU
                 'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
                 'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
+
+                // Data Kepegawaian
                 'asal_instansi' => 'required|string|max:200',
                 'unit_kerja' => 'nullable|string|max:200',
                 'id_provinsi' => 'required',
@@ -207,28 +198,32 @@ class AdminController extends Controller
                 'email_kantor' => 'nullable|email|max:100',
                 'jabatan' => 'required|string|max:200',
                 'pangkat' => 'nullable|string|max:50',
-                'golongan_ruang' => 'required|string|max:50',
+                'golongan_ruang' => 'required|string|max:10',
                 'eselon' => 'nullable|string|max:50',
+
+                // File Kepegawaian
                 'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
                 'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
+                'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
+                'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
+                'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+
+                // File Pendaftaran
                 'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024',
                 'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024',
                 'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024',
                 'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
                 'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
                 'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
-                'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:1024',
-                'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
-                'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
-                'file_skp' => 'nullable|file|mimes:pdf|max:1024',
-                'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
+
+                // Data SK
                 'nomor_sk_cpns' => 'nullable|string|max:100',
                 'nomor_sk_terakhir' => 'nullable|string|max:100',
                 'tanggal_sk_cpns' => 'nullable|date',
                 'tanggal_sk_jabatan' => 'nullable|date',
                 'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
+
+                // Mentor
                 'nama_mentor' => 'nullable|string|max:200',
                 'jabatan_mentor' => 'nullable|string|max:200',
                 'nomor_rekening_mentor' => 'nullable|string|max:200',
@@ -257,9 +252,134 @@ class AdminController extends Controller
                 'alamat_kantor.required' => 'Alamat kantor wajib diisi',
                 'jabatan.required' => 'Jabatan wajib diisi',
                 'golongan_ruang.required' => 'Golongan ruang wajib diisi',
+                'golongan_ruang.max' => 'Golongan ruang maksimal 10 karakter',
             ]);
 
-            // 2. SIMPAN FILE UPLOADS
+            // 2. VALIDASI KONDISIONAL BERDASARKAN STATUS FILE
+            $additionalRules = [];
+            $additionalMessages = [];
+
+            // Validasi file hanya jika belum ada file di database DAN sedang upload file baru
+            if ($pendaftaranTerbaru && $pendaftaranTerbaru->jenisPelatihan) {
+                $kode = $pendaftaranTerbaru->jenisPelatihan->kode_pelatihan;
+
+                if ($kode === 'PKN_TK_II') {
+                    $additionalRules['eselon'] = 'required|string|max:50';
+
+                    // Validasi file hanya jika tidak ada file di database
+                    if (!$kepegawaian || !$kepegawaian->file_sk_jabatan) {
+                        $additionalRules['file_sk_jabatan'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$kepegawaian || !$kepegawaian->file_sk_pangkat) {
+                        $additionalRules['file_sk_pangkat'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$pendaftaranTerbaru->file_pakta_integritas) {
+                        $additionalRules['file_pakta_integritas'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$pendaftaranTerbaru->file_surat_sehat) {
+                        $additionalRules['file_surat_sehat'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$pendaftaranTerbaru->file_surat_bebas_narkoba) {
+                        $additionalRules['file_surat_bebas_narkoba'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+
+                    $additionalMessages = [
+                        'eselon.required' => 'Eselon wajib diisi untuk pelatihan PKN TK II',
+                    ];
+                }
+
+                if ($kode === 'LATSAR') {
+                    $additionalRules = [
+                        'nomor_sk_cpns' => 'required|string|max:100',
+                        'tanggal_sk_cpns' => 'required|date',
+                        'pangkat' => 'required|string|max:50',
+                        'sudah_ada_mentor' => 'required|in:Ya,Tidak',
+                    ];
+
+                    // Validasi file hanya jika tidak ada di database
+                    if (!$kepegawaian || !$kepegawaian->file_sk_cpns) {
+                        $additionalRules['file_sk_cpns'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$kepegawaian || !$kepegawaian->file_spmt) {
+                        $additionalRules['file_spmt'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$pendaftaranTerbaru->file_surat_kesediaan) {
+                        $additionalRules['file_surat_kesediaan'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$peserta->file_ktp) {
+                        $additionalRules['file_ktp'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024';
+                    }
+
+                    $additionalMessages = [
+                        'nomor_sk_cpns.required' => 'Nomor SK CPNS wajib diisi untuk pelatihan LATSAR',
+                        'tanggal_sk_cpns.required' => 'Tanggal SK CPNS wajib diisi untuk pelatihan LATSAR',
+                        'pangkat.required' => 'Pangkat wajib diisi untuk pelatihan LATSAR',
+                        'sudah_ada_mentor.required' => 'Status mentor wajib dipilih untuk pelatihan LATSAR',
+                    ];
+                }
+
+                if ($kode === 'PKA' || $kode === 'PKP') {
+                    $additionalRules = [
+                        'eselon' => 'required|string|max:50',
+                        'tanggal_sk_jabatan' => 'required|date',
+                        'sudah_ada_mentor' => 'required|in:Ya,Tidak',
+                        'nomor_sk_terakhir' => 'required|string|max:100',
+                    ];
+
+                    // Validasi file hanya jika tidak ada di database
+                    if (!$pendaftaranTerbaru->file_surat_kesediaan) {
+                        $additionalRules['file_surat_kesediaan'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$peserta->file_ktp) {
+                        $additionalRules['file_ktp'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024';
+                    }
+                    if (!$peserta->file_pas_foto) {
+                        $additionalRules['file_pas_foto'] = 'nullable|file|mimes:jpg,jpeg,png|max:1024';
+                    }
+                    if (!$kepegawaian || !$kepegawaian->file_sk_jabatan) {
+                        $additionalRules['file_sk_jabatan'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$kepegawaian || !$kepegawaian->file_sk_pangkat) {
+                        $additionalRules['file_sk_pangkat'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$pendaftaranTerbaru->file_pakta_integritas) {
+                        $additionalRules['file_pakta_integritas'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+                    if (!$pendaftaranTerbaru->file_surat_tugas) {
+                        $additionalRules['file_surat_tugas'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+
+                    $additionalMessages = [
+                        'eselon.required' => 'Eselon wajib diisi untuk pelatihan ' . $kode,
+                        'tanggal_sk_jabatan.required' => 'Tanggal SK Jabatan wajib diisi untuk pelatihan ' . $kode,
+                        'sudah_ada_mentor.required' => 'Status mentor wajib dipilih untuk pelatihan ' . $kode,
+                        'nomor_sk_terakhir.required' => 'Nomor SK Jabatan Terakhir wajib diisi untuk pelatihan ' . $kode,
+                    ];
+                }
+
+                // Validasi mentor jika sudah ada mentor
+                if ($request->sudah_ada_mentor === 'Ya') {
+                    $additionalRules['mentor_mode'] = 'required|in:pilih,tambah';
+                    $additionalMessages['mentor_mode.required'] = 'Pilih mode mentor (Pilih dari daftar atau Tambah baru)';
+
+                    if ($request->mentor_mode === 'pilih') {
+                        $additionalRules['id_mentor'] = 'required|exists:mentor,id';
+                        $additionalMessages['id_mentor.required'] = 'Pilih mentor dari daftar';
+                    } elseif ($request->mentor_mode === 'tambah') {
+                        $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
+                        $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
+                        $additionalMessages['nama_mentor_baru.required'] = 'Nama mentor baru wajib diisi';
+                        $additionalMessages['jabatan_mentor_baru.required'] = 'Jabatan mentor baru wajib diisi';
+                    }
+                }
+
+                // Jalankan validasi tambahan
+                if (!empty($additionalRules)) {
+                    $request->validate($additionalRules, $additionalMessages);
+                }
+            }
+
+            // 3. SIMPAN FILE UPLOADS DENGAN STRUKTUR FOLDER TERPERINCI
             $fileFields = [
                 'file_ktp',
                 'file_pas_foto',
@@ -284,18 +404,55 @@ class AdminController extends Controller
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
                     try {
-                        $folderPath = public_path('uploads/dashboard_edit');
+                        // Tentukan nama folder berdasarkan jenis pelatihan
+                        $folderName = 'dashboard_edit'; // Default untuk dashboard edit
+
+                        // Jika ada pendaftaran terbaru dengan jenis pelatihan
+                        if ($pendaftaranTerbaru && $pendaftaranTerbaru->jenisPelatihan) {
+                            $kode = $pendaftaranTerbaru->jenisPelatihan->kode_pelatihan;
+                            $folderName = strtolower(str_replace(' ', '_', $kode));
+
+                            // Struktur folder: uploads/jenis_pelatihan/tahun/bulan/nama_lengkap peserta/
+                            $year = date('Y');
+                            $month = date('m');
+
+                            // Sanitize nama lengkap untuk folder
+                            $namaFolderPeserta = preg_replace('/[^A-Za-z0-9_-]/', '_', $request->nama_lengkap);
+
+                            $folderPath = public_path("uploads/{$folderName}/{$year}/{$month}/{$namaFolderPeserta}");
+                        } else {
+                            // Struktur default untuk dashboard edit
+                            $folderPath = public_path('uploads/dashboard_edit');
+                        }
+
+                        // Buat folder struktur lengkap jika belum ada
                         if (!file_exists($folderPath)) {
                             mkdir($folderPath, 0755, true);
                         }
 
+                        // Dapatkan file object
                         $file = $request->file($field);
+
+                        // Dapatkan informasi file
                         $originalName = $file->getClientOriginalName();
                         $extension = $file->getClientOriginalExtension();
+
+                        // Sanitize nama file
                         $safeOriginalName = preg_replace('/[^A-Za-z0-9_-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+
+                        // Format nama file: field_nip_timestamp.extension
                         $fileName = "{$field}_{$peserta->nip_nrp}_{$safeOriginalName}_" . time() . '.' . $extension;
+
+                        // Pindahkan file ke folder
                         $path = $file->move($folderPath, $fileName);
-                        $relativePath = "uploads/dashboard_edit/{$fileName}";
+
+                        // Simpan path relatif untuk database
+                        if ($pendaftaranTerbaru && $pendaftaranTerbaru->jenisPelatihan) {
+                            $relativePath = "uploads/{$folderName}/{$year}/{$month}/{$namaFolderPeserta}/{$fileName}";
+                        } else {
+                            $relativePath = "uploads/dashboard_edit/{$fileName}";
+                        }
+
                         $files[$field] = $relativePath;
 
                         // Hapus file lama jika ada
@@ -308,7 +465,7 @@ class AdminController extends Controller
                 }
             }
 
-            // 3. UPDATE DATA PESERTA
+            // 4. UPDATE DATA PESERTA
             $pesertaUpdateData = [
                 'nama_lengkap' => $request->nama_lengkap,
                 'nip_nrp' => $request->nip_nrp,
@@ -324,7 +481,7 @@ class AdminController extends Controller
                 'bidang_studi' => $request->bidang_studi,
                 'bidang_keahlian' => $request->bidang_keahlian,
                 'status_perkawinan' => $request->status_perkawinan,
-                'nama_pasangan' => $request->nama_pasangan,
+                'nama_pasangan' => $request->status_perkawinan === 'Menikah' ? $request->nama_pasangan : null,
                 'olahraga_hobi' => $request->olahraga_hobi,
                 'perokok' => $request->perokok,
                 'ukuran_kaos' => $request->ukuran_kaos,
@@ -333,6 +490,7 @@ class AdminController extends Controller
                 'kondisi_peserta' => $request->kondisi_peserta,
             ];
 
+            // Tambahkan file KTP dan pas foto jika ada
             if (isset($files['file_ktp'])) {
                 $pesertaUpdateData['file_ktp'] = $files['file_ktp'];
             }
@@ -343,7 +501,7 @@ class AdminController extends Controller
 
             $peserta->update($pesertaUpdateData);
 
-            // 4. UPDATE KEPEGAWAIAN
+            // 5. UPDATE KEPEGAWAIAN
             $provinsi = Provinsi::where('id', $request->id_provinsi)->first();
             $kabupaten = $request->id_kabupaten_kota ?
                 Kabupaten::where('id', $request->id_kabupaten_kota)->first() : null;
@@ -388,7 +546,7 @@ class AdminController extends Controller
                 KepegawaianPeserta::create($kepegawaianUpdateData);
             }
 
-            // 5. UPDATE DOKUMEN PENDAFTARAN
+            // 6. UPDATE DOKUMEN PENDAFTARAN
             if ($pendaftaranTerbaru) {
                 $pendaftaranUpdateData = [];
 
@@ -416,7 +574,7 @@ class AdminController extends Controller
                 }
             }
 
-            // 6. SIMPAN MENTOR JIKA ADA
+            // 7. SIMPAN MENTOR JIKA ADA
             if ($request->sudah_ada_mentor === 'Ya' && $pendaftaranTerbaru) {
                 $mentor = null;
 
@@ -444,7 +602,7 @@ class AdminController extends Controller
                 }
             }
 
-            // 7. RESPONSE
+            // 8. RESPONSE
             return redirect()->route('dashboard')
                 ->with('success', 'Data berhasil diperbarui!')
                 ->with('scroll_to', 'data-peserta-section');
@@ -489,6 +647,7 @@ class AdminController extends Controller
             }
         } catch (\Exception $e) {
             // Log error jika diperlukan
+            // \Log::error('Gagal menghapus file lama: ' . $e->getMessage());
         }
     }
 }

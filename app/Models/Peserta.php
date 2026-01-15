@@ -40,9 +40,6 @@ class Peserta extends Model
     ];
 
     protected $dates = ['tanggal_lahir'];
-    protected $casts = [
-        'tanggal_lahir' => 'datetime',
-    ];
 
     // Relasi: hasOne ke KepegawaianPeserta
     public function kepegawaian()
