@@ -1,5 +1,3 @@
-@extends('admin.partials.layout')
-
 @php
     // Ambil jenis dari route
     $jenis = request()->route('jenis');
@@ -7,7 +5,7 @@
     // Mapping nama dan ID
     $jenisMapping = [
         'pkn' => ['nama' => 'PKN TK II', 'id' => 1, 'kode' => 'PKN_TK_II'],
-        'latsar' => ['nama' => 'LATSAR', 'id' => 2, 'kode' => 'LATSAR'],
+        'cpns' => ['nama' => 'PD CPNS', 'id' => 2, 'kode' => 'PD_CPNS'],
         'pka' => ['nama' => 'PKA', 'id' => 3, 'kode' => 'PKA'],
         'pkp' => ['nama' => 'PKP', 'id' => 4, 'kode' => 'PKP']
     ];
@@ -23,11 +21,13 @@
     $mentorData = $isEdit ? ($pendaftaran->pesertaMentor->first() ?? null) : null;
 
     // Tentukan fields yang required berdasarkan jenis
-    $isLATSAR = $jenis === 'latsar';
+    $isCPNS = $jenis === 'cpns';
     $isPKA = $jenis === 'pka';
     $isPKP = $jenis === 'pkp';
     $isPKN = $jenis === 'pkn';
 @endphp
+
+@extends('admin.partials.layout')
 
 @section('title', $isEdit ? 'Edit Peserta ' . $jenisNama : 'Tambah Peserta ' . $jenisNama . ' - Sistem Pelatihan')
 
@@ -36,7 +36,8 @@
     <section class="form-hero" id="home">
         <div class="container">
             <div class="form-hero-content animate">
-                <h1 class="form-hero-title">{{ $isEdit ? 'Edit Peserta ' . $jenisNama : 'Tambah Peserta ' . $jenisNama }}</h1>
+                <h1 class="form-hero-title">{{ $isEdit ? 'Edit Peserta ' . $jenisNama : 'Tambah Peserta ' . $jenisNama }}
+                </h1>
                 <p class="form-hero-text">
                     {{ $isEdit ? 'Perbarui data peserta untuk program pelatihan ' . $jenisNama . '.' : 'Daftarkan peserta baru untuk mengikuti program pelatihan ' . $jenisNama . '. Isi formulir dengan data yang lengkap dan valid.' }}
                 </p>
@@ -147,7 +148,7 @@
                     <div class="form-step" id="step2-content">
                         <div class="step-header">
                             <h2 class="step-title">Data Pribadi Peserta</h2>
-                            <p class="step-description">Lengkapi data berikut dengan informasi yang valid</p>
+                            <p class="step-description">Lengkapi data berikut dengan informasi yang valid (kecuali NIP, semua field opsional)</p>
                             <div class="selected-info">
                                 <div class="info-badge">
                                     <i class="fas fa-book"></i> <span id="current-training-name">{{ $jenisNama }}</span>
@@ -166,11 +167,11 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label required">Nama Lengkap (Berikut Gelar Pendidikan) *</label>
+                                    <label class="form-label">Nama Lengkap (Berikut Gelar Pendidikan)</label>
                                     <input type="text" name="nama_lengkap"
                                         class="form-input @error('nama_lengkap') error @enderror"
                                         value="{{ $pesertaData ? $pesertaData->nama_lengkap : old('nama_lengkap') }}"
-                                        required placeholder="Masukkan nama lengkap dengan gelar">
+                                        placeholder="Masukkan nama lengkap dengan gelar">
                                     @error('nama_lengkap')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -189,8 +190,7 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Nama Panggilan</label>
-                                    <input type="text" name="nama_panggilan"
-                                        class="form-input @error('nama_panggilan') error @enderror"
+                                    <input type="text" name="nama_panggilan" class="form-input @error('nama_panggilan') error @enderror"
                                         value="{{ $pesertaData ? $pesertaData->nama_panggilan : old('nama_panggilan') }}"
                                         placeholder="Masukkan nama panggilan">
                                     @error('nama_panggilan')
@@ -212,6 +212,31 @@
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Tempat Lahir</label>
+                                    <input type="text" name="tempat_lahir"
+                                        class="form-input @error('tempat_lahir') error @enderror"
+                                        value="{{ $pesertaData ? $pesertaData->tempat_lahir : old('tempat_lahir') }}"
+                                        placeholder="Masukkan tempat lahir">
+                                    @error('tempat_lahir')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Tanggal Lahir</label>
+                                    <input type="date" name="tanggal_lahir"
+                                        class="form-input @error('tanggal_lahir') error @enderror"
+                                        value="{{ $pesertaData ? (is_string($pesertaData->tanggal_lahir) ? \Carbon\Carbon::parse($pesertaData->tanggal_lahir)->format('Y-m-d') : ($pesertaData->tanggal_lahir ? $pesertaData->tanggal_lahir->format('Y-m-d') : '')) : old('tanggal_lahir') }}">
+                                    @error('tanggal_lahir')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Agama</label>
                                     <select name="agama" class="form-select @error('agama') error @enderror">
@@ -227,15 +252,39 @@
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Alamat Rumah</label>
-                                <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror"
-                                    placeholder="Masukkan alamat lengkap rumah">{{ $pesertaData ? $pesertaData->alamat_rumah : old('alamat_rumah') }}</textarea>
-                                @error('alamat_rumah')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
+                                <div class="form-group">
+                                    <label class="form-label">Status Perkawinan</label>
+                                    <select name="status_perkawinan" id="status_perkawinan"
+                                        class="form-select @error('status_perkawinan') error @enderror">
+                                        <option value="">Pilih</option>
+                                        <option value="Belum Menikah" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Belum Menikah') || old('status_perkawinan') == 'Belum Menikah' ? 'selected' : '' }}>
+                                            Belum Menikah
+                                        </option>
+                                        <option value="Menikah" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Menikah') || old('status_perkawinan') == 'Menikah' ? 'selected' : '' }}>
+                                            Menikah
+                                        </option>
+                                        <option value="Duda" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Duda') || old('status_perkawinan') == 'Duda' ? 'selected' : '' }}>
+                                            Duda
+                                        </option>
+                                        <option value="Janda" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Janda') || old('status_perkawinan') == 'Janda' ? 'selected' : '' }}>
+                                            Janda
+                                        </option>
+                                    </select>
+                                    @error('status_perkawinan')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Nama Istri/Suami</label>
+                                    <input type="text" name="nama_pasangan" id="nama_pasangan"
+                                        class="form-input @error('nama_pasangan') error @enderror"
+                                        value="{{ $pesertaData ? $pesertaData->nama_pasangan : old('nama_pasangan') }}"
+                                        placeholder="Masukkan nama pasangan (jika menikah)"
+                                        {{ ($pesertaData && $pesertaData->status_perkawinan != 'Menikah') && !old('nama_pasangan') ? 'disabled' : '' }}>
+                                    @error('nama_pasangan')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
                             </div>
 
                             <div class="form-row">
@@ -259,6 +308,50 @@
                                     @enderror
                                 </div>
                             </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Alamat Rumah</label>
+                                    <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror"
+                                        placeholder="Masukkan alamat lengkap rumah">{{ $pesertaData ? $pesertaData->alamat_rumah : old('alamat_rumah') }}</textarea>
+                                    @error('alamat_rumah')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Kondisi Peserta</label>
+                                    <textarea name="kondisi_peserta" class="form-textarea @error('kondisi_peserta') error @enderror"
+                                        placeholder="Masukkan kondisi peserta">{{ $pesertaData ? $pesertaData->kondisi_peserta : old('kondisi_peserta') }}</textarea>
+                                    @error('kondisi_peserta')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Olahraga Kegemaran</label>
+                                    <input type="text" name="olahraga_hobi"
+                                        class="form-input @error('olahraga_hobi') error @enderror"
+                                        value="{{ $pesertaData ? $pesertaData->olahraga_hobi : old('olahraga_hobi') }}"
+                                        placeholder="Contoh: Sepakbola, Renang">
+                                    @error('olahraga_hobi')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Apakah Anda merokok?</label>
+                                    <select name="perokok" class="form-select @error('perokok') error @enderror">
+                                        <option value="">Pilih</option>
+                                        <option value="Ya" {{ ($pesertaData && $pesertaData->perokok == 'Ya') || old('perokok') == 'Ya' ? 'selected' : '' }}>Ya</option>
+                                        <option value="Tidak" {{ ($pesertaData && $pesertaData->perokok == 'Tidak') || old('perokok') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
+                                    </select>
+                                    @error('perokok')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
 
                             <div class="form-row">
                                 <div class="form-group">
@@ -266,8 +359,8 @@
                                     <select name="pendidikan_terakhir"
                                         class="form-select @error('pendidikan_terakhir') error @enderror">
                                         <option value="">Pilih</option>
-                                        <option value="SMU" {{ ($pesertaData && $pesertaData->pendidikan_terakhir == 'SMU') || old('pendidikan_terakhir') == 'SMU' ? 'selected' : '' }}>SMU</option>
                                         <option value="D3" {{ ($pesertaData && $pesertaData->pendidikan_terakhir == 'D3') || old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3</option>
+                                        <option value="D4" {{ ($pesertaData && $pesertaData->pendidikan_terakhir == 'D4') || old('pendidikan_terakhir') == 'D4' ? 'selected' : '' }}>D4</option>
                                         <option value="S1" {{ ($pesertaData && $pesertaData->pendidikan_terakhir == 'S1') || old('pendidikan_terakhir') == 'S1' ? 'selected' : '' }}>S1</option>
                                         <option value="S2" {{ ($pesertaData && $pesertaData->pendidikan_terakhir == 'S2') || old('pendidikan_terakhir') == 'S2' ? 'selected' : '' }}>S2</option>
                                         <option value="S3" {{ ($pesertaData && $pesertaData->pendidikan_terakhir == 'S3') || old('pendidikan_terakhir') == 'S3' ? 'selected' : '' }}>S3</option>
@@ -298,79 +391,6 @@
                                 </div>
                             </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Status Perkawinan</label>
-                                    <select name="status_perkawinan"
-                                        class="form-select @error('status_perkawinan') error @enderror">
-                                        <option value="">Pilih</option>
-                                        <option value="Belum Menikah" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Belum Menikah') || old('status_perkawinan') == 'Belum Menikah' ? 'selected' : '' }}>Belum Menikah
-                                        </option>
-                                        <option value="Menikah" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Menikah') || old('status_perkawinan') == 'Menikah' ? 'selected' : '' }}>Menikah</option>
-                                        <option value="Duda" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Duda') || old('status_perkawinan') == 'Duda' ? 'selected' : '' }}>Duda</option>
-                                        <option value="Janda" {{ ($pesertaData && $pesertaData->status_perkawinan == 'Janda') || old('status_perkawinan') == 'Janda' ? 'selected' : '' }}>Janda</option>
-                                    </select>
-                                    @error('status_perkawinan')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Nama Istri/Suami</label>
-                                    <input type="text" name="nama_pasangan"
-                                        class="form-input @error('nama_pasangan') error @enderror"
-                                        value="{{ $pesertaData ? $pesertaData->nama_pasangan : old('nama_pasangan') }}"
-                                        placeholder="Masukkan nama pasangan (jika menikah)">
-                                    @error('nama_pasangan')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Tempat Lahir</label>
-                                    <input type="text" name="tempat_lahir"
-                                        class="form-input @error('tempat_lahir') error @enderror"
-                                        value="{{ $pesertaData ? $pesertaData->tempat_lahir : old('tempat_lahir') }}"
-                                        placeholder="Masukkan tempat lahir">
-                                    @error('tempat_lahir')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Tanggal Lahir</label>
-                                    <input type="date" name="tanggal_lahir"
-                                        class="form-input @error('tanggal_lahir') error @enderror"
-                                        value="{{ $pesertaData ? (is_string($pesertaData->tanggal_lahir) ? \Carbon\Carbon::parse($pesertaData->tanggal_lahir)->format('Y-m-d') : ($pesertaData->tanggal_lahir ? $pesertaData->tanggal_lahir->format('Y-m-d') : '')) : old('tanggal_lahir') }}">
-                                    @error('tanggal_lahir')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Olahraga Kegemaran</label>
-                                    <input type="text" name="olahraga_hobi"
-                                        class="form-input @error('olahraga_hobi') error @enderror"
-                                        value="{{ $pesertaData ? $pesertaData->olahraga_hobi : old('olahraga_hobi') }}"
-                                        placeholder="Contoh: Sepakbola, Renang">
-                                    @error('olahraga_hobi')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Apakah Anda merokok?</label>
-                                    <select name="perokok" class="form-select @error('perokok') error @enderror">
-                                        <option value="">Pilih</option>
-                                        <option value="Ya" {{ ($pesertaData && $pesertaData->perokok == 'Ya') || old('perokok') == 'Ya' ? 'selected' : '' }}>Ya</option>
-                                        <option value="Tidak" {{ ($pesertaData && $pesertaData->perokok == 'Tidak') || old('perokok') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
-                                    </select>
-                                    @error('perokok')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                            </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Ukuran Kaos</label>
@@ -418,52 +438,6 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Kondisi Peserta</label>
-                                <textarea name="kondisi_peserta" class="form-textarea @error('kondisi_peserta') error @enderror"
-                                    placeholder="Masukkan kondisi peserta">{{ $pesertaData ? $pesertaData->kondisi_peserta : old('kondisi_peserta') }}</textarea>
-                                @error('kondisi_peserta')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            <!-- Current Photo Preview -->
-                            @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
-                                <div class="form-group">
-                                    <label class="form-label">Pasfoto Saat Ini</label>
-                                    <div class="current-file-preview">
-                                        <img src="{{ asset($pesertaData->file_pas_foto) }}" alt="Pasfoto" class="img-thumbnail"
-                                            style="max-width: 200px; max-height: 200px;">
-                                        <small class="d-block text-muted mt-1">Pasfoto yang sudah diunggah</small>
-                                    </div>
-                                </div>
-                            @endif
-
-                            <div class="form-group">
-                                <label class="form-label">Upload Pasfoto peserta berwarna</label>
-                                <div class="form-hint">Format JPG/PNG, maksimal 5MB</div>
-                                <div class="form-file">
-                                    <input type="file" name="file_pas_foto" id="file_pas_foto"
-                                        class="form-file-input @error('file_pas_foto') error @enderror"
-                                        accept=".jpg,.jpeg,.png">
-                                    <label class="form-file-label" for="file_pas_foto">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit ? 'Ganti Pasfoto (Opsional)' : 'Klik untuk mengunggah file JPG/PNG (maks. 5MB)' }}</span>
-                                    </label>
-                                    <div class="form-file-name" id="filePasFotoName">
-                                        @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
-                                            File sudah ada: {{ basename($pesertaData->file_pas_foto) }}
-                                        @elseif(old('file_pas_foto'))
-                                            File sudah diupload sebelumnya
-                                        @else
-                                            Belum ada file dipilih
-                                        @endif
-                                    </div>
-                                </div>
-                                @error('file_pas_foto')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
                         </div>
 
                         <div class="step-navigation">
@@ -480,7 +454,7 @@
                     <div class="form-step" id="step3-content">
                         <div class="step-header">
                             <h2 class="step-title">Data Kepegawaian & Mentor</h2>
-                            <p class="step-description">Lengkapi informasi instansi dan penugasan mentor</p>
+                            <p class="step-description">Lengkapi informasi instansi dan penugasan mentor (semua field opsional)</p>
                             <div class="selected-info">
                                 <div class="info-badge">
                                     <i class="fas fa-book"></i> <span id="current-training-name-2">{{ $jenisNama }}</span>
@@ -509,11 +483,12 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Jabatan</label>
-                                    <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
-                                        value="{{ $kepegawaianData ? $kepegawaianData->jabatan : old('jabatan') }}"
-                                        placeholder="Jabatan saat ini">
-                                    @error('jabatan')
+                                    <label class="form-label">Unit Kerja/ Detail Instansi</label>
+                                    <input type="text" name="unit_kerja"
+                                        class="form-input @error('unit_kerja') error @enderror"
+                                        placeholder="Contoh: Sekretariat Daerah Kota Makassar"
+                                        value="{{ $kepegawaianData ? $kepegawaianData->unit_kerja : old('unit_kerja') }}">
+                                    @error('unit_kerja')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
@@ -522,14 +497,21 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Golongan Ruang</label>
-                                    <select name="golongan_ruang"
+                                    <select name="golongan_ruang" id="golongan_ruang"
                                         class="form-select @error('golongan_ruang') error @enderror">
                                         <option value="">Pilih</option>
-                                        <option value="III/C" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'III/C') || old('golongan_ruang') == 'III/C' ? 'selected' : '' }}>III/C</option>
-                                        <option value="III/B" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'III/B') || old('golongan_ruang') == 'III/B' ? 'selected' : '' }}>III/B</option>
-                                        <option value="III/A" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'III/A') || old('golongan_ruang') == 'III/A' ? 'selected' : '' }}>III/A</option>
-                                        <option value="II/C" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'II/C') || old('golongan_ruang') == 'II/C' ? 'selected' : '' }}>II/C</option>
-                                        <option value="II/A" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'II/A') || old('golongan_ruang') == 'II/A' ? 'selected' : '' }}>II/A</option>
+                                        <option value="II/a" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'II/a') || old('golongan_ruang') == 'II/a' ? 'selected' : '' }}>II/a</option>
+                                        <option value="II/b" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'II/b') || old('golongan_ruang') == 'II/b' ? 'selected' : '' }}>II/b</option>
+                                        <option value="II/c" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'II/c') || old('golongan_ruang') == 'II/c' ? 'selected' : '' }}>II/c</option>
+                                        <option value="II/d" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'II/d') || old('golongan_ruang') == 'II/d' ? 'selected' : '' }}>II/d</option>
+                                        <option value="III/a" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'III/a') || old('golongan_ruang') == 'III/a' ? 'selected' : '' }}>III/a</option>
+                                        <option value="III/b" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'III/b') || old('golongan_ruang') == 'III/b' ? 'selected' : '' }}>III/b</option>
+                                        <option value="III/c" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'III/c') || old('golongan_ruang') == 'III/c' ? 'selected' : '' }}>III/c</option>
+                                        <option value="III/d" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'III/d') || old('golongan_ruang') == 'III/d' ? 'selected' : '' }}>III/d</option>
+                                        <option value="IV/a" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/a') || old('golongan_ruang') == 'IV/a' ? 'selected' : '' }}>IV/a</option>
+                                        <option value="IV/b" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/b') || old('golongan_ruang') == 'IV/b' ? 'selected' : '' }}>IV/b</option>
+                                        <option value="IV/c" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/c') || old('golongan_ruang') == 'IV/c' ? 'selected' : '' }}>IV/c</option>
+                                        <option value="IV/d" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/d') || old('golongan_ruang') == 'IV/d' ? 'selected' : '' }}>IV/d</option>
                                     </select>
                                     @error('golongan_ruang')
                                         <small class="text-danger">{{ $message }}</small>
@@ -537,18 +519,27 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Pangkat</label>
-                                    <select name="pangkat" class="form-select @error('pangkat') error @enderror">
-                                        <option value="">Pilih</option>
-                                        <option value="Penata" {{ ($kepegawaianData && $kepegawaianData->pangkat == 'Penata') || old('pangkat') == 'Penata' ? 'selected' : '' }}>Penata</option>
-                                        <option value="Penata Muda Tingkat I" {{ ($kepegawaianData && $kepegawaianData->pangkat == 'Penata Muda Tingkat I') || old('pangkat') == 'Penata Muda Tingkat I' ? 'selected' : '' }}>Penata Muda Tingkat I</option>
-                                        <option value="Penata Muda" {{ ($kepegawaianData && $kepegawaianData->pangkat == 'Penata Muda') || old('pangkat') == 'Penata Muda' ? 'selected' : '' }}>Penata Muda</option>
-                                        <option value="Pengatur" {{ ($kepegawaianData && $kepegawaianData->pangkat == 'Pengatur') || old('pangkat') == 'Pengatur' ? 'selected' : '' }}>Pengatur</option>
-                                        <option value="Pengatur Muda" {{ ($kepegawaianData && $kepegawaianData->pangkat == 'Pengatur Muda') || old('pangkat') == 'Pengatur Muda' ? 'selected' : '' }}>Pengatur Muda</option>
-                                    </select>
+                                    <input type="text" name="pangkat" id="pangkat"
+                                        class="form-input @error('pangkat') error @enderror"
+                                        value="{{ $kepegawaianData ? $kepegawaianData->pangkat : old('pangkat') }}"
+                                        placeholder="Pangkat otomatis terisi" readonly>
                                     @error('pangkat')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Jabatan</label>
+                                    <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
+                                        value="{{ $kepegawaianData ? $kepegawaianData->jabatan : old('jabatan') }}"
+                                        placeholder="Jabatan saat ini">
+                                    @error('jabatan')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                
                             </div>
 
                             <div class="form-row">
@@ -596,16 +587,17 @@
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+                                
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Alamat Kantor</label>
-                                <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror"
-                                    placeholder="Masukkan alamat lengkap kantor">{{ $kepegawaianData ? $kepegawaianData->alamat_kantor : old('alamat_kantor') }}</textarea>
-                                @error('alamat_kantor')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
+                                    <label class="form-label">Alamat Kantor</label>
+                                    <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror"
+                                        placeholder="Masukkan alamat lengkap kantor">{{ $kepegawaianData ? $kepegawaianData->alamat_kantor : old('alamat_kantor') }}</textarea>
+                                    @error('alamat_kantor')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
 
                             <div class="form-row">
                                 <div class="form-group">
@@ -630,143 +622,27 @@
                                 </div>
                             </div>
 
-                            <!-- Data SK CPNS khusus untuk LATSAR -->
-                            @if($isLATSAR)
-                                <div class="form-section-header">
-                                    <i class="fas fa-file-contract"></i> Data SK CPNS
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Nomor SK CPNS</label>
+                                    <input type="text" name="nomor_sk_cpns"
+                                        class="form-input @error('nomor_sk_cpns') error @enderror"
+                                        value="{{ $kepegawaianData ? $kepegawaianData->nomor_sk_cpns : old('nomor_sk_cpns') }}"
+                                        placeholder="Masukkan nomor SK CPNS">
+                                    @error('nomor_sk_cpns')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
-
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="form-label">Nomor SK CPNS</label>
-                                        <input type="text" name="nomor_sk_cpns"
-                                            class="form-input @error('nomor_sk_cpns') error @enderror"
-                                            value="{{ $kepegawaianData ? $kepegawaianData->nomor_sk_cpns : old('nomor_sk_cpns') }}"
-                                            placeholder="Masukkan nomor SK CPNS">
-                                        @error('nomor_sk_cpns')
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Tanggal SK CPNS</label>
-                                        <input type="date" name="tanggal_sk_cpns"
-                                            class="form-input @error('tanggal_sk_cpns') error @enderror"
-                                            value="{{ $kepegawaianData ? (is_string($kepegawaianData->tanggal_sk_cpns) ? \Carbon\Carbon::parse($kepegawaianData->tanggal_sk_cpns)->format('Y-m-d') : ($kepegawaianData->tanggal_sk_cpns ? $kepegawaianData->tanggal_sk_cpns->format('Y-m-d') : '')) : old('tanggal_sk_cpns') }}">
-                                        @error('tanggal_sk_cpns')
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
+                                <div class="form-group">
+                                    <label class="form-label">Tanggal SK CPNS</label>
+                                    <input type="date" name="tanggal_sk_cpns"
+                                        class="form-input @error('tanggal_sk_cpns') error @enderror"
+                                        value="{{ $kepegawaianData ? (is_string($kepegawaianData->tanggal_sk_cpns) ? \Carbon\Carbon::parse($kepegawaianData->tanggal_sk_cpns)->format('Y-m-d') : ($kepegawaianData->tanggal_sk_cpns ? $kepegawaianData->tanggal_sk_cpns->format('Y-m-d') : '')) : old('tanggal_sk_cpns') }}">
+                                    @error('tanggal_sk_cpns')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
-                            @endif
-
-                            <!-- Current Document Previews -->
-                            @if($isEdit && $kepegawaianData)
-                                @if($kepegawaianData->file_sk_jabatan)
-                                    <div class="form-group">
-                                        <label class="form-label">SK Jabatan Saat Ini</label>
-                                        <div class="current-file-preview">
-                                            <a href="{{ asset($kepegawaianData->file_sk_jabatan) }}" target="_blank"
-                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye me-1"></i> Lihat SK Jabatan
-                                            </a>
-                                            <small class="d-block text-muted mt-1">File: {{ basename($kepegawaianData->file_sk_jabatan) }}</small>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if($kepegawaianData->file_sk_pangkat)
-                                    <div class="form-group">
-                                        <label class="form-label">SK Pangkat Saat Ini</label>
-                                        <div class="current-file-preview">
-                                            <a href="{{ asset($kepegawaianData->file_sk_pangkat) }}" target="_blank"
-                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye me-1"></i> Lihat SK Pangkat
-                                            </a>
-                                            <small class="d-block text-muted mt-1">File: {{ basename($kepegawaianData->file_sk_pangkat) }}</small>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if($isLATSAR && $kepegawaianData->file_sk_cpns)
-                                    <div class="form-group">
-                                        <label class="form-label">SK CPNS Saat Ini</label>
-                                        <div class="current-file-preview">
-                                            <a href="{{ asset($kepegawaianData->file_sk_cpns) }}" target="_blank"
-                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye me-1"></i> Lihat SK CPNS
-                                            </a>
-                                            <small class="d-block text-muted mt-1">File: {{ basename($kepegawaianData->file_sk_cpns) }}</small>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if($isLATSAR && $kepegawaianData->file_spmt)
-                                    <div class="form-group">
-                                        <label class="form-label">SPMT Saat Ini</label>
-                                        <div class="current-file-preview">
-                                            <a href="{{ asset($kepegawaianData->file_spmt) }}" target="_blank"
-                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye me-1"></i> Lihat SPMT
-                                            </a>
-                                            <small class="d-block text-muted mt-1">File: {{ basename($kepegawaianData->file_spmt) }}</small>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endif
-
-                            <!-- File SK CPNS khusus untuk LATSAR -->
-                            @if($isLATSAR)
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="form-label">Unggah SK CPNS</label>
-                                        <div class="form-file">
-                                            <input type="file" name="file_sk_cpns" id="file_sk_cpns"
-                                                class="form-file-input @error('file_sk_cpns') error @enderror" 
-                                                accept=".pdf">
-                                            <label class="form-file-label" for="file_sk_cpns">
-                                                <i class="fas fa-cloud-upload-alt"></i>
-                                                <span>{{ $isEdit ? 'Ganti SK CPNS (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
-                                            </label>
-                                            <div class="form-file-name" id="fileSkCpnsName">
-                                                @if($isEdit && $kepegawaianData && $kepegawaianData->file_sk_cpns)
-                                                    File sudah ada: {{ basename($kepegawaianData->file_sk_cpns) }}
-                                                @elseif(old('file_sk_cpns'))
-                                                    File sudah diupload sebelumnya
-                                                @else
-                                                    Belum ada file dipilih
-                                                @endif
-                                            </div>
-                                        </div>
-                                        @error('file_sk_cpns')
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Unggah SPMT</label>
-                                        <div class="form-file">
-                                            <input type="file" name="file_spmt" id="file_spmt"
-                                                class="form-file-input @error('file_spmt') error @enderror" 
-                                                accept=".pdf">
-                                            <label class="form-file-label" for="file_spmt">
-                                                <i class="fas fa-cloud-upload-alt"></i>
-                                                <span>{{ $isEdit ? 'Ganti SPMT (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
-                                            </label>
-                                            <div class="form-file-name" id="fileSpmtName">
-                                                @if($isEdit && $kepegawaianData && $kepegawaianData->file_spmt)
-                                                    File sudah ada: {{ basename($kepegawaianData->file_spmt) }}
-                                                @elseif(old('file_spmt'))
-                                                    File sudah diupload sebelumnya
-                                                @else
-                                                    Belum ada file dipilih
-                                                @endif
-                                            </div>
-                                        </div>
-                                        @error('file_spmt')
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-                                </div>
-                            @endif
+                            </div>
 
                             <!-- Data Mentor -->
                             <div class="form-section-header">
@@ -953,7 +829,7 @@
                     <div class="form-step" id="step4-content">
                         <div class="step-header">
                             <h2 class="step-title">Dokumen Pendaftaran</h2>
-                            <p class="step-description">Unggah dokumen yang diperlukan (dapat diunggah nanti)</p>
+                            <p class="step-description">Unggah dokumen yang diperlukan (semua dokumen opsional)</p>
                             <div class="selected-info">
                                 <div class="info-badge">
                                     <i class="fas fa-book"></i> <span id="current-training-name-3">{{ $jenisNama }}</span>
@@ -965,9 +841,9 @@
                         </div>
 
                         @if(!$isEdit)
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <strong>Perhatian:</strong> Dokumen dapat diunggah nanti setelah peserta terdaftar. Namun disarankan untuk mengunggah dokumen utama terlebih dahulu.
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Informasi:</strong> Semua dokumen bersifat opsional dan dapat diunggah nanti setelah peserta terdaftar.
                             </div>
                         @endif
 
@@ -1003,76 +879,166 @@
                                                     class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-eye me-1"></i> Lihat {{ $label }}
                                                 </a>
-                                                <small class="d-block text-muted mt-1">File: {{ basename($pendaftaran->$field) }}</small>
+                                                <small class="d-block text-muted mt-1">File:
+                                                    {{ basename($pendaftaran->$field) }}</small>
                                             </div>
                                         </div>
                                     @endif
                                 @endforeach
                             @endif
 
+                            <!-- KTP -->
                             <div class="form-group">
-                                <label class="form-label">Unggah Surat Kesediaan</label>
-                                <div class="form-hint">Surat kesediaan mengikuti pelatihan</div>
+                                <label class="form-label">Upload KTP</label>
+                                <div class="form-hint">Format PDF/JPG/PNG, maksimal 5MB</div>
                                 <div class="form-file">
-                                    <input type="file" name="file_surat_kesediaan" id="file_surat_kesediaan"
-                                        class="form-file-input @error('file_surat_kesediaan') error @enderror" 
-                                        accept=".pdf">
-                                    <label class="form-file-label" for="file_surat_kesediaan">
+                                    <input type="file" name="file_ktp" id="file_ktp"
+                                        class="form-file-input @error('file_ktp') error @enderror"
+                                        accept=".pdf,.jpg,.jpeg,.png">
+                                    <label class="form-file-label" for="file_ktp">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pendaftaran->file_surat_kesediaan ? 'Ganti Surat Kesediaan (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        <span>{{ $isEdit && $pesertaData && $pesertaData->file_ktp ? 'Ganti KTP' : 'Klik untuk mengunggah file KTP' }}</span>
                                     </label>
-                                    <div class="form-file-name" id="fileSuratKesediaanName">
-                                        @if($isEdit && $pendaftaran->file_surat_kesediaan)
-                                            File sudah ada: {{ basename($pendaftaran->file_surat_kesediaan) }}
-                                        @elseif(old('file_surat_kesediaan'))
+                                    <div class="form-file-name" id="fileKtpName">
+                                        @if($isEdit && $pesertaData && $pesertaData->file_ktp)
+                                            File sudah ada: {{ basename($pesertaData->file_ktp) }}
+                                        @elseif(old('file_ktp'))
                                             File sudah diupload sebelumnya
                                         @else
                                             Belum ada file dipilih
                                         @endif
                                     </div>
                                 </div>
-                                @error('file_surat_kesediaan')
+                                @error('file_ktp')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
 
+                            <!-- Current Photo Preview -->
+                            @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
+                                <div class="form-group">
+                                    <label class="form-label">Pasfoto Saat Ini</label>
+                                    <div class="current-file-preview">
+                                        <img src="{{ asset($pesertaData->file_pas_foto) }}" alt="Pasfoto" class="img-thumbnail"
+                                            style="max-width: 200px; max-height: 200px;">
+                                        <small class="d-block text-muted mt-1">Pasfoto yang sudah diunggah</small>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Pas Foto -->
                             <div class="form-group">
-                                <label class="form-label">Unggah Persetujuan Mentor</label>
-                                <div class="form-hint">Persetujuan mentor untuk membimbing peserta</div>
+                                <label class="form-label">Upload Pasfoto peserta berwarna</label>
+                                <div class="form-hint">Format JPG/PNG, maksimal 5MB</div>
                                 <div class="form-file">
-                                    <input type="file" name="file_persetujuan_mentor" id="file_persetujuan_mentor"
-                                        class="form-file-input @error('file_persetujuan_mentor') error @enderror"
-                                        accept=".pdf">
-                                    <label class="form-file-label" for="file_persetujuan_mentor">
+                                    <input type="file" name="file_pas_foto" id="file_pas_foto"
+                                        class="form-file-input @error('file_pas_foto') error @enderror"
+                                        accept=".jpg,.jpeg,.png">
+                                    <label class="form-file-label" for="file_pas_foto">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pendaftaran->file_persetujuan_mentor ? 'Ganti Persetujuan Mentor (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 5MB)' }}</span>
                                     </label>
-                                    <div class="form-file-name" id="filePersetujuanMentorName">
-                                        @if($isEdit && $pendaftaran->file_persetujuan_mentor)
-                                            File sudah ada: {{ basename($pendaftaran->file_persetujuan_mentor) }}
-                                        @elseif(old('file_persetujuan_mentor'))
+                                    <div class="form-file-name" id="filePasFotoName">
+                                        @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
+                                            File sudah ada: {{ basename($pesertaData->file_pas_foto) }}
+                                        @elseif(old('file_pas_foto'))
                                             File sudah diupload sebelumnya
                                         @else
                                             Belum ada file dipilih
                                         @endif
                                     </div>
                                 </div>
-                                @error('file_persetujuan_mentor')
+                                @error('file_pas_foto')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">
-                                    Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang
-                                </label>
-                                <div class="form-hint">jika belum maka WAJIB disertakan saat registrasi ulang di Puslatbang KMP</div>
+                                    <label class="form-label">Unggah SK CPNS</label>
+                                    <div class="form-file">
+                                        <input type="file" name="file_sk_cpns" id="file_sk_cpns"
+                                            class="form-file-input @error('file_sk_cpns') error @enderror" accept=".pdf">
+                                        <label class="form-file-label" for="file_sk_cpns">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_sk_cpns ? 'Ganti SK CPNS' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        </label>
+                                        <div class="form-file-name" id="fileSkCpnsName">
+                                            @if($isEdit && $kepegawaianData && $kepegawaianData->file_sk_cpns)
+                                                File sudah ada: {{ basename($kepegawaianData->file_sk_cpns) }}
+                                            @elseif(old('file_sk_cpns'))
+                                                File sudah diupload sebelumnya
+                                            @else
+                                                Belum ada file dipilih
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @error('file_sk_cpns')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <!-- File SPMT -->
+                                <div class="form-group">
+                                    <label class="form-label">Unggah SPMT</label>
+                                    <div class="form-file">
+                                        <input type="file" name="file_spmt" id="file_spmt"
+                                            class="form-file-input @error('file_spmt') error @enderror" accept=".pdf">
+                                        <label class="form-file-label" for="file_spmt">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_spmt ? 'Ganti SPMT' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        </label>
+                                        <div class="form-file-name" id="fileSpmtName">
+                                            @if($isEdit && $kepegawaianData && $kepegawaianData->file_spmt)
+                                                File sudah ada: {{ basename($kepegawaianData->file_spmt) }}
+                                            @elseif(old('file_spmt'))
+                                                File sudah diupload sebelumnya
+                                            @else
+                                                Belum ada file dipilih
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @error('file_spmt')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <!-- File SKP -->
+                                <div class="form-group">
+                                    <label class="form-label">Unggah SKP (Sasaran Kinerja Pegawai)</label>
+                                    <div class="form-file">
+                                        <input type="file" name="file_skp" id="file_skp"
+                                            class="form-file-input @error('file_skp') error @enderror" accept=".pdf">
+                                        <label class="form-file-label" for="file_skp">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_skp ? 'Ganti SKP' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        </label>
+                                        <div class="form-file-name" id="fileSkpName">
+                                            @if($isEdit && $kepegawaianData && $kepegawaianData->file_skp)
+                                                File sudah ada: {{ basename($kepegawaianData->file_skp) }}
+                                            @elseif(old('file_skp'))
+                                                File sudah diupload sebelumnya
+                                            @else
+                                                Belum ada file dipilih
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @error('file_skp')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                            <!-- Surat Tugas -->
+                            <div class="form-group">
+                                <label class="form-label">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani
+                                    oleh pejabat yang berwenang</label>
+                                <div class="form-hint">jika belum maka WAJIB disertakan saat registrasi ulang di Puslatbang
+                                    KMP</div>
                                 <div class="form-file">
                                     <input type="file" name="file_surat_tugas" id="file_surat_tugas"
                                         class="form-file-input @error('file_surat_tugas') error @enderror" accept=".pdf">
                                     <label class="form-file-label" for="file_surat_tugas">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pendaftaran->file_surat_tugas ? 'Ganti Surat Tugas (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        <span>{{ $isEdit && $pendaftaran->file_surat_tugas ? 'Ganti Surat Tugas' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
                                     </label>
                                     <div class="form-file-name" id="fileSuratTugasName">
                                         @if($isEdit && $pendaftaran->file_surat_tugas)
@@ -1090,41 +1056,42 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Unggah Surat Pernyataan Administrasi</label>
-                                <div class="form-file">
-                                    <input type="file" name="file_surat_pernyataan_administrasi"
-                                        id="file_surat_pernyataan_administrasi"
-                                        class="form-file-input @error('file_surat_pernyataan_administrasi') error @enderror"
-                                        accept=".pdf">
-                                    <label class="form-file-label" for="file_surat_pernyataan_administrasi">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pendaftaran->file_surat_pernyataan_administrasi ? 'Ganti Surat Pernyataan (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
-                                    </label>
-                                    <div class="form-file-name" id="fileSuratPernyataanName">
-                                        @if($isEdit && $pendaftaran->file_surat_pernyataan_administrasi)
-                                            File sudah ada: {{ basename($pendaftaran->file_surat_pernyataan_administrasi) }}
-                                        @elseif(old('file_surat_pernyataan_administrasi'))
-                                            File sudah diupload sebelumnya
-                                        @else
-                                            Belum ada file dipilih
-                                        @endif
+                                    <label class="form-label">Unggah Scan Formulir Kesediaan (file dapat diunduh di <a href="https://bit.ly/3VtcljN" target="_blank">Disini</a>)</label>
+                                    <div class="form-file">
+                                        <input type="file" name="file_surat_kesediaan" id="file_surat_kesediaan"
+                                            class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf">
+                                        <label class="form-file-label" for="file_surat_kesediaan">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span>{{ $isEdit && $pendaftaran->file_surat_kesediaan ? 'Ganti Surat Kesediaan' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        </label>
+                                        <div class="form-file-name" id="fileSuratKesediaanName">
+                                            @if($isEdit && $pendaftaran->file_surat_kesediaan)
+                                                File sudah ada: {{ basename($pendaftaran->file_surat_kesediaan) }}
+                                            @elseif(old('file_surat_kesediaan'))
+                                                File sudah diupload sebelumnya
+                                            @else
+                                                Belum ada file dipilih
+                                            @endif
+                                        </div>
                                     </div>
+                                    @error('file_surat_kesediaan')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
-                                @error('file_surat_pernyataan_administrasi')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
+
+
+                            
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Unggah Surat Keterangan Berbadan Sehat</label>
+                                    <div class="form-hint">Format PDF, maksimal 5MB</div>
                                     <div class="form-file">
                                         <input type="file" name="file_surat_sehat" id="file_surat_sehat"
-                                            class="form-file-input @error('file_surat_sehat') error @enderror" 
-                                            accept=".pdf">
+                                            class="form-file-input @error('file_surat_sehat') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_surat_sehat">
                                             <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $pendaftaran->file_surat_sehat ? 'Ganti Surat Sehat (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                            <span>{{ $isEdit && $pendaftaran->file_surat_sehat ? 'Ganti Surat Sehat' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
                                         </label>
                                         <div class="form-file-name" id="fileSuratSehatName">
                                             @if($isEdit && $pendaftaran->file_surat_sehat)
@@ -1140,83 +1107,8 @@
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Unggah Surat Bebas Narkoba</label>
-                                    <div class="form-file">
-                                        <input type="file" name="file_surat_bebas_narkoba" id="file_surat_bebas_narkoba"
-                                            class="form-file-input @error('file_surat_bebas_narkoba') error @enderror" 
-                                            accept=".pdf">
-                                        <label class="form-file-label" for="file_surat_bebas_narkoba">
-                                            <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $pendaftaran->file_surat_bebas_narkoba ? 'Ganti Surat Bebas Narkoba (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
-                                        </label>
-                                        <div class="form-file-name" id="fileSuratBebasNarkobaName">
-                                            @if($isEdit && $pendaftaran->file_surat_bebas_narkoba)
-                                                File sudah ada: {{ basename($pendaftaran->file_surat_bebas_narkoba) }}
-                                            @elseif(old('file_surat_bebas_narkoba'))
-                                                File sudah diupload sebelumnya
-                                            @else
-                                                Belum ada file dipilih
-                                            @endif
-                                        </div>
-                                    </div>
-                                    @error('file_surat_bebas_narkoba')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
                             </div>
 
-                            <!-- Dokumen tambahan untuk LATSAR -->
-                            @if($isLATSAR)
-                                <div class="form-group">
-                                    <label class="form-label">Unggah SKP (Sasaran Kinerja Pegawai)</label>
-                                    <div class="form-file">
-                                        <input type="file" name="file_skp" id="file_skp"
-                                            class="form-file-input @error('file_skp') error @enderror" accept=".pdf">
-                                        <label class="form-file-label" for="file_skp">
-                                            <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_skp ? 'Ganti SKP (Opsional)' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
-                                        </label>
-                                        <div class="form-file-name" id="fileSkpName">
-                                            @if($isEdit && $kepegawaianData && $kepegawaianData->file_skp)
-                                                File sudah ada: {{ basename($kepegawaianData->file_skp) }}
-                                            @elseif(old('file_skp'))
-                                                File sudah diupload sebelumnya
-                                            @else
-                                                Belum ada file dipilih
-                                            @endif
-                                        </div>
-                                    </div>
-                                    @error('file_skp')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Unggah Scan atau Foto KTP yang berlaku</label>
-                                    <div class="form-file">
-                                        <input type="file" name="file_ktp" id="file_ktp"
-                                            class="form-file-input @error('file_ktp') error @enderror"
-                                            accept=".pdf,jpg,jpeg,png">
-                                        <label class="form-file-label" for="file_ktp">
-                                            <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $pesertaData && $pesertaData->file_ktp ? 'Ganti KTP (Opsional)' : 'Klik untuk mengunggah file PDF/JPG/PNG (maks. 5MB)' }}</span>
-                                        </label>
-                                        <div class="form-file-name" id="fileKtpName">
-                                            @if($isEdit && $pesertaData && $pesertaData->file_ktp)
-                                                File sudah ada: {{ basename($pesertaData->file_ktp) }}
-                                            @elseif(old('file_ktp'))
-                                                File sudah diupload sebelumnya
-                                            @else
-                                                Belum ada file dipilih
-                                            @endif
-                                        </div>
-                                    </div>
-                                    @error('file_ktp')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                            @endif
-                        </div>
 
                         <div class="step-navigation">
                             <button type="button" class="btn btn-secondary" id="back-to-step3">
@@ -1234,1349 +1126,1379 @@
 @endsection
 
 @section('styles')
-<style>
-:root {
-    --primary-color: #1a3a6c;
-    --secondary-color: #2c5282;
-    --accent-color: #4299e1;
-    --success-color: #48bb78;
-    --warning-color: #ed8936;
-    --danger-color: #f56565;
-    --light-color: #f7fafc;
-    --dark-color: #2d3748;
-    --gray-color: #718096;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
-}
-
-/* Hero Section */
-.form-hero {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    padding: 40px 0;
-    margin-bottom: 40px;
-}
-
-.form-hero-content {
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.form-hero-title {
-    font-size: 2rem;
-    margin-bottom: 15px;
-    font-weight: 700;
-}
-
-.form-hero-text {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 30px;
-    line-height: 1.6;
-}
-
-.progress-indicator {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin-top: 30px;
-}
-
-.progress-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    opacity: 0.5;
-    transition: var(--transition);
-}
-
-.progress-step.active {
-    opacity: 1;
-}
-
-.step-number {
-    width: 40px;
-    height: 40px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    border: 2px solid transparent;
-}
-
-.progress-step.active .step-number {
-    background-color: var(--accent-color);
-    border-color: white;
-}
-
-.step-label {
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-/* Form Section */
-.form-section {
-    padding: 0 0 60px 0;
-}
-
-.form-wrapper {
-    max-width: 1000px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-}
-
-.form-step {
-    padding: 40px;
-    display: none;
-}
-
-.form-step.active {
-    display: block;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.step-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.step-title {
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.step-description {
-    color: var(--gray-color);
-    margin-bottom: 20px;
-}
-
-/* Selected Training */
-.selected-training {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(72, 187, 120, 0.1);
-    color: var(--success-color);
-    padding: 10px 20px;
-    border-radius: 5px;
-    margin-top: 15px;
-    font-weight: 500;
-}
-
-/* Form Elements */
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: var(--dark-color);
-}
-
-.form-label.required::after {
-    content: " *";
-    color: var(--danger-color);
-}
-
-.form-select,
-.form-input,
-.form-textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 2px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: var(--transition);
-    background: white;
-}
-
-.form-select.error,
-.form-input.error,
-.form-textarea.error {
-    border-color: var(--danger-color) !important;
-    box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1) !important;
-}
-
-.form-select:focus,
-.form-input:focus,
-.form-textarea:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-}
-
-.form-textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
-.form-hint {
-    font-size: 0.85rem;
-    color: var(--gray-color);
-    margin-top: 5px;
-    font-style: italic;
-}
-
-.form-file {
-    position: relative;
-    overflow: hidden;
-}
-
-.form-file-input {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.form-file-label {
-    display: block;
-    padding: 20px;
-    background: var(--light-color);
-    border: 2px dashed #cbd5e0;
-    border-radius: 6px;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.form-file-label:hover {
-    border-color: var(--accent-color);
-    background: rgba(66, 153, 225, 0.05);
-}
-
-.form-file-name {
-    margin-top: 10px;
-    font-size: 0.9rem;
-    color: var(--gray-color);
-}
-
-/* Error Styling */
-.text-danger {
-    color: var(--danger-color) !important;
-    font-size: 0.85rem;
-    margin-top: 5px;
-    display: block;
-}
-
-/* Angkatan Info */
-.angkatan-info {
-    margin-top: 30px;
-}
-
-.info-card {
-    background: linear-gradient(135deg, #f7fafc, #edf2f7);
-    border-radius: 10px;
-    padding: 20px;
-    border-left: 4px solid var(--accent-color);
-}
-
-.info-card h4 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--primary-color);
-    margin-bottom: 15px;
-    font-size: 1.1rem;
-}
-
-.info-details {
-    display: grid;
-    gap: 10px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.info-label {
-    font-weight: 500;
-    color: var(--dark-color);
-}
-
-.info-value {
-    color: var(--gray-color);
-}
-
-.info-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    background: var(--success-color);
-    color: white;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-/* Selected Info */
-.selected-info {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-
-.selected-info .info-badge {
-    background: var(--primary-color);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-}
-
-.dynamic-form-container {
-    margin-top: 30px;
-}
-
-.form-section-header {
-    font-size: 1.4rem;
-    color: var(--primary-color);
-    margin: 40px 0 20px 0;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e2e8f0;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.form-section-header:first-child {
-    margin-top: 0;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.checkbox-group input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-}
-
-.checkbox-group label {
-    margin: 0;
-    font-weight: normal;
-}
-
-/* Alert Styling */
-.alert {
-    padding: 12px 16px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.alert-info {
-    background-color: rgba(66, 153, 225, 0.1);
-    border-color: var(--accent-color);
-    color: var(--primary-color);
-}
-
-.alert-warning {
-    background-color: rgba(237, 137, 54, 0.1);
-    border-color: var(--warning-color);
-    color: #744210;
-}
-
-/* Buttons */
-.btn {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.btn-primary {
-    background: var(--accent-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--secondary-color);
-    transform: translateY(-2px);
-}
-
-.btn-primary:disabled {
-    background: #cbd5e0;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.btn-secondary {
-    background: #e2e8f0;
-    color: var(--dark-color);
-}
-
-.btn-secondary:hover {
-    background: #cbd5e0;
-}
-
-.btn-success {
-    background: var(--success-color);
-    color: white;
-}
-
-.btn-success:hover {
-    background: #38a169;
-    transform: translateY(-2px);
-}
-
-.step-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 2px solid #e2e8f0;
-}
-
-/* Additional Styles for Edit Mode */
-.current-file-preview {
-    margin-bottom: 15px;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #e9ecef;
-}
-
-.current-file-preview img {
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-}
-
-.form-input[readonly],
-.form-select[disabled] {
-    background-color: #e9ecef;
-    opacity: 0.8;
-    cursor: not-allowed;
-}
-
-.text-muted.d-block {
-    font-size: 0.85rem;
-    margin-top: 4px;
-}
-
-/* Notification Styles */
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    min-width: 300px;
-    max-width: 400px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    padding: 15px 20px;
-    transform: translateX(400px);
-    transition: transform 0.3s ease;
-}
-
-.notification.show {
-    transform: translateX(0);
-}
-
-.notification.success {
-    border-left: 4px solid var(--success-color);
-}
-
-.notification.error {
-    border-left: 4px solid var(--danger-color);
-}
-
-.notification-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.notification-content i {
-    font-size: 1.2rem;
-}
-
-.notification.success .notification-content i {
-    color: var(--success-color);
-}
-
-.notification.error .notification-content i {
-    color: var(--danger-color);
-}
-
-.notification-content span {
-    flex: 1;
-    font-size: 0.95rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .form-hero {
-        padding: 30px 0;
-    }
-
-    .form-hero-title {
-        font-size: 1.5rem;
-    }
-
-    .progress-indicator {
-        gap: 20px;
-    }
-
-    .progress-step {
-        gap: 5px;
-    }
-
-    .step-label {
-        font-size: 0.8rem;
-    }
-
-    .form-step {
-        padding: 20px;
-    }
-
-    .step-title {
-        font-size: 1.5rem;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .step-navigation {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .step-navigation .btn {
-        width: 100%;
-    }
-    
-    .notification {
-        min-width: 250px;
-        max-width: 300px;
-        right: 10px;
-        left: 10px;
-        margin: 0 auto;
-    }
-}
-</style>
+    <style>
+        :root {
+            --primary-color: #1a3a6c;
+            --secondary-color: #2c5282;
+            --accent-color: #4299e1;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
+            --light-color: #f7fafc;
+            --dark-color: #2d3748;
+            --gray-color: #718096;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Hero Section */
+        .form-hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+        }
+
+        .form-hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-hero-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .form-hero-text {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+
+        .progress-step.active {
+            opacity: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid transparent;
+        }
+
+        .progress-step.active .step-number {
+            background-color: var(--accent-color);
+            border-color: white;
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 0 0 60px 0;
+        }
+
+        .form-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .form-step {
+            padding: 40px;
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .step-description {
+            color: var(--gray-color);
+            margin-bottom: 20px;
+        }
+
+        /* Selected Training */
+        .selected-training {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(72, 187, 120, 0.1);
+            color: var(--success-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--danger-color);
+        }
+
+        .form-select,
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .form-select.error,
+        .form-input.error,
+        .form-textarea.error {
+            border-color: var(--danger-color) !important;
+            box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1) !important;
+        }
+
+        .form-select:focus,
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .form-file {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .form-file-label {
+            display: block;
+            padding: 20px;
+            background: var(--light-color);
+            border: 2px dashed #cbd5e0;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .form-file-label:hover {
+            border-color: var(--accent-color);
+            background: rgba(66, 153, 225, 0.05);
+        }
+
+        .form-file-name {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        /* Error Styling */
+        .text-danger {
+            color: var(--danger-color) !important;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Angkatan Info */
+        .angkatan-info {
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .info-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .info-details {
+            display: grid;
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .info-value {
+            color: var(--gray-color);
+        }
+
+        .info-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--success-color);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Selected Info */
+        .selected-info {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .selected-info .info-badge {
+            background: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+        }
+
+        .dynamic-form-container {
+            margin-top: 30px;
+        }
+
+        .form-section-header {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section-header:first-child {
+            margin-top: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: normal;
+        }
+
+        /* Alert Styling */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-info {
+            background-color: rgba(66, 153, 225, 0.1);
+            border-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .alert-warning {
+            background-color: rgba(237, 137, 54, 0.1);
+            border-color: var(--warning-color);
+            color: #744210;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        /* Additional Styles for Edit Mode */
+        .current-file-preview {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .current-file-preview img {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .form-input[readonly],
+        .form-select[disabled] {
+            background-color: #e9ecef;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .text-muted.d-block {
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-hero {
+                padding: 30px 0;
+            }
+
+            .form-hero-title {
+                font-size: 1.5rem;
+            }
+
+            .progress-indicator {
+                gap: 20px;
+            }
+
+            .progress-step {
+                gap: 5px;
+            }
+
+            .step-label {
+                font-size: 0.8rem;
+            }
+
+            .form-step {
+                padding: 20px;
+            }
+
+            .step-title {
+                font-size: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .step-navigation {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .step-navigation .btn {
+                width: 100%;
+            }
+        }
+    </style>
 @endsection
 
 @section('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // ============================================
-    // KONFIGURASI AWAL
-    // ============================================
-    const isEdit = @json($isEdit);
-    const jenis = @json($jenis);
-    let selectedAngkatan = null;
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // ============================================
+            // KONFIGURASI AWAL
+            // ============================================
+            const isEdit = @json($isEdit);
+            const jenis = @json($jenis);
+            let selectedAngkatan = null;
 
-    // ============================================
-    // VARIABLES & ELEMENTS
-    // ============================================
-    const step1Content = document.getElementById('step1-content');
-    const step2Content = document.getElementById('step2-content');
-    const step3Content = document.getElementById('step3-content');
-    const step4Content = document.getElementById('step4-content');
-    const step1Indicator = document.getElementById('step1');
-    const step2Indicator = document.getElementById('step2');
-    const step3Indicator = document.getElementById('step3');
-    const step4Indicator = document.getElementById('step4');
-    const angkatanSelect = document.getElementById('id_angkatan');
-    const selectedTrainingName = document.getElementById('selected-training-name');
-    const currentTrainingName = document.getElementById('current-training-name');
-    const currentAngkatanName = document.getElementById('current-angkatan-name');
-    const currentTrainingName2 = document.getElementById('current-training-name-2');
-    const currentAngkatanName2 = document.getElementById('current-angkatan-name-2');
-    const currentTrainingName3 = document.getElementById('current-training-name-3');
-    const currentAngkatanName3 = document.getElementById('current-angkatan-name-3');
-    const backToStep1Btn = document.getElementById('back-to-step1');
-    const backToStep2Btn = document.getElementById('back-to-step2');
-    const backToStep3Btn = document.getElementById('back-to-step3');
-    const nextToStep2Btn = document.getElementById('next-to-step2');
-    const nextToStep3Btn = document.getElementById('next-to-step3');
-    const nextToStep4Btn = document.getElementById('next-to-step4');
-    const submitFormBtn = document.getElementById('submit-form');
-    const angkatanInfo = document.getElementById('angkatan-info');
+            // ============================================
+            // VARIABLES & ELEMENTS
+            // ============================================
+            const step1Content = document.getElementById('step1-content');
+            const step2Content = document.getElementById('step2-content');
+            const step3Content = document.getElementById('step3-content');
+            const step4Content = document.getElementById('step4-content');
+            const step1Indicator = document.getElementById('step1');
+            const step2Indicator = document.getElementById('step2');
+            const step3Indicator = document.getElementById('step3');
+            const step4Indicator = document.getElementById('step4');
+            const angkatanSelect = document.getElementById('id_angkatan');
+            const selectedTrainingName = document.getElementById('selected-training-name');
+            const currentTrainingName = document.getElementById('current-training-name');
+            const currentAngkatanName = document.getElementById('current-angkatan-name');
+            const currentTrainingName2 = document.getElementById('current-training-name-2');
+            const currentAngkatanName2 = document.getElementById('current-angkatan-name-2');
+            const currentTrainingName3 = document.getElementById('current-training-name-3');
+            const currentAngkatanName3 = document.getElementById('current-angkatan-name-3');
+            const backToStep1Btn = document.getElementById('back-to-step1');
+            const backToStep2Btn = document.getElementById('back-to-step2');
+            const backToStep3Btn = document.getElementById('back-to-step3');
+            const nextToStep2Btn = document.getElementById('next-to-step2');
+            const nextToStep3Btn = document.getElementById('next-to-step3');
+            const nextToStep4Btn = document.getElementById('next-to-step4');
+            const submitFormBtn = document.getElementById('submit-form');
+            const angkatanInfo = document.getElementById('angkatan-info');
 
-    // Mentor elements
-    const mentorContainer = document.getElementById('mentor-container');
-    const sudahAdaMentorSelect = document.getElementById('sudah_ada_mentor');
-    const mentorModeSelect = document.getElementById('mentor_mode');
-    const selectMentorForm = document.getElementById('select-mentor-form');
-    const addMentorForm = document.getElementById('add-mentor-form');
-    const mentorSelect = document.getElementById('id_mentor');
-    const namaMentorSelect = document.getElementById('nama_mentor_select');
-    const jabatanMentorSelect = document.getElementById('jabatan_mentor_select');
-    const nomorRekeningMentorSelect = document.getElementById('nomor_rekening_mentor_select');
-    const npwpMentorSelect = document.getElementById('npwp_mentor_select');
+            // Status perkawinan dan nama pasangan
+            const statusPerkawinanSelect = document.getElementById('status_perkawinan');
+            const namaPasanganInput = document.getElementById('nama_pasangan');
 
-    // Provinsi & Kabupaten elements
-    const provinsiSelect = document.getElementById('id_provinsi');
-    const kabupatenSelect = document.getElementById('id_kabupaten_kota');
+            // Golongan ruang dan pangkat
+            const golonganRuangSelect = document.getElementById('golongan_ruang');
+            const pangkatInput = document.getElementById('pangkat');
 
-    // File input elements - semua file inputs
-    const fileInputs = [
-        { input: document.getElementById('file_ktp'), display: document.getElementById('fileKtpName') },
-        { input: document.getElementById('file_pas_foto'), display: document.getElementById('filePasFotoName') },
-        { input: document.getElementById('file_sk_cpns'), display: document.getElementById('fileSkCpnsName') },
-        { input: document.getElementById('file_spmt'), display: document.getElementById('fileSpmtName') },
-        { input: document.getElementById('file_skp'), display: document.getElementById('fileSkpName') },
-        { input: document.getElementById('file_surat_kesediaan'), display: document.getElementById('fileSuratKesediaanName') },
-        { input: document.getElementById('file_surat_tugas'), display: document.getElementById('fileSuratTugasName') },
-        { input: document.getElementById('file_surat_kelulusan_seleksi'), display: document.getElementById('fileSuratKelulusanName') },
-        { input: document.getElementById('file_surat_sehat'), display: document.getElementById('fileSuratSehatName') },
-        { input: document.getElementById('file_surat_bebas_narkoba'), display: document.getElementById('fileSuratBebasNarkobaName') },
-        { input: document.getElementById('file_surat_pernyataan_administrasi'), display: document.getElementById('fileSuratPernyataanName') },
-        { input: document.getElementById('file_persetujuan_mentor'), display: document.getElementById('filePersetujuanMentorName') },
-        { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') }
-    ].filter(item => item.input); // Hanya yang ada di DOM
+            // Pangkat mapping
+            const pangkatMapping = {
+                'II/a': { pangkat: 'Pengatur Muda', description: 'Golongan IIa - Pengatur Muda' },
+                'II/b': { pangkat: 'Pengatur Muda Tingkat I', description: 'Golongan IIb - Pengatur Muda Tingkat I' },
+                'II/c': { pangkat: 'Pengatur', description: 'Golongan IIc - Pengatur' },
+                'II/d': { pangkat: 'Pengatur Tingkat I', description: 'Golongan IId - Pengatur Tingkat I' },
+                'III/a': { pangkat: 'Penata Muda', description: 'Golongan IIIa - Penata Muda' },
+                'III/b': { pangkat: 'Penata Muda Tingkat I', description: 'Golongan IIIb - Penata Muda Tingkat I' },
+                'III/c': { pangkat: 'Penata', description: 'Golongan IIIc - Penata' },
+                'III/d': { pangkat: 'Penata Tingkat I', description: 'Golongan IIId - Penata Tingkat I' },
+                'IV/a': { pangkat: 'Pembina', description: 'Golongan IVa - Pembina' },
+                'IV/b': { pangkat: 'Pembina Tingkat I', description: 'Golongan IVb - Pembina Tingkat I' },
+                'IV/c': { pangkat: 'Pembina Muda', description: 'Golongan IVc - Pembina Muda' },
+                'IV/d': { pangkat: 'Pembina Madya', description: 'Golongan IVd - Pembina Madya' }
+            };
 
-    // ============================================
-    // HANDLE OLD VALUES (IF VALIDATION FAILED)
-    // ============================================
-    window.oldValues = @json(old(), JSON_PRETTY_PRINT);
-    const validationFailed = @json($errors->any() ? true : false);
+            // Mentor elements
+            const mentorContainer = document.getElementById('mentor-container');
+            const sudahAdaMentorSelect = document.getElementById('sudah_ada_mentor');
+            const mentorModeSelect = document.getElementById('mentor_mode');
+            const selectMentorForm = document.getElementById('select-mentor-form');
+            const addMentorForm = document.getElementById('add-mentor-form');
+            const mentorSelect = document.getElementById('id_mentor');
+            const namaMentorSelect = document.getElementById('nama_mentor_select');
+            const jabatanMentorSelect = document.getElementById('jabatan_mentor_select');
+            const nomorRekeningMentorSelect = document.getElementById('nomor_rekening_mentor_select');
+            const npwpMentorSelect = document.getElementById('npwp_mentor_select');
 
-    // Jika ada validation errors, auto-select angkatan yang dipilih sebelumnya
-    if (validationFailed && window.oldValues.id_angkatan) {
-        setTimeout(() => {
-            if (window.oldValues.id_angkatan) {
-                angkatanSelect.value = window.oldValues.id_angkatan;
-                angkatanSelect.dispatchEvent(new Event('change'));
-            }
-        }, 100);
-    }
+            // Provinsi & Kabupaten elements
+            const provinsiSelect = document.getElementById('id_provinsi');
+            const kabupatenSelect = document.getElementById('id_kabupaten_kota');
 
-    // ============================================
-    // INITIALIZE EDIT MODE
-    // ============================================
-    if (isEdit) {
-        // Auto-enable next button pada step 1
-        nextToStep2Btn.disabled = false;
+            // File input elements - semua file inputs
+            const fileInputs = [
+                { input: document.getElementById('file_ktp'), display: document.getElementById('fileKtpName') },
+                { input: document.getElementById('file_pas_foto'), display: document.getElementById('filePasFotoName') },
+                { input: document.getElementById('file_sk_jabatan'), display: document.getElementById('fileSkJabatanName') },
+                { input: document.getElementById('file_sk_pangkat'), display: document.getElementById('fileSkPangkatName') },
+                { input: document.getElementById('file_surat_kesediaan'), display: document.getElementById('fileSuratKesediaanName') },
+                { input: document.getElementById('file_surat_komitmen'), display: document.getElementById('fileSuratKomitmenName') },
+                { input: document.getElementById('file_pakta_integritas'), display: document.getElementById('filePaktaIntegritasName') },
+                { input: document.getElementById('file_surat_tugas'), display: document.getElementById('fileSuratTugasName') },
+                { input: document.getElementById('file_surat_kelulusan_seleksi'), display: document.getElementById('fileSuratKelulusanName') },
+                { input: document.getElementById('file_surat_sehat'), display: document.getElementById('fileSuratSehatName') },
+                { input: document.getElementById('file_surat_bebas_narkoba'), display: document.getElementById('fileSuratBebasNarkobaName') },
+                { input: document.getElementById('file_surat_pernyataan_administrasi'), display: document.getElementById('fileSuratPernyataanName') },
+                { input: document.getElementById('file_persetujuan_mentor'), display: document.getElementById('filePersetujuanMentorName') },
+                { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') }
+            ].filter(item => item.input); // Hanya yang ada di DOM
 
-        // Load kabupaten saat halaman pertama kali dibuka (edit mode)
-        setTimeout(() => {
-            if (provinsiSelect && provinsiSelect.value) {
-                provinsiSelect.dispatchEvent(new Event('change'));
-            }
+            // ============================================
+            // HANDLE OLD VALUES (IF VALIDATION FAILED)
+            // ============================================
+            window.oldValues = @json(old(), JSON_PRETTY_PRINT);
+            const validationFailed = @json($errors->any() ? true : false);
 
-            // Auto skip ke step 2 untuk edit mode
-            setTimeout(() => {
-                moveToStep(1);
-            }, 800);
-        }, 500);
-    }
-
-    // ============================================
-    // STEP 1: ANGKATAN SELECTION
-    // ============================================
-    angkatanSelect.addEventListener('change', function () {
-        if (!this.value) {
-            nextToStep2Btn.disabled = true;
-            angkatanInfo.style.display = 'none';
-            return;
-        }
-
-        const selectedOption = this.options[this.selectedIndex];
-        selectedAngkatan = {
-            id: this.value,
-            nama: selectedOption.dataset.nama,
-            tahun: selectedOption.dataset.tahun,
-            kuota: selectedOption.dataset.kuota,
-            status: selectedOption.dataset.status
-        };
-
-        // Update UI
-        currentAngkatanName.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
-        currentAngkatanName2.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
-        currentAngkatanName3.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
-
-        // Show angkatan info
-        document.getElementById('info-nama-angkatan').textContent = selectedAngkatan.nama;
-        document.getElementById('info-tahun-angkatan').textContent = selectedAngkatan.tahun;
-        document.getElementById('info-kuota-angkatan').textContent = selectedAngkatan.kuota;
-
-        const statusBadge = document.getElementById('info-status-angkatan');
-        statusBadge.textContent = selectedAngkatan.status;
-        statusBadge.className = 'info-badge';
-        if (selectedAngkatan.status === 'Aktif' || selectedAngkatan.status === 'Dibuka') {
-            statusBadge.style.background = 'var(--success-color)';
-        } else if (selectedAngkatan.status === 'Penuh') {
-            statusBadge.style.background = 'var(--danger-color)';
-        } else {
-            statusBadge.style.background = 'var(--warning-color)';
-        }
-
-        angkatanInfo.style.display = 'block';
-        nextToStep2Btn.disabled = false;
-    });
-
-    // ============================================
-    // STEP 3: MENTOR HANDLERS
-    // ============================================
-    if (sudahAdaMentorSelect) {
-        sudahAdaMentorSelect.addEventListener('change', function () {
-            if (this.value === 'Ya') {
-                mentorContainer.style.display = 'block';
-            } else {
-                mentorContainer.style.display = 'none';
-                // Reset mentor forms
-                if (mentorModeSelect) mentorModeSelect.value = '';
-                selectMentorForm.style.display = 'none';
-                addMentorForm.style.display = 'none';
-                if (mentorSelect) mentorSelect.value = '';
-                resetMentorFields();
-            }
-        });
-
-        if (mentorModeSelect) {
-            mentorModeSelect.addEventListener('change', function () {
-                if (this.value === 'pilih') {
-                    selectMentorForm.style.display = 'block';
-                    addMentorForm.style.display = 'none';
-                    // Load mentors if not loaded
-                    if (mentorSelect && mentorSelect.options.length <= 1) {
-                        loadMentors();
+            // Jika ada validation errors, auto-select angkatan yang dipilih sebelumnya
+            if (validationFailed && window.oldValues.id_angkatan) {
+                setTimeout(() => {
+                    if (window.oldValues.id_angkatan) {
+                        angkatanSelect.value = window.oldValues.id_angkatan;
+                        angkatanSelect.dispatchEvent(new Event('change'));
                     }
-                } else if (this.value === 'tambah') {
-                    selectMentorForm.style.display = 'none';
-                    addMentorForm.style.display = 'block';
-                    resetMentorFields();
-                } else {
-                    selectMentorForm.style.display = 'none';
-                    addMentorForm.style.display = 'none';
+                }, 100);
+            }
+
+            // ============================================
+            // INITIALIZE EDIT MODE
+            // ============================================
+            if (isEdit) {
+                // Auto-enable next button pada step 1
+                nextToStep2Btn.disabled = false;
+
+                // Load kabupaten saat halaman pertama kali dibuka (edit mode)
+                setTimeout(() => {
+                    if (provinsiSelect && provinsiSelect.value) {
+                        provinsiSelect.dispatchEvent(new Event('change'));
+                    }
+
+                    // Auto skip ke step 2 untuk edit mode
+                    setTimeout(() => {
+                        moveToStep(1);
+                    }, 800);
+                }, 500);
+
+                // Untuk edit, file input tidak required
+                document.querySelectorAll('input[type="file"]').forEach(input => {
+                    input.removeAttribute('required');
+                });
+            }
+
+            // ============================================
+            // STATUS PERKAWINAN HANDLER
+            // ============================================
+            if (statusPerkawinanSelect && namaPasanganInput) {
+                statusPerkawinanSelect.addEventListener('change', function () {
+                    if (this.value === 'Menikah') {
+                        namaPasanganInput.disabled = false;
+                        namaPasanganInput.placeholder = "Masukkan nama pasangan";
+                    } else {
+                        namaPasanganInput.disabled = true;
+                        namaPasanganInput.value = '';
+                        namaPasanganInput.placeholder = "Hanya tersedia jika status Menikah";
+                    }
+                });
+
+                // Trigger change jika sudah ada nilai
+                if (statusPerkawinanSelect.value) {
+                    statusPerkawinanSelect.dispatchEvent(new Event('change'));
                 }
-            });
-        }
+            }
 
-        if (mentorSelect) {
-            mentorSelect.addEventListener('change', function () {
-                if (this.value) {
-                    const selectedOption = this.options[this.selectedIndex];
+            // ============================================
+            // GOLONGAN RUANG DAN PANGKAT HANDLER
+            // ============================================
+            if (golonganRuangSelect && pangkatInput) {
+                golonganRuangSelect.addEventListener('change', function () {
+                    const golongan = this.value;
+                    
+                    if (golongan && pangkatMapping[golongan]) {
+                        pangkatInput.value = pangkatMapping[golongan].pangkat;
+                    } else {
+                        pangkatInput.value = '';
+                    }
+                });
 
-                    // Populate fields with mentor data
-                    if (namaMentorSelect) namaMentorSelect.value = selectedOption.dataset.nama || '';
-                    if (jabatanMentorSelect) jabatanMentorSelect.value = selectedOption.dataset.jabatan || '';
-                    if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = selectedOption.dataset.nomorRekening || '';
-                    if (npwpMentorSelect) npwpMentorSelect.value = selectedOption.dataset.npwp || '';
-                } else {
-                    resetMentorFields();
+                // Trigger change jika sudah ada nilai (edit mode atau validation failed)
+                if (golonganRuangSelect.value) {
+                    golonganRuangSelect.dispatchEvent(new Event('change'));
+                } else if (window.oldValues && window.oldValues.golongan_ruang) {
+                    // Set nilai dari old values
+                    golonganRuangSelect.value = window.oldValues.golongan_ruang;
+                    golonganRuangSelect.dispatchEvent(new Event('change'));
                 }
-            });
-        }
+            }
 
-        // Trigger change if value exists (for old form values)
-        if (sudahAdaMentorSelect.value) {
-            sudahAdaMentorSelect.dispatchEvent(new Event('change'));
-        }
-        if (mentorModeSelect && mentorModeSelect.value) {
-            mentorModeSelect.dispatchEvent(new Event('change'));
-        }
-        if (mentorSelect && mentorSelect.value) {
-            mentorSelect.dispatchEvent(new Event('change'));
-        }
-    }
+            // ============================================
+            // STEP 1: ANGKATAN SELECTION
+            // ============================================
+            angkatanSelect.addEventListener('change', function () {
+                if (!this.value) {
+                    nextToStep2Btn.disabled = true;
+                    angkatanInfo.style.display = 'none';
+                    return;
+                }
 
-    function resetMentorFields() {
-        if (namaMentorSelect) namaMentorSelect.value = '';
-        if (jabatanMentorSelect) jabatanMentorSelect.value = '';
-        if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = '';
-        if (npwpMentorSelect) npwpMentorSelect.value = '';
-    }
+                const selectedOption = this.options[this.selectedIndex];
+                selectedAngkatan = {
+                    id: this.value,
+                    nama: selectedOption.dataset.nama,
+                    tahun: selectedOption.dataset.tahun,
+                    kuota: selectedOption.dataset.kuota,
+                    status: selectedOption.dataset.status
+                };
 
-    async function loadMentors() {
-        if (!mentorSelect) return;
+                // Update UI
+                currentAngkatanName.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                currentAngkatanName2.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                currentAngkatanName3.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
 
-        mentorSelect.innerHTML = '<option value="">Memuat daftar mentor...</option>';
-        mentorSelect.disabled = true;
+                // Show angkatan info
+                document.getElementById('info-nama-angkatan').textContent = selectedAngkatan.nama;
+                document.getElementById('info-tahun-angkatan').textContent = selectedAngkatan.tahun;
+                document.getElementById('info-kuota-angkatan').textContent = selectedAngkatan.kuota;
 
-        try {
-            const response = await fetch('/api/mentors');
-            const data = await response.json();
+                const statusBadge = document.getElementById('info-status-angkatan');
+                statusBadge.textContent = selectedAngkatan.status;
+                statusBadge.className = 'info-badge';
+                if (selectedAngkatan.status === 'Aktif' || selectedAngkatan.status === 'Dibuka') {
+                    statusBadge.style.background = 'var(--success-color)';
+                } else if (selectedAngkatan.status === 'Penuh') {
+                    statusBadge.style.background = 'var(--danger-color)';
+                } else {
+                    statusBadge.style.background = 'var(--warning-color)';
+                }
 
-            mentorSelect.innerHTML = '<option value="">Pilih Mentor...</option>';
-            mentorSelect.disabled = false;
-
-            data.forEach(mentor => {
-                const option = document.createElement('option');
-                option.value = mentor.id_mentor || mentor.id;
-                option.textContent = `${mentor.nama_mentor} - ${mentor.jabatan_mentor}`;
-
-                // Store mentor data in dataset
-                option.dataset.nama = mentor.nama_mentor;
-                option.dataset.jabatan = mentor.jabatan_mentor;
-                option.dataset.nomorRekening = mentor.nomor_rekening_mentor || mentor.nomor_rekening || '';
-                option.dataset.npwp = mentor.npwp_mentor || mentor.npwp || '';
-
-                mentorSelect.appendChild(option);
+                angkatanInfo.style.display = 'block';
+                nextToStep2Btn.disabled = false;
             });
 
-            // Set old value if exists
-            if (window.oldValues && window.oldValues.id_mentor) {
-                mentorSelect.value = window.oldValues.id_mentor;
-                if (mentorSelect.value) {
+            // ============================================
+            // STEP 3: MENTOR HANDLERS
+            // ============================================
+            if (sudahAdaMentorSelect) {
+                sudahAdaMentorSelect.addEventListener('change', function () {
+                    if (this.value === 'Ya') {
+                        mentorContainer.style.display = 'block';
+                    } else {
+                        mentorContainer.style.display = 'none';
+                        // Reset mentor forms
+                        mentorModeSelect.value = '';
+                        selectMentorForm.style.display = 'none';
+                        addMentorForm.style.display = 'none';
+                        mentorSelect.value = '';
+                        resetMentorFields();
+                    }
+                });
+
+                mentorModeSelect.addEventListener('change', function () {
+                    if (this.value === 'pilih') {
+                        selectMentorForm.style.display = 'block';
+                        addMentorForm.style.display = 'none';
+                        // Load mentors if not loaded
+                        if (mentorSelect && mentorSelect.options.length <= 1) {
+                            loadMentors();
+                        }
+                    } else if (this.value === 'tambah') {
+                        selectMentorForm.style.display = 'none';
+                        addMentorForm.style.display = 'block';
+                        resetMentorFields();
+                    } else {
+                        selectMentorForm.style.display = 'none';
+                        addMentorForm.style.display = 'none';
+                    }
+                });
+
+                if (mentorSelect) {
+                    mentorSelect.addEventListener('change', function () {
+                        if (this.value) {
+                            const selectedOption = this.options[this.selectedIndex];
+
+                            // Populate fields with mentor data
+                            if (namaMentorSelect) namaMentorSelect.value = selectedOption.dataset.nama || '';
+                            if (jabatanMentorSelect) jabatanMentorSelect.value = selectedOption.dataset.jabatan || '';
+                            if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = selectedOption.dataset.nomorRekening || '';
+                            if (npwpMentorSelect) npwpMentorSelect.value = selectedOption.dataset.npwp || '';
+                        } else {
+                            resetMentorFields();
+                        }
+                    });
+                }
+
+                // Trigger change if value exists (for old form values)
+                if (sudahAdaMentorSelect.value) {
+                    sudahAdaMentorSelect.dispatchEvent(new Event('change'));
+                }
+                if (mentorModeSelect && mentorModeSelect.value) {
+                    mentorModeSelect.dispatchEvent(new Event('change'));
+                }
+                if (mentorSelect && mentorSelect.value) {
                     mentorSelect.dispatchEvent(new Event('change'));
                 }
             }
-        } catch (error) {
-            console.error('Error loading mentors:', error);
-            mentorSelect.innerHTML = '<option value="">Error loading mentors</option>';
-            mentorSelect.disabled = false;
-        }
-    }
 
-    // ============================================
-    // PROVINSI & KABUPATEN HANDLERS
-    // ============================================
-    if (provinsiSelect) {
-        provinsiSelect.addEventListener('change', function () {
-            const provinsiId = this.value;
-
-            if (!provinsiId) {
-                kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>';
-                kabupatenSelect.disabled = true;
-                return;
+            function resetMentorFields() {
+                if (namaMentorSelect) namaMentorSelect.value = '';
+                if (jabatanMentorSelect) jabatanMentorSelect.value = '';
+                if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = '';
+                if (npwpMentorSelect) npwpMentorSelect.value = '';
             }
 
-            kabupatenSelect.innerHTML = '<option value="">Memuat kabupaten/kota...</option>';
-            kabupatenSelect.disabled = true;
+            async function loadMentors() {
+                if (!mentorSelect) return;
 
-            try {
-                // Filter kabupaten dari data yang sudah ada (dikirim dari controller)
-                const allKabupaten = @json($kabupatenList);
-                const filteredKabupaten = allKabupaten.filter(kab => kab.province_id == provinsiId);
+                mentorSelect.innerHTML = '<option value="">Memuat daftar mentor...</option>';
+                mentorSelect.disabled = true;
 
-                kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-                kabupatenSelect.disabled = false;
+                try {
+                    const response = await fetch('/api/mentors');
+                    const data = await response.json();
 
-                if (filteredKabupaten.length > 0) {
-                    filteredKabupaten.forEach(kabupaten => {
+                    mentorSelect.innerHTML = '<option value="">Pilih Mentor...</option>';
+                    mentorSelect.disabled = false;
+
+                    data.forEach(mentor => {
                         const option = document.createElement('option');
-                        option.value = kabupaten.id;
-                        option.textContent = kabupaten.name;
-                        kabupatenSelect.appendChild(option);
+                        option.value = mentor.id_mentor || mentor.id;
+                        option.textContent = `${mentor.nama_mentor} - ${mentor.jabatan_mentor}`;
+
+                        // Store mentor data in dataset
+                        option.dataset.nama = mentor.nama_mentor;
+                        option.dataset.jabatan = mentor.jabatan_mentor;
+                        option.dataset.nomorRekening = mentor.nomor_rekening_mentor || mentor.nomor_rekening || '';
+                        option.dataset.npwp = mentor.npwp_mentor || mentor.npwp || '';
+
+                        mentorSelect.appendChild(option);
                     });
 
-                    // Set nilai untuk edit mode
-                    const currentKabupatenId = @json($isEdit && $kepegawaianData ? $kepegawaianData->id_kabupaten_kota : null);
-                    if (currentKabupatenId) {
-                        kabupatenSelect.value = currentKabupatenId;
+                    // Set old value if exists
+                    if (window.oldValues && window.oldValues.id_mentor) {
+                        mentorSelect.value = window.oldValues.id_mentor;
+                        if (mentorSelect.value) {
+                            mentorSelect.dispatchEvent(new Event('change'));
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading mentors:', error);
+                    mentorSelect.innerHTML = '<option value="">Error loading mentors</option>';
+                    mentorSelect.disabled = false;
+                }
+            }
+
+            // ============================================
+            // PROVINSI & KABUPATEN HANDLERS
+            // ============================================
+            if (provinsiSelect) {
+                provinsiSelect.addEventListener('change', function () {
+                    const provinsiId = this.value;
+
+                    if (!provinsiId) {
+                        kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>';
+                        kabupatenSelect.disabled = true;
+                        return;
                     }
 
-                    // Set old value jika ada dari validation
-                    if (window.oldValues && window.oldValues.id_kabupaten_kota) {
-                        kabupatenSelect.value = window.oldValues.id_kabupaten_kota;
+                    kabupatenSelect.innerHTML = '<option value="">Memuat kabupaten/kota...</option>';
+                    kabupatenSelect.disabled = true;
+
+                    try {
+                        // Filter kabupaten dari data yang sudah ada (dikirim dari controller)
+                        const allKabupaten = @json($kabupatenList);
+                        const filteredKabupaten = allKabupaten.filter(kab => kab.province_id == provinsiId);
+
+                        kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+                        kabupatenSelect.disabled = false;
+
+                        if (filteredKabupaten.length > 0) {
+                            filteredKabupaten.forEach(kabupaten => {
+                                const option = document.createElement('option');
+                                option.value = kabupaten.id;
+                                option.textContent = kabupaten.name;
+                                kabupatenSelect.appendChild(option);
+                            });
+
+                            // Set nilai untuk edit mode
+                            const currentKabupatenId = @json($isEdit && $kepegawaianData ? $kepegawaianData->id_kabupaten_kota : null);
+                            if (currentKabupatenId) {
+                                kabupatenSelect.value = currentKabupatenId;
+                            }
+
+                            // Set old value jika ada dari validation
+                            if (window.oldValues && window.oldValues.id_kabupaten_kota) {
+                                kabupatenSelect.value = window.oldValues.id_kabupaten_kota;
+                            }
+                        } else {
+                            kabupatenSelect.innerHTML = '<option value="">Tidak ada data kabupaten</option>';
+                        }
+                    } catch (error) {
+                        console.error('Error filtering kabupaten:', error);
+                        kabupatenSelect.innerHTML = '<option value="">Error loading data</option>';
+                        kabupatenSelect.disabled = false;
                     }
-                } else {
-                    kabupatenSelect.innerHTML = '<option value="">Tidak ada data kabupaten</option>';
-                }
-            } catch (error) {
-                console.error('Error filtering kabupaten:', error);
-                kabupatenSelect.innerHTML = '<option value="">Error loading data</option>';
-                kabupatenSelect.disabled = false;
-            }
-        });
-
-        // Trigger change jika sudah ada nilai (edit mode)
-        if (provinsiSelect.value) {
-            setTimeout(() => {
-                provinsiSelect.dispatchEvent(new Event('change'));
-            }, 300);
-        }
-    }
-
-    // ============================================
-    // FILE INPUT HANDLERS
-    // ============================================
-    fileInputs.forEach(({ input, display }) => {
-        if (input) {
-            input.addEventListener('change', function () {
-                const fileName = this.files[0]?.name || 'Belum ada file dipilih';
-                if (display) display.textContent = fileName;
-
-                // Remove error class when file is selected
-                this.classList.remove('error');
-            });
-        }
-    });
-
-    // ============================================
-    // NAVIGATION FUNCTIONS
-    // ============================================
-    function moveToStep(step) {
-        // Update indicators
-        [step1Indicator, step2Indicator, step3Indicator, step4Indicator].forEach(indicator => {
-            indicator.classList.remove('active');
-        });
-        document.getElementById(`step${step}`).classList.add('active');
-
-        // Update content
-        [step1Content, step2Content, step3Content, step4Content].forEach(content => {
-            content.classList.remove('active');
-        });
-        document.getElementById(`step${step}-content`).classList.add('active');
-
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Navigation event listeners
-    nextToStep2Btn.addEventListener('click', () => {
-        if (angkatanSelect.value) {
-            // Untuk edit mode, langsung lanjut tanpa validasi angkatan
-            moveToStep(2);
-
-            // Update current angkatan name
-            const selectedOption = angkatanSelect.options[angkatanSelect.selectedIndex];
-            if (selectedOption) {
-                const nama = selectedOption.dataset.nama || '';
-                const tahun = selectedOption.dataset.tahun || '';
-                currentAngkatanName.textContent = `${nama} (${tahun})`;
-                currentAngkatanName2.textContent = `${nama} (${tahun})`;
-                currentAngkatanName3.textContent = `${nama} (${tahun})`;
-            }
-        }
-    });
-
-    nextToStep3Btn.addEventListener('click', () => {
-        // Validasi hanya untuk 3 field utama
-        const namaLengkapField = document.querySelector('input[name="nama_lengkap"]');
-        const nipField = document.querySelector('input[name="nip_nrp"]');
-        const angkatanField = document.getElementById('id_angkatan');
-        
-        let isValid = true;
-        let firstInvalidField = null;
-
-        // Validasi Nama Lengkap
-        if (!namaLengkapField || !namaLengkapField.value.trim()) {
-            isValid = false;
-            firstInvalidField = namaLengkapField;
-            if (namaLengkapField) namaLengkapField.classList.add('error');
-        } else {
-            if (namaLengkapField) namaLengkapField.classList.remove('error');
-        }
-
-        // Validasi NIP/NRP
-        if (!nipField || !nipField.value.trim()) {
-            isValid = false;
-            firstInvalidField = nipField || firstInvalidField;
-            if (nipField) nipField.classList.add('error');
-        } else {
-            if (nipField) nipField.classList.remove('error');
-        }
-
-        // Validasi Angkatan
-        if (!angkatanField || !angkatanField.value) {
-            isValid = false;
-            firstInvalidField = angkatanField || firstInvalidField;
-            if (angkatanField) angkatanField.classList.add('error');
-        } else {
-            if (angkatanField) angkatanField.classList.remove('error');
-        }
-
-        if (!isValid) {
-            showNotification('error', 'Angkatan, NIP/NRP, dan Nama Lengkap wajib diisi');
-            if (firstInvalidField) {
-                firstInvalidField.focus();
-                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            return;
-        }
-
-        moveToStep(3);
-    });
-
-    nextToStep4Btn.addEventListener('click', () => {
-        // Tidak ada validasi required untuk step 3 karena semua field nullable
-        moveToStep(4);
-    });
-
-    backToStep1Btn.addEventListener('click', () => moveToStep(1));
-    backToStep2Btn.addEventListener('click', () => moveToStep(2));
-    backToStep3Btn.addEventListener('click', () => moveToStep(3));
-
-    // ============================================
-    // FORM SUBMISSION HANDLER
-    // ============================================
-    document.getElementById('pesertaForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        const submitBtn = document.getElementById('submit-form');
-        const originalText = submitBtn.innerHTML;
-
-        // Show loading state
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (isEdit ? 'Mengupdate...' : 'Menyimpan...');
-        submitBtn.disabled = true;
-
-        // Clear previous client-side errors
-        document.querySelectorAll('.client-error').forEach(el => el.remove());
-        
-        // Validasi hanya untuk 3 field utama
-        const namaLengkapField = document.querySelector('input[name="nama_lengkap"]');
-        const nipField = document.querySelector('input[name="nip_nrp"]');
-        const angkatanField = document.getElementById('id_angkatan');
-        
-        let hasEmptyRequired = false;
-
-        // Validasi Nama Lengkap
-        if (!namaLengkapField || !namaLengkapField.value.trim()) {
-            hasEmptyRequired = true;
-            if (namaLengkapField) {
-                namaLengkapField.classList.add('error');
-                const formGroup = namaLengkapField.closest('.form-group');
-                if (formGroup) {
-                    const errorMsg = document.createElement('small');
-                    errorMsg.className = 'text-danger client-error';
-                    errorMsg.textContent = 'Nama lengkap wajib diisi';
-                    formGroup.appendChild(errorMsg);
-                }
-            }
-        }
-
-        // Validasi NIP/NRP
-        if (!nipField || !nipField.value.trim()) {
-            hasEmptyRequired = true;
-            if (nipField) {
-                nipField.classList.add('error');
-                const formGroup = nipField.closest('.form-group');
-                if (formGroup) {
-                    const errorMsg = document.createElement('small');
-                    errorMsg.className = 'text-danger client-error';
-                    errorMsg.textContent = 'NIP/NRP wajib diisi';
-                    formGroup.appendChild(errorMsg);
-                }
-            }
-        }
-
-        // Validasi Angkatan
-        if (!angkatanField || !angkatanField.value) {
-            hasEmptyRequired = true;
-            if (angkatanField) {
-                angkatanField.classList.add('error');
-                const formGroup = angkatanField.closest('.form-group');
-                if (formGroup) {
-                    const errorMsg = document.createElement('small');
-                    errorMsg.className = 'text-danger client-error';
-                    errorMsg.textContent = 'Angkatan wajib dipilih';
-                    formGroup.appendChild(errorMsg);
-                }
-            }
-        }
-
-        if (hasEmptyRequired) {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-
-            // Scroll ke error pertama
-            const firstError = document.querySelector('.error');
-            if (firstError) {
-                firstError.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
                 });
+
+                // Trigger change jika sudah ada nilai (edit mode)
+                if (provinsiSelect.value) {
+                    setTimeout(() => {
+                        provinsiSelect.dispatchEvent(new Event('change'));
+                    }, 300);
+                }
             }
 
-            return false;
-        }
+            // ============================================
+            // FILE INPUT HANDLERS
+            // ============================================
+            fileInputs.forEach(({ input, display }) => {
+                if (input) {
+                    input.addEventListener('change', function () {
+                        const fileName = this.files[0]?.name || 'Belum ada file dipilih';
+                        if (display) display.textContent = fileName;
 
-        // Collect form data
-        const formData = new FormData(this);
-
-        // Add CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        try {
-            const response = await fetch(this.action, {
-                method: this.method,
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
+                        // Remove error class when file is selected
+                        this.classList.remove('error');
+                    });
                 }
             });
 
-            const data = await response.json();
-
-            if (data.success) {
-                showSuccessMessage(isEdit ? 'Peserta berhasil diperbarui!' : 'Peserta berhasil ditambahkan!');
-
-                setTimeout(() => {
-                    const jenis = "{{ $jenis }}";
-                    const redirectUrl = data.redirect_url || `/peserta/${jenis}`;
-                    window.location.href = redirectUrl;
-                }, 1500);
-
-            } else {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-
-                // Clear previous errors
-                document.querySelectorAll('.server-error').forEach(el => el.remove());
-                document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-
-                // Clear file label error styles
-                document.querySelectorAll('.form-file-label').forEach(label => {
-                    label.style.borderColor = '';
-                    label.style.background = '';
+            // ============================================
+            // NAVIGATION FUNCTIONS
+            // ============================================
+            function moveToStep(step) {
+                // Update indicators
+                [step1Indicator, step2Indicator, step3Indicator, step4Indicator].forEach(indicator => {
+                    indicator.classList.remove('active');
                 });
+                document.getElementById(`step${step}`).classList.add('active');
 
-                // Display new errors
-                if (data.errors) {
-                    Object.keys(data.errors).forEach(field => {
-                        let input = document.querySelector(`[name="${field}"]`);
+                // Update content
+                [step1Content, step2Content, step3Content, step4Content].forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`step${step}-content`).classList.add('active');
 
-                        // Jika tidak ketemu, coba dengan nama field yang berbeda
-                        if (!input) {
-                            input = document.querySelector(`[name="${field}[]"]`);
-                        }
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
 
-                        if (!input) {
-                            input = document.querySelector(`#${field}`);
-                        }
+            // Navigation event listeners
+            nextToStep2Btn.addEventListener('click', () => {
+                if (angkatanSelect.value) {
+                    // Update current angkatan name
+                    const selectedOption = angkatanSelect.options[angkatanSelect.selectedIndex];
+                    if (selectedOption) {
+                        const nama = selectedOption.dataset.nama || '';
+                        const tahun = selectedOption.dataset.tahun || '';
+                        currentAngkatanName.textContent = `${nama} (${tahun})`;
+                        currentAngkatanName2.textContent = `${nama} (${tahun})`;
+                        currentAngkatanName3.textContent = `${nama} (${tahun})`;
+                    }
+                    moveToStep(2);
+                }
+            });
 
-                        if (input) {
-                            input.classList.add('error');
+            nextToStep3Btn.addEventListener('click', () => {
+                // Untuk step 2, hanya validasi NIP saja
+                const nipField = document.querySelector('input[name="nip_nrp"]');
+                if (nipField && !nipField.value.trim()) {
+                    nipField.classList.add('error');
+                    nipField.focus();
+                    nipField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Show notification
+                    const notification = document.createElement('div');
+                    notification.className = 'notification error';
+                    notification.innerHTML = `
+                        <div class="notification-content">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>NIP/NRP wajib diisi</span>
+                        </div>
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        notification.classList.add('show');
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        notification.classList.remove('show');
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 300);
+                    }, 3000);
+                    return;
+                }
+                
+                moveToStep(3);
+            });
 
-                            // Untuk file inputs, juga highlight label
-                            if (input.type === 'file') {
-                                const fileLabel = input.closest('.form-file')?.querySelector('.form-file-label');
-                                if (fileLabel) {
-                                    fileLabel.style.borderColor = 'var(--danger-color)';
-                                    fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
-                                }
-                            }
+            nextToStep4Btn.addEventListener('click', () => {
+                moveToStep(4);
+            });
 
-                            // Cari form group
-                            let formGroup = input.closest('.form-group');
-                            if (!formGroup) {
-                                formGroup = input.closest('.checkbox-group') ||
-                                    input.closest('.form-check') ||
-                                    input.parentElement;
-                            }
+            backToStep1Btn.addEventListener('click', () => moveToStep(1));
+            backToStep2Btn.addEventListener('click', () => moveToStep(2));
+            backToStep3Btn.addEventListener('click', () => moveToStep(3));
 
-                            if (formGroup) {
-                                // Hapus error message sebelumnya
-                                const existingError = formGroup.querySelector('.server-error');
-                                if (existingError) existingError.remove();
+            // ============================================
+            // FORM SUBMISSION HANDLER
+            // ============================================
+            document.getElementById('pesertaForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
 
-                                // Tambahkan error message baru
-                                const errorMsg = document.createElement('small');
-                                errorMsg.className = 'text-danger server-error';
-                                errorMsg.textContent = data.errors[field][0];
-                                formGroup.appendChild(errorMsg);
-                            }
-                        }
-                    });
+                const submitBtn = document.getElementById('submit-form');
+                const originalText = submitBtn.innerHTML;
+
+                // Show loading state
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (isEdit ? 'Mengupdate...' : 'Menyimpan...');
+                submitBtn.disabled = true;
+
+                // Validasi minimal: NIP dan Angkatan
+                const nipField = document.querySelector('input[name="nip_nrp"]');
+                const angkatanField = document.querySelector('select[name="id_angkatan"]');
+                
+                let hasError = false;
+                
+                // Clear previous client-side errors
+                document.querySelectorAll('.client-error').forEach(el => el.remove());
+
+                // Validasi NIP
+                if (!nipField.value.trim()) {
+                    hasError = true;
+                    nipField.classList.add('error');
+                    
+                    const formGroup = nipField.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = document.createElement('small');
+                        errorMsg.className = 'text-danger client-error';
+                        errorMsg.textContent = 'NIP/NRP wajib diisi';
+                        formGroup.appendChild(errorMsg);
+                    }
+                }
+                
+                // Validasi Angkatan
+                if (!angkatanField.value) {
+                    hasError = true;
+                    angkatanField.classList.add('error');
+                    
+                    const formGroup = angkatanField.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = document.createElement('small');
+                        errorMsg.className = 'text-danger client-error';
+                        errorMsg.textContent = 'Angkatan wajib dipilih';
+                        formGroup.appendChild(errorMsg);
+                    }
+                }
+                
+                if (hasError) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
 
                     // Scroll ke error pertama
                     const firstError = document.querySelector('.error');
                     if (firstError) {
-                        setTimeout(() => {
-                            firstError.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'center'
-                            });
-                        }, 300);
+                        // Determine which step has the error
+                        if (firstError.closest('#step1-content')) {
+                            moveToStep(1);
+                        } else if (firstError.closest('#step2-content')) {
+                            moveToStep(2);
+                        }
+
+                        firstError.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
                     }
-                } else if (data.message) {
-                    showErrorMessage(data.message);
+
+                    return false;
+                }
+
+                // Collect form data
+                const formData = new FormData(this);
+
+                // Add CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                try {
+                    const response = await fetch(this.action, {
+                        method: this.method,
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showSuccessMessage(isEdit ? 'Peserta berhasil diperbarui!' : 'Peserta berhasil ditambahkan!');
+
+                        // Redirect sesuai jenis
+                        setTimeout(() => {
+                            const jenis = "{{ $jenis }}";
+                            const redirectUrl = data.redirect_url || `/peserta/${jenis}`;
+                            window.location.href = redirectUrl;
+                        }, 1500);
+
+                    } else {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+
+                        // Clear previous errors
+                        document.querySelectorAll('.server-error').forEach(el => el.remove());
+                        document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+                        // Clear file label error styles
+                        document.querySelectorAll('.form-file-label').forEach(label => {
+                            label.style.borderColor = '';
+                            label.style.background = '';
+                        });
+
+                        // Display new errors
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(field => {
+                                let input = document.querySelector(`[name="${field}"]`);
+
+                                // Jika tidak ketemu, coba dengan nama field yang berbeda
+                                if (!input) {
+                                    input = document.querySelector(`[name="${field}[]"]`);
+                                }
+
+                                if (!input) {
+                                    input = document.querySelector(`#${field}`);
+                                }
+
+                                if (input) {
+                                    input.classList.add('error');
+
+                                    // Untuk file inputs, juga highlight label
+                                    if (input.type === 'file') {
+                                        const fileLabel = input.closest('.form-file')?.querySelector('.form-file-label');
+                                        if (fileLabel) {
+                                            fileLabel.style.borderColor = 'var(--danger-color)';
+                                            fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
+                                        }
+                                    }
+
+                                    // Cari form group
+                                    let formGroup = input.closest('.form-group');
+                                    if (!formGroup) {
+                                        formGroup = input.closest('.checkbox-group') ||
+                                            input.closest('.form-check') ||
+                                            input.parentElement;
+                                    }
+
+                                    if (formGroup) {
+                                        // Hapus error message sebelumnya
+                                        const existingError = formGroup.querySelector('.server-error');
+                                        if (existingError) existingError.remove();
+
+                                        // Tambahkan error message baru
+                                        const errorMsg = document.createElement('small');
+                                        errorMsg.className = 'text-danger server-error';
+                                        errorMsg.textContent = data.errors[field][0];
+                                        formGroup.appendChild(errorMsg);
+                                    }
+                                }
+                            });
+
+                            // Scroll ke error pertama
+                            const firstError = document.querySelector('.error');
+                            if (firstError) {
+                                setTimeout(() => {
+                                    firstError.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'center'
+                                    });
+                                }, 300);
+                            }
+                        } else if (data.message) {
+                            showErrorMessage(data.message);
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('AJAX Error:', error);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    showErrorMessage('Terjadi kesalahan jaringan. Silakan coba lagi.');
+                }
+            });
+
+            // ============================================
+            // HELPER FUNCTIONS
+            // ============================================
+            function showSuccessMessage(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification success';
+                notification.innerHTML = `
+                        <div class="notification-content">
+                            <i class="fas fa-check-circle"></i>
+                            <span>${message}</span>
+                        </div>
+                    `;
+
+                document.body.appendChild(notification);
+
+                // Animasi masuk
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+
+                // Hapus setelah 3 detik
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            function showErrorMessage(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification error';
+                notification.innerHTML = `
+                        <div class="notification-content">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>${message}</span>
+                        </div>
+                    `;
+
+                document.body.appendChild(notification);
+
+                // Animasi masuk
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+
+                // Hapus setelah 5 detik
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 5000);
+            }
+
+            // Tambahkan CSS untuk notifikasi
+            const notificationStyles = `
+                    .notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 9999;
+                        min-width: 300px;
+                        max-width: 400px;
+                        background: white;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        padding: 15px 20px;
+                        transform: translateX(400px);
+                        transition: transform 0.3s ease;
+                    }
+
+                    .notification.show {
+                        transform: translateX(0);
+                    }
+
+                    .notification.success {
+                        border-left: 4px solid var(--success-color);
+                    }
+
+                    .notification.error {
+                        border-left: 4px solid var(--danger-color);
+                    }
+
+                    .notification-content {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                    }
+
+                    .notification-content i {
+                        font-size: 1.2rem;
+                    }
+
+                    .notification.success .notification-content i {
+                        color: var(--success-color);
+                    }
+
+                    .notification.error .notification-content i {
+                        color: var(--danger-color);
+                    }
+
+                    .notification-content span {
+                        flex: 1;
+                        font-size: 0.95rem;
+                    }
+                `;
+
+            // Inject styles
+            const styleSheet = document.createElement("style");
+            styleSheet.textContent = notificationStyles;
+            document.head.appendChild(styleSheet);
+
+            // Clear error saat input
+            document.addEventListener('input', function (e) {
+                if (e.target.matches('input, select, textarea')) {
+                    e.target.classList.remove('error');
+
+                    const formGroup = e.target.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = formGroup.querySelector('.server-error, .client-error');
+                        if (errorMsg) errorMsg.remove();
+                    }
+
+                    // Reset file label styling
+                    if (e.target.type === 'file') {
+                        const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = '';
+                            fileLabel.style.background = '';
+                        }
+                    }
+                }
+            });
+
+            // Clear error saat file change
+            document.addEventListener('change', function (e) {
+                if (e.target.matches('input[type="file"]')) {
+                    e.target.classList.remove('error');
+
+                    const formGroup = e.target.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = formGroup.querySelector('.server-error, .client-error');
+                        if (errorMsg) errorMsg.remove();
+                    }
+
+                    const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
+                    if (fileLabel) {
+                        fileLabel.style.borderColor = '';
+                        fileLabel.style.background = '';
+                    }
+                }
+            });
+
+            // Initialize angkatan change if value exists
+            if (angkatanSelect.value) {
+                angkatanSelect.dispatchEvent(new Event('change'));
+            }
+
+            // Initialize provinsi change for edit mode
+            if (isEdit && provinsiSelect && provinsiSelect.value) {
+                setTimeout(() => {
+                    provinsiSelect.dispatchEvent(new Event('change'));
+                }, 500);
+            }
+
+            // Initialize status perkawinan from old values if exists
+            if (validationFailed && window.oldValues.status_perkawinan) {
+                if (statusPerkawinanSelect) {
+                    statusPerkawinanSelect.value = window.oldValues.status_perkawinan;
+                    statusPerkawinanSelect.dispatchEvent(new Event('change'));
                 }
             }
 
-        } catch (error) {
-            console.error('AJAX Error:', error);
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-            showErrorMessage('Terjadi kesalahan jaringan. Silakan coba lagi.');
-        }
-    });
-
-    // ============================================
-    // HELPER FUNCTIONS
-    // ============================================
-    function showSuccessMessage(message) {
-        const notification = document.createElement('div');
-        notification.className = 'notification success';
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-check-circle"></i>
-                <span>${message}</span>
-            </div>
-        `;
-
-        document.body.appendChild(notification);
-
-        // Animasi masuk
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-
-        // Hapus setelah 3 detik
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 3000);
-    }
-
-    function showErrorMessage(message) {
-        const notification = document.createElement('div');
-        notification.className = 'notification error';
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>${message}</span>
-            </div>
-        `;
-
-        document.body.appendChild(notification);
-
-        // Animasi masuk
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-
-        // Hapus setelah 5 detik
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 5000);
-    }
-
-    function showNotification(type, message) {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-        `;
-
-        document.body.appendChild(notification);
-
-        // Animasi masuk
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-
-        // Hapus setelah 5 detik
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 5000);
-    }
-
-    // Clear error saat input
-    document.addEventListener('input', function (e) {
-        if (e.target.matches('input, select, textarea')) {
-            e.target.classList.remove('error');
-
-            const formGroup = e.target.closest('.form-group');
-            if (formGroup) {
-                const errorMsg = formGroup.querySelector('.server-error, .client-error');
-                if (errorMsg) errorMsg.remove();
-            }
-
-            // Reset file label styling
-            if (e.target.type === 'file') {
-                const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
-                if (fileLabel) {
-                    fileLabel.style.borderColor = '';
-                    fileLabel.style.background = '';
+            // Initialize golongan ruang from old values if exists
+            if (validationFailed && window.oldValues.golongan_ruang) {
+                if (golonganRuangSelect) {
+                    golonganRuangSelect.value = window.oldValues.golongan_ruang;
+                    golonganRuangSelect.dispatchEvent(new Event('change'));
                 }
             }
-        }
-    });
-
-    // Clear error saat file change
-    document.addEventListener('change', function (e) {
-        if (e.target.matches('input[type="file"]')) {
-            e.target.classList.remove('error');
-
-            const formGroup = e.target.closest('.form-group');
-            if (formGroup) {
-                const errorMsg = formGroup.querySelector('.server-error, .client-error');
-                if (errorMsg) errorMsg.remove();
-            }
-
-            const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
-            if (fileLabel) {
-                fileLabel.style.borderColor = '';
-                fileLabel.style.background = '';
-            }
-        }
-    });
-
-    // Auto-capitalize name fields
-    document.querySelectorAll('input[name="nama_lengkap"], input[name="tempat_lahir"]').forEach(field => {
-        field.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
         });
-    });
-
-    // Initialize angkatan change if value exists
-    if (angkatanSelect.value) {
-        angkatanSelect.dispatchEvent(new Event('change'));
-    }
-
-    // Initialize provinsi change for edit mode
-    if (isEdit && provinsiSelect && provinsiSelect.value) {
-        setTimeout(() => {
-            provinsiSelect.dispatchEvent(new Event('change'));
-        }, 500);
-    }
-});
-</script>
+    </script>
 @endsection

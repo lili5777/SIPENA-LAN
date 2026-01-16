@@ -123,6 +123,7 @@ class AdminController extends Controller
             // Ambil data terkait
             $kepegawaian = $peserta->kepegawaian;
             $pendaftaranTerbaru = $peserta->pendaftaran->first();
+            $jenisPelatihanData = $pendaftaranTerbaru->jenisPelatihan;
 
             // Dapatkan list provinsi dan SEMUA kabupaten
             $provinsiList = Provinsi::orderBy('name')->get();
@@ -137,7 +138,8 @@ class AdminController extends Controller
                 'pendaftaranTerbaru',
                 'provinsiList',
                 'kabupatenList', // Kirim semua kabupaten
-                'mentorList'
+                'mentorList',
+                'jenisPelatihanData'
             ));
         } catch (\Exception $e) {
             return redirect()->route('dashboard')

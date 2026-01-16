@@ -7,8 +7,6 @@
 @section('styles')
     <style>
         :root {
-            --primary-color: #1a3a6c;
-            --secondary-color: #2563eb;
             --success-color: #10b981;
             --danger-color: #ef4444;
             --warning-color: #f59e0b;
@@ -1320,7 +1318,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Unit Kerja</label>
+                        <label class="form-label">Unit Kerja/Detail Instansi</label>
                         <input type="text" name="unit_kerja" class="form-input @error('unit_kerja') error @enderror"
                             value="{{ old('unit_kerja', $kepegawaian->unit_kerja ?? '') }}">
                         @error('unit_kerja')
@@ -1427,7 +1425,7 @@
                             </div>
                         @enderror
                     </div>
-
+                    @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
                     <div class="form-group">
                         <label class="form-label">Eselon</label>
                         <input type="text" name="eselon" class="form-input @error('eselon') error @enderror"
@@ -1439,6 +1437,7 @@
                             </div>
                         @enderror
                     </div>
+                    @endif
 
                     
                 </div>
@@ -1493,75 +1492,85 @@
                     
                 </div>
 
-                <div class="form-section-header">
-                    <i class="fas fa-file-contract"></i>
-                    <h3>Data SK</h3>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Nomor SK CPNS</label>
-                        <input type="text" name="nomor_sk_cpns" class="form-input @error('nomor_sk_cpns') error @enderror"
-                            value="{{ old('nomor_sk_cpns', $kepegawaian->nomor_sk_cpns ?? '') }}">
-                        @error('nomor_sk_cpns')
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </div>
-                        @enderror
+                @if (!($jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
+                    <div class="form-section-header">
+                        <i class="fas fa-file-contract"></i>
+                        <h3>Data SK</h3>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Tanggal SK CPNS</label>
-                        <input type="date" name="tanggal_sk_cpns" class="form-input @error('tanggal_sk_cpns') error @enderror"
-                            value="{{ old('tanggal_sk_cpns', $kepegawaian->tanggal_sk_cpns ?? '') }}">
-                        @error('tanggal_sk_cpns')
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Nomor SK Terakhir</label>
-                        <input type="text" name="nomor_sk_terakhir" class="form-input @error('nomor_sk_terakhir') error @enderror"
-                            value="{{ old('nomor_sk_terakhir', $kepegawaian->nomor_sk_terakhir ?? '') }}">
-                        @error('nomor_sk_terakhir')
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Tanggal SK Jabatan</label>
-                        <input type="date" name="tanggal_sk_jabatan" class="form-input @error('tanggal_sk_jabatan') error @enderror"
-                            value="{{ old('tanggal_sk_jabatan', $kepegawaian->tanggal_sk_jabatan ?? '') }}">
-                        @error('tanggal_sk_jabatan')
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Tahun Lulus PKP/PIM IV</label>
-                    <input type="number" name="tahun_lulus_pkp_pim_iv" class="form-input @error('tahun_lulus_pkp_pim_iv') error @enderror"
-                        value="{{ old('tahun_lulus_pkp_pim_iv', $kepegawaian->tahun_lulus_pkp_pim_iv ?? '') }}"
-                        min="1900" max="{{ date('Y') }}" placeholder="{{ date('Y') }}">
-                    @error('tahun_lulus_pkp_pim_iv')
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                    @if (!($jenisPelatihanData->kode_pelatihan == "PKA" || $jenisPelatihanData->kode_pelatihan == "PKP"))
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nomor SK CPNS</label>
+                            <input type="text" name="nomor_sk_cpns" class="form-input @error('nomor_sk_cpns') error @enderror"
+                                value="{{ old('nomor_sk_cpns', $kepegawaian->nomor_sk_cpns ?? '') }}">
+                            @error('nomor_sk_cpns')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
-                    @enderror
-                </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tanggal SK CPNS</label>
+                            <input type="date" name="tanggal_sk_cpns" class="form-input @error('tanggal_sk_cpns') error @enderror"
+                                value="{{ old('tanggal_sk_cpns', $kepegawaian->tanggal_sk_cpns ?? '') }}">
+                            @error('tanggal_sk_cpns')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="form-row">
+                        @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
+                        <div class="form-group">
+                            <label class="form-label">Nomor SK Terakhir</label>
+                            <input type="text" name="nomor_sk_terakhir" class="form-input @error('nomor_sk_terakhir') error @enderror"
+                                value="{{ old('nomor_sk_terakhir', $kepegawaian->nomor_sk_terakhir ?? '') }}">
+                            @error('nomor_sk_terakhir')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                        @endif
+
+                        @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
+                        <div class="form-group">
+                            <label class="form-label">Tanggal SK Jabatan</label>
+                            <input type="date" name="tanggal_sk_jabatan" class="form-input @error('tanggal_sk_jabatan') error @enderror"
+                                value="{{ old('tanggal_sk_jabatan', $kepegawaian->tanggal_sk_jabatan ?? '') }}">
+                            @error('tanggal_sk_jabatan')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                        @endif
+                    </div>
+
+                    @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
+                    <div class="form-group">
+                        <label class="form-label">Tahun Lulus PKP/PIM IV</label>
+                        <input type="number" name="tahun_lulus_pkp_pim_iv" class="form-input @error('tahun_lulus_pkp_pim_iv') error @enderror"
+                            value="{{ old('tahun_lulus_pkp_pim_iv', $kepegawaian->tahun_lulus_pkp_pim_iv ?? '') }}"
+                            min="1900" max="{{ date('Y') }}" placeholder="{{ date('Y') }}">
+                        @error('tahun_lulus_pkp_pim_iv')
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                    @endif
+                @endif
             </div>
 
             <!-- Tab 3: Data Mentor -->
@@ -1842,6 +1851,18 @@
                             ['name' => 'file_spmt', 'label' => 'SPMT'],
                             ['name' => 'file_skp', 'label' => 'SKP'],
                         ];
+
+                        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
+                                $kepegawaianDocs = array_filter($kepegawaianDocs, function($doc) {
+                                    return !in_array($doc['name'], ['file_sk_jabatan', 'file_sk_pangkat']);
+                                });
+                            }
+
+                        if (isset($jenisPelatihanData->kode_pelatihan) && ($jenisPelatihanData->kode_pelatihan == "PKN_TK_II" || $jenisPelatihanData->kode_pelatihan == "PKA" || $jenisPelatihanData->kode_pelatihan == "PKP")) {
+                                $kepegawaianDocs = array_filter($kepegawaianDocs, function($doc) {
+                                    return !in_array($doc['name'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
+                                });
+                            }
                     @endphp
 
                     @foreach($kepegawaianDocs as $doc)
@@ -1893,7 +1914,30 @@
                             ['name' => 'file_surat_kesediaan', 'label' => 'Surat Kesediaan'],
                             ['name' => 'file_pakta_integritas', 'label' => 'Pakta Integritas'],
                             ['name' => 'file_surat_sehat', 'label' => 'Surat Sehat'],
+                            ['name' => 'file_surat_komitmen', 'label' => 'Surat Komitmen'],
+                            ['name' => 'file_surat_kelulusan_selesksi', 'label' => 'Surat Kelulusan Seleksi'],
+                            ['name' => 'file_surat_bebas_narkoba', 'label' => 'Surat Bebas Narkoba'],
+                            ['name' => 'file_surat_pernyataan_administrasi', 'label' => 'Surat Pernyataan Administrasi'],
+                            ['name' => 'file_persetujuan_mentor', 'label' => 'Surat Persetujuan Mentor'],
                         ];
+
+                        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
+                                $pendaftaranDocs = array_filter($pendaftaranDocs, function($doc) {
+                                    return !in_array($doc['name'], ['file_pakta_integritas','file_surat_komitmen','file_surat_kelulusan_selesksi','file_surat_bebas_narkoba','file_surat_pernyataan_administrasi','file_persetujuan_mentor']);
+                                });
+                            }
+
+                        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
+                                $pendaftaranDocs = array_filter($pendaftaranDocs, function($doc) {
+                                    return !in_array($doc['name'], ['file_surat_pernyataan_administrasi','file_persetujuan_mentor','file_surat_kesediaan']);
+                                });
+                            }
+                        
+                        if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
+                                $pendaftaranDocs = array_filter($pendaftaranDocs, function($doc) {
+                                    return !in_array($doc['name'], ['file_surat_komitmen','file_sertifikat_penghargaan','file_surat_pernyataan_administrasi']);
+                                });
+                            }
                     @endphp
 
                     @foreach($pendaftaranDocs as $doc)

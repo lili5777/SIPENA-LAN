@@ -268,10 +268,17 @@
                                                                                                                             </div>
                                                                                                                         </td>
                                                                                                                         <td class="d-none d-md-table-cell">
-                                                                                                                            <p class="mb-0 text-muted peserta-instansi">
-                                                                                                                                <i class="fas fa-building me-1"></i>
-                                                                                                                                {{ $kepegawaian->unit_kerja ?? '-' }}
-                                                                                                                            </p>
+                                                                                                                            <div class="d-flex align-items-start">
+                                                                                                                                <i class="fas fa-building me-2 mt-1"></i>
+                                                                                                                                <div class="d-flex flex-column">
+                                                                                                                                    <span class="mb-1">
+                                                                                                                                        {{ $kepegawaian->asal_instansi ?? '-' }}
+                                                                                                                                    </span>
+                                                                                                                                    <small class="text-muted">
+                                                                                                                                        {{ $kepegawaian->unit_kerja ?? '-' }}
+                                                                                                                                    </small>
+                                                                                                                                </div>
+                                                                                                                            </div>
                                                                                                                         </td>
                                                                                                                         <td class="d-none d-md-table-cell">
                                                                                                                             <p class="mb-0 text-muted peserta-angkatan">
@@ -407,7 +414,7 @@
                     </div>
                     <div class="flex-grow-1">
                         <h5 class="modal-title text-white mb-1 fw-bold" id="detailModalLabel">
-                            Detail Peserta PKN TK II
+                            Detail PKP
                         </h5>
                         <div class="d-flex flex-wrap align-items-center gap-2">
                             <small class="text-white-75" id="detailModalSubtitle"></small>
@@ -907,7 +914,7 @@
                     content.innerHTML = generateMentorHTML(data);
                 }
 
-                // Generate Data Peserta HTML
+                 // Generate Data Peserta HTML
                 function generateDataPesertaHTML(data) {
                     const peserta = data.peserta;
                     const kepegawaian = data.kepegawaian;
@@ -919,29 +926,116 @@
                                 <div class="row align-items-center">
                                     <div class="col-md-8">
                                         <h4 class="fw-bold text-primary mb-2">${peserta.nama_lengkap}</h4>
+                                        <h6 class="fw-bold mb-3 pb-2 border-bottom">
+                                            <i class="fas fa-id-card me-2 text-primary"></i>Informasi Pribadi
+                                        </h6>
                                         <div class="row g-3">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Nama Panggilan</label>
+                                                    <p class="fw-semibold mb-0">${peserta.nama_panggilan || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
                                                 <div class="info-item">
                                                     <label class="text-muted small">NIP/NRP</label>
                                                     <p class="fw-semibold mb-0">${peserta.nip_nrp || '-'}</p>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="info-item">
                                                     <label class="text-muted small">Jenis Kelamin</label>
                                                     <p class="fw-semibold mb-0">${peserta.jenis_kelamin || '-'}</p>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="info-item">
                                                     <label class="text-muted small">Tempat/Tanggal Lahir</label>
                                                     <p class="fw-semibold mb-0">${peserta.tempat_lahir || '-'}, ${formatDate(peserta.tanggal_lahir)}</p>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="info-item">
                                                     <label class="text-muted small">Agama</label>
                                                     <p class="fw-semibold mb-0">${peserta.agama || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Status</label>
+                                                    <p class="fw-semibold mb-0">${peserta.status_perkawinan || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Nama Pasangan</label>
+                                                    <p class="fw-semibold mb-0">${peserta.nama_pasangan || '-'}</p>
+                                                </div>
+                                            </div>
+                                             <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Alamat Rumah</label>
+                                                    <p class="fw-semibold mb-0">${peserta.alamat_rumah || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Email Pribadi</label>
+                                                    <p class="fw-semibold mb-0">${peserta.email_pribadi || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Nomor HP/WhatsApp</label>
+                                                    <p class="fw-semibold mb-0">${peserta.nomor_hp || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Olahraga/Hobi</label>
+                                                    <p class="fw-semibold mb-0">${peserta.olahraga_hobi || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Merokok</label>
+                                                    <p class="fw-semibold mb-0">${peserta.perokok ? 'Ya' : 'Tidak'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Pendidikan Terakhir</label>
+                                                    <p class="fw-semibold mb-0">${peserta.pendidikan_terakhir || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Bidang Studi</label>
+                                                    <p class="fw-semibold mb-0">${peserta.bidang_studi || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Bidang Keahlian</label>
+                                                    <p class="fw-semibold mb-0">${peserta.bidang_keahlian || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Ukuran Kaos Taktikal</label>
+                                                    <p class="fw-semibold mb-0">${peserta.ukuran_kaos || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Ukuran Kaos Training</label>
+                                                    <p class="fw-semibold mb-0">${peserta.ukuran_training || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="info-item">
+                                                    <label class="text-muted small">Ukuran Celana</label>
+                                                    <p class="fw-semibold mb-0">${peserta.ukuran_celana || '-'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -954,50 +1048,6 @@
                                 </div>
                             </div>
 
-                            <!-- Informasi Pribadi -->
-                            <div class="info-section mb-4">
-                                <h6 class="fw-bold mb-3 pb-2 border-bottom">
-                                    <i class="fas fa-id-card me-2 text-primary"></i>Informasi Pribadi
-                                </h6>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Alamat Rumah</label>
-                                            <p class="fw-semibold mb-0">${peserta.alamat_rumah || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Email Pribadi</label>
-                                            <p class="fw-semibold mb-0">${peserta.email_pribadi || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Nomor HP/WhatsApp</label>
-                                            <p class="fw-semibold mb-0">${peserta.nomor_hp || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Pendidikan Terakhir</label>
-                                            <p class="fw-semibold mb-0">${peserta.pendidikan_terakhir || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Bidang Studi</label>
-                                            <p class="fw-semibold mb-0">${peserta.bidang_studi || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Bidang Keahlian</label>
-                                            <p class="fw-semibold mb-0">${peserta.bidang_keahlian || '-'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <!-- Informasi Kepegawaian -->
                             <div class="info-section mb-4">
@@ -1013,8 +1063,20 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="info-item">
-                                            <label class="text-muted small">Unit Kerja</label>
+                                            <label class="text-muted small">Unit Kerja/Detail Instansi</label>
                                             <p class="fw-semibold mb-0">${kepegawaian?.unit_kerja || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Provinsi</label>
+                                            <p class="fw-semibold mb-0">${data.provinsi?.name || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Kabupaten/Kota</label>
+                                            <p class="fw-semibold mb-0">${data.kabupaten?.name || '-'}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -1037,6 +1099,24 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="info-item">
+                                            <label class="text-muted small">Nomor SK Terakhir</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.nomor_sk_terakhir || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Tanggal SK Jabatan</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.tanggal_sk_jabatan || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="text-muted small">Tahun Lulus PKP/PIM IV</label>
+                                            <p class="fw-semibold mb-0">${kepegawaian?.tahun_lulus_pkp_pim_iv || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
                                             <label class="text-muted small">Email Kantor</label>
                                             <p class="fw-semibold mb-0">${kepegawaian?.email_kantor || '-'}</p>
                                         </div>
@@ -1053,57 +1133,7 @@
                                             <p class="fw-semibold mb-0">${kepegawaian?.nomor_telepon_kantor || '-'}</p>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Provinsi</label>
-                                            <p class="fw-semibold mb-0">${data.provinsi?.name || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Kabupaten/Kota</label>
-                                            <p class="fw-semibold mb-0">${data.kabupaten?.name || '-'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- Informasi Tambahan -->
-                            <div class="info-section">
-                                <h6 class="fw-bold mb-3 pb-2 border-bottom">
-                                    <i class="fas fa-info-circle me-2 text-primary"></i>Informasi Tambahan
-                                </h6>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Status</label>
-                                            <p class="fw-semibold mb-0">${peserta.status_perkawinan || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Nama Pasangan</label>
-                                            <p class="fw-semibold mb-0">${peserta.nama_pasangan || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Olahraga/Hobi</label>
-                                            <p class="fw-semibold mb-0">${peserta.olahraga_hobi || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Merokok</label>
-                                            <p class="fw-semibold mb-0">${peserta.perokok ? 'Ya' : 'Tidak'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Ukuran Kaos</label>
-                                            <p class="fw-semibold mb-0">${peserta.ukuran_kaos || '-'}</p>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1118,6 +1148,13 @@
 
                     // Dokumen dengan ikon yang lebih jelas
                     const dokumenList = [
+                        {
+                            title: 'KTP',
+                            icon: 'fa-id-card',
+                            color: 'success',
+                            file: peserta.file_ktp,
+                            description: 'Kartu Tanda Penduduk yang masih berlaku'
+                        },
                         {
                             title: 'Pasfoto',
                             icon: 'fa-camera',
@@ -1140,11 +1177,11 @@
                             description: 'Surat Keputusan kenaikan pangkat/golongan'
                         },
                         {
-                            title: 'Surat Komitmen',
-                            icon: 'fa-handshake',
-                            color: 'info',
-                            file: pendaftaran.file_surat_komitmen,
-                            description: 'Surat komitmen menyelesaikan pelatihan'
+                            title: 'Surat Kesediaan',
+                            icon: 'fa-graduation-cap',
+                            color: 'success',
+                            file: pendaftaran.file_surat_kesediaan,
+                            description: 'Surat kesediaan mengikuti pelatihan'
                         },
                         {
                             title: 'Pakta Integritas',
@@ -1180,6 +1217,13 @@
                             color: 'info',
                             file: pendaftaran.file_surat_bebas_narkoba,
                             description: 'Surat keterangan bebas narkoba'
+                        },
+                        {
+                            title: 'Surat Persetujuan Mentor',
+                            icon: 'fa-handshake',
+                            color: 'info',
+                            file: pendaftaran.file_persetujuan_mentor,
+                            description: 'Surat persetujuan dari mentor'
                         }
                     ];
 
@@ -1298,9 +1342,6 @@
                                                     <span class="badge bg-success bg-opacity-10 text-success">
                                                         <i class="fas fa-check-circle me-1"></i>Tersedia
                                                     </span>
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-file me-1"></i>${fileSize}
-                                                    </small>
                                                 </div>
                                             </div>
                                         </div>
@@ -1384,14 +1425,20 @@
                                             <div class="row g-3">
                                                 <div class="col-md-6">
                                                     <div class="info-item">
+                                                        <label class="text-muted small">NPWP</label>
+                                                        <p class="fw-semibold mb-0">${mentor.npwp_mentor || '-'}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
                                                         <label class="text-muted small">Jabatan</label>
                                                         <p class="fw-semibold mb-0">${mentor.jabatan_mentor || '-'}</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="info-item">
-                                                        <label class="text-muted small">Instansi</label>
-                                                        <p class="fw-semibold mb-0">${mentor.instansi_mentor || '-'}</p>
+                                                        <label class="text-muted small">Nomor Rekening</label>
+                                                        <p class="fw-semibold mb-0">${mentor.nomor_rekening || '-'}</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -1403,9 +1450,10 @@
                                                 <div class="col-md-6">
                                                     <div class="info-item">
                                                         <label class="text-muted small">Telepon</label>
-                                                        <p class="fw-semibold mb-0">${mentor.telepon_mentor || '-'}</p>
+                                                        <p class="fw-semibold mb-0">${mentor.nomor_hp_mentor || '-'}</p>
                                                     </div>
                                                 </div>
+                                                
                                             </div>
                                         </div>
                                         <div class="col-md-4 text-md-end">
@@ -1417,52 +1465,11 @@
                                 </div>
                             </div>
 
-                            <!-- Informasi Angkatan -->
-                            <div class="angkatan-info card border-0 shadow-sm">
-                                <div class="card-header bg-light border-0">
-                                    <h6 class="mb-0 fw-bold">
-                                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Informasi Angkatan
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="info-item mb-3">
-                                                <label class="text-muted small">Nama Angkatan</label>
-                                                <p class="fw-semibold mb-0">${angkatan?.nama_angkatan || '-'}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="info-item mb-3">
-                                                <label class="text-muted small">Periode</label>
-                                                <p class="fw-semibold mb-0">
-                                                    ${formatDate(angkatan?.tanggal_mulai)} - ${formatDate(angkatan?.tanggal_selesai)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="info-item mb-3">
-                                                <label class="text-muted small">Lokasi Pelatihan</label>
-                                                <p class="fw-semibold mb-0">${angkatan?.lokasi_pelatihan || '-'}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="info-item mb-3">
-                                                <label class="text-muted small">Status Angkatan</label>
-                                                <p class="fw-semibold mb-0">
-                                                    <span class="badge ${getAngkatanStatusBadge(angkatan?.status)}">
-                                                        ${angkatan?.status || '-'}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        
                         </div>
                     `;
                 }
-
+                
                 // Helper Functions untuk Status
                 function getStatusIcon(status) {
                     const statusLower = status.toLowerCase();

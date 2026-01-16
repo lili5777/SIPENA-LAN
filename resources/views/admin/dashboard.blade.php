@@ -1422,7 +1422,7 @@
                         <div class="data-card-header">
                             <div class="data-card-title">
                                 <i class="fas fa-address-book"></i>
-                                Kontak Kantor & SK
+                                Kontak Kantor
                             </div>
                             
                         </div>
@@ -1440,6 +1440,35 @@
                             </span>
                             <span class="data-value">{{ $kepegawaian->nomor_telepon_kantor ?? 'Belum diisi' }}</span>
                         </div>
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-map-pin"></i>
+                                Alamat Kantor
+                            </span>
+                            <span class="data-value">{{ $kepegawaian->alamat_kantor ?? 'Belum diisi' }}</span>
+                        </div>
+                        
+                    </div>
+                    @if (!($jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <div class="data-card-title">
+                                <i class="fas fa-calendar-alt"></i>
+                                Tanggal & SK
+                            </div>
+                            
+                        </div>
+                        @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR" || $jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-calendar-check"></i>
+                                Tanggal SK Jabatan
+                            </span>
+                            <span class="data-value">
+                                {{ $kepegawaian->tanggal_sk_jabatan ? \Carbon\Carbon::parse($kepegawaian->tanggal_sk_jabatan)->format('d F Y') : 'Belum diisi' }}
+                            </span>
+                        </div>
+                        @endif
                         @if ($jenisPelatihanData->kode_pelatihan == "LATSAR")
                         <div class="data-item">
                             <span class="data-label">
@@ -1458,27 +1487,6 @@
                             <span class="data-value">{{ $kepegawaian->nomor_sk_terakhir ?? 'Belum diisi' }}</span>
                         </div>
                         @endif
-                    </div>
-
-                    <div class="data-card">
-                        <div class="data-card-header">
-                            <div class="data-card-title">
-                                <i class="fas fa-calendar-alt"></i>
-                                Tanggal & Alamat Kantor
-                            </div>
-                            
-                        </div>
-                        @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR" || $jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
-                        <div class="data-item">
-                            <span class="data-label">
-                                <i class="fas fa-calendar-check"></i>
-                                Tanggal SK Jabatan
-                            </span>
-                            <span class="data-value">
-                                {{ $kepegawaian->tanggal_sk_jabatan ? \Carbon\Carbon::parse($kepegawaian->tanggal_sk_jabatan)->format('d F Y') : 'Belum diisi' }}
-                            </span>
-                        </div>
-                        @endif
                         @if ($jenisPelatihanData->kode_pelatihan == "LATSAR")
                         <div class="data-item">
                             <span class="data-label">
@@ -1490,13 +1498,7 @@
                             </span>
                         </div>
                         @endif
-                        <div class="data-item">
-                            <span class="data-label">
-                                <i class="fas fa-map-pin"></i>
-                                Alamat Kantor
-                            </span>
-                            <span class="data-value">{{ $kepegawaian->alamat_kantor ?? 'Belum diisi' }}</span>
-                        </div>
+                        
                         @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR" || $jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
                         <div class="data-item">
                             <span class="data-label">
@@ -1507,6 +1509,7 @@
                         </div>
                         @endif
                     </div>
+                    @endif
                 </div>
                 @else
                 <div class="no-data">
