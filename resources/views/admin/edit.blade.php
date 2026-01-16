@@ -1915,7 +1915,7 @@
                             ['name' => 'file_pakta_integritas', 'label' => 'Pakta Integritas'],
                             ['name' => 'file_surat_sehat', 'label' => 'Surat Sehat'],
                             ['name' => 'file_surat_komitmen', 'label' => 'Surat Komitmen'],
-                            ['name' => 'file_surat_kelulusan_selesksi', 'label' => 'Surat Kelulusan Seleksi'],
+                            ['name' => 'file_surat_kelulusan_seleksi', 'label' => 'Surat Kelulusan Seleksi'],
                             ['name' => 'file_surat_bebas_narkoba', 'label' => 'Surat Bebas Narkoba'],
                             ['name' => 'file_surat_pernyataan_administrasi', 'label' => 'Surat Pernyataan Administrasi'],
                             ['name' => 'file_persetujuan_mentor', 'label' => 'Surat Persetujuan Mentor'],

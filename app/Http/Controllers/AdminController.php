@@ -217,6 +217,7 @@ class AdminController extends Controller
                 'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
                 'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
                 'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
 
                 // Data SK
                 'nomor_sk_cpns' => 'nullable|string|max:100',
@@ -257,6 +258,8 @@ class AdminController extends Controller
                 'golongan_ruang.max' => 'Golongan ruang maksimal 10 karakter',
             ]);
 
+            // dd($pendaftaranTerbaru->file_surat_kelulusan_seleksi);
+
             // 2. VALIDASI KONDISIONAL BERDASARKAN STATUS FILE
             $additionalRules = [];
             $additionalMessages = [];
@@ -284,6 +287,10 @@ class AdminController extends Controller
                     if (!$pendaftaranTerbaru->file_surat_bebas_narkoba) {
                         $additionalRules['file_surat_bebas_narkoba'] = 'nullable|file|mimes:pdf|max:1024';
                     }
+                    if (!$pendaftaranTerbaru->file_surat_kelulusan_seleksi) {
+                        $additionalRules['file_surat_kelulusan_seleksi'] = 'nullable|file|mimes:pdf|max:1024';
+                    }
+
 
                     $additionalMessages = [
                         'eselon.required' => 'Eselon wajib diisi untuk pelatihan PKN TK II',
