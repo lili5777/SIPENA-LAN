@@ -414,7 +414,7 @@
                     </div>
                     <div class="flex-grow-1">
                         <h5 class="modal-title text-white mb-1 fw-bold" id="detailModalLabel">
-                            Detail Peserta PKN TK II
+                            Detail Peserta PKA
                         </h5>
                         <div class="d-flex flex-wrap align-items-center gap-2">
                             <small class="text-white-75" id="detailModalSubtitle"></small>

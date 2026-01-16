@@ -1811,7 +1811,7 @@
                 { input: document.getElementById('file_surat_bebas_narkoba'), display: document.getElementById('fileSuratBebasNarkobaName') },
                 { input: document.getElementById('file_surat_pernyataan_administrasi'), display: document.getElementById('fileSuratPernyataanName') },
                 { input: document.getElementById('file_persetujuan_mentor'), display: document.getElementById('filePersetujuanMentorName') },
-                { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') }
+                { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') },
             ].filter(item => item.input); // Hanya yang ada di DOM
 
             // ============================================

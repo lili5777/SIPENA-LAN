@@ -976,7 +976,7 @@
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
-
+                                
                                 <!-- File SPMT -->
                                 <div class="form-group">
                                     <label class="form-label">Unggah SPMT</label>
@@ -1732,7 +1732,10 @@
                 { input: document.getElementById('file_surat_bebas_narkoba'), display: document.getElementById('fileSuratBebasNarkobaName') },
                 { input: document.getElementById('file_surat_pernyataan_administrasi'), display: document.getElementById('fileSuratPernyataanName') },
                 { input: document.getElementById('file_persetujuan_mentor'), display: document.getElementById('filePersetujuanMentorName') },
-                { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') }
+                { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') },
+                { input: document.getElementById('file_sk_cpns'), display: document.getElementById('fileSkCpnsName') },
+                { input: document.getElementById('file_spmt'), display: document.getElementById('fileSpmtName') },
+                { input: document.getElementById('file_skp'), display: document.getElementById('fileSkpName') }
             ].filter(item => item.input); // Hanya yang ada di DOM
 
             // ============================================

@@ -1222,24 +1222,24 @@
                                     <label class="form-label">Unggah Surat Persetujuan Mentor</label>
                                     <div class="form-hint">Format PDF, maksimal 5MB</div>
                                     <div class="form-file">
-                                        <input type="file" name="file_surat_persetujuan_mentor" id="file_surat_persetujuan_mentor"
-                                            class="form-file-input @error('file_surat_persetujuan_mentor') error @enderror"
+                                        <input type="file" name="file_persetujuan_mentor" id="file_persetujuan_mentor"
+                                            class="form-file-input @error('file_persetujuan_mentor') error @enderror"
                                             accept=".pdf">
-                                        <label class="form-file-label" for="file_surat_persetujuan_mentor">
+                                        <label class="form-file-label" for="file_persetujuan_mentor">
                                             <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $pendaftaran->file_surat_persetujuan_mentor ? 'Ganti Surat Persetujuan Mentor' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                            <span>{{ $isEdit && $pendaftaran->file_persetujuan_mentor ? 'Ganti Surat Persetujuan Mentor' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
                                         </label>
-                                        <div class="form-file-name" id="fileSuratBebasNarkobaName">
-                                            @if($isEdit && $pendaftaran->file_surat_persetujuan_mentor)
-                                                File sudah ada: {{ basename($pendaftaran->file_surat_persetujuan_mentor) }}
-                                            @elseif(old('file_surat_persetujuan_mentor'))
+                                        <div class="form-file-name" id="filePersetujuanMentorName">
+                                            @if($isEdit && $pendaftaran->file_persetujuan_mentor)
+                                                File sudah ada: {{ basename($pendaftaran->file_persetujuan_mentor) }}
+                                            @elseif(old('file_persetujuan_mentor'))
                                                 File sudah diupload sebelumnya
                                             @else
                                                 Belum ada file dipilih
                                             @endif
                                         </div>
                                     </div>
-                                    @error('file_surat_persetujuan_mentor')
+                                    @error('file_persetujuan_mentor')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>

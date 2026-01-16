@@ -1169,7 +1169,7 @@
                             title: 'SKP',
                             icon: 'fa-handshake',
                             color: 'info',
-                            file: pendaftaran.file_skp,
+                            file: kepegawaian?.file_skp,
                             description: 'Surat Keterangan Pengantar'
                         },
                         {
