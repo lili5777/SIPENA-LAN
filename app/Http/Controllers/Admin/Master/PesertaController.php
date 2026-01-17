@@ -441,17 +441,39 @@ class PesertaController extends Controller
                 'file_persetujuan_mentor'
             ];
 
+            // Ambil data untuk struktur folder
+            $tahun = date('Y'); // Tahun saat ini (2026)
+            $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
+            $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan); // contoh: LATSAR, PKN_TK_II, dll
+            $angkatan = Angkatan::find($request->id_angkatan);
+            $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan); // contoh: Angkatan I, Angkatan II, dll
+            $nip = $request->nip_nrp;
+
+            // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
+            $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            $fullPath = public_path($folderPath);
+
+            // Buat folder jika belum ada
+            if (!file_exists($fullPath)) {
+                mkdir($fullPath, 0755, true);
+            }
+
             $files = [];
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
-                    // Membuat nama file yang unik
-                    $fileName = time() . '_' . $field . '.' . $request->file($field)->getClientOriginalExtension();
+                    // Ambil nama file asli dan ekstensi
+                    $originalName = $request->file($field)->getClientOriginalName();
+                    $extension = $request->file($field)->getClientOriginalExtension();
 
-                    // Pindahkan file ke folder public/upload
-                    $path = $request->file($field)->move(public_path('uploads'), $fileName);
+                    // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
+                    $fieldName = str_replace('file_', '', $field);
+                    $fileName = $fieldName . '.' . $extension;
 
-                    // Simpan path file
-                    $files[$field] = 'uploads/' . $fileName;
+                    // Pindahkan file ke folder yang sudah ditentukan
+                    $request->file($field)->move($fullPath, $fileName);
+
+                    // Simpan path relatif untuk database
+                    $files[$field] = '/' . $folderPath . '/' . $fileName;
                 }
             }
 
@@ -805,7 +827,7 @@ class PesertaController extends Controller
                 $request->validate($additionalRules);
             }
 
-            // 3. SIMPAN FILE UPLOADS (SISTEM YANG SAMA DENGAN STORE)
+            // 3. SIMPAN FILE UPLOADS DENGAN STRUKTUR FOLDER BARU
             $fileFields = [
                 'file_ktp',
                 'file_pas_foto',
@@ -826,17 +848,37 @@ class PesertaController extends Controller
                 'file_persetujuan_mentor'
             ];
 
+            // Ambil data untuk struktur folder
+            $tahun = date('Y');
+            $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
+            $angkatan = Angkatan::find($request->id_angkatan);
+            $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
+            $nip = $request->nip_nrp;
+
+            // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
+            $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            $fullPath = public_path($folderPath);
+
+            // Buat folder jika belum ada
+            if (!file_exists($fullPath)) {
+                mkdir($fullPath, 0755, true);
+            }
+
             $files = [];
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
-                    // Membuat nama file yang unik
-                    $fileName = time() . '_' . $field . '.' . $request->file($field)->getClientOriginalExtension();
+                    // Ambil ekstensi file
+                    $extension = $request->file($field)->getClientOriginalExtension();
 
-                    // Pindahkan file ke folder public/upload
-                    $path = $request->file($field)->move(public_path('uploads'), $fileName);
+                    // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
+                    $fieldName = str_replace('file_', '', $field);
+                    $fileName = $fieldName . '.' . $extension;
 
-                    // Simpan path file
-                    $files[$field] = 'uploads/' . $fileName;
+                    // Pindahkan file ke folder yang sudah ditentukan
+                    $request->file($field)->move($fullPath, $fileName);
+
+                    // Simpan path relatif untuk database (DENGAN SLASH DI AWAL)
+                    $files[$field] = '/' . $folderPath . '/' . $fileName;
                 } else {
                     // Untuk update, jika tidak ada file baru, pertahankan file lama
                     if ($field === 'file_ktp' && $peserta && $peserta->file_ktp) {
@@ -845,7 +887,7 @@ class PesertaController extends Controller
                         $files[$field] = $peserta->file_pas_foto;
                     } elseif (in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp']) && $kepegawaian) {
                         // Field dari kepegawaian
-                        $dbField = $field; // nama field sama
+                        $dbField = $field;
                         if ($kepegawaian->$dbField) {
                             $files[$field] = $kepegawaian->$dbField;
                         }
@@ -1107,8 +1149,50 @@ class PesertaController extends Controller
 
             // Hapus file fisik
             foreach ($filesToDelete as $file) {
-                if ($file && file_exists(public_path($file))) {
-                    unlink(public_path($file));
+                if ($file) {
+                    // Hilangkan leading slash jika ada untuk public_path
+                    $filePath = ltrim($file, '/');
+                    $fullPath = public_path($filePath);
+
+                    if (file_exists($fullPath)) {
+                        unlink($fullPath);
+                    }
+                }
+            }
+
+            // Hapus folder kosong jika semua file sudah dihapus
+            // Struktur: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
+            if ($peserta) {
+                $tahun = date('Y');
+                $jenisPelatihan = JenisPelatihan::find($pendaftaran->id_jenis_pelatihan);
+                $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
+                $angkatan = Angkatan::find($pendaftaran->id_angkatan);
+                $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
+                $nip = $peserta->nip_nrp;
+
+                $nipFolderPath = public_path("Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}");
+
+                // Hapus folder NIP jika kosong
+                if (is_dir($nipFolderPath) && count(scandir($nipFolderPath)) == 2) { // hanya . dan ..
+                    rmdir($nipFolderPath);
+
+                    // Hapus folder angkatan jika kosong
+                    $angkataFolderPath = public_path("Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}");
+                    if (is_dir($angkataFolderPath) && count(scandir($angkataFolderPath)) == 2) {
+                        rmdir($angkataFolderPath);
+
+                        // Hapus folder jenis pelatihan jika kosong
+                        $jenisFolderPath = public_path("Berkas/{$tahun}/{$kodeJenisPelatihan}");
+                        if (is_dir($jenisFolderPath) && count(scandir($jenisFolderPath)) == 2) {
+                            rmdir($jenisFolderPath);
+
+                            // Hapus folder tahun jika kosong
+                            $tahunFolderPath = public_path("Berkas/{$tahun}");
+                            if (is_dir($tahunFolderPath) && count(scandir($tahunFolderPath)) == 2) {
+                                rmdir($tahunFolderPath);
+                            }
+                        }
+                    }
                 }
             }
 

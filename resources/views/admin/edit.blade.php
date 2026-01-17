@@ -41,6 +41,134 @@
             line-height: 1.6;
         }
 
+        /* Fixed Notification Container */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 400px;
+            max-width: calc(100vw - 40px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow-xl);
+            border-left: 4px solid;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            animation: slideInRight 0.3s ease-out;
+            transform: translateX(0);
+            transition: all 0.3s ease;
+        }
+
+        .notification.hiding {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-success {
+            border-left-color: var(--success-color);
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, white 10%);
+        }
+
+        .notification-error {
+            border-left-color: var(--danger-color);
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, white 10%);
+        }
+
+        .notification-warning {
+            border-left-color: var(--warning-color);
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.05) 0%, white 10%);
+        }
+
+        .notification-info {
+            border-left-color: var(--info-color);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, white 10%);
+        }
+
+        .notification i {
+            margin-top: 0.125rem;
+            font-size: 1.25rem;
+        }
+
+        .notification-success i {
+            color: var(--success-color);
+        }
+
+        .notification-error i {
+            color: var(--danger-color);
+        }
+
+        .notification-warning i {
+            color: var(--warning-color);
+        }
+
+        .notification-info i {
+            color: var(--info-color);
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+            color: var(--gray-800);
+        }
+
+        .notification-message {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: 0.25rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
         /* Container */
         .edit-container {
             max-width: 1400px;
@@ -137,17 +265,6 @@
             animation: slideInDown 0.3s ease-out;
         }
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .alert-success {
             background: #d1fae5;
             color: #065f46;
@@ -204,6 +321,58 @@
 
         .alert-close:hover {
             opacity: 1;
+        }
+
+        /* Error summary */
+        .error-summary {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: slideInDown 0.3s ease-out;
+        }
+
+        .error-summary h4 {
+            color: #991b1b;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-summary ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .error-summary li {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .error-summary li:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .error-summary li:last-child {
+            margin-bottom: 0;
+        }
+
+        .error-summary .error-count {
+            background: var(--danger-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
         }
 
         /* Form */
@@ -292,9 +461,12 @@
         }
 
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 1;
             }
+
             50% {
                 opacity: 0.5;
             }
@@ -316,6 +488,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -825,6 +998,12 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            .notification-container {
+                width: 350px;
+                right: 10px;
+                top: 10px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -857,6 +1036,13 @@
             .form-file-label {
                 padding: 2rem 1rem;
             }
+
+            .notification-container {
+                width: 300px;
+                right: 10px;
+                left: 10px;
+                margin: 0 auto;
+            }
         }
 
         /* Smooth Scrolling */
@@ -873,20 +1059,34 @@
         /* Highlight error fields */
         .error-field {
             animation: pulseError 1.5s ease-in-out;
+            border-color: var(--danger-color) !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2) !important;
         }
 
         @keyframes pulseError {
-            0%, 100% {
+
+            0%,
+            100% {
                 background-color: transparent;
             }
+
             50% {
                 background-color: rgba(239, 68, 68, 0.1);
             }
+        }
+
+        /* Required field indicator */
+        .required-indicator {
+            color: var(--danger-color);
+            margin-left: 2px;
         }
     </style>
 @endsection
 
 @section('content')
+    <!-- Notification Container (Fixed at top-right) -->
+    <div class="notification-container" id="notificationContainer"></div>
+
     <div class="edit-container">
         <!-- Header -->
         <div class="edit-header">
@@ -929,47 +1129,51 @@
             @endif
 
             @if($errors->any())
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div class="alert-content">
-                        <div class="alert-title">Periksa Kembali Form Anda</div>
-                        <div class="alert-message">
-                            Terdapat {{ $errors->count() }} kesalahan yang perlu diperbaiki
-                        </div>
-                    </div>
-                    <button type="button" class="alert-close" onclick="this.parentElement.remove()">
-                        <i class="fas fa-times"></i>
-                    </button>
+                <div class="error-summary" id="errorSummary">
+                    <h4>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Terdapat <span class="error-count">{{ $errors->count() }}</span> kesalahan yang perlu diperbaiki
+                    </h4>
+                    <ul>
+                        @foreach($errors->all() as $error)
+                            <li onclick="scrollToFieldError('{{ $error }}')">
+                                <i class="fas fa-exclamation-circle text-danger"></i>
+                                {{ $error }}
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
         </div>
 
         <!-- Form -->
         <form id="editForm" class="edit-form" method="POST" action="{{ route('admin.dashboard.update') }}"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" novalidate>
             @csrf
 
             <!-- Tab Navigation -->
             <div class="form-tabs">
-                <button type="button" class="form-tab active" data-tab="tab-personal">
+                <button type="button" class="form-tab active" data-tab="tab-personal" id="tab-btn-personal">
                     <i class="fas fa-user"></i>
                     <span>Data Pribadi</span>
                 </button>
-                <button type="button" class="form-tab" data-tab="tab-employment">
+                <button type="button" class="form-tab" data-tab="tab-employment" id="tab-btn-employment">
                     <i class="fas fa-briefcase"></i>
                     <span>Kepegawaian</span>
                 </button>
-                <button type="button" class="form-tab" data-tab="tab-mentor">
+                <button type="button" class="form-tab" data-tab="tab-mentor" id="tab-btn-mentor">
                     <i class="fas fa-user-tie"></i>
                     <span>Mentor</span>
                 </button>
-                <button type="button" class="form-tab" data-tab="tab-documents">
+                <button type="button" class="form-tab" data-tab="tab-documents" id="tab-btn-documents">
                     <i class="fas fa-file-alt"></i>
                     <span>Dokumen</span>
                 </button>
             </div>
 
-            <!-- Tab 1: Data Pribadi -->
+            <!-- ============================================
+                            TAB 1: DATA PRIBADI
+                ============================================= -->
             <div id="tab-personal" class="form-tab-content active">
                 <div class="form-section-header">
                     <i class="fas fa-user-circle"></i>
@@ -1037,12 +1241,18 @@
                         <label class="form-label required">Agama</label>
                         <select name="agama" class="form-select @error('agama') error @enderror" required>
                             <option value="">-- Pilih Agama --</option>
-                            <option value="Islam" {{ old('agama', $peserta->agama) == 'Islam' ? 'selected' : '' }}>Islam</option>
-                            <option value="Kristen" {{ old('agama', $peserta->agama) == 'Kristen' ? 'selected' : '' }}>Kristen</option>
-                            <option value="Katolik" {{ old('agama', $peserta->agama) == 'Katolik' ? 'selected' : '' }}>Katolik</option>
-                            <option value="Hindu" {{ old('agama', $peserta->agama) == 'Hindu' ? 'selected' : '' }}>Hindu</option>
-                            <option value="Buddha" {{ old('agama', $peserta->agama) == 'Buddha' ? 'selected' : '' }}>Buddha</option>
-                            <option value="Konghucu" {{ old('agama', $peserta->agama) == 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
+                            <option value="Islam" {{ old('agama', $peserta->agama) == 'Islam' ? 'selected' : '' }}>Islam
+                            </option>
+                            <option value="Kristen" {{ old('agama', $peserta->agama) == 'Kristen' ? 'selected' : '' }}>Kristen
+                            </option>
+                            <option value="Katolik" {{ old('agama', $peserta->agama) == 'Katolik' ? 'selected' : '' }}>Katolik
+                            </option>
+                            <option value="Hindu" {{ old('agama', $peserta->agama) == 'Hindu' ? 'selected' : '' }}>Hindu
+                            </option>
+                            <option value="Buddha" {{ old('agama', $peserta->agama) == 'Buddha' ? 'selected' : '' }}>Buddha
+                            </option>
+                            <option value="Konghucu" {{ old('agama', $peserta->agama) == 'Konghucu' ? 'selected' : '' }}>
+                                Konghucu</option>
                         </select>
                         @error('agama')
                             <div class="error-message">
@@ -1069,27 +1279,27 @@
                             </div>
                         @enderror
                     </div>
-
                 </div>
 
-                <div class="form-row" id="nama-pasangan-container" style="{{ old('status_perkawinan', $peserta->status_perkawinan) == 'Menikah' ? 'display: grid;' : 'display: none;' }}">
-                        <div class="form-group">
-                            <label class="form-label required">Nama Pasangan</label>
-                            <input type="text" name="nama_pasangan" id="nama_pasangan"
-                                class="form-input @error('nama_pasangan') error @enderror"
-                                value="{{ old('nama_pasangan', $peserta->nama_pasangan) }}"
-                                {{ old('status_perkawinan', $peserta->status_perkawinan) == 'Menikah' ? '' : 'disabled' }}>
-                            <small class="form-hint"><i class="fas fa-info-circle"></i> Diisi hanya jika status "Menikah"</small>
-                            @error('nama_pasangan')
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                        
-                        <!-- Kolom kosong untuk menjaga layout -->
-                        <div class="form-group"></div>
+                <div class="form-row" id="nama-pasangan-container"
+                    style="{{ old('status_perkawinan', $peserta->status_perkawinan) == 'Menikah' ? 'display: grid;' : 'display: none;' }}">
+                    <div class="form-group">
+                        <label class="form-label">Nama Pasangan</label>
+                        <input type="text" name="nama_pasangan" id="nama_pasangan"
+                            class="form-input @error('nama_pasangan') error @enderror"
+                            value="{{ old('nama_pasangan', $peserta->nama_pasangan) }}" {{ old('status_perkawinan', $peserta->status_perkawinan) == 'Menikah' ? '' : 'disabled' }}>
+                        <small class="form-hint"><i class="fas fa-info-circle"></i> Diisi hanya jika status
+                            "Menikah"</small>
+                        @error('nama_pasangan')
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                    <!-- Kolom kosong untuk menjaga layout -->
+                    <div class="form-group"></div>
                 </div>
 
                 <div class="form-row">
@@ -1146,8 +1356,8 @@
 
                 <div class="form-group full-width">
                     <label class="form-label required">Alamat Rumah</label>
-                    <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror"
-                        required placeholder="Masukkan alamat lengkap">{{ old('alamat_rumah', $peserta->alamat_rumah) }}</textarea>
+                    <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror" required
+                        placeholder="Masukkan alamat lengkap">{{ old('alamat_rumah', $peserta->alamat_rumah) }}</textarea>
                     @error('alamat_rumah')
                         <div class="error-message">
                             <i class="fas fa-exclamation-circle"></i>
@@ -1160,7 +1370,8 @@
                     <div class="form-group">
                         <label class="form-label">Olahraga & Hobi</label>
                         <input type="text" name="olahraga_hobi" class="form-input @error('olahraga_hobi') error @enderror"
-                            value="{{ old('olahraga_hobi', $peserta->olahraga_hobi) }}" placeholder="Contoh: Futsal, Membaca">
+                            value="{{ old('olahraga_hobi', $peserta->olahraga_hobi) }}"
+                            placeholder="Contoh: Futsal, Membaca">
                         @error('olahraga_hobi')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1174,7 +1385,8 @@
                         <select name="perokok" class="form-select @error('perokok') error @enderror" required>
                             <option value="">-- Pilih Status --</option>
                             <option value="Ya" {{ old('perokok', $peserta->perokok) == 'Ya' ? 'selected' : '' }}>Ya</option>
-                            <option value="Tidak" {{ old('perokok', $peserta->perokok) == 'Tidak' ? 'selected' : '' }}>Tidak</option>
+                            <option value="Tidak" {{ old('perokok', $peserta->perokok) == 'Tidak' ? 'selected' : '' }}>Tidak
+                            </option>
                         </select>
                         @error('perokok')
                             <div class="error-message">
@@ -1187,7 +1399,7 @@
 
                 <div class="form-row form-row-3">
                     <div class="form-group">
-                        <label class="form-label">Ukuran Kaos</label>
+                        <label class="form-label required">Ukuran Kaos</label>
                         <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
                             <option value="">-- Pilih Ukuran --</option>
                             @foreach(['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
@@ -1203,7 +1415,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Ukuran Celana</label>
+                        <label class="form-label required">Ukuran Celana</label>
                         <select name="ukuran_celana" class="form-select @error('ukuran_celana') error @enderror">
                             <option value="">-- Pilih Ukuran --</option>
                             @foreach(['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
@@ -1219,7 +1431,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Ukuran Training</label>
+                        <label class="form-label required">Ukuran Training</label>
                         <select name="ukuran_training" class="form-select @error('ukuran_training') error @enderror">
                             <option value="">-- Pilih Ukuran --</option>
                             @foreach(['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
@@ -1243,7 +1455,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label required">Pendidikan Terakhir</label>
-                        <select name="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') error @enderror" required>
+                        <select name="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') error @enderror"
+                            required>
                             <option value="">-- Pilih Pendidikan --</option>
                             @foreach(['SD', 'SMP', 'SMU', 'D3', 'D4', 'S1', 'S2', 'S3'] as $edu)
                                 <option value="{{ $edu }}" {{ old('pendidikan_terakhir', $peserta->pendidikan_terakhir) == $edu ? 'selected' : '' }}>{{ $edu }}</option>
@@ -1258,7 +1471,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Bidang Studi</label>
+                        <label class="form-label required">Bidang Studi</label>
                         <input type="text" name="bidang_studi" class="form-input @error('bidang_studi') error @enderror"
                             value="{{ old('bidang_studi', $peserta->bidang_studi) }}" placeholder="Contoh: Ilmu Komputer">
                         @error('bidang_studi')
@@ -1273,8 +1486,10 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Bidang Keahlian</label>
-                        <input type="text" name="bidang_keahlian" class="form-input @error('bidang_keahlian') error @enderror"
-                            value="{{ old('bidang_keahlian', $peserta->bidang_keahlian) }}" placeholder="Contoh: Data Science">
+                        <input type="text" name="bidang_keahlian"
+                            class="form-input @error('bidang_keahlian') error @enderror"
+                            value="{{ old('bidang_keahlian', $peserta->bidang_keahlian) }}"
+                            placeholder="Contoh: Data Science">
                         @error('bidang_keahlian')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1285,7 +1500,7 @@
 
                     <div class="form-group">
                         <label class="form-label">Kondisi Peserta</label>
-                        <textarea name="kondisi_peserta" class="form-textarea @error('kondisi_peserta') error @enderror" 
+                        <textarea name="kondisi_peserta" class="form-textarea @error('kondisi_peserta') error @enderror"
                             placeholder="Catatan khusus (alergi, kondisi kesehatan, dll)">{{ old('kondisi_peserta', $peserta->kondisi_peserta) }}</textarea>
                         @error('kondisi_peserta')
                             <div class="error-message">
@@ -1297,7 +1512,9 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Data Kepegawaian -->
+            <!-- ============================================
+                            TAB 2: DATA KEPEGAWAIAN
+                ============================================= -->
             <div id="tab-employment" class="form-tab-content">
                 <div class="form-section-header">
                     <i class="fas fa-building"></i>
@@ -1318,7 +1535,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Unit Kerja/Detail Instansi</label>
+                        <label class="form-label required">Unit Kerja/Detail Instansi</label>
                         <input type="text" name="unit_kerja" class="form-input @error('unit_kerja') error @enderror"
                             value="{{ old('unit_kerja', $kepegawaian->unit_kerja ?? '') }}">
                         @error('unit_kerja')
@@ -1333,7 +1550,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label required">Provinsi</label>
-                        <select name="id_provinsi" id="id_provinsi" class="form-select @error('id_provinsi') error @enderror" required>
+                        <select name="id_provinsi" id="id_provinsi"
+                            class="form-select @error('id_provinsi') error @enderror" required>
                             <option value="">-- Pilih Provinsi --</option>
                             @foreach($provinsiList as $provinsi)
                                 <option value="{{ $provinsi->id }}" {{ old('id_provinsi', $kepegawaian->id_provinsi ?? '') == $provinsi->id ? 'selected' : '' }}>
@@ -1350,35 +1568,34 @@
                     </div>
 
                     <div class="form-group">
-                    <label class="form-label">Kabupaten/Kota</label>
-                    <select name="id_kabupaten_kota" id="id_kabupaten_kota" 
-                            class="form-select @error('id_kabupaten_kota') error @enderror" 
-                            {{ !$kepegawaian?->id_provinsi ? 'disabled' : '' }}>
-                        <option value="">-- Pilih Kabupaten/Kota --</option>
-                        @if($kepegawaian && $kepegawaian->id_kabupaten_kota)
-                            @php
-                                $currentKabupaten = $kabupatenList->firstWhere('id', $kepegawaian->id_kabupaten_kota);
-                            @endphp
-                            @if($currentKabupaten)
-                                <option value="{{ $currentKabupaten->id }}" selected>
-                                    {{ $currentKabupaten->name }}
-                                </option>
+                        <label class="form-label required">Kabupaten/Kota</label>
+                        <select name="id_kabupaten_kota" id="id_kabupaten_kota"
+                            class="form-select @error('id_kabupaten_kota') error @enderror" {{ !$kepegawaian?->id_provinsi ? 'disabled' : '' }}>
+                            <option value="">-- Pilih Kabupaten/Kota --</option>
+                            @if($kepegawaian && $kepegawaian->id_kabupaten_kota)
+                                @php
+    $currentKabupaten = $kabupatenList->firstWhere('id', $kepegawaian->id_kabupaten_kota);
+                                @endphp
+                                @if($currentKabupaten)
+                                    <option value="{{ $currentKabupaten->id }}" selected>
+                                        {{ $currentKabupaten->name }}
+                                    </option>
+                                @endif
                             @endif
-                        @endif
-                    </select>
-                    @error('id_kabupaten_kota')
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
+                        </select>
+                        @error('id_kabupaten_kota')
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="form-group full-width">
                     <label class="form-label required">Alamat Kantor</label>
-                    <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror"
-                        required placeholder="Masukkan alamat kantor lengkap">{{ old('alamat_kantor', $kepegawaian->alamat_kantor ?? '') }}</textarea>
+                    <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror" required
+                        placeholder="Masukkan alamat kantor lengkap">{{ old('alamat_kantor', $kepegawaian->alamat_kantor ?? '') }}</textarea>
                     @error('alamat_kantor')
                         <div class="error-message">
                             <i class="fas fa-exclamation-circle"></i>
@@ -1390,8 +1607,10 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Nomor Telepon Kantor</label>
-                        <input type="tel" name="nomor_telepon_kantor" class="form-input @error('nomor_telepon_kantor') error @enderror"
-                            value="{{ old('nomor_telepon_kantor', $kepegawaian->nomor_telepon_kantor ?? '') }}" placeholder="021xxxxxxxx">
+                        <input type="tel" name="nomor_telepon_kantor"
+                            class="form-input @error('nomor_telepon_kantor') error @enderror"
+                            value="{{ old('nomor_telepon_kantor', $kepegawaian->nomor_telepon_kantor ?? '') }}"
+                            placeholder="021xxxxxxxx">
                         @error('nomor_telepon_kantor')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1403,7 +1622,8 @@
                     <div class="form-group">
                         <label class="form-label">Email Kantor</label>
                         <input type="email" name="email_kantor" class="form-input @error('email_kantor') error @enderror"
-                            value="{{ old('email_kantor', $kepegawaian->email_kantor ?? '') }}" placeholder="nama@instansi.go.id">
+                            value="{{ old('email_kantor', $kepegawaian->email_kantor ?? '') }}"
+                            placeholder="nama@instansi.go.id">
                         @error('email_kantor')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1426,38 +1646,42 @@
                         @enderror
                     </div>
                     @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
-                    <div class="form-group">
-                        <label class="form-label">Eselon</label>
-                        <input type="text" name="eselon" class="form-input @error('eselon') error @enderror"
-                            value="{{ old('eselon', $kepegawaian->eselon ?? '') }}" placeholder="Contoh: III/a">
-                        @error('eselon')
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
+                        <div class="form-group">
+                            <label class="form-label required">Eselon</label>
+                            <select name="eselon" class="form-select @error('eselon') error @enderror">
+                                <option value="">-- Pilih Eselon --</option>
+                                <option value="II" {{ old('eselon', $kepegawaian->eselon ?? '') == 'II' ? 'selected' : '' }}>
+                                    II
+                                </option>
+                                <option value="III/Pejabat Fungsional" {{ old('eselon', $kepegawaian->eselon ?? '') == 'III/Pejabat Fungsional' ? 'selected' : '' }}>
+                                    III/Pejabat Fungsional
+                                </option>
+                            </select>
+                            @error('eselon')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                            <small class="form-hint"><i class="fas fa-info-circle"></i> Pilih eselon sesuai dengan jabatan Anda</small>
+                        </div>
                     @endif
-
-                    
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label required">Golongan Ruang</label>
-                        <select name="golongan_ruang" id="golongan_ruang" class="form-select @error('golongan_ruang') error @enderror" required>
+                        <select name="golongan_ruang" id="golongan_ruang"
+                            class="form-select @error('golongan_ruang') error @enderror" required>
                             <option value="">-- Pilih Golongan Ruang --</option>
-                            <!-- Golongan II -->
                             <option value="II/a" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'II/a' ? 'selected' : '' }}>II/a</option>
                             <option value="II/b" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'II/b' ? 'selected' : '' }}>II/b</option>
                             <option value="II/c" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'II/c' ? 'selected' : '' }}>II/c</option>
                             <option value="II/d" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'II/d' ? 'selected' : '' }}>II/d</option>
-                            <!-- Golongan III -->
                             <option value="III/a" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'III/a' ? 'selected' : '' }}>III/a</option>
                             <option value="III/b" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'III/b' ? 'selected' : '' }}>III/b</option>
                             <option value="III/c" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'III/c' ? 'selected' : '' }}>III/c</option>
                             <option value="III/d" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'III/d' ? 'selected' : '' }}>III/d</option>
-                            <!-- Golongan IV -->
                             <option value="IV/a" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'IV/a' ? 'selected' : '' }}>IV/a</option>
                             <option value="IV/b" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'IV/b' ? 'selected' : '' }}>IV/b</option>
                             <option value="IV/c" {{ old('golongan_ruang', $kepegawaian->golongan_ruang ?? '') == 'IV/c' ? 'selected' : '' }}>IV/c</option>
@@ -1469,15 +1693,14 @@
                                 {{ $message }}
                             </div>
                         @enderror
-                        <small class="form-hint"><i class="fas fa-info-circle"></i> Contoh: III/a ditulis sebagai IIIa</small>
+                        <small class="form-hint"><i class="fas fa-info-circle"></i> Contoh: III/a ditulis sebagai
+                            IIIa</small>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label required">Pangkat</label>
-                        <input type="text" name="pangkat" id="pangkat" 
-                            class="form-input @error('pangkat') error @enderror"
-                            value="{{ old('pangkat', $kepegawaian->pangkat ?? '') }}" 
-                            readonly
+                        <input type="text" name="pangkat" id="pangkat" class="form-input @error('pangkat') error @enderror"
+                            value="{{ old('pangkat', $kepegawaian->pangkat ?? '') }}" readonly
                             placeholder="Akan terisi otomatis berdasarkan golongan ruang">
                         <div id="pangkat_description" class="form-hint" style="display: none;">
                             <i class="fas fa-info-circle"></i> <span id="pangkat_desc_text"></span>
@@ -1489,7 +1712,6 @@
                             </div>
                         @enderror
                     </div>
-                    
                 </div>
 
                 @if (!($jenisPelatihanData->kode_pelatihan == "PKN_TK_II"))
@@ -1499,81 +1721,87 @@
                     </div>
 
                     @if (!($jenisPelatihanData->kode_pelatihan == "PKA" || $jenisPelatihanData->kode_pelatihan == "PKP"))
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Nomor SK CPNS</label>
-                            <input type="text" name="nomor_sk_cpns" class="form-input @error('nomor_sk_cpns') error @enderror"
-                                value="{{ old('nomor_sk_cpns', $kepegawaian->nomor_sk_cpns ?? '') }}">
-                            @error('nomor_sk_cpns')
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">Nomor SK CPNS</label>
+                                <input type="text" name="nomor_sk_cpns" class="form-input @error('nomor_sk_cpns') error @enderror"
+                                    value="{{ old('nomor_sk_cpns', $kepegawaian->nomor_sk_cpns ?? '') }}">
+                                @error('nomor_sk_cpns')
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Tanggal SK CPNS</label>
-                            <input type="date" name="tanggal_sk_cpns" class="form-input @error('tanggal_sk_cpns') error @enderror"
-                                value="{{ old('tanggal_sk_cpns', $kepegawaian->tanggal_sk_cpns ?? '') }}">
-                            @error('tanggal_sk_cpns')
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ $message }}
-                                </div>
-                            @enderror
+                            <div class="form-group">
+                                <label class="form-label required">Tanggal SK CPNS</label>
+                                <input type="date" name="tanggal_sk_cpns"
+                                    class="form-input @error('tanggal_sk_cpns') error @enderror"
+                                    value="{{ old('tanggal_sk_cpns', $kepegawaian->tanggal_sk_cpns ?? '') }}">
+                                @error('tanggal_sk_cpns')
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
                         </div>
-                    </div>
                     @endif
 
                     <div class="form-row">
                         @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
-                        <div class="form-group">
-                            <label class="form-label">Nomor SK Terakhir</label>
-                            <input type="text" name="nomor_sk_terakhir" class="form-input @error('nomor_sk_terakhir') error @enderror"
-                                value="{{ old('nomor_sk_terakhir', $kepegawaian->nomor_sk_terakhir ?? '') }}">
-                            @error('nomor_sk_terakhir')
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
+                            <div class="form-group">
+                                <label class="form-label required">Nomor SK Terakhir</label>
+                                <input type="text" name="nomor_sk_terakhir"
+                                    class="form-input @error('nomor_sk_terakhir') error @enderror"
+                                    value="{{ old('nomor_sk_terakhir', $kepegawaian->nomor_sk_terakhir ?? '') }}">
+                                @error('nomor_sk_terakhir')
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
                         @endif
 
                         @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
-                        <div class="form-group">
-                            <label class="form-label">Tanggal SK Jabatan</label>
-                            <input type="date" name="tanggal_sk_jabatan" class="form-input @error('tanggal_sk_jabatan') error @enderror"
-                                value="{{ old('tanggal_sk_jabatan', $kepegawaian->tanggal_sk_jabatan ?? '') }}">
-                            @error('tanggal_sk_jabatan')
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
+                            <div class="form-group">
+                                <label class="form-label required">Tanggal SK Jabatan</label>
+                                <input type="date" name="tanggal_sk_jabatan"
+                                    class="form-input @error('tanggal_sk_jabatan') error @enderror"
+                                    value="{{ old('tanggal_sk_jabatan', $kepegawaian->tanggal_sk_jabatan ?? '') }}">
+                                @error('tanggal_sk_jabatan')
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
                         @endif
                     </div>
 
                     @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
-                    <div class="form-group">
-                        <label class="form-label">Tahun Lulus PKP/PIM IV</label>
-                        <input type="number" name="tahun_lulus_pkp_pim_iv" class="form-input @error('tahun_lulus_pkp_pim_iv') error @enderror"
-                            value="{{ old('tahun_lulus_pkp_pim_iv', $kepegawaian->tahun_lulus_pkp_pim_iv ?? '') }}"
-                            min="1900" max="{{ date('Y') }}" placeholder="{{ date('Y') }}">
-                        @error('tahun_lulus_pkp_pim_iv')
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
+                        <div class="form-group">
+                            <label class="form-label">Tahun Lulus PKP/PIM IV</label>
+                            <input type="number" name="tahun_lulus_pkp_pim_iv"
+                                class="form-input @error('tahun_lulus_pkp_pim_iv') error @enderror"
+                                value="{{ old('tahun_lulus_pkp_pim_iv', $kepegawaian->tahun_lulus_pkp_pim_iv ?? '') }}" min="1900"
+                                max="{{ date('Y') }}" placeholder="{{ date('Y') }}">
+                            @error('tahun_lulus_pkp_pim_iv')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
                     @endif
                 @endif
             </div>
 
-            <!-- Tab 3: Data Mentor -->
+            <!-- ============================================
+                            TAB 3: DATA MENTOR
+                ============================================= -->
             <div id="tab-mentor" class="form-tab-content">
                 <div class="form-section-header">
                     <i class="fas fa-user-tie"></i>
@@ -1583,7 +1811,8 @@
                 @if($pendaftaranTerbaru)
                     <div class="form-group">
                         <label class="form-label required">Sudah Ada Penunjukan Mentor?</label>
-                        <select name="sudah_ada_mentor" id="sudah_ada_mentor" class="form-select @error('sudah_ada_mentor') error @enderror" required>
+                        <select name="sudah_ada_mentor" id="sudah_ada_mentor"
+                            class="form-select @error('sudah_ada_mentor') error @enderror" required>
                             <option value="">-- Pilih Status --</option>
                             <option value="Ya" {{ old('sudah_ada_mentor', $pendaftaranTerbaru->id_mentor ? 'Ya' : 'Tidak') == 'Ya' ? 'selected' : '' }}>Ya</option>
                             <option value="Tidak" {{ old('sudah_ada_mentor', $pendaftaranTerbaru->id_mentor ? 'Ya' : 'Tidak') == 'Tidak' ? 'selected' : '' }}>Tidak</option>
@@ -1596,13 +1825,15 @@
                         @enderror
                     </div>
 
-                    <div id="mentor-container" style="{{ old('sudah_ada_mentor', $pendaftaranTerbaru->id_mentor ? 'Ya' : 'Tidak') == 'Ya' ? 'display: block;' : 'display: none;' }}">
+                    <div id="mentor-container"
+                        style="{{ old('sudah_ada_mentor', $pendaftaranTerbaru->id_mentor ? 'Ya' : 'Tidak') == 'Ya' ? 'display: block;' : 'display: none;' }}">
                         <div class="form-group">
                             <label class="form-label required">Pilih Menu Mentor</label>
-                            <select name="mentor_mode" id="mentor_mode" class="form-select @error('mentor_mode') error @enderror">
+                            <select name="mentor_mode" id="mentor_mode"
+                                class="form-select @error('mentor_mode') error @enderror">
                                 <option value="">-- Pilih Menu --</option>
                                 @if(count($mentorList) > 0)
-                                <option value="pilih" {{ old('mentor_mode', $pendaftaranTerbaru->id_mentor ? 'pilih' : 'tambah') == 'pilih' ? 'selected' : '' }}>Pilih dari Daftar Mentor</option>
+                                    <option value="pilih" {{ old('mentor_mode', $pendaftaranTerbaru->id_mentor ? 'pilih' : 'tambah') == 'pilih' ? 'selected' : '' }}>Pilih dari Daftar Mentor</option>
                                 @endif
                                 <option value="tambah" {{ old('mentor_mode', !$pendaftaranTerbaru->id_mentor ? 'tambah' : '') == 'tambah' ? 'selected' : '' }}>Tambah Mentor Baru</option>
                             </select>
@@ -1616,66 +1847,68 @@
 
                         <!-- Pilih dari daftar mentor -->
                         @if(count($mentorList) > 0)
-                        <div id="select-mentor-form" style="{{ old('mentor_mode', $pendaftaranTerbaru->id_mentor ? 'pilih' : '') == 'pilih' ? 'display: block;' : 'display: none;' }}">
-                            <div class="form-group">
-                                <label class="form-label required">Pilih Mentor</label>
-                                <select name="id_mentor" id="id_mentor" class="form-select @error('id_mentor') error @enderror">
-                                    <option value="">-- Pilih Mentor --</option>
-                                    @foreach($mentorList as $mentor)
-                                        <option value="{{ $mentor->id }}" 
-                                            data-nama="{{ $mentor->nama_mentor }}"
-                                            data-jabatan="{{ $mentor->jabatan_mentor }}"
-                                            data-rekening="{{ $mentor->nomor_rekening }}" 
-                                            data-npwp="{{ $mentor->npwp_mentor }}" 
-                                            {{ old('id_mentor', $pendaftaranTerbaru->id_mentor) == $mentor->id ? 'selected' : '' }}>
-                                            {{ $mentor->nama_mentor }} - {{ $mentor->jabatan_mentor }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('id_mentor')
-                                    <div class="error-message">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        {{ $message }}
+                            <div id="select-mentor-form"
+                                style="{{ old('mentor_mode', $pendaftaranTerbaru->id_mentor ? 'pilih' : '') == 'pilih' ? 'display: block;' : 'display: none;' }}">
+                                <div class="form-group">
+                                    <label class="form-label required">Pilih Mentor</label>
+                                    <select name="id_mentor" id="id_mentor" class="form-select @error('id_mentor') error @enderror">
+                                        <option value="">-- Pilih Mentor --</option>
+                                        @foreach($mentorList as $mentor)
+                                            <option value="{{ $mentor->id }}" data-nama="{{ $mentor->nama_mentor }}"
+                                                data-jabatan="{{ $mentor->jabatan_mentor }}"
+                                                data-rekening="{{ $mentor->nomor_rekening }}" data-npwp="{{ $mentor->npwp_mentor }}" {{ old('id_mentor', $pendaftaranTerbaru->id_mentor) == $mentor->id ? 'selected' : '' }}>
+                                                {{ $mentor->nama_mentor }} - {{ $mentor->jabatan_mentor }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('id_mentor')
+                                        <div class="error-message">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Nama Mentor</label>
+                                        <input type="text" name="nama_mentor" id="nama_mentor_select" class="form-input" readonly
+                                            value="{{ old('nama_mentor', $pendaftaranTerbaru->mentor->nama_mentor ?? '') }}">
                                     </div>
-                                @enderror
-                            </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Jabatan Mentor</label>
+                                        <input type="text" name="jabatan_mentor" id="jabatan_mentor_select" class="form-input"
+                                            readonly
+                                            value="{{ old('jabatan_mentor', $pendaftaranTerbaru->mentor->jabatan_mentor ?? '') }}">
+                                    </div>
+                                </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Nama Mentor</label>
-                                    <input type="text" name="nama_mentor" id="nama_mentor_select" class="form-input" readonly
-                                        value="{{ old('nama_mentor', $pendaftaranTerbaru->mentor->nama_mentor ?? '') }}">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Jabatan Mentor</label>
-                                    <input type="text" name="jabatan_mentor" id="jabatan_mentor_select" class="form-input" readonly
-                                        value="{{ old('jabatan_mentor', $pendaftaranTerbaru->mentor->jabatan_mentor ?? '') }}">
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Nomor Rekening Mentor</label>
-                                    <input type="text" name="nomor_rekening_mentor" id="nomor_rekening_mentor_select" class="form-input" readonly
-                                        value="{{ old('nomor_rekening_mentor', $pendaftaranTerbaru->mentor->nomor_rekening ?? '') }}">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NPWP Mentor</label>
-                                    <input type="text" name="npwp_mentor" id="npwp_mentor_select" class="form-input" readonly
-                                        value="{{ old('npwp_mentor', $pendaftaranTerbaru->mentor->npwp_mentor ?? '') }}">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Nomor Rekening Mentor</label>
+                                        <input type="text" name="nomor_rekening_mentor" id="nomor_rekening_mentor_select"
+                                            class="form-input" readonly
+                                            value="{{ old('nomor_rekening_mentor', $pendaftaranTerbaru->mentor->nomor_rekening ?? '') }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">NPWP Mentor</label>
+                                        <input type="text" name="npwp_mentor" id="npwp_mentor_select" class="form-input" readonly
+                                            value="{{ old('npwp_mentor', $pendaftaranTerbaru->mentor->npwp_mentor ?? '') }}">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         @else
-                        <input type="hidden" name="mentor_mode" value="tambah">
+                            <input type="hidden" name="mentor_mode" value="tambah">
                         @endif
 
                         <!-- Tambah mentor baru -->
-                        <div id="add-mentor-form" style="{{ old('mentor_mode', !$pendaftaranTerbaru->id_mentor ? 'tambah' : '') == 'tambah' ? 'display: block;' : 'display: none;' }}">
+                        <div id="add-mentor-form"
+                            style="{{ old('mentor_mode', !$pendaftaranTerbaru->id_mentor ? 'tambah' : '') == 'tambah' ? 'display: block;' : 'display: none;' }}">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
                                 <div class="alert-content">
-                                    <div class="alert-message">Silakan lengkapi data mentor baru dengan informasi yang akurat</div>
+                                    <div class="alert-message">Silakan lengkapi data mentor baru dengan informasi yang akurat
+                                    </div>
                                 </div>
                             </div>
 
@@ -1744,7 +1977,9 @@
                 @endif
             </div>
 
-            <!-- Tab 4: Dokumen -->
+            <!-- ============================================
+                            TAB 4: DOKUMEN
+                ============================================= -->
             <div id="tab-documents" class="form-tab-content">
                 <div class="form-section-header">
                     <i class="fas fa-file-upload"></i>
@@ -1756,7 +1991,7 @@
                     <div class="alert-content">
                         <div class="alert-title">Perhatian</div>
                         <div class="alert-message">
-                            Upload file hanya jika ingin mengganti file yang sudah ada. 
+                            Upload file hanya jika ingin mengganti file yang sudah ada.
                             Format yang diterima: PDF, JPG, JPEG, PNG (maks. 1MB).
                         </div>
                     </div>
@@ -1769,9 +2004,10 @@
 
                 <!-- KTP -->
                 <div class="form-group">
-                    <label class="form-label">KTP</label>
+                    <label class="form-label required">KTP</label>
                     <div class="form-file">
-                        <input type="file" name="file_ktp" id="file_ktp" class="form-file-input" accept=".pdf,.jpg,.jpeg,.png">
+                        <input type="file" name="file_ktp" id="file_ktp"
+                            class="form-file-input @error('file_ktp') error @enderror" accept=".pdf,.jpg,.jpeg,.png">
                         <label for="file_ktp" class="form-file-label">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <div class="form-file-label-text">Klik untuk mengunggah file KTP</div>
@@ -1804,9 +2040,10 @@
 
                 <!-- Pas Foto -->
                 <div class="form-group">
-                    <label class="form-label">Pas Foto</label>
+                    <label class="form-label required">Pas Foto</label>
                     <div class="form-file">
-                        <input type="file" name="file_pas_foto" id="file_pas_foto" class="form-file-input" accept=".jpg,.jpeg,.png">
+                        <input type="file" name="file_pas_foto" id="file_pas_foto"
+                            class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
                         <label for="file_pas_foto" class="form-file-label">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <div class="form-file-label-text">Klik untuk mengunggah pas foto</div>
@@ -1845,31 +2082,32 @@
 
                     @php
                         $kepegawaianDocs = [
-                            ['name' => 'file_sk_jabatan', 'label' => 'SK Jabatan'],
-                            ['name' => 'file_sk_pangkat', 'label' => 'SK Pangkat'],
-                            ['name' => 'file_sk_cpns', 'label' => 'SK CPNS'],
-                            ['name' => 'file_spmt', 'label' => 'SPMT'],
-                            ['name' => 'file_skp', 'label' => 'SKP'],
+                            ['name' => 'file_sk_jabatan', 'label' => 'SK Jabatan', 'wajib' => 'required'],
+                            ['name' => 'file_sk_pangkat', 'label' => 'SK Pangkat', 'wajib' => 'required'],
+                            ['name' => 'file_sk_cpns', 'label' => 'SK CPNS', 'wajib' => 'required'],
+                            ['name' => 'file_spmt', 'label' => 'SPMT', 'wajib' => 'required'],
+                            ['name' => 'file_skp', 'label' => 'SKP', 'wajib' => '-'],
                         ];
 
                         if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
-                                $kepegawaianDocs = array_filter($kepegawaianDocs, function($doc) {
-                                    return !in_array($doc['name'], ['file_sk_jabatan', 'file_sk_pangkat']);
-                                });
-                            }
+                            $kepegawaianDocs = array_filter($kepegawaianDocs, function ($doc) {
+                                return !in_array($doc['name'], ['file_sk_jabatan', 'file_sk_pangkat']);
+                            });
+                        }
 
                         if (isset($jenisPelatihanData->kode_pelatihan) && ($jenisPelatihanData->kode_pelatihan == "PKN_TK_II" || $jenisPelatihanData->kode_pelatihan == "PKA" || $jenisPelatihanData->kode_pelatihan == "PKP")) {
-                                $kepegawaianDocs = array_filter($kepegawaianDocs, function($doc) {
-                                    return !in_array($doc['name'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
-                                });
-                            }
+                            $kepegawaianDocs = array_filter($kepegawaianDocs, function ($doc) {
+                                return !in_array($doc['name'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
+                            });
+                        }
                     @endphp
 
                     @foreach($kepegawaianDocs as $doc)
                         <div class="form-group">
-                            <label class="form-label">{{ $doc['label'] }}</label>
+                            <label class="form-label {{ $doc['wajib'] == 'required' ? 'required' : '' }}">{{ $doc['label'] }}</label>
                             <div class="form-file">
-                                <input type="file" name="{{ $doc['name'] }}" id="{{ $doc['name'] }}" class="form-file-input" accept=".pdf">
+                                <input type="file" name="{{ $doc['name'] }}" id="{{ $doc['name'] }}"
+                                    class="form-file-input @error($doc['name']) error @enderror" accept=".pdf">
                                 <label for="{{ $doc['name'] }}" class="form-file-label">
                                     <i class="fas fa-cloud-upload-alt"></i>
                                     <div class="form-file-label-text">Klik untuk mengunggah {{ $doc['label'] }}</div>
@@ -1910,41 +2148,42 @@
 
                     @php
                         $pendaftaranDocs = [
-                            ['name' => 'file_surat_tugas', 'label' => 'Surat Tugas'],
-                            ['name' => 'file_surat_kesediaan', 'label' => 'Surat Kesediaan'],
-                            ['name' => 'file_pakta_integritas', 'label' => 'Pakta Integritas'],
-                            ['name' => 'file_surat_sehat', 'label' => 'Surat Sehat'],
-                            ['name' => 'file_surat_komitmen', 'label' => 'Surat Komitmen'],
-                            ['name' => 'file_surat_kelulusan_seleksi', 'label' => 'Surat Kelulusan Seleksi'],
-                            ['name' => 'file_surat_bebas_narkoba', 'label' => 'Surat Bebas Narkoba'],
-                            ['name' => 'file_surat_pernyataan_administrasi', 'label' => 'Surat Pernyataan Administrasi'],
-                            ['name' => 'file_persetujuan_mentor', 'label' => 'Surat Persetujuan Mentor'],
+                            ['name' => 'file_surat_tugas', 'label' => 'Surat Tugas', 'wajib' => '-'],
+                            ['name' => 'file_surat_kesediaan', 'label' => 'Surat Kesediaan', 'wajib' => 'required'],
+                            ['name' => 'file_pakta_integritas', 'label' => 'Pakta Integritas', 'wajib' => 'required'],
+                            ['name' => 'file_surat_sehat', 'label' => 'Surat Sehat', 'wajib' => '-'],
+                            ['name' => 'file_surat_komitmen', 'label' => 'Surat Komitmen', 'wajib' => '-'],
+                            ['name' => 'file_surat_kelulusan_seleksi', 'label' => 'Surat Kelulusan Seleksi', 'wajib' => '-'],
+                            ['name' => 'file_surat_bebas_narkoba', 'label' => 'Surat Bebas Narkoba', 'wajib' => '-'],
+                            ['name' => 'file_surat_pernyataan_administrasi', 'label' => 'Surat Pernyataan Tidak Sedang mempertanggungjawabkan PenyelesaianAdministrasi','wajib' => 'required'],
+                            ['name' => 'file_persetujuan_mentor', 'label' => 'Surat Persetujuan Mentor','wajib' => 'required'],
                         ];
 
                         if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
-                                $pendaftaranDocs = array_filter($pendaftaranDocs, function($doc) {
-                                    return !in_array($doc['name'], ['file_pakta_integritas','file_surat_komitmen','file_surat_kelulusan_selesksi','file_surat_bebas_narkoba','file_surat_pernyataan_administrasi','file_persetujuan_mentor']);
-                                });
-                            }
+                            $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
+                                return !in_array($doc['name'], ['file_pakta_integritas', 'file_surat_komitmen', 'file_surat_kelulusan_seleksi', 'file_surat_bebas_narkoba', 'file_surat_pernyataan_administrasi', 'file_persetujuan_mentor']);
+                            });
+                        }
 
                         if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
-                                $pendaftaranDocs = array_filter($pendaftaranDocs, function($doc) {
-                                    return !in_array($doc['name'], ['file_surat_pernyataan_administrasi','file_persetujuan_mentor','file_surat_kesediaan']);
-                                });
-                            }
-                        
+                            $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
+                                return !in_array($doc['name'], ['file_surat_pernyataan_administrasi', 'file_persetujuan_mentor', 'file_surat_kesediaan']);
+                            });
+                        }
+
                         if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
-                                $pendaftaranDocs = array_filter($pendaftaranDocs, function($doc) {
-                                    return !in_array($doc['name'], ['file_surat_komitmen','file_sertifikat_penghargaan','file_surat_pernyataan_administrasi']);
-                                });
-                            }
+                            $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
+                                return !in_array($doc['name'], ['file_surat_komitmen', 'file_sertifikat_penghargaan']);
+                            });
+                        }
                     @endphp
 
                     @foreach($pendaftaranDocs as $doc)
                         <div class="form-group">
-                            <label class="form-label">{{ $doc['label'] }}</label>
+                            <label class="form-label {{ $doc['wajib'] == 'required' ? 'required' : '' }}">{{ $doc['label'] }}</label>
                             <div class="form-file">
-                                <input type="file" name="{{ $doc['name'] }}" id="{{ $doc['name'] }}" class="form-file-input" accept=".pdf">
+                                <input type="file" name="{{ $doc['name'] }}" id="{{ $doc['name'] }}"
+                                    class="form-file-input @error($doc['name']) error @enderror" accept=".pdf">
                                 <label for="{{ $doc['name'] }}" class="form-file-label">
                                     <i class="fas fa-cloud-upload-alt"></i>
                                     <div class="form-file-label-text">Klik untuk mengunggah {{ $doc['label'] }}</div>
@@ -2007,17 +2246,279 @@
         window.oldValues = @json(old(), JSON_PRETTY_PRINT);
         window.allKabupatenData = @json($kabupatenList);
         const validationFailed = @json($errors->any() ? true : false);
+        const hasErrorsOnLoad = validationFailed;
 
-        // Jika ada validation errors, set old values
-        if (validationFailed && window.oldValues.id_provinsi) {
-            setTimeout(() => {
-                if (provinceSelect) {
-                    provinceSelect.value = window.oldValues.id_provinsi;
-                    provinceSelect.dispatchEvent(new Event('change'));
+        // ===== NOTIFICATION SYSTEM =====
+        class NotificationSystem {
+            constructor() {
+                this.container = document.getElementById('notificationContainer');
+                this.notifications = new Map();
+                this.nextId = 1;
+            }
+
+            show(type, title, message, duration = 5000) {
+                const id = this.nextId++;
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.id = `notification-${id}`;
+
+                const iconMap = {
+                    'success': 'fa-check-circle',
+                    'error': 'fa-exclamation-circle',
+                    'warning': 'fa-exclamation-triangle',
+                    'info': 'fa-info-circle'
+                };
+
+                notification.innerHTML = `
+                        <i class="fas ${iconMap[type]}"></i>
+                        <div class="notification-content">
+                            <div class="notification-title">${title}</div>
+                            <div class="notification-message">${message}</div>
+                        </div>
+                        <button type="button" class="notification-close" onclick="notificationSystem.remove(${id})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+
+                this.container.appendChild(notification);
+                this.notifications.set(id, notification);
+
+                if (duration > 0) {
+                    setTimeout(() => this.remove(id), duration);
                 }
-            }, 100);
+
+                return id;
+            }
+
+            remove(id) {
+                const notification = this.notifications.get(id);
+                if (notification) {
+                    notification.classList.add('hiding');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                        this.notifications.delete(id);
+                    }, 300);
+                }
+            }
+
+            clearAll() {
+                this.notifications.forEach((notification, id) => {
+                    this.remove(id);
+                });
+            }
         }
+
+        const notificationSystem = new NotificationSystem();
+
+        // ===== VALIDATION UTILITIES =====
+        class FormValidator {
+            constructor(form) {
+                this.form = form;
+                this.errorFields = new Set();
+                this.errorTabs = new Set();
+            }
+
+            validateField(field) {
+                let isValid = true;
+                let errorMessage = '';
+
+                // Clear previous error state
+                field.classList.remove('error');
+                const errorElement = field.parentElement.querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.remove();
+                }
+
+                // Required validation
+                if (field.hasAttribute('required') && !field.value.trim()) {
+                    isValid = false;
+                    errorMessage = 'Field ini wajib diisi';
+                }
+
+                // Email validation
+                if (field.type === 'email' && field.value && !this.isValidEmail(field.value)) {
+                    isValid = false;
+                    errorMessage = 'Format email tidak valid';
+                }
+
+                // Phone validation
+                if (field.name === 'nomor_hp' && field.value && !this.isValidPhone(field.value)) {
+                    isValid = false;
+                    errorMessage = 'Format nomor HP tidak valid';
+                }
+
+                // File validation
+                if (field.type === 'file' && field.files.length > 0) {
+                    const file = field.files[0];
+                    if (file.size > 1024 * 1024) { // 1MB
+                        isValid = false;
+                        errorMessage = 'Ukuran file maksimal 1MB';
+                    }
+                }
+
+                // If invalid, show error
+                if (!isValid) {
+                    field.classList.add('error');
+                    this.errorFields.add(field);
+
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message';
+                    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+                    field.parentElement.appendChild(errorDiv);
+
+                    // Mark tab with error
+                    this.markErrorTab(field);
+                } else {
+                    this.errorFields.delete(field);
+                }
+
+                this.updateErrorIndicators();
+                return isValid;
+            }
+
+            isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            isValidPhone(phone) {
+                const phoneRegex = /^[0-9+\-\s()]{10,20}$/;
+                return phoneRegex.test(phone);
+            }
+
+            markErrorTab(field) {
+                const tabContent = field.closest('.form-tab-content');
+                if (tabContent) {
+                    const tabId = tabContent.id;
+                    const tabButton = document.querySelector(`.form-tab[data-tab="${tabId}"]`);
+                    if (tabButton) {
+                        tabButton.classList.add('error');
+                        this.errorTabs.add(tabButton);
+                    }
+                }
+            }
+
+            updateErrorIndicators() {
+                // Update tab indicators
+                document.querySelectorAll('.form-tab.error').forEach(tab => {
+                    if (!this.errorTabs.has(tab)) {
+                        tab.classList.remove('error');
+                    }
+                });
+
+                // Update progress
+                this.updateProgress();
+            }
+
+            updateProgress() {
+                const requiredFields = this.form.querySelectorAll('[required]');
+                let filledCount = 0;
+
+                requiredFields.forEach(field => {
+                    if (field.value && field.value.trim()) {
+                        filledCount++;
+                    }
+                });
+
+                const progress = Math.min((filledCount / requiredFields.length) * 100, 100);
+                const progressBar = document.getElementById('formProgress');
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+            }
+
+            validateForm() {
+                let isValid = true;
+                this.errorFields.clear();
+                this.errorTabs.clear();
+
+                const fieldsToValidate = this.form.querySelectorAll('input, select, textarea');
+                fieldsToValidate.forEach(field => {
+                    if (!this.validateField(field)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            scrollToFirstError() {
+                if (this.errorFields.size > 0) {
+                    const firstError = Array.from(this.errorFields)[0];
+
+                    // Find and activate the tab containing the error
+                    const tabContent = firstError.closest('.form-tab-content');
+                    if (tabContent) {
+                        const tabId = tabContent.id;
+                        const tabButton = document.querySelector(`.form-tab[data-tab="${tabId}"]`);
+                        if (tabButton) {
+                            tabButton.click();
+                        }
+                    }
+
+                    // Scroll to error field with highlight
+                    setTimeout(() => {
+                        firstError.classList.add('error-field');
+                        firstError.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'nearest'
+                        });
+
+                        // Focus the field
+                        if (firstError.tagName === 'INPUT' || firstError.tagName === 'SELECT' || firstError.tagName === 'TEXTAREA') {
+                            firstError.focus();
+                        }
+
+                        // Remove highlight after 3 seconds
+                        setTimeout(() => {
+                            firstError.classList.remove('error-field');
+                        }, 3000);
+                    }, 300);
+
+                    // Show notification
+                    notificationSystem.show('error', 'Validasi Gagal',
+                        `Terdapat ${this.errorFields.size} kesalahan yang perlu diperbaiki.`, 5000);
+                }
+            }
+        }
+
+        // ===== MAIN INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', function () {
+            const editForm = document.getElementById('editForm');
+            const submitBtn = document.getElementById('submitBtn');
+            let formValidator;
+
+            // Initialize form validator
+            if (editForm) {
+                formValidator = new FormValidator(editForm);
+
+                // Real-time validation for all fields
+                const formInputs = editForm.querySelectorAll('input, select, textarea');
+                formInputs.forEach(input => {
+                    input.addEventListener('blur', function () {
+                        formValidator.validateField(this);
+                    });
+
+                    input.addEventListener('input', function () {
+                        if (this.classList.contains('error')) {
+                            formValidator.validateField(this);
+                        }
+                    });
+                });
+
+                // File input validation
+                const fileInputs = editForm.querySelectorAll('input[type="file"]');
+                fileInputs.forEach(input => {
+                    input.addEventListener('change', function () {
+                        formValidator.validateField(this);
+                        updateFileDisplay(this);
+                    });
+                });
+            }
+
             // ===== TAB NAVIGATION =====
             const formTabs = document.querySelectorAll('.form-tab');
             const tabContents = document.querySelectorAll('.form-tab-content');
@@ -2041,54 +2542,43 @@
             });
 
             // ===== FILE UPLOAD HANDLING =====
-            const fileInputs = document.querySelectorAll('.form-file-input');
+            function updateFileDisplay(input) {
+                const fileInfo = input.closest('.form-file').querySelector('.form-file-name');
 
-            fileInputs.forEach(input => {
-                input.addEventListener('change', function () {
-                    const fileInfo = this.closest('.form-file').querySelector('.form-file-name');
-                    
-                    if (this.files && this.files[0]) {
-                        const file = this.files[0];
-                        const fileSize = (file.size / 1024).toFixed(2); // KB
-                        const fileName = file.name;
-                        const fileExt = fileName.split('.').pop().toLowerCase();
-                        
-                        let fileIcon = 'fa-file';
-                        if (['jpg', 'jpeg', 'png'].includes(fileExt)) {
-                            fileIcon = 'fa-file-image';
-                        } else if (fileExt === 'pdf') {
-                            fileIcon = 'fa-file-pdf';
-                        }
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    const fileSize = (file.size / 1024).toFixed(2); // KB
+                    const fileName = file.name;
+                    const fileExt = fileName.split('.').pop().toLowerCase();
 
-                        fileInfo.innerHTML = `
+                    let fileIcon = 'fa-file';
+                    if (['jpg', 'jpeg', 'png'].includes(fileExt)) {
+                        fileIcon = 'fa-file-image';
+                    } else if (fileExt === 'pdf') {
+                        fileIcon = 'fa-file-pdf';
+                    }
+
+                    fileInfo.innerHTML = `
                             <div class="file-info">
                                 <i class="fas ${fileIcon}"></i>
                                 <div class="file-info-content">
                                     <div class="file-name">${fileName}</div>
                                     <div class="file-size">${fileSize} KB</div>
                                 </div>
-                                <button type="button" class="btn-change-file" data-target="${this.name}">
+                                <button type="button" class="btn-change-file" data-target="${input.name}">
                                     <i class="fas fa-exchange-alt"></i> Ganti
                                 </button>
                             </div>
                         `;
 
-                        const changeBtn = fileInfo.querySelector('.btn-change-file');
-                        if (changeBtn) {
-                            changeBtn.addEventListener('click', () => {
-                                this.click();
-                            });
-                        }
-
-                        // Validate file size
-                        if (file.size > 1024 * 1024) { // 1MB
-                            alert(`File ${fileName} terlalu besar. Maksimal ukuran file adalah 1MB.`);
-                            this.value = '';
-                            fileInfo.innerHTML = '<span class="no-file">Belum ada file diupload</span>';
-                        }
+                    const changeBtn = fileInfo.querySelector('.btn-change-file');
+                    if (changeBtn) {
+                        changeBtn.addEventListener('click', () => {
+                            input.click();
+                        });
                     }
-                });
-            });
+                }
+            }
 
             // Change file button functionality
             document.querySelectorAll('.btn-change-file').forEach(btn => {
@@ -2101,51 +2591,31 @@
                 });
             });
 
-
             // ===== STATUS PERKAWINAN & NAMA PASANGAN HANDLING =====
             const statusPerkawinanSelect = document.getElementById('status_perkawinan');
             const namaPasanganContainer = document.getElementById('nama-pasangan-container');
             const namaPasanganInput = document.getElementById('nama_pasangan');
 
-            // Function untuk mengatur tampilan field nama pasangan
             function toggleNamaPasanganField() {
                 if (!statusPerkawinanSelect || !namaPasanganContainer || !namaPasanganInput) return;
-                
+
                 const status = statusPerkawinanSelect.value;
-                
+
                 if (status === 'Menikah') {
-                    // Tampilkan field nama pasangan
                     namaPasanganContainer.style.display = 'grid';
                     namaPasanganInput.disabled = false;
                     namaPasanganInput.setAttribute('required', 'required');
                 } else {
-                    // Sembunyikan field nama pasangan
                     namaPasanganContainer.style.display = 'none';
                     namaPasanganInput.disabled = true;
                     namaPasanganInput.removeAttribute('required');
-                    namaPasanganInput.value = ''; // Kosongkan nilai jika status bukan "Menikah"
+                    namaPasanganInput.value = '';
                 }
             }
 
-            // Event listener untuk status perkawinan
             if (statusPerkawinanSelect) {
                 statusPerkawinanSelect.addEventListener('change', toggleNamaPasanganField);
-                
-                // Initialize on page load
-                document.addEventListener('DOMContentLoaded', function() {
-                    toggleNamaPasanganField();
-                    
-                    // Handle old values from validation
-                    if (window.oldValues && window.oldValues.status_perkawinan) {
-                        statusPerkawinanSelect.value = window.oldValues.status_perkawinan;
-                        toggleNamaPasanganField();
-                        
-                        // Set nama pasangan dari old values jika ada
-                        if (window.oldValues.nama_pasangan && namaPasanganInput) {
-                            namaPasanganInput.value = window.oldValues.nama_pasangan;
-                        }
-                    }
-                });
+                toggleNamaPasanganField();
             }
 
             // ===== GOLONGAN RUANG & PANGKAT AUTO-FILL =====
@@ -2154,7 +2624,6 @@
             const pangkatDescription = document.getElementById('pangkat_description');
             const pangkatDescText = document.getElementById('pangkat_desc_text');
 
-            // Mapping golongan ruang ke pangkat dan deskripsi
             const pangkatMapping = {
                 'II/a': { pangkat: 'Pengatur Muda', description: 'Golongan IIa - Pengatur Muda' },
                 'II/b': { pangkat: 'Pengatur Muda Tingkat I', description: 'Golongan IIb - Pengatur Muda Tingkat I' },
@@ -2170,12 +2639,11 @@
                 'IV/d': { pangkat: 'Pembina Madya', description: 'Golongan IVd - Pembina Madya' }
             };
 
-            // Function untuk update pangkat berdasarkan golongan
             function updatePangkatFromGolongan() {
                 if (!golonganRuangSelect || !pangkatInput) return;
-                
+
                 const selectedGolongan = golonganRuangSelect.value;
-                
+
                 if (selectedGolongan && pangkatMapping[selectedGolongan]) {
                     pangkatInput.value = pangkatMapping[selectedGolongan].pangkat;
                     pangkatDescText.textContent = pangkatMapping[selectedGolongan].description;
@@ -2186,131 +2654,74 @@
                 }
             }
 
-            // Event listener untuk golongan ruang
             if (golonganRuangSelect) {
                 golonganRuangSelect.addEventListener('change', updatePangkatFromGolongan);
-                
-                // Initialize on page load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Set initial value for golongan ruang from database
-                    const currentGolongan = @json($kepegawaian->golongan_ruang ?? '');
-                    
-                    // Check if current golongan is in old format (like "III/a") and convert
-                    if (currentGolongan) {
-                        let normalizedGolongan = currentGolongan;
-                        
-                        // Convert format "III/a" to "IIIa"
-                        if (currentGolongan.includes('/')) {
-                            normalizedGolongan = currentGolongan.replace('/', '');
-                        }
-                        
-                        // Check if the normalized value exists in our options
-                        if (pangkatMapping[normalizedGolongan]) {
-                            golonganRuangSelect.value = normalizedGolongan;
-                        }
-                    }
-                    
-                    // Set old value jika ada dari validation
-                    if (window.oldValues && window.oldValues.golongan_ruang) {
-                        let oldGolongan = window.oldValues.golongan_ruang;
-                        
-                        // Convert format if needed
-                        if (oldGolongan.includes('/')) {
-                            oldGolongan = oldGolongan.replace('/', '');
-                        }
-                        
-                        golonganRuangSelect.value = oldGolongan;
-                    }
-                    
-                    // Update pangkat berdasarkan golongan yang dipilih
-                    updatePangkatFromGolongan();
-                });
+                updatePangkatFromGolongan();
             }
 
-          
+            // ===== PROVINSI & KABUPATEN HANDLERS =====
+            const provinceSelect = document.getElementById('id_provinsi');
+            const citySelect = document.getElementById('id_kabupaten_kota');
 
-            // Optional: Reset to auto-fill if input is cleared
-            pangkatInput.addEventListener('blur', function() {
-                if (!this.value.trim() && golonganRuangSelect.value) {
-                    this.setAttribute('readonly', true);
-                    this.placeholder = 'Akan terisi otomatis berdasarkan golongan ruang';
-                    updatePangkatFromGolongan();
-                }
-            });
+            if (provinceSelect && citySelect) {
+                provinceSelect.addEventListener('change', function () {
+                    const provinceId = this.value;
 
-           // ===== PROVINSI & KABUPATEN HANDLERS =====
-const provinceSelect = document.getElementById('id_provinsi');
-const citySelect = document.getElementById('id_kabupaten_kota');
+                    if (!provinceId) {
+                        citySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>';
+                        citySelect.disabled = true;
+                        return;
+                    }
 
-if (provinceSelect && citySelect) {
-    provinceSelect.addEventListener('change', function () {
-        const provinceId = this.value;
+                    citySelect.innerHTML = '<option value="">Memuat kabupaten/kota...</option>';
+                    citySelect.disabled = true;
 
-        if (!provinceId) {
-            citySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>';
-            citySelect.disabled = true;
-            return;
-        }
+                    try {
+                        const allKabupaten = window.allKabupatenData || [];
+                        const filteredKabupaten = allKabupaten.filter(kab => kab.province_id == provinceId);
 
-        citySelect.innerHTML = '<option value="">Memuat kabupaten/kota...</option>';
-        citySelect.disabled = true;
+                        citySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+                        citySelect.disabled = false;
 
-        try {
-            // Filter kabupaten dari data yang sudah ada (dikirim dari controller)
-            // Asumsi: window.allKabupatenData sudah tersedia di global scope
-            const allKabupaten = window.allKabupatenData || [];
-            const filteredKabupaten = allKabupaten.filter(kab => kab.province_id == provinceId);
+                        if (filteredKabupaten.length > 0) {
+                            filteredKabupaten.forEach(kabupaten => {
+                                const option = document.createElement('option');
+                                option.value = kabupaten.id;
+                                option.textContent = kabupaten.name;
+                                citySelect.appendChild(option);
+                            });
 
-            citySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-            citySelect.disabled = false;
+                            const currentKabupatenId = @json($kepegawaian && $kepegawaian->id_kabupaten_kota ? $kepegawaian->id_kabupaten_kota : null);
+                            if (currentKabupatenId) {
+                                citySelect.value = currentKabupatenId;
+                            }
 
-            if (filteredKabupaten.length > 0) {
-                filteredKabupaten.forEach(kabupaten => {
-                    const option = document.createElement('option');
-                    option.value = kabupaten.id;
-                    option.textContent = kabupaten.name;
-                    citySelect.appendChild(option);
+                            if (window.oldValues && window.oldValues.id_kabupaten_kota) {
+                                citySelect.value = window.oldValues.id_kabupaten_kota;
+                            }
+                        } else {
+                            citySelect.innerHTML = '<option value="">Tidak ada data kabupaten</option>';
+                        }
+                    } catch (error) {
+                        console.error('Error filtering kabupaten:', error);
+                        citySelect.innerHTML = '<option value="">Error loading data</option>';
+                        citySelect.disabled = false;
+                    }
                 });
 
-                // Set nilai untuk edit mode
-                const currentKabupatenId = @json($kepegawaian && $kepegawaian->id_kabupaten_kota ? $kepegawaian->id_kabupaten_kota : null);
-                if (currentKabupatenId) {
-                    citySelect.value = currentKabupatenId;
+                if (provinceSelect.value) {
+                    setTimeout(() => {
+                        provinceSelect.dispatchEvent(new Event('change'));
+                    }, 300);
                 }
-
-                // Set old value jika ada dari validation
-                if (window.oldValues && window.oldValues.id_kabupaten_kota) {
-                    citySelect.value = window.oldValues.id_kabupaten_kota;
-                }
-            } else {
-                citySelect.innerHTML = '<option value="">Tidak ada data kabupaten</option>';
             }
-        } catch (error) {
-            console.error('Error filtering kabupaten:', error);
-            citySelect.innerHTML = '<option value="">Error loading data</option>';
-            citySelect.disabled = false;
-        }
-    });
 
-    // Inisialisasi data kabupaten di window object
-    window.allKabupatenData = @json($kabupatenList);
-
-    // Trigger change jika sudah ada nilai (edit mode)
-    if (provinceSelect.value) {
-        setTimeout(() => {
-            provinceSelect.dispatchEvent(new Event('change'));
-        }, 300);
-    }
-}
-            
             // ===== MENTOR HANDLING =====
             const sudahAdaMentor = document.getElementById('sudah_ada_mentor');
             const mentorContainer = document.getElementById('mentor-container');
             const mentorMode = document.getElementById('mentor_mode');
             const selectMentorForm = document.getElementById('select-mentor-form');
             const addMentorForm = document.getElementById('add-mentor-form');
-            
-            
             const mentorSelect = document.getElementById('id_mentor');
 
             if (sudahAdaMentor && mentorContainer) {
@@ -2363,97 +2774,62 @@ if (provinceSelect && citySelect) {
                 }
             }
 
-            // ===== FORM VALIDATION =====
-            const editForm = document.getElementById('editForm');
-            const submitBtn = document.getElementById('submitBtn');
+            // ===== FORM SUBMISSION =====
+            editForm.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-            // Real-time validation
-            const formInputs = editForm.querySelectorAll('input, select, textarea');
+                if (!formValidator.validateForm()) {
+                    formValidator.scrollToFirstError();
+                    return false;
+                }
 
-            formInputs.forEach(input => {
-                input.addEventListener('blur', function () {
-                    validateField(this);
-                });
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span> Menyimpan...';
 
-                input.addEventListener('input', function () {
-                    if (this.classList.contains('error')) {
-                        validateField(this);
-                    }
-                    updateProgress();
-                });
+                // Show saving notification
+                notificationSystem.show('info', 'Menyimpan Data', 'Mohon tunggu, data sedang disimpan...', 3000);
+
+                // Submit form
+                setTimeout(() => {
+                    editForm.submit();
+                }, 500);
             });
 
-            function validateField(field) {
-                if (field.hasAttribute('required') && !field.value.trim()) {
-                    field.classList.add('error');
-                    return false;
-                } else {
-                    field.classList.remove('error');
-                }
+            // ===== AUTO-SCROLL TO ERRORS ON PAGE LOAD =====
+            if (hasErrorsOnLoad) {
+                setTimeout(() => {
+                    if (formValidator) {
+                        // Mark all tabs with errors
+                        const errorFields = editForm.querySelectorAll('.error');
+                        errorFields.forEach(field => {
+                            formValidator.markErrorTab(field);
+                        });
 
-                if (field.type === 'email' && field.value) {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(field.value)) {
-                        field.classList.add('error');
-                        return false;
-                    } else {
-                        field.classList.remove('error');
+                        // Scroll to first error
+                        formValidator.scrollToFirstError();
                     }
-                }
-
-                if (field.name === 'nomor_hp' && field.value) {
-                    const phoneRegex = /^[0-9+\-\s()]{10,20}$/;
-                    if (!phoneRegex.test(field.value)) {
-                        field.classList.add('error');
-                        return false;
-                    } else {
-                        field.classList.remove('error');
-                    }
-                }
-
-                return true;
+                }, 1000);
             }
 
-            // Progress calculation
-            function updateProgress() {
-                const requiredFields = editForm.querySelectorAll('[required]');
-                let filledCount = 0;
+            // ===== PROGRESS INITIALIZATION =====
+            if (formValidator) {
+                formValidator.updateProgress();
+            }
 
-                requiredFields.forEach(field => {
-                    if (field.value && field.value.trim()) {
-                        filledCount++;
+            // ===== ERROR SUMMARY CLICK HANDLER =====
+            window.scrollToFieldError = function (errorText) {
+                // Find field that matches error text
+                const fields = editForm.querySelectorAll('input, select, textarea');
+                let targetField = null;
+
+                fields.forEach(field => {
+                    if (field.name && errorText.toLowerCase().includes(field.name.replace('_', ' ').toLowerCase())) {
+                        targetField = field;
                     }
                 });
 
-                const progress = (filledCount / requiredFields.length) * 100;
-                document.getElementById('formProgress').style.width = progress + '%';
-            }
-
-            updateProgress();
-
-            // Mark tabs with errors
-            function markErrorTabs() {
-                formTabs.forEach(tab => tab.classList.remove('error'));
-
-                const errorFields = editForm.querySelectorAll('.error');
-                errorFields.forEach(field => {
-                    const tabContent = field.closest('.form-tab-content');
-                    if (tabContent) {
-                        const tabId = tabContent.id;
-                        const tabButton = document.querySelector(`.form-tab[data-tab="${tabId}"]`);
-                        if (tabButton) {
-                            tabButton.classList.add('error');
-                        }
-                    }
-                });
-            }
-
-            // Function to scroll to first error field
-            function scrollToFirstError() {
-                const firstError = editForm.querySelector('.error');
-                if (firstError) {
-                    // Find the tab containing the error
-                    const tabContent = firstError.closest('.form-tab-content');
+                if (targetField) {
+                    const tabContent = targetField.closest('.form-tab-content');
                     if (tabContent) {
                         const tabId = tabContent.id;
                         const tabButton = document.querySelector(`.form-tab[data-tab="${tabId}"]`);
@@ -2462,59 +2838,21 @@ if (provinceSelect && citySelect) {
                         }
                     }
 
-                    // Scroll to error field with animation
                     setTimeout(() => {
-                        firstError.classList.add('error-field');
-                        firstError.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'center',
-                            inline: 'nearest'
+                        targetField.classList.add('error-field');
+                        targetField.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
                         });
-                        
-                        // Focus the field
-                        if (firstError.tagName === 'INPUT' || firstError.tagName === 'SELECT' || firstError.tagName === 'TEXTAREA') {
-                            firstError.focus();
-                        }
-                        
-                        // Remove highlight after 3 seconds
+
+                        targetField.focus();
+
                         setTimeout(() => {
-                            firstError.classList.remove('error-field');
+                            targetField.classList.remove('error-field');
                         }, 3000);
                     }, 300);
                 }
-            }
-
-            // Check for errors on page load and scroll to them
-            if (editForm.querySelector('.error')) {
-                setTimeout(() => {
-                    scrollToFirstError();
-                    markErrorTabs();
-                }, 500);
-            }
-
-            // Form submission
-            editForm.addEventListener('submit', function (e) {
-                const requiredFields = editForm.querySelectorAll('[required]');
-                let isValid = true;
-
-                requiredFields.forEach(field => {
-                    if (!validateField(field)) {
-                        isValid = false;
-                    }
-                });
-
-                markErrorTabs();
-
-                if (!isValid) {
-                    e.preventDefault();
-                    scrollToFirstError();
-                    alert('Harap lengkapi semua field yang wajib diisi dengan benar.');
-                    return;
-                }
-
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner"></span> Menyimpan...';
-            });
+            };
 
             // Auto-dismiss alerts
             setTimeout(() => {
@@ -2529,7 +2867,7 @@ if (provinceSelect && citySelect) {
 
             // Prevent accidental page leave
             let formChanged = false;
-            formInputs.forEach(input => {
+            editForm.querySelectorAll('input, select, textarea').forEach(input => {
                 input.addEventListener('change', () => {
                     formChanged = true;
                 });

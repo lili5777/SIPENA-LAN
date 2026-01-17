@@ -1940,10 +1940,7 @@
                     <i class="fas fa-user-tie"></i>
                     <h4>Belum Memiliki Mentor</h4>
                     <p>Anda belum ditunjuk mentor untuk pelatihan ini</p>
-                    <a href="#" class="btn-edit mt-3">
-                        <i class="fas fa-user-plus"></i>
-                        Minta Penunjukan Mentor
-                    </a>
+                    
                 </div>
                 @endif
             </div>
