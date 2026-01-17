@@ -163,7 +163,7 @@ class PendaftaranController extends Controller
                 'ukuran_celana' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                 'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                 'kondisi_peserta' => 'nullable|string',
-                'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
+                'file_ktp' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1024',
                 'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
                 'asal_instansi' => 'required|string|max:200',
                 'unit_kerja' => 'nullable|string|max:200',
@@ -378,7 +378,7 @@ class PendaftaranController extends Controller
                 if (!$peserta->file_ktp) {
                     $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
                 }
-                
+
 
                 $additionalMessages = [
                     'nomor_sk_cpns.required' => 'Nomor SK CPNS wajib diisi untuk pelatihan LATSAR',
@@ -555,7 +555,7 @@ class PendaftaranController extends Controller
                 $request->validate($additionalRules, $additionalMessages);
             }
 
-            // 4. SIMPAN FILE UPLOADS DENGAN STRUKTUR FOLDER TERPERINCI
+            // 4. SIMPAN FILE UPLOADS DENGAN STRUKTUR FOLDER: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
             $fileFields = [
                 'file_ktp',
                 'file_pas_foto',
@@ -576,44 +576,58 @@ class PendaftaranController extends Controller
                 'file_persetujuan_mentor'
             ];
 
+            // Ambil data untuk struktur folder
+            $tahun = date('Y');
+            $folderPath = null;
+            $fullPath = null;
+
+            // Ambil data angkatan dari pendaftaran
+            $angkatan = null;
+            if ($pendaftaran && $pendaftaran->angkatan) {
+                $angkatan = $pendaftaran->angkatan;
+            }
+
+            if ($jenisPelatihan && $angkatan) {
+                $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
+                $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
+                $nip = $request->nip_nrp;
+
+                // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
+                $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+                $fullPath = public_path($folderPath);
+
+                // Buat folder jika belum ada
+                if (!file_exists($fullPath)) {
+                    mkdir($fullPath, 0755, true);
+                }
+            }
+
             $files = [];
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
                     try {
-                        // Struktur folder: uploads/jenis_pelatihan/tahun/bulan/nama_lengkap peserta/
-                        $folderName = strtolower(str_replace(' ', '_', $kode));
-                        $year = date('Y');
-                        $month = date('m');
+                        // Jika tidak ada data lengkap untuk struktur folder, gunakan folder default
+                        if (!$fullPath) {
+                            $folderPath = "Berkas/{$tahun}/default/{$request->nip_nrp}";
+                            $fullPath = public_path($folderPath);
 
-                        // Sanitize nama lengkap untuk folder
-                        $namaFolderPeserta = preg_replace('/[^A-Za-z0-9_-]/', '_', $request->nama_lengkap);
-
-                        $folderPath = public_path("uploads/{$folderName}/{$year}/{$month}/{$namaFolderPeserta}");
-
-                        // Buat folder struktur lengkap jika belum ada
-                        if (!file_exists($folderPath)) {
-                            mkdir($folderPath, 0755, true);
+                            if (!file_exists($fullPath)) {
+                                mkdir($fullPath, 0755, true);
+                            }
                         }
 
-                        // Dapatkan file object
-                        $file = $request->file($field);
+                        // Ambil ekstensi file
+                        $extension = $request->file($field)->getClientOriginalExtension();
 
-                        // Dapatkan informasi file
-                        $originalName = $file->getClientOriginalName();
-                        $extension = $file->getClientOriginalExtension();
+                        // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
+                        $fieldName = str_replace('file_', '', $field);
+                        $fileName = $fieldName . '.' . $extension;
 
-                        // Sanitize nama file
-                        $safeOriginalName = preg_replace('/[^A-Za-z0-9_-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+                        // Pindahkan file ke folder yang sudah ditentukan
+                        $request->file($field)->move($fullPath, $fileName);
 
-                        // Format nama file: field_nip_timestamp.extension
-                        $fileName = "{$field}_{$peserta->nip_nrp}_{$safeOriginalName}_" . time() . '.' . $extension;
-
-                        // Pindahkan file ke folder
-                        $path = $file->move($folderPath, $fileName);
-
-                        // Simpan path relatif untuk database
-                        $relativePath = "uploads/{$folderName}/{$year}/{$month}/{$namaFolderPeserta}/{$fileName}";
-                        $files[$field] = $relativePath;
+                        // Simpan path relatif untuk database (DENGAN SLASH DI AWAL)
+                        $files[$field] = '/' . $folderPath . '/' . $fileName;
 
                         // Hapus file lama jika ada
                         $this->deleteOldFile($peserta, $pendaftaran, $kepegawaian, $field);
@@ -820,23 +834,33 @@ class PendaftaranController extends Controller
 
             // Cek di model Peserta
             if (in_array($field, ['file_ktp', 'file_pas_foto']) && $peserta->$field) {
-                $oldFilePath = public_path($peserta->$field);
+                $oldFilePath = $peserta->$field;
             }
             // Cek di model KepegawaianPeserta
-            elseif (in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp']) && $kepegawaian && $kepegawaian->$field) {
-                $oldFilePath = public_path($kepegawaian->$field);
+            elseif (
+                in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp'])
+                && $kepegawaian && $kepegawaian->$field
+            ) {
+                $oldFilePath = $kepegawaian->$field;
             }
             // Cek di model Pendaftaran
-            elseif ($pendaftaran->$field) {
-                $oldFilePath = public_path($pendaftaran->$field);
+            elseif ($pendaftaran && $pendaftaran->$field) {
+                $oldFilePath = $pendaftaran->$field;
             }
 
             // Hapus file lama jika ada
-            if ($oldFilePath && file_exists($oldFilePath)) {
-                unlink($oldFilePath);
+            if ($oldFilePath) {
+                // Hilangkan leading slash jika ada
+                $filePath = ltrim($oldFilePath, '/');
+                $fullPath = public_path($filePath);
+
+                if (file_exists($fullPath)) {
+                    unlink($fullPath);
+                }
             }
         } catch (\Exception $e) {
-            // Tidak melakukan logging
+            // Log error jika diperlukan
+            // \Log::error('Gagal menghapus file lama: ' . $e->getMessage());
         }
     }
     /**

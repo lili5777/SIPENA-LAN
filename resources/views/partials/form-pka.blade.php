@@ -84,6 +84,13 @@
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
+<div class="form-group">
+    <label class="form-label ">Kondisi Peserta</label>
+    <textarea name="kondisi_peserta" class="form-textarea @error('kondisi_peserta') error @enderror" required>{{ $peserta['kondisi_peserta'] ?? old('kondisi_peserta') }}</textarea>
+    @error('kondisi_peserta')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
 
 <div class="form-row">
     <div class="form-group">
@@ -219,7 +226,7 @@
         <label class="form-label required">Eselon</label>
         <select name="eselon" class="form-select @error('eselon') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="III" {{ ($peserta['kepegawaian']['eselon'] ?? old('eselon')) == 'III' ? 'selected' : '' }}>III</option>
+            <option value="III/Pejabat Fungsional" {{ ($peserta['kepegawaian']['eselon'] ?? old('eselon')) == 'III/Pejabat Fungsional' ? 'selected' : '' }}>III/Pejabat Fungsional</option>
             <option value="IV" {{ ($peserta['kepegawaian']['eselon'] ?? old('eselon')) == 'IV' ? 'selected' : '' }}>IV</option>
         </select>
         @error('eselon')
@@ -230,23 +237,51 @@
 
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label required">Pangkat / Golongan Ruang</label>
-        <select name="golongan_ruang" class="form-select @error('golongan_ruang') error @enderror" required>
-            <option value="">Pilih</option>
-            <option value="Pembina Utama, IV/E" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Pembina Utama, IV/E' ? 'selected' : '' }}>Pembina Utama, IV/E</option>
-            <option value="Pembina Utama Madya, IV/D" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Pembina Utama Madya, IV/D' ? 'selected' : '' }}>Pembina Utama Madya, IV/D</option>
-            <option value="Pembina Utama Muda, IV/C" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Pembina Utama Muda, IV/C' ? 'selected' : '' }}>Pembina Utama Muda, IV/C</option>
-            <option value="Pembina Tingkat I, IV/B" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Pembina Tingkat I, IV/B' ? 'selected' : '' }}>Pembina Tingkat I, IV/B</option>
-            <option value="Pembina, IV/A" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Pembina, IV/A' ? 'selected' : '' }}>Pembina, IV/A</option>
-            <option value="Penata Tingkat I, III/D" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Penata Tingkat I, III/D' ? 'selected' : '' }}>Penata Tingkat I, III/D</option>
-            <option value="Penata, III/C" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Penata, III/C' ? 'selected' : '' }}>Penata, III/C</option>
-            <option value="Penata Muda Tingkat I, III/B" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Penata Muda Tingkat I, III/B' ? 'selected' : '' }}>Penata Muda Tingkat I, III/B</option>
-            <option value="Penata Muda, III/A" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'Penata Muda, III/A' ? 'selected' : '' }}>Penata Muda, III/A</option>
+        <label class="form-label required">Golongan Ruang</label>
+        <select name="golongan_ruang" id="golongan_ruang" class="form-select @error('golongan_ruang') error @enderror"
+            required>
+            <option value="">-- Pilih Golongan Ruang --</option>
+            <option value="II/a" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'II/a' ? 'selected' : '' }}>II/a</option>
+            <option value="II/b" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'II/b' ? 'selected' : '' }}>II/b</option>
+            <option value="II/c" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'II/c' ? 'selected' : '' }}>II/c</option>
+            <option value="II/d" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'II/d' ? 'selected' : '' }}>II/d</option>
+            <option value="III/a" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'III/a' ? 'selected' : '' }}>III/a</option>
+            <option value="III/b" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'III/b' ? 'selected' : '' }}>III/b</option>
+            <option value="III/c" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'III/c' ? 'selected' : '' }}>III/c</option>
+            <option value="III/d" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'III/d' ? 'selected' : '' }}>III/d</option>
+            <option value="IV/a" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'IV/a' ? 'selected' : '' }}>IV/a</option>
+            <option value="IV/b" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'IV/b' ? 'selected' : '' }}>IV/b</option>
+            <option value="IV/c" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'IV/c' ? 'selected' : '' }}>IV/c</option>
+            <option value="IV/d" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'IV/d' ? 'selected' : '' }}>IV/d</option>
         </select>
         @error('golongan_ruang')
-            <small class="text-danger">{{ $message }}</small>
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ $message }}
+            </div>
+        @enderror
+        <small class="form-hint"><i class="fas fa-info-circle"></i> Contoh: III/A ditulis sebagai IIIA</small>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label required">Pangkat</label>
+        <input type="text" name="pangkat" id="pangkat" class="form-input @error('pangkat') error @enderror"
+            value="{{ old('pangkat', $peserta['kepegawaian']['pangkat'] ?? '') }}" readonly
+            placeholder="Akan terisi otomatis berdasarkan golongan ruang">
+        <div id="pangkat_description" class="form-hint" style="display: none;">
+            <i class="fas fa-info-circle"></i> <span id="pangkat_desc_text"></span>
+        </div>
+        @error('pangkat')
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ $message }}
+            </div>
         @enderror
     </div>
+</div>
+
+<div class="form-row">
+    
     <div class="form-group">
         <label class="form-label ">Tahun Lulus PKP/PIM IV</label>
         <input type="number" name="tahun_lulus_pkp_pim_iv" class="form-input @error('tahun_lulus_pkp_pim_iv') error @enderror" 
@@ -366,6 +401,15 @@
         <input type="text" name="bidang_studi" class="form-input @error('bidang_studi') error @enderror" 
                value="{{ $peserta['bidang_studi'] ?? old('bidang_studi') }}" required>
         @error('bidang_studi')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label class="form-label required">Bidang Keahlian/Kepakaran</label>
+        <input type="text" name="bidang_keahlian" class="form-input @error('bidang_keahlian') error @enderror"
+            value="{{ $peserta['bidang_keahlian'] ?? old('bidang_keahlian') }}" required
+            placeholder="Contoh : Manajemen Pemerintahan ">
+        @error('bidang_keahlian')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>

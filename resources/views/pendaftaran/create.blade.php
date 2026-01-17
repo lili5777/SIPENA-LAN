@@ -921,28 +921,28 @@
                         // Verification successful
                         verifiedPeserta = data.peserta;
                         pendaftaranData = data.pendaftaran;
-                        
+
                         // Update UI
                         currentNipNrp.textContent = verifiedPeserta.nip_nrp;
                         currentAngkatanName.textContent = pendaftaranData.angkatan ? 
                             `${pendaftaranData.angkatan.nama_angkatan} (${pendaftaranData.angkatan.tahun})` : 
                             'Angkatan tidak tersedia';
-                        
+
                         // Show verification details
                         successMessage.textContent = data.message;
                         detailNama.textContent = verifiedPeserta.nama_lengkap;
                         detailAngkatan.textContent = pendaftaranData.angkatan ? 
                             `${pendaftaranData.angkatan.nama_angkatan} (${pendaftaranData.angkatan.tahun})` : 
                             'Tidak tersedia';
-                        
+
                         verificationSuccess.style.display = 'flex';
                         verificationError.style.display = 'none';
                         verificationDetails.style.display = 'flex';
                         verificationAnggaran.style.display = 'flex';
                         verificationResult.style.display = 'block';
-                        
+
                         nextToStep3Btn.disabled = false;
-                        
+
                     } else {
                         // Verification failed
                         errorMessage.textContent = data.message;
@@ -951,7 +951,7 @@
                         verificationDetails.style.display = 'none';
                         verificationAnggaran.style.display = 'none';
                         verificationResult.style.display = 'block';
-                        
+
                         nextToStep3Btn.disabled = true;
                     }
                 } catch (error) {
@@ -1038,6 +1038,7 @@
 
                     // Setup form interactions
                     setupFormInteractions();
+                    setupPangkatAutoFill();
 
                 } catch (error) {
                     console.error('Error loading form partial:', error);
@@ -1139,12 +1140,12 @@
             function setupMaritalStatusLogic() {
                 const maritalStatusSelect = document.getElementById('status_perkawinan');
                 const spouseNameInput = document.getElementById('nama_pasangan');
-                
+
                 if (!maritalStatusSelect || !spouseNameInput) return;
-                
+
                 function toggleSpouseNameInput() {
                     const isMarried = maritalStatusSelect.value === 'Menikah';
-                    
+
                     if (isMarried) {
                         spouseNameInput.disabled = false;
                         spouseNameInput.required = true;
@@ -1155,7 +1156,7 @@
                         spouseNameInput.value = ''; // Kosongkan nilai jika tidak menikah
                         spouseNameInput.placeholder = "Hanya untuk yang berstatus Menikah";
                     }
-                    
+
                     // Update label dan validasi
                     const label = spouseNameInput.parentElement.querySelector('.form-label');
                     if (label) {
@@ -1167,7 +1168,7 @@
                             label.textContent = 'Nama Istri/Suami';
                         }
                     }
-                    
+
                     // Clear error jika ada
                     spouseNameInput.classList.remove('error');
                     const errorMsg = spouseNameInput.parentElement.querySelector('.text-danger');
@@ -1175,14 +1176,14 @@
                         errorMsg.remove();
                     }
                 }
-                
+
                 // Inisialisasi saat pertama kali load
                 toggleSpouseNameInput();
-                
+
                 // Event listener untuk perubahan
                 maritalStatusSelect.addEventListener('change', toggleSpouseNameInput);
             }
-            
+
             function setupFormInteractions() {
                 // Load provinsi data
                 loadProvinsi();
@@ -1201,6 +1202,8 @@
                         this.parentElement.querySelector('.form-file-name').textContent = fileName;
                     });
                 });
+
+                setupPangkatAutoFill();
 
                 // Setup mentor form jika ada
                 setupMentorForm();
@@ -1232,7 +1235,7 @@
                     mentorModeSelect.addEventListener('change', function () {
                         const selectForm = document.getElementById('select-mentor-form');
                         const addForm = document.getElementById('add-mentor-form');
-                        
+
                         if (this.value === 'pilih') {
                             selectForm.style.display = 'block';
                             addForm.style.display = 'none';
@@ -1287,6 +1290,67 @@
                     mentorDropdown.innerHTML = '<option value="">Error loading mentors</option>';
                     mentorDropdown.disabled = false;
                 }
+            }
+
+            // ============================================
+            // FUNGSI UNTUK AUTO-FILL PANGKAT
+            // ============================================
+            function setupPangkatAutoFill() {
+                const golonganRuangSelect = document.getElementById('golongan_ruang');
+                const pangkatInput = document.getElementById('pangkat');
+                const pangkatDescription = document.getElementById('pangkat_description');
+                const pangkatDescText = document.getElementById('pangkat_desc_text');
+
+                if (!golonganRuangSelect || !pangkatInput) {
+                    console.log('Elemen golongan_ruang atau pangkat tidak ditemukan');
+                    return;
+                }
+
+                const pangkatMapping = {
+                    'II/a': { pangkat: 'Pengatur Muda', description: 'Golongan IIa - Pengatur Muda' },
+                    'II/b': { pangkat: 'Pengatur Muda Tingkat I', description: 'Golongan IIb - Pengatur Muda Tingkat I' },
+                    'II/c': { pangkat: 'Pengatur', description: 'Golongan IIc - Pengatur' },
+                    'II/d': { pangkat: 'Pengatur Tingkat I', description: 'Golongan IId - Pengatur Tingkat I' },
+                    'III/a': { pangkat: 'Penata Muda', description: 'Golongan IIIa - Penata Muda' },
+                    'III/b': { pangkat: 'Penata Muda Tingkat I', description: 'Golongan IIIb - Penata Muda Tingkat I' },
+                    'III/c': { pangkat: 'Penata', description: 'Golongan IIIc - Penata' },
+                    'III/d': { pangkat: 'Penata Tingkat I', description: 'Golongan IIId - Penata Tingkat I' },
+                    'IV/a': { pangkat: 'Pembina', description: 'Golongan IVa - Pembina' },
+                    'IV/b': { pangkat: 'Pembina Tingkat I', description: 'Golongan IVb - Pembina Tingkat I' },
+                    'IV/c': { pangkat: 'Pembina Muda', description: 'Golongan IVc - Pembina Muda' },
+                    'IV/d': { pangkat: 'Pembina Madya', description: 'Golongan IVd - Pembina Madya' }
+                };
+
+                function updatePangkatFromGolongan() {
+                    const selectedGolongan = golonganRuangSelect.value;
+                    console.log('Golongan dipilih:', selectedGolongan); // Untuk debugging
+
+                    if (selectedGolongan && pangkatMapping[selectedGolongan]) {
+                        pangkatInput.value = pangkatMapping[selectedGolongan].pangkat;
+
+                        if (pangkatDescText) {
+                            pangkatDescText.textContent = pangkatMapping[selectedGolongan].description;
+                        }
+
+                        if (pangkatDescription) {
+                            pangkatDescription.style.display = 'block';
+                        }
+                    } else {
+                        pangkatInput.value = '';
+
+                        if (pangkatDescription) {
+                            pangkatDescription.style.display = 'none';
+                        }
+                    }
+                }
+
+                // Event listener
+                golonganRuangSelect.addEventListener('change', updatePangkatFromGolongan);
+
+                // Inisialisasi pertama kali
+                updatePangkatFromGolongan();
+
+                console.log('Auto-fill pangkat sudah di-setup');
             }
 
             // ============================================
@@ -1389,7 +1453,7 @@
                         if (data.errors) {
                             Object.keys(data.errors).forEach(field => {
                                 let input = document.querySelector(`[name="${field}"]`);
-                                
+
                                 if (!input) input = document.querySelector(`[name="${field}[]"]`);
                                 if (!input) input = document.querySelector(`#${field}`);
 

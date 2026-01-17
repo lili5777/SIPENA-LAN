@@ -279,10 +279,10 @@ class AdminController extends Controller
                         $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:5120';
                     }
                     if (!$peserta || !$peserta->file_ktp) {
-                        $additionalRules['file_ktp'] = 'required|file|mimes:pdf|max:5120';
+                        $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
                     }
                     if (!$peserta || !$peserta->file_pas_foto) {
-                        $additionalRules['file_pas_foto'] = 'required|file|max:5120';
+                        $additionalRules['file_pas_foto'] = 'required|file|mimes:jpg,jpeg,png|max:5120';
                     }
                     if (!$pendaftaranTerbaru || !$pendaftaranTerbaru->file_surat_komitmen) {
                         $additionalRules['file_surat_komitmen'] = 'nullable|file|mimes:pdf|max:5120';

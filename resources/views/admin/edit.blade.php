@@ -1656,6 +1656,9 @@
                                 <option value="III/Pejabat Fungsional" {{ old('eselon', $kepegawaian->eselon ?? '') == 'III/Pejabat Fungsional' ? 'selected' : '' }}>
                                     III/Pejabat Fungsional
                                 </option>
+                                <option value="IV" {{ old('eselon', $kepegawaian->eselon ?? '') == 'IV' ? 'selected' : '' }}>
+                                    IV
+                                </option>
                             </select>
                             @error('eselon')
                                 <div class="error-message">
