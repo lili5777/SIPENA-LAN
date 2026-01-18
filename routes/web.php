@@ -25,22 +25,12 @@ Route::get('/tes', function () {
     }
 });
 
-Route::get('/send-email', function () {
-    $data = [
-        'name' => 'Syahrizal As',
-        'body' => 'Testing Kirim Email di Santri Koding'
-    ];
-
-    Mail::to('ma.ferdiansyah7179@gmail.com')->send(new SendEmail($data));
-
-    dd("Email Berhasil dikirim.");
-});
 
 Route::get('/up', [UploadController::class, 'index'])->name('upload.index');
 Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
 
-// export data peserta
-// Route::get('/export-peserta', [ExportController::class, 'exportAllPeserta']);
+
+
 
 
 // Route Landing Page
@@ -49,17 +39,12 @@ Route::get('/profil', function () {return view('profil');})->name('profil');
 Route::get('/publikasi', function () {return view('publikasi');})->name('publikasi');
 
 
+// Route Proses Pendaftaran
 Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
 Route::post('/pendaftaran/update-data', [PendaftaranController::class, 'updateData'])->name('pendaftaran.updateData');
 Route::get('/pendaftaran/success', [PendaftaranController::class, 'success'])->name('pendaftaran.success');
 Route::post('/form-partial/{type}', [PendaftaranController::class, 'formPartial'])->name('form.partial');
 Route::post('/api/verify-nip', [PendaftaranController::class, 'verifyNip'])->name('api.verifyNip');
-Route::get('/api/get-provinces', [PendaftaranController::class, 'getProvinces']);
-Route::get('/api/get-regencies/{provinceId}', [PendaftaranController::class, 'getRegencies']);
-
-
-// Routes untuk API (digunakan di JavaScript untuk load data dinamis)
-Route::get('/api/angkatan/{id_jenis_pelatihan}', [PendaftaranController::class, 'apiAngkatan']);
 
 
 // Route Authentication
@@ -74,6 +59,8 @@ Route::middleware('auth')->group(function () {
 
     // Route Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+
+    // Route Edit Data Peserta (khusus Peserta)
     Route::get('/dashboard/edit', [AdminController::class, 'editData'])->name('admin.dashboard.edit');
     Route::post('/dashboard/update', [AdminController::class, 'updateData'])->name('admin.dashboard.update');
     
@@ -99,8 +86,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'delete'])->name('users.delete')->middleware('permission:user.read'); 
     });
 
-    // Route Peserta PKN
-    // Peserta Controller
+    
+    // Data Pesrta (khusus Admin)
     Route::prefix('peserta')->name('peserta.')->group(function () {
         // Route utama dengan parameter jenis
         Route::get('/{jenis}', [PesertaController::class, 'index'])
@@ -132,6 +119,8 @@ Route::middleware('auth')->group(function () {
 
         // Route yang tidak butuh parameter jenis
         Route::get('/detail/{id}', [PesertaController::class, 'getDetail'])->name('detail');
+
+        // Route Update Status peserta
         Route::post('/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('update-status');
     });
 
@@ -165,10 +154,9 @@ Route::middleware('auth')->group(function () {
         //  Route export Absen
         Route::get('/absen-peserta', [ExportController::class, 'indexAbsen'])->name('absenpeserta');
         Route::get('/absen', [ExportController::class, 'exportAbsen'])->name('absen');
-
-
     });
 
+    // Route Update Akun dan Password
     Route::prefix('admin/akun')->name('admin.akun.')->group(function () {
         Route::get('/', [AuthController::class, 'index'])->name('index');
         Route::put('/update-password', [AuthController::class, 'updatePassword'])->name('update-password');
@@ -176,6 +164,17 @@ Route::middleware('auth')->group(function () {
 
     
 });
+
+
+// Routes untuk API Wilayah Indonesia (digunakan di form pendaftaran)
+Route::get('/api/get-provinces', [PendaftaranController::class, 'getProvinces']);
+Route::get('/api/get-regencies/{provinceId}', [PendaftaranController::class, 'getRegencies']);
+
+// Routes untuk API (digunakan di JavaScript untuk load data dinamis)
+Route::get('/api/angkatan/{id_jenis_pelatihan}', [PendaftaranController::class, 'apiAngkatan']);
+
+// Route untuk mendapatkan data mentor 
+Route::get('/api/mentors', [PendaftaranController::class, 'getMentors'])->name('api.mentors');
 
 
 // Proxy untuk bypass CORS (API Wilayah Indonesia)
@@ -191,4 +190,4 @@ Route::get('/proxy/regencies/{code}', function ($code) {
     return response($response)->header('Content-Type', 'application/json');
 });
 
-Route::get('/api/mentors', [PendaftaranController::class, 'getMentors'])->name('api.mentors');
+
