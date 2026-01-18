@@ -41,4 +41,10 @@ class Angkatan extends Model
     {
         return $this->hasMany(Pendaftaran::class, 'id_angkatan');
     }
+
+    // Relasi: hasMany ke PicPeserta
+    public function picPesertas()
+    {
+        return $this->hasMany(PicPeserta::class, 'angkatan_id');
+    }
 }

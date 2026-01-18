@@ -7,6 +7,7 @@ use App\Models\JenisPelatihan;
 use App\Models\Kabupaten;
 use App\Models\KabupatenKota;
 use App\Models\Mentor;
+use App\Models\PicPeserta;
 use App\Models\Provinsi;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -77,6 +78,12 @@ class Dataawal extends Seeder
             ]);
         }
 
+        // Buat PICPESERTA
+        PicPeserta::create([
+            'user_id' => 3, // ID user PIC
+            'jenispelatihan_id' => 2, // Sesuaikan dengan jenis pelatihan yang ada
+            'angkatan_id' => 1, // Sesuaikan dengan angkatan yang ada
+        ]);
 
         // Ambil data provinsi
         $response = Http::get('https://wilayah.id/api/provinces.json')->json();

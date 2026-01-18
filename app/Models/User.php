@@ -66,4 +66,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Peserta::class);
     }
+
+    public function picPesertas()
+    {
+        return $this->hasMany(PicPeserta::class, 'user_id');
+    }
+
+    public function isPic()
+    {
+        return $this->role && $this->role->name === 'pic';
+    }
 }

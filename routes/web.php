@@ -83,7 +83,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-        Route::delete('/users/{id}', [UserController::class, 'delete'])->name('users.delete')->middleware('permission:user.read'); 
+        Route::delete('/users/{id}', [UserController::class, 'delete'])->name('users.delete')->middleware('permission:user.read');
+
+        Route::get('users/{user}/pic-access', [UserController::class, 'getPicAccess'])->name('users.pic-access');
+        Route::post('users/{user}/pic-access', [UserController::class, 'updatePicAccess'])->name('users.update-pic-access');
     });
 
 

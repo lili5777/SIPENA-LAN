@@ -53,18 +53,34 @@
                     <i class="fas fa-chevron-right menu-arrow"></i>
                 </a>
                 <div class="submenu">
-                    <a href="{{ route('peserta.index', ['jenis' => 'pkn']) }}" class="submenu-link">
-                        <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
-                    </a>
-                    <a href="{{ route('peserta.index', ['jenis' => 'latsar']) }}" class="submenu-link">
-                        <i class="fas fa-user-tie me-2"></i> Peserta LATSAR
-                    </a>
-                    <a href="{{ route('peserta.index', ['jenis' => 'pka']) }}" class="submenu-link">
-                        <i class="fas fa-users-gear me-2"></i> Peserta PKA
-                    </a>
-                    <a href="{{ route('peserta.index', ['jenis' => 'pkp']) }}" class="submenu-link">
-                        <i class="fas fa-user-check me-2"></i> Peserta PKP
-                    </a>
+                    @php
+                        $user = auth()->user();
+                        $isAdmin = in_array($user->role->name, ['admin', 'super admin']);
+                    @endphp
+
+                    @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 1)->count() > 0)
+                        <a href="{{ route('peserta.index', ['jenis' => 'pkn']) }}" class="submenu-link">
+                            <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
+                        </a>
+                    @endif
+
+                    @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 2)->count() > 0)
+                        <a href="{{ route('peserta.index', ['jenis' => 'latsar']) }}" class="submenu-link">
+                            <i class="fas fa-user-tie me-2"></i> Peserta LATSAR
+                        </a>
+                    @endif
+
+                    @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 3)->count() > 0)
+                        <a href="{{ route('peserta.index', ['jenis' => 'pka']) }}" class="submenu-link">
+                            <i class="fas fa-users-gear me-2"></i> Peserta PKA
+                        </a>
+                    @endif
+
+                    @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 4)->count() > 0)
+                        <a href="{{ route('peserta.index', ['jenis' => 'pkp']) }}" class="submenu-link">
+                            <i class="fas fa-user-check me-2"></i> Peserta PKP
+                        </a>
+                    @endif
                 </div>
             </div>
 

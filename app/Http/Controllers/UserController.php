@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aktifikat;
+use App\Models\Angkatan;
+use App\Models\JenisPelatihan;
+use App\Models\PicPeserta;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -12,9 +15,65 @@ class UserController extends Controller
     //
     public function index()
     {
-        $users = User::with('role')->get();
-        return view('admin.users.index', compact('users'));
+        $users = User::with(['role', 'picPesertas.jenisPelatihan', 'picPesertas.angkatan'])->get();
+        $allJenisPelatihan = JenisPelatihan::where('aktif', 1)->get();
+        $allAngkatan = Angkatan::with('jenisPelatihan')->get();
+        return view('admin.users.index', compact('users', 'allJenisPelatihan', 'allAngkatan'));
     }
+
+    // Method baru untuk mengambil akses PIC
+    public function getPicAccess($userId)
+    {
+        $user = User::with(['picPesertas.jenisPelatihan', 'picPesertas.angkatan'])->findOrFail($userId);
+
+        $picAccess = [
+            'jenis_pelatihan' => $user->picPesertas->pluck('jenispelatihan_id')->toArray(),
+            'angkatan' => $user->picPesertas->pluck('angkatan_id')->toArray(),
+        ];
+
+        return response()->json($picAccess);
+    }
+
+    // Method baru untuk update akses PIC
+    public function updatePicAccess(Request $request, $userId)
+    {
+        $request->validate([
+            'jenis_pelatihan' => 'required|array',
+            'jenis_pelatihan.*' => 'exists:jenis_pelatihan,id',
+            'angkatan' => 'required|array',
+            'angkatan.*' => 'exists:angkatan,id',
+        ]);
+
+        try {
+            // Hapus akses lama
+            PicPeserta::where('user_id', $userId)->delete();
+
+            $jenisPelatihanIds = $request->jenis_pelatihan;
+            $angkatanIds = $request->angkatan;
+
+            // Buat kombinasi semua tanpa validasi hubungan
+            foreach ($jenisPelatihanIds as $jenisId) {
+                foreach ($angkatanIds as $angkatanId) {
+                    PicPeserta::create([
+                        'user_id' => $userId,
+                        'jenispelatihan_id' => $jenisId,
+                        'angkatan_id' => $angkatanId,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Akses PIC berhasil diperbarui'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui akses: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function create()
     {
         $roles = Role::orderBy('name')->get();

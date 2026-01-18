@@ -45,11 +45,25 @@ class PesertaController extends Controller
     {
         $jenisData = $this->getJenisData($jenis);
         $jenisPelatihanId = $jenisData['id'];
+        $user = auth()->user();
 
-        $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
-            ->orderBy('tahun', 'desc')
-            ->get();
+        // Ambil angkatan yang bisa diakses PIC
+        $picAngkatanIds = $user->picPesertas
+            ->where('jenispelatihan_id', $jenisPelatihanId)
+            ->pluck('angkatan_id')
+            ->unique()
+            ->toArray();
 
+        // Filter angkatan
+        $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId);
+
+        if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
+            $angkatanQuery->whereIn('id', $picAngkatanIds);
+        }
+
+        $angkatanList = $angkatanQuery->orderBy('tahun', 'desc')->get();
+
+        // Query pendaftaran
         $pendaftaranQuery = Pendaftaran::with([
             'peserta',
             'peserta.kepegawaianPeserta',
@@ -60,6 +74,12 @@ class PesertaController extends Controller
             ->whereNotNull('id_angkatan')
             ->where('id_angkatan', '!=', 0);
 
+        // Filter berdasarkan akses PIC
+        if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
+            $pendaftaranQuery->whereIn('id_angkatan', $picAngkatanIds);
+        }
+
+        // Filter dropdown
         if ($request->filled('angkatan') && $request->angkatan != '' && $request->angkatan != 'semua') {
             $pendaftaranQuery->where('id_angkatan', $request->angkatan);
         }

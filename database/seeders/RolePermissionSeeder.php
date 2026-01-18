@@ -26,6 +26,11 @@ class RolePermissionSeeder extends Seeder
             'description' => 'Regular user, limited access'
         ]);
 
+        $picRole = Role::create([
+            'name' => 'pic',
+            'description' => 'PIC Pelatihan, akses menyesuaikan kebutuhan'
+        ]);
+
         // buat daftar permission CRUD dasar
         $crudPermissions = [
             'user.create',
@@ -64,6 +69,10 @@ class RolePermissionSeeder extends Seeder
         $allPermissions = Permission::all();
         $adminRole->permissions()->sync($allPermissions->pluck('id')->toArray());
 
+        // hubungkan role pic dengan permission kecuali role dan user
+        $picPermissions = Permission::where('name', 'not like', 'role.%')->where('name', 'not like', 'user.%')->get();
+        $picRole->permissions()->sync($picPermissions->pluck('id')->toArray());
+
         // hubungkan role user dengan permission read saja
         $readPermissions = Permission::where('name', 'like', '%.read')->get();
         $userRole->permissions()->sync($readPermissions->pluck('id')->toArray());
@@ -83,5 +92,16 @@ class RolePermissionSeeder extends Seeder
             'password' => bcrypt('222'),
             'role_id' => $userRole->id
         ]);
+
+        // Buat user PIC
+        User::create([
+            'name' => 'PIC Pelatihan',
+            'email' => 'pic@example.com',
+            'password' => bcrypt('333'),
+            'role_id' => $picRole->id
+        ]);
+
+        
+
     }
 }
