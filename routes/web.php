@@ -86,74 +86,84 @@ Route::middleware('auth')->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'delete'])->name('users.delete')->middleware('permission:user.read'); 
     });
 
-    
+
     // Data Pesrta (khusus Admin)
-    Route::prefix('peserta')->name('peserta.')->group(function () {
-        // Route utama dengan parameter jenis
-        Route::get('/{jenis}', [PesertaController::class, 'index'])
-            ->where('jenis', 'pkn|latsar|pka|pkp')
-            ->name('index');
+    Route::middleware('permission:peserta.create')->group(function () {
+        Route::prefix('peserta')->name('peserta.')->group(function () {
+            // Route utama dengan parameter jenis
+            Route::get('/{jenis}', [PesertaController::class, 'index'])
+                ->where('jenis', 'pkn|latsar|pka|pkp')
+                ->name('index');
 
-        // Route create dengan parameter jenis
-        Route::get('/{jenis}/create', [PesertaController::class, 'create'])
-            ->where('jenis', 'pkn|latsar|pka|pkp')
-            ->name('create');
+            // Route create dengan parameter jenis
+            Route::get('/{jenis}/create', [PesertaController::class, 'create'])
+                ->where('jenis', 'pkn|latsar|pka|pkp')
+                ->name('create');
 
-        // Route edit dengan parameter jenis
-        Route::get('/{jenis}/{id}/edit', [PesertaController::class, 'edit'])
-            ->where('jenis', 'pkn|latsar|pka|pkp')
-            ->name('edit');
+            // Route edit dengan parameter jenis
+            Route::get('/{jenis}/{id}/edit', [PesertaController::class, 'edit'])
+                ->where('jenis', 'pkn|latsar|pka|pkp')
+                ->name('edit');
 
-        // Route update dengan parameter jenis
-        Route::put('/{jenis}/{id}', [PesertaController::class, 'update'])
-            ->where('jenis', 'pkn|latsar|pka|pkp')
-            ->name('update');
+            // Route update dengan parameter jenis
+            Route::put('/{jenis}/{id}', [PesertaController::class, 'update'])
+                ->where('jenis', 'pkn|latsar|pka|pkp')
+                ->name('update');
 
-        // Route destroy dengan parameter jenis
-        Route::delete('/{jenis}/{id}', [PesertaController::class, 'destroy'])
-            ->where('jenis', 'pkn|latsar|pka|pkp')
-            ->name('destroy');
+            // Route destroy dengan parameter jenis
+            Route::delete('/{jenis}/{id}', [PesertaController::class, 'destroy'])
+                ->where('jenis', 'pkn|latsar|pka|pkp')
+                ->name('destroy');
 
-        // Route store (tidak perlu parameter jenis karena dari session)
-        Route::post('/store', [PesertaController::class, 'store'])->name('store');
+            // Route store (tidak perlu parameter jenis karena dari session)
+            Route::post('/store', [PesertaController::class, 'store'])->name('store');
 
-        // Route yang tidak butuh parameter jenis
-        Route::get('/detail/{id}', [PesertaController::class, 'getDetail'])->name('detail');
+            // Route yang tidak butuh parameter jenis
+            Route::get('/detail/{id}', [PesertaController::class, 'getDetail'])->name('detail');
 
-        // Route Update Status peserta
-        Route::post('/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('update-status');
+            // Route Update Status peserta
+            Route::post('/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('update-status');
+        });
     });
+
 
     // Master Angkatan Routes
-    Route::prefix('angkatan')->name('angkatan.')->group(function () {
-        Route::get('/', [AngkatanController::class, 'index'])->name('index');
-        Route::get('/create', [AngkatanController::class, 'create'])->name('create');
-        Route::post('/', [AngkatanController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [AngkatanController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [AngkatanController::class, 'update'])->name('update');
-        Route::delete('/{id}', [AngkatanController::class, 'destroy'])->name('destroy');
+    Route::middleware('permission:angkatan.create')->group(function () {
+        Route::prefix('angkatan')->name('angkatan.')->group(function () {
+            Route::get('/', [AngkatanController::class, 'index'])->name('index');
+            Route::get('/create', [AngkatanController::class, 'create'])->name('create');
+            Route::post('/', [AngkatanController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [AngkatanController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [AngkatanController::class, 'update'])->name('update');
+            Route::delete('/{id}', [AngkatanController::class, 'destroy'])->name('destroy');
+        });
     });
+
 
     // Master Mentor Routes
-    Route::prefix('mentor')->name('mentor.')->group(function () {
-        Route::get('/', [MentorController::class, 'index'])->name('index');
-        Route::get('/create', [MentorController::class, 'create'])->name('create');
-        Route::post('/', [MentorController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [MentorController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [MentorController::class, 'update'])->name('update');
-        Route::delete('/{id}', [MentorController::class, 'destroy'])->name('destroy');
+    Route::middleware('permission:mentor.create')->group(function () {
+        Route::prefix('mentor')->name('mentor.')->group(function () {
+            Route::get('/', [MentorController::class, 'index'])->name('index');
+            Route::get('/create', [MentorController::class, 'create'])->name('create');
+            Route::post('/', [MentorController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [MentorController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [MentorController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MentorController::class, 'destroy'])->name('destroy');
+        });
     });
+    
 
     // Export routes
+    
     Route::prefix('admin/export')->name('admin.export.')->group(function () {
-        Route::get('/data-peserta', [ExportController::class, 'index'])->name('datapeserta');
-        Route::get('/peserta', [ExportController::class, 'exportPeserta'])->name('peserta');
+        Route::get('/data-peserta', [ExportController::class, 'index'])->name('datapeserta')->middleware('permission:export.data');
+        Route::get('/peserta', [ExportController::class, 'exportPeserta'])->name('peserta')->middleware('permission:export.data');
         // Route baru untuk komposisi
-        Route::get('/komposisi-peserta', [ExportController::class, 'indexKomposisi'])->name('komposisipeserta');
-        Route::get('/komposisi', [ExportController::class, 'exportKomposisi'])->name('komposisi');
+        Route::get('/komposisi-peserta', [ExportController::class, 'indexKomposisi'])->name('komposisipeserta')->middleware('permission:export.komposisi');
+        Route::get('/komposisi', [ExportController::class, 'exportKomposisi'])->name('komposisi')->middleware('permission:export.komposisi');
         //  Route export Absen
-        Route::get('/absen-peserta', [ExportController::class, 'indexAbsen'])->name('absenpeserta');
-        Route::get('/absen', [ExportController::class, 'exportAbsen'])->name('absen');
+        Route::get('/absen-peserta', [ExportController::class, 'indexAbsen'])->name('absenpeserta')->middleware('permission:export.absen');
+        Route::get('/absen', [ExportController::class, 'exportAbsen'])->name('absen')->middleware('permission:export.absen');
     });
 
     // Route Update Akun dan Password

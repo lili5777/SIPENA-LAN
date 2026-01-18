@@ -36,6 +36,21 @@ class RolePermissionSeeder extends Seeder
             'role.read',
             'role.update',
             'role.delete',
+            'peserta.create',
+            'peserta.read',
+            'peserta.update',
+            'peserta.delete',
+            'angkatan.create',
+            'angkatan.read',
+            'angkatan.update',
+            'angkatan.delete',
+            'mentor.create',
+            'mentor.read',
+            'mentor.update',
+            'mentor.delete',
+            'export.data',
+            'export.absen',
+            'export.komposisi',
         ];
 
         foreach ($crudPermissions as $perm) {
