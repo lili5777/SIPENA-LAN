@@ -104,7 +104,7 @@
                     <a href="{{ route('admin.export.datapeserta') }}" class="submenu-link">
                         <i class="fas fa-chart-bar me-2"></i> Data Peserta
                     </a>
-                    <a href="" class="submenu-link">
+                    <a href="{{ route('admin.export.absenpeserta') }}" class="submenu-link">
                         <i class="fas fa-chart-pie me-2"></i> Absensi Peserta
                     </a>
                     <a href="{{ route('admin.export.komposisipeserta') }}" class="submenu-link">

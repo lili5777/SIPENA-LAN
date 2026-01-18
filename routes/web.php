@@ -162,6 +162,11 @@ Route::middleware('auth')->group(function () {
         // Route baru untuk komposisi
         Route::get('/komposisi-peserta', [ExportController::class, 'indexKomposisi'])->name('komposisipeserta');
         Route::get('/komposisi', [ExportController::class, 'exportKomposisi'])->name('komposisi');
+        //  Route export Absen
+        Route::get('/absen-peserta', [ExportController::class, 'indexAbsen'])->name('absenpeserta');
+        Route::get('/absen', [ExportController::class, 'exportAbsen'])->name('absen');
+
+
     });
 
     Route::prefix('admin/akun')->name('admin.akun.')->group(function () {
