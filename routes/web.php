@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Angkatan\AngkatanController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Admin\Master\PesertaController;
 use App\Http\Controllers\Admin\Mentor\MentorController;
 use App\Http\Controllers\AdminController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SendEmail;
 
 Route::get('/tes', function () {
     try {
@@ -22,8 +25,22 @@ Route::get('/tes', function () {
     }
 });
 
+Route::get('/send-email', function () {
+    $data = [
+        'name' => 'Syahrizal As',
+        'body' => 'Testing Kirim Email di Santri Koding'
+    ];
+
+    Mail::to('ma.ferdiansyah7179@gmail.com')->send(new SendEmail($data));
+
+    dd("Email Berhasil dikirim.");
+});
+
 Route::get('/up', [UploadController::class, 'index'])->name('upload.index');
 Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
+
+// export data peserta
+// Route::get('/export-peserta', [ExportController::class, 'exportAllPeserta']);
 
 
 // Route Landing Page
@@ -136,6 +153,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/edit', [MentorController::class, 'edit'])->name('edit');
         Route::put('/{id}', [MentorController::class, 'update'])->name('update');
         Route::delete('/{id}', [MentorController::class, 'destroy'])->name('destroy');
+    });
+
+    // Export routes
+    Route::prefix('admin/export')->name('admin.export.')->group(function () {
+        Route::get('/data-peserta', [ExportController::class, 'index'])->name('datapeserta');
+        Route::get('/peserta', [ExportController::class, 'exportPeserta'])->name('peserta');
+        // Route baru untuk komposisi
+        Route::get('/komposisi-peserta', [ExportController::class, 'indexKomposisi'])->name('komposisipeserta');
+        Route::get('/komposisi', [ExportController::class, 'exportKomposisi'])->name('komposisi');
+    });
+
+    Route::prefix('admin/akun')->name('admin.akun.')->group(function () {
+        Route::get('/', [AuthController::class, 'index'])->name('index');
+        Route::put('/update-password', [AuthController::class, 'updatePassword'])->name('update-password');
     });
 
     

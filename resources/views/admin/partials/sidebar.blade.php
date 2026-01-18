@@ -42,8 +42,8 @@
                     </a>
                 </div>
             </div>
-        
-        
+
+
 
             {{-- Peserta --}}
             <div class="menu-item has-submenu">
@@ -67,10 +67,10 @@
                     </a>
                 </div>
             </div>
-        
+
 
             <!-- Pelatihan & Kelas -->
-            <div class="menu-item has-submenu">
+            {{-- <div class="menu-item has-submenu">
                 <a href="#" class="menu-link">
                     <i class="fas fa-graduation-cap menu-icon"></i>
                     <span class="menu-text">Pelatihan & Kelas</span>
@@ -90,32 +90,32 @@
                         <i class="fas fa-star me-2"></i> Penilaian
                     </a>
                 </div>
-            </div>
+            </div> --}}
 
-        
+
             <!-- Laporan & Analisis -->
             <div class="menu-item has-submenu">
                 <a href="#" class="menu-link">
                     <i class="fas fa-chart-line menu-icon"></i>
-                    <span class="menu-text">Laporan & Analisis</span>
+                    <span class="menu-text">Export Laporan</span>
                     <i class="fas fa-chevron-right menu-arrow"></i>
                 </a>
                 <div class="submenu">
-                    <a href="" class="submenu-link">
-                        <i class="fas fa-chart-bar me-2"></i> Statistik Peserta
+                    <a href="{{ route('admin.export.datapeserta') }}" class="submenu-link">
+                        <i class="fas fa-chart-bar me-2"></i> Data Peserta
                     </a>
                     <a href="" class="submenu-link">
-                        <i class="fas fa-chart-pie me-2"></i> Analisis Pelatihan
+                        <i class="fas fa-chart-pie me-2"></i> Absensi Peserta
                     </a>
-                    <a href="" class="submenu-link">
-                        <i class="fas fa-file-invoice me-2"></i> Laporan Keuangan
+                    <a href="{{ route('admin.export.komposisipeserta') }}" class="submenu-link">
+                        <i class="fas fa-file-invoice me-2"></i> Komposisi Peserta
                     </a>
-                    <a href="" class="submenu-link">
+                    {{-- <a href="" class="submenu-link">
                         <i class="fas fa-clipboard-list me-2"></i> Evaluasi Program
-                    </a>
+                    </a> --}}
                 </div>
             </div>
-      
+
 
             <!-- Pengaturan Sistem -->
             <div class="menu-item has-submenu">

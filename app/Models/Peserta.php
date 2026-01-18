@@ -14,6 +14,7 @@ class Peserta extends Model
 
     protected $fillable = [
         'nip_nrp',
+        'ndh',
         'nama_lengkap',
         'nama_panggilan',
         'jenis_kelamin',

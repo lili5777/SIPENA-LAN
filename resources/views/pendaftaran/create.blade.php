@@ -1292,6 +1292,190 @@
                 }
             }
 
+            // Fungsi untuk format ukuran file
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            }
+
+            // Validasi ukuran file realtime
+            document.addEventListener('change', function (e) {
+                if (e.target.matches('input[type="file"]')) {
+                    const fileInput = e.target;
+                    const file = fileInput.files[0];
+
+                    if (!file) return;
+
+                    const maxSize = 1 * 1024 * 1024; // 1MB dalam bytes
+                    const fileSize = file.size;
+                    const fileName = file.name;
+                    const fileNameDisplay = fileInput.closest('.form-file')?.querySelector('.form-file-name');
+                    const formGroup = fileInput.closest('.form-group');
+
+                    // Remove previous error messages
+                    const existingError = formGroup?.querySelector('.file-size-error');
+                    if (existingError) {
+                        existingError.remove();
+                    }
+
+                    // Remove error styling
+                    fileInput.classList.remove('error');
+                    const fileLabel = fileInput.closest('.form-file')?.querySelector('.form-file-label');
+                    if (fileLabel) {
+                        fileLabel.style.borderColor = '';
+                        fileLabel.style.background = '';
+                    }
+
+                    // Check file size
+                    if (fileSize > maxSize) {
+                        // File terlalu besar
+                        fileInput.value = ''; // Clear input
+                        fileInput.classList.add('error');
+
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = 'var(--danger-color)';
+                            fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
+                        }
+
+                        // Update file name display
+                        if (fileNameDisplay) {
+                            fileNameDisplay.innerHTML = `
+                    <span class="no-file text-danger">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        File terlalu besar (${formatFileSize(fileSize)})
+                    </span>
+                `;
+                        }
+
+                        // Add error message
+                        if (formGroup) {
+                            const errorMsg = document.createElement('small');
+                            errorMsg.className = 'text-danger file-size-error';
+                            errorMsg.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i> 
+                    Ukuran file "${fileName}" (${formatFileSize(fileSize)}) melebihi batas maksimal 1 MB
+                `;
+                            formGroup.appendChild(errorMsg);
+                        }
+
+                        // Show notification
+                        showErrorMessage(`File "${fileName}" terlalu besar! Ukuran maksimal 1 MB. Ukuran file Anda: ${formatFileSize(fileSize)}`);
+
+                    } else {
+                        // File valid
+                        if (fileNameDisplay) {
+                            fileNameDisplay.innerHTML = `
+                    <span style="color: var(--success-color);">
+                        <i class="fas fa-check-circle"></i> 
+                        ${fileName} (${formatFileSize(fileSize)})
+                    </span>
+                `;
+                        }
+
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = 'var(--success-color)';
+                            fileLabel.style.background = 'rgba(72, 187, 120, 0.05)';
+                        }
+                    }
+                }
+            });
+
+            // Validasi sebelum submit
+            document.getElementById('pendaftaranForm').addEventListener('submit', function (e) {
+                const fileInputs = this.querySelectorAll('input[type="file"]');
+                let hasOversizedFile = false;
+                const maxSize = 1 * 1024 * 1024; // 1MB
+
+                fileInputs.forEach(input => {
+                    if (input.files.length > 0) {
+                        const file = input.files[0];
+                        if (file.size > maxSize) {
+                            hasOversizedFile = true;
+
+                            // Highlight error
+                            input.classList.add('error');
+                            const fileLabel = input.closest('.form-file')?.querySelector('.form-file-label');
+                            if (fileLabel) {
+                                fileLabel.style.borderColor = 'var(--danger-color)';
+                                fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
+                            }
+
+                            // Show error message
+                            const formGroup = input.closest('.form-group');
+                            if (formGroup) {
+                                const existingError = formGroup.querySelector('.file-size-error');
+                                if (!existingError) {
+                                    const errorMsg = document.createElement('small');
+                                    errorMsg.className = 'text-danger file-size-error';
+                                    errorMsg.innerHTML = `
+                            <i class="fas fa-exclamation-circle"></i> 
+                            Ukuran file (${formatFileSize(file.size)}) melebihi batas maksimal 1 MB
+                        `;
+                                    formGroup.appendChild(errorMsg);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                if (hasOversizedFile) {
+                    e.preventDefault();
+                    showErrorMessage('Ada file yang melebihi ukuran maksimal 1 MB. Silakan periksa kembali file yang Anda upload.');
+
+                    // Scroll to first error
+                    const firstError = this.querySelector('.file-size-error');
+                    if (firstError) {
+                        firstError.closest('.form-group').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+
+                    return false;
+                }
+            });
+
+            // Handler untuk tombol "Ganti File"
+            document.addEventListener('click', function (e) {
+                if (e.target.matches('.btn-change-file') || e.target.closest('.btn-change-file')) {
+                    const btn = e.target.closest('.btn-change-file');
+                    const targetName = btn.getAttribute('data-target');
+                    const fileInput = document.querySelector(`input[name="${targetName}"]`);
+
+                    if (fileInput) {
+                        // Reset file input
+                        fileInput.value = '';
+
+                        // Update UI
+                        const fileNameDisplay = fileInput.closest('.form-file')?.querySelector('.form-file-name');
+                        if (fileNameDisplay) {
+                            fileNameDisplay.innerHTML = '<span class="no-file">Belum ada file dipilih</span>';
+                        }
+
+                        // Remove error styling
+                        fileInput.classList.remove('error');
+                        const fileLabel = fileInput.closest('.form-file')?.querySelector('.form-file-label');
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = '';
+                            fileLabel.style.background = '';
+                        }
+
+                        // Remove error message
+                        const formGroup = fileInput.closest('.form-group');
+                        const errorMsg = formGroup?.querySelector('.file-size-error');
+                        if (errorMsg) {
+                            errorMsg.remove();
+                        }
+
+                        // Trigger file input click
+                        fileInput.click();
+                    }
+                }
+            });
+
             // ============================================
             // FUNGSI UNTUK AUTO-FILL PANGKAT
             // ============================================

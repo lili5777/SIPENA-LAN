@@ -15,7 +15,11 @@ use App\Models\Provinsi;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SendEmail;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
+
 
 class PesertaController extends Controller
 {
@@ -104,6 +108,8 @@ class PesertaController extends Controller
     /**
      * Update status pendaftaran.
      */
+
+
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -113,39 +119,67 @@ class PesertaController extends Controller
 
         $pendaftaran = Pendaftaran::findOrFail($id);
         $role = Role::where('name', 'user')->first();
+        $peserta = $pendaftaran->peserta;
+        // dd($peserta);
 
         if ($request->status_pendaftaran == 'Diterima') {
-            // Gunakan updateOrCreate untuk lebih efisien
-            $user = User::updateOrCreate(
-                // Kondisi pencarian
-                ['peserta_id' => $pendaftaran->peserta->id],
 
-                // Data untuk update/create
+            $lastNdh = Pendaftaran::where('id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan)
+                ->where('id_angkatan', $pendaftaran->id_angkatan)
+                ->whereHas('peserta', function ($q) {
+                    $q->whereNotNull('ndh');
+                })
+                ->with('peserta')
+                ->get()
+                ->max('peserta.ndh');
+
+            $ndhBaru = $lastNdh ? $lastNdh + 1 : 1;
+
+            // update NDH peserta
+            $peserta->update([
+                'ndh' => $ndhBaru
+            ]);
+
+
+            // password asli (untuk email)
+            $passwordAsli = Str::random(8);
+
+            // simpan user
+            $user = User::updateOrCreate(
+                ['peserta_id' => $pendaftaran->peserta->id],
                 [
-                    'name' => $pendaftaran->peserta->nama_lengkap,
-                    'email' => $pendaftaran->peserta->email_pribadi,
-                    'password' => bcrypt($pendaftaran->peserta->nip_nrp),
-                    'role_id' => $role->id,
+                    'name'     => $pendaftaran->peserta->nama_lengkap,
+                    'email'    => $pendaftaran->peserta->email_pribadi,
+                    'password' => bcrypt($passwordAsli),
+                    'role_id'  => $role->id,
                 ]
             );
+
+            // update pesrta
+
+            // data email
+            $data = [
+                'name'     => $user->name,
+                'email'    => $user->email,
+                'password' => $passwordAsli,
+            ];
+
+            // kirim email ke peserta
+            Mail::to($user->email)->send(new SendEmail($data));
         }
 
-        
         $pendaftaran->update([
             'status_pendaftaran' => $request->status_pendaftaran,
             'catatan_verifikasi' => $request->catatan_verifikasi,
             'tanggal_verifikasi' => now()
         ]);
 
-        
-
-        
-
         return response()->json([
             'success' => true,
             'message' => 'Status pendaftaran berhasil diperbarui'
         ]);
     }
+
 
     // Method untuk create form
     public function create(Request $request, $jenis = null)
@@ -1107,6 +1141,7 @@ class PesertaController extends Controller
             }
 
             $peserta = $pendaftaran->peserta;
+           
 
             // 1. Hapus file-file yang terkait
             $filesToDelete = [];
@@ -1211,8 +1246,19 @@ class PesertaController extends Controller
             $otherRegistrations = Pendaftaran::where('id_peserta', $peserta->id)->count();
 
             if ($otherRegistrations == 0) {
+
+                $user = User::where('peserta_id', $peserta->id)->first();
+                if ($user) {
+                    $user->delete();
+                }
                 $peserta->delete();
             }
+
+            $user=User::where('peserta_id',$peserta->id)->first();
+            if($user){
+                $user->delete();
+            }
+            
 
             if (request()->ajax()) {
                 return response()->json([

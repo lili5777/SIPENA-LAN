@@ -247,7 +247,7 @@
 
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label required">Asal Instansi</label>
+        <label class="form-label required">Instansi</label>
         <input type="text" name="asal_instansi" class="form-input @error('asal_instansi') error @enderror"
             placeholder="Contoh: Dinas Kesehatan" 
             value="{{ $peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') }}" required>
@@ -256,13 +256,15 @@
         @enderror
     </div>
     <div class="form-group">
-        <label class="form-label required">Jabatan</label>
-        <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
-            value="{{ $peserta['kepegawaian']['jabatan'] ?? old('jabatan') }}" required placeholder="Contoh : Perencana Ahli Pertama">
-        @error('jabatan')
+        <label class="form-label required">Unit Kerja/Detail Instansi</label>
+        <input type="text" name="unit_kerja" class="form-input @error('unit_kerja') error @enderror"
+            placeholder="Contoh: Dinas Kesehatan"
+            value="{{ $peserta['kepegawaian']['unit_kerja'] ?? old('unit_kerja') }}" required>
+        @error('unit_kerja')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
+    
 </div>
 
 <div class="form-row">
@@ -285,6 +287,16 @@
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label required">Jabatan</label>
+    <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
+        value="{{ $peserta['kepegawaian']['jabatan'] ?? old('jabatan') }}" required
+        placeholder="Contoh : Perencana Ahli Pertama">
+    @error('jabatan')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
 </div>
 
 <div class="form-row">
