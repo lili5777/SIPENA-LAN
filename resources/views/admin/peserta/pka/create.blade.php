@@ -1,30 +1,30 @@
 @php
-    // Ambil jenis dari route
-    $jenis = request()->route('jenis');
+// Ambil jenis dari route
+$jenis = request()->route('jenis');
 
-    // Mapping nama dan ID
-    $jenisMapping = [
-        'pkn' => ['nama' => 'PKN TK II', 'id' => 1, 'kode' => 'PKN_TK_II'],
-        'cpns' => ['nama' => 'PD CPNS', 'id' => 2, 'kode' => 'PD_CPNS'],
-        'pka' => ['nama' => 'PKA', 'id' => 3, 'kode' => 'PKA'],
-        'pkp' => ['nama' => 'PKP', 'id' => 4, 'kode' => 'PKP']
-    ];
+// Mapping nama dan ID
+$jenisMapping = [
+    'pkn' => ['nama' => 'PKN TK II', 'id' => 1, 'kode' => 'PKN_TK_II'],
+    'cpns' => ['nama' => 'PD CPNS', 'id' => 2, 'kode' => 'PD_CPNS'],
+    'pka' => ['nama' => 'PKA', 'id' => 3, 'kode' => 'PKA'],
+    'pkp' => ['nama' => 'PKP', 'id' => 4, 'kode' => 'PKP']
+];
 
-    $jenisData = $jenisMapping[$jenis] ?? ['nama' => 'Pelatihan', 'id' => 1, 'kode' => 'DEFAULT'];
-    $jenisNama = $jenisData['nama'];
-    $jenisPelatihanId = $jenisData['id'];
-    $jenisKode = $jenisData['kode'];
+$jenisData = $jenisMapping[$jenis] ?? ['nama' => 'Pelatihan', 'id' => 1, 'kode' => 'DEFAULT'];
+$jenisNama = $jenisData['nama'];
+$jenisPelatihanId = $jenisData['id'];
+$jenisKode = $jenisData['kode'];
 
-    // Data untuk form (dari controller)
-    $pesertaData = $isEdit ? $pendaftaran->peserta : null;
-    $kepegawaianData = $isEdit ? ($pendaftaran->peserta->kepegawaianPeserta ?? null) : null;
-    $mentorData = $isEdit ? ($pendaftaran->pesertaMentor->first() ?? null) : null;
+// Data untuk form (dari controller)
+$pesertaData = $isEdit ? $pendaftaran->peserta : null;
+$kepegawaianData = $isEdit ? ($pendaftaran->peserta->kepegawaianPeserta ?? null) : null;
+$mentorData = $isEdit ? ($pendaftaran->pesertaMentor->first() ?? null) : null;
 
-    // Tentukan fields yang required berdasarkan jenis
-    $isCPNS = $jenis === 'cpns';
-    $isPKA = $jenis === 'pka';
-    $isPKP = $jenis === 'pkp';
-    $isPKN = $jenis === 'pkn';
+// Tentukan fields yang required berdasarkan jenis
+$isCPNS = $jenis === 'cpns';
+$isPKA = $jenis === 'pka';
+$isPKP = $jenis === 'pkp';
+$isPKN = $jenis === 'pkn';
 @endphp
 
 @extends('admin.partials.layout')
@@ -561,12 +561,12 @@
                                         <option value="">Pilih Provinsi</option>
                                         @foreach($provinsiList as $provinsi)
                                             @php
-                                                $isSelected = false;
-                                                if ($isEdit && $kepegawaianData && $kepegawaianData->id_provinsi) {
-                                                    $isSelected = ($kepegawaianData->id_provinsi == $provinsi->id);
-                                                } else {
-                                                    $isSelected = (old('id_provinsi') == $provinsi->id);
-                                                }
+    $isSelected = false;
+    if ($isEdit && $kepegawaianData && $kepegawaianData->id_provinsi) {
+        $isSelected = ($kepegawaianData->id_provinsi == $provinsi->id);
+    } else {
+        $isSelected = (old('id_provinsi') == $provinsi->id);
+    }
                                             @endphp
                                             <option value="{{ $provinsi->id }}" {{ $isSelected ? 'selected' : '' }}>
                                                 {{ $provinsi->name }}
@@ -584,8 +584,8 @@
                                         <option value="">Pilih Kabupaten/Kota</option>
                                         @if($isEdit && $kepegawaianData && $kepegawaianData->id_kabupaten_kota)
                                             @php
-                                                $currentKabupatenId = $kepegawaianData->id_kabupaten_kota;
-                                                $currentKabupaten = $kabupatenList->firstWhere('id', $currentKabupatenId);
+    $currentKabupatenId = $kepegawaianData->id_kabupaten_kota;
+    $currentKabupaten = $kabupatenList->firstWhere('id', $currentKabupatenId);
                                             @endphp
                                             @if($currentKabupaten)
                                                 <option value="{{ $currentKabupatenId }}" selected>
@@ -672,9 +672,9 @@
                             </div>
 
                             @php
-                                $hasMentor = $mentorData ? true : false;
-                                $selectedMentorId = $mentorData ? $mentorData->id_mentor : null;
-                                $selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') : '';
+$hasMentor = $mentorData ? true : false;
+$selectedMentorId = $mentorData ? $mentorData->id_mentor : null;
+$selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') : '';
                             @endphp
 
                             <div class="form-group">
@@ -786,8 +786,8 @@
                                     </div>
 
                                     @php
-                                        $mentorBaruNama = $mentorData && !$mentorData->mentor ? $mentorData->nama_mentor_custom : old('nama_mentor_baru');
-                                        $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_mentor_custom : old('jabatan_mentor_baru');
+$mentorBaruNama = $mentorData && !$mentorData->mentor ? $mentorData->nama_mentor_custom : old('nama_mentor_baru');
+$mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_mentor_custom : old('jabatan_mentor_baru');
                                     @endphp
 
                                     <div class="form-row">
@@ -878,18 +878,18 @@
                             <!-- Current Document Previews -->
                             @if($isEdit)
                                 @php
-                                    $dokumenFields = [
-                                        'file_surat_tugas' => 'Surat Tugas',
-                                        'file_surat_kesediaan' => 'Surat Kesediaan',
-                                        'file_pakta_integritas' => 'Pakta Integritas',
-                                        'file_surat_komitmen' => 'Surat Komitmen',
-                                        'file_surat_kelulusan_seleksi' => 'Surat Kelulusan Seleksi',
-                                        'file_surat_sehat' => 'Surat Sehat',
-                                        'file_surat_bebas_narkoba' => 'Surat Bebas Narkoba',
-                                        'file_surat_pernyataan_administrasi' => 'Surat Pernyataan Administrasi',
-                                        'file_persetujuan_mentor' => 'Persetujuan Mentor',
-                                        'file_sertifikat_penghargaan' => 'Sertifikat Penghargaan'
-                                    ];
+    $dokumenFields = [
+        'file_surat_tugas' => 'Surat Tugas',
+        'file_surat_kesediaan' => 'Surat Kesediaan',
+        'file_pakta_integritas' => 'Pakta Integritas',
+        'file_surat_komitmen' => 'Surat Komitmen',
+        'file_surat_kelulusan_seleksi' => 'Surat Kelulusan Seleksi',
+        'file_surat_sehat' => 'Surat Sehat',
+        'file_surat_bebas_narkoba' => 'Surat Bebas Narkoba',
+        'file_surat_pernyataan_administrasi' => 'Surat Pernyataan Administrasi',
+        'file_persetujuan_mentor' => 'Persetujuan Mentor',
+        'file_sertifikat_penghargaan' => 'Sertifikat Penghargaan'
+    ];
                                 @endphp
 
                                 @foreach($dokumenFields as $field => $label)
@@ -1938,7 +1938,7 @@
             if (golonganRuangSelect && pangkatInput) {
                 golonganRuangSelect.addEventListener('change', function () {
                     const golongan = this.value;
-                    
+
                     if (golongan && pangkatMapping[golongan]) {
                         pangkatInput.value = pangkatMapping[golongan].pangkat;
                     } else {
@@ -2230,7 +2230,7 @@
                     nipField.classList.add('error');
                     nipField.focus();
                     nipField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
+
                     // Show notification
                     const notification = document.createElement('div');
                     notification.className = 'notification error';
@@ -2241,11 +2241,11 @@
                         </div>
                     `;
                     document.body.appendChild(notification);
-                    
+
                     setTimeout(() => {
                         notification.classList.add('show');
                     }, 10);
-                    
+
                     setTimeout(() => {
                         notification.classList.remove('show');
                         setTimeout(() => {
@@ -2254,7 +2254,7 @@
                     }, 3000);
                     return;
                 }
-                
+
                 moveToStep(3);
             });
 
@@ -2282,9 +2282,9 @@
                 // Validasi minimal: NIP dan Angkatan
                 const nipField = document.querySelector('input[name="nip_nrp"]');
                 const angkatanField = document.querySelector('select[name="id_angkatan"]');
-                
+
                 let hasError = false;
-                
+
                 // Clear previous client-side errors
                 document.querySelectorAll('.client-error').forEach(el => el.remove());
 
@@ -2292,7 +2292,7 @@
                 if (!nipField.value.trim()) {
                     hasError = true;
                     nipField.classList.add('error');
-                    
+
                     const formGroup = nipField.closest('.form-group');
                     if (formGroup) {
                         const errorMsg = document.createElement('small');
@@ -2301,12 +2301,12 @@
                         formGroup.appendChild(errorMsg);
                     }
                 }
-                
+
                 // Validasi Angkatan
                 if (!angkatanField.value) {
                     hasError = true;
                     angkatanField.classList.add('error');
-                    
+
                     const formGroup = angkatanField.closest('.form-group');
                     if (formGroup) {
                         const errorMsg = document.createElement('small');
@@ -2315,7 +2315,7 @@
                         formGroup.appendChild(errorMsg);
                     }
                 }
-                
+
                 if (hasError) {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
@@ -2384,6 +2384,38 @@
 
                         // Display new errors
                         if (data.errors) {
+
+                            if (data.errors.id_angkatan) {
+                                moveToStep(1);
+
+                                // Tampilkan error di field angkatan
+                                const angkatanField = document.querySelector('[name="id_angkatan"]');
+                                if (angkatanField) {
+                                    angkatanField.classList.add('error');
+
+                                    const formGroup = angkatanField.closest('.form-group');
+                                    if (formGroup) {
+                                        const errorMsg = document.createElement('small');
+                                        errorMsg.className = 'text-danger server-error';
+                                        errorMsg.textContent = data.errors.id_angkatan[0];
+                                        formGroup.appendChild(errorMsg);
+                                    }
+
+                                    // Scroll ke field angkatan
+                                    setTimeout(() => {
+                                        angkatanField.scrollIntoView({
+                                            behavior: 'smooth',
+                                            block: 'center'
+                                        });
+                                    }, 300);
+                                }
+
+                                // Tampilkan notifikasi error
+                                showErrorMessage(data.errors.id_angkatan[0]);
+
+                                return; // Stop di sini, jangan lanjut ke loop biasa
+                            }
+                            
                             Object.keys(data.errors).forEach(field => {
                                 let input = document.querySelector(`[name="${field}"]`);
 

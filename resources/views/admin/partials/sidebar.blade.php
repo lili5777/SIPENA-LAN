@@ -28,18 +28,22 @@
                     <i class="fas fa-chevron-right menu-arrow"></i>
                 </a>
                 <div class="submenu">
+                    @if(auth()->user()->hasPermission('angkatan.read'))
                     <a href="{{ route('angkatan.index') }}" class="submenu-link">
                         <i class="fas fa-handshake me-2"></i> Angkatan
                     </a>
+                    @endif
                     {{-- <a href="" class="submenu-link">
                         <i class="fas fa-handshake me-2"></i> Mitra Kerja
                     </a>
                     <a href="" class="submenu-link">
                         <i class="fas fa-book me-2"></i> Materi Pelatihan
                     </a> --}}
+                    @if(auth()->user()->hasPermission('mentor.read'))
                     <a href="{{ route('mentor.index') }}" class="submenu-link">
                         <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
                     </a>
+                    @endif
                 </div>
             </div>
 
@@ -134,28 +138,30 @@
 
 
             <!-- Pengaturan Sistem -->
-            <div class="menu-item has-submenu">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-cog menu-icon"></i>
-                    <span class="menu-text">Pengaturan Sistem</span>
-                    <i class="fas fa-chevron-right menu-arrow"></i>
-                </a>
-                <div class="submenu">
-                    {{-- @if(auth()->user()->hasPermission('user.read')) --}}
-                        <a href="{{ route('users.index') }}" class="submenu-link">
-                            <i class="fas fa-users-cog me-2"></i> Manajemen User
-                        </a>
-                    {{-- @endif --}}
-                    {{-- @if(auth()->user()->hasPermission('role.read')) --}}
-                        <a href="{{ route('roles.index') }}" class="submenu-link">
-                            <i class="fas fa-user-shield me-2"></i> Peran & Hak Akses
-                        </a>
-                    {{-- @endif --}}
-                    <a href="#" class="submenu-link">
-                        <i class="fas fa-sliders-h me-2"></i> Konfigurasi Sistem
+            @if (auth()->user()->role->name == "admin")
+                <div class="menu-item has-submenu">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-cog menu-icon"></i>
+                        <span class="menu-text">Pengaturan Sistem</span>
+                        <i class="fas fa-chevron-right menu-arrow"></i>
                     </a>
+                    <div class="submenu">
+                        {{-- @if(auth()->user()->hasPermission('user.read')) --}}
+                            <a href="{{ route('users.index') }}" class="submenu-link">
+                                <i class="fas fa-users-cog me-2"></i> Manajemen User
+                            </a>
+                        {{-- @endif --}}
+                        {{-- @if(auth()->user()->hasPermission('role.read')) --}}
+                            <a href="{{ route('roles.index') }}" class="submenu-link">
+                                <i class="fas fa-user-shield me-2"></i> Peran & Hak Akses
+                            </a>
+                        {{-- @endif --}}
+                        {{-- <a href="#" class="submenu-link">
+                            <i class="fas fa-sliders-h me-2"></i> Konfigurasi Sistem
+                        </a> --}}
+                    </div>
                 </div>
-            </div>
+            @endif
         @endif
         <!-- Logout -->
         <div class="menu-item">

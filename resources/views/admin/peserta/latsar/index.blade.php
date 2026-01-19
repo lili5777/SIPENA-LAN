@@ -19,10 +19,12 @@
                 </div>
             </div>
             <div class="col-auto">
+                @if(auth()->user()->hasPermission('peserta.create'))
                 <a href="{{ route('peserta.create', ['jenis' => request()->route('jenis')]) }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
                     <i class="fas fa-user-plus me-2"></i>
                     Tambah Peserta
                 </a>
+                @endif
             </div>
         </div>
     </div>

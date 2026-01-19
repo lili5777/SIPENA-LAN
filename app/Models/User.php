@@ -76,4 +76,9 @@ class User extends Authenticatable
     {
         return $this->role && $this->role->name === 'pic';
     }
+
+    public function aktifikats()
+    {
+        return $this->hasMany(Aktifikat::class);
+    }
 }

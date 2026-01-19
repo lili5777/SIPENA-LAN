@@ -131,16 +131,15 @@ Route::middleware('auth')->group(function () {
 
 
     // Master Angkatan Routes
-    Route::middleware('permission:angkatan.create')->group(function () {
-        Route::prefix('angkatan')->name('angkatan.')->group(function () {
-            Route::get('/', [AngkatanController::class, 'index'])->name('index');
-            Route::get('/create', [AngkatanController::class, 'create'])->name('create');
-            Route::post('/', [AngkatanController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [AngkatanController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [AngkatanController::class, 'update'])->name('update');
-            Route::delete('/{id}', [AngkatanController::class, 'destroy'])->name('destroy');
-        });
+    Route::prefix('angkatan')->name('angkatan.')->group(function () {
+        Route::get('/', [AngkatanController::class, 'index'])->name('index')->middleware('permission:angkatan.read');
+        Route::get('/create', [AngkatanController::class, 'create'])->name('create')->middleware('permission:angkatan.create');
+        Route::post('/', [AngkatanController::class, 'store'])->name('store')->middleware('permission:angkatan.create');
+        Route::get('/{id}/edit', [AngkatanController::class, 'edit'])->name('edit')->middleware('permission:angkatan.update');
+        Route::put('/{id}', [AngkatanController::class, 'update'])->name('update')->middleware('permission:angkatan.update');
+        Route::delete('/{id}', [AngkatanController::class, 'destroy'])->name('destroy')->middleware('permission:angkatan.delete');
     });
+        
 
 
     // Master Mentor Routes

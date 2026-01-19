@@ -314,6 +314,39 @@ class PesertaController extends Controller
                 }
             }
 
+            // =========================
+            // VALIDASI KUOTA ANGKATAN
+            // =========================
+            $angkatan = Angkatan::withCount('pendaftaran')
+                ->find($request->id_angkatan);
+
+            if (!$angkatan) {
+                throw ValidationException::withMessages([
+                    'id_angkatan' => ['Angkatan tidak ditemukan.'],
+                ]);
+            }
+
+            if ($angkatan->pendaftaran_count >= $angkatan->kuota) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => [
+                            'id_angkatan' => [
+                                'Kuota angkatan "' . $angkatan->nama_angkatan . '" sudah penuh.'
+                            ]
+                        ],
+                        'message' => 'Kuota angkatan "' . $angkatan->nama_angkatan . '" sudah penuh.'
+                    ], 422);
+                }
+
+                throw ValidationException::withMessages([
+                    'id_angkatan' => [
+                        'Kuota angkatan "' . $angkatan->nama_angkatan . '" sudah penuh.'
+                    ],
+                ]);
+            }
+
+
             // 3. VALIDASI INPUT UMUM (HANYA angkatan, nip_nrp, nama_lengkap YANG REQUIRED)
             $validated = $request->validate(
                 [
@@ -1278,7 +1311,8 @@ class PesertaController extends Controller
             if($user){
                 $user->delete();
             }
-            
+            aktifitas('Menghapus User', $user);
+
 
             if (request()->ajax()) {
                 return response()->json([

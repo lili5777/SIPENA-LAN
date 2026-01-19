@@ -2384,6 +2384,38 @@
 
                         // Display new errors
                         if (data.errors) {
+
+                            if (data.errors.id_angkatan) {
+                                moveToStep(1);
+
+                                // Tampilkan error di field angkatan
+                                const angkatanField = document.querySelector('[name="id_angkatan"]');
+                                if (angkatanField) {
+                                    angkatanField.classList.add('error');
+
+                                    const formGroup = angkatanField.closest('.form-group');
+                                    if (formGroup) {
+                                        const errorMsg = document.createElement('small');
+                                        errorMsg.className = 'text-danger server-error';
+                                        errorMsg.textContent = data.errors.id_angkatan[0];
+                                        formGroup.appendChild(errorMsg);
+                                    }
+
+                                    // Scroll ke field angkatan
+                                    setTimeout(() => {
+                                        angkatanField.scrollIntoView({
+                                            behavior: 'smooth',
+                                            block: 'center'
+                                        });
+                                    }, 300);
+                                }
+
+                                // Tampilkan notifikasi error
+                                showErrorMessage(data.errors.id_angkatan[0]);
+
+                                return; // Stop di sini, jangan lanjut ke loop biasa
+                            }
+                            
                             Object.keys(data.errors).forEach(field => {
                                 let input = document.querySelector(`[name="${field}"]`);
 

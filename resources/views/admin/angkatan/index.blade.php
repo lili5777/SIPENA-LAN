@@ -19,10 +19,12 @@
                 </div>
             </div>
             <div class="col-auto">
+                @if(auth()->user()->hasPermission('angkatan.create'))
                 <a href="{{ route('angkatan.create') }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
                     <i class="fas fa-plus me-2"></i>
                     Tambah Angkatan
                 </a>
+                @endif
             </div>
         </div>
     </div>
@@ -327,17 +329,21 @@
                                 </td>
                                 <td class="text-center pe-4">
                                     <div class="btn-group" role="group">
+                                        @if(auth()->user()->hasPermission('angkatan.update'))
                                         <a href="{{ route('angkatan.edit', $item->id) }}" 
                                            class="btn btn-sm btn-outline-warning btn-action"
                                            data-bs-toggle="tooltip" title="Edit Angkatan">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        @endif
+                                        @if(auth()->user()->hasPermission('angkatan.delete'))
                                         <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-angkatan"
                                             data-id="{{ $item->id }}" 
                                             data-name="{{ $item->nama_angkatan }}"
                                             data-bs-toggle="tooltip" title="Hapus Angkatan">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
