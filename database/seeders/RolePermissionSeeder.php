@@ -56,6 +56,7 @@ class RolePermissionSeeder extends Seeder
             'export.data',
             'export.absen',
             'export.komposisi',
+            'aktifitas.read'
         ];
 
         foreach ($crudPermissions as $perm) {

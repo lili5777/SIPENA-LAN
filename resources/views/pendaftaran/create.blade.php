@@ -1133,6 +1133,93 @@
                     showErrorMessage('Gagal memuat data kabupaten/kota');
                 }
             }
+            // ============================================
+            // KAPITALISASI OTOMATIS - FIXED VERSION
+            // ============================================
+
+            // Fungsi untuk kapitalisasi setiap kata
+            function capitalizeWords(str) {
+                return str.replace(/\b\w/g, function (char) {
+                    return char.toUpperCase();
+                });
+            }
+
+            // Fungsi untuk lowercase
+            function toLowerCase(str) {
+                return str.toLowerCase();
+            }
+
+            // Fungsi untuk uppercase
+            function toUpperCase(str) {
+                return str.toUpperCase();
+            }
+
+            // Fungsi untuk setup kapitalisasi
+            function setupAutoCapitalization() {
+                console.log('Setting up auto-capitalization...');
+
+                // Event listener untuk input dengan class 'capitalize'
+                document.querySelectorAll('.capitalize').forEach(function (input) {
+                    // Setup input event
+                    input.addEventListener('input', function (e) {
+                        if (this.value) {
+                            this.value = capitalizeWords(this.value);
+                        }
+                    });
+
+                    // Setup change event
+                    input.addEventListener('change', function (e) {
+                        if (this.value) {
+                            this.value = capitalizeWords(this.value);
+                        }
+                    });
+
+                    // Apply to existing value
+                    if (input.value) {
+                        input.value = capitalizeWords(input.value);
+                    }
+
+                    console.log('Added capitalize to:', input.name);
+                });
+
+                // Event listener untuk input dengan class 'lowercase'
+                document.querySelectorAll('.lowercase').forEach(function (input) {
+                    input.addEventListener('input', function (e) {
+                        if (this.value) {
+                            this.value = toLowerCase(this.value);
+                        }
+                    });
+
+                    input.addEventListener('change', function (e) {
+                        if (this.value) {
+                            this.value = toLowerCase(this.value);
+                        }
+                    });
+
+                    if (input.value) {
+                        input.value = toLowerCase(input.value);
+                    }
+                });
+
+                // Event listener untuk input dengan class 'uppercase'
+                document.querySelectorAll('.uppercase').forEach(function (input) {
+                    input.addEventListener('input', function (e) {
+                        if (this.value) {
+                            this.value = toUpperCase(this.value);
+                        }
+                    });
+
+                    input.addEventListener('change', function (e) {
+                        if (this.value) {
+                            this.value = toUpperCase(this.value);
+                        }
+                    });
+
+                    if (input.value) {
+                        input.value = toUpperCase(input.value);
+                    }
+                });
+            }
 
             // ============================================
             // FUNGSI UNTUK MENGATUR STATUS PERKAWINAN
@@ -1202,8 +1289,10 @@
                         this.parentElement.querySelector('.form-file-name').textContent = fileName;
                     });
                 });
+                setupAutoCapitalization();
 
                 setupPangkatAutoFill();
+
 
                 // Setup mentor form jika ada
                 setupMentorForm();

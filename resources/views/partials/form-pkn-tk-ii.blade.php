@@ -9,16 +9,19 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Nama Lengkap (Berikut Gelar Pendidikan)</label>
-        <input type="text" name="nama_lengkap" class="form-input @error('nama_lengkap') error @enderror" 
-               value="{{ $peserta['nama_lengkap'] ?? old('nama_lengkap') }}" required>
+        <input type="text" name="nama_lengkap" class="form-input capitalize @error('nama_lengkap') error @enderror"
+            value="{{ $peserta['nama_lengkap'] ?? old('nama_lengkap') }}" required
+            placeholder="Contoh: Muhammad Ali, S.H., M.H.">
+        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
         @error('nama_lengkap')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
         <label class="form-label required">NIP/NRP</label>
-        <input type="text" name="nip_nrp" class="form-input @error('nip_nrp') error @enderror" 
-               value="{{ $peserta['nip_nrp'] ?? old('nip_nrp') }}" required readonly>
+        <input type="text" name="nip_nrp" class="form-input @error('nip_nrp') error @enderror"
+            value="{{ $peserta['nip_nrp'] ?? old('nip_nrp') }}" required readonly
+            placeholder="Contoh: 198108122006041001">
         <small class="form-hint">NIP/NRP tidak dapat diubah</small>
         @error('nip_nrp')
             <small class="text-danger">{{ $message }}</small>
@@ -29,8 +32,9 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Nama Panggilan</label>
-        <input type="text" name="nama_panggilan" class="form-input @error('nama_panggilan') error @enderror"
-            value="{{ $peserta['nama_panggilan'] ?? old('nama_panggilan') }}" required>
+        <input type="text" name="nama_panggilan" class="form-input capitalize @error('nama_panggilan') error @enderror"
+            value="{{ $peserta['nama_panggilan'] ?? old('nama_panggilan') }}" required placeholder="Contoh: Rudi">
+        <small class="form-hint">Huruf akan otomatis kapital</small>
         @error('nama_panggilan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -49,32 +53,32 @@
 </div>
 
 <div class="form-row">
-    
     <div class="form-group">
         <label class="form-label required">Tempat Lahir (sesuai SK)</label>
-        <input type="text" name="tempat_lahir" class="form-input @error('tempat_lahir') error @enderror" 
-               value="{{ $peserta['tempat_lahir'] ?? old('tempat_lahir') }}" required>
+        <input type="text" name="tempat_lahir" class="form-input capitalize @error('tempat_lahir') error @enderror"
+            value="{{ $peserta['tempat_lahir'] ?? old('tempat_lahir') }}" required placeholder="Contoh: Jakarta">
+        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
         @error('tempat_lahir')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
         <label class="form-label required">Tanggal Lahir</label>
-        <input type="date" name="tanggal_lahir" class="form-input @error('tanggal_lahir') error @enderror" 
-               value="{{ $peserta['tanggal_lahir'] ?? old('tanggal_lahir') }}" required>
+        <input type="date" name="tanggal_lahir" class="form-input @error('tanggal_lahir') error @enderror"
+            value="{{ $peserta['tanggal_lahir'] ?? old('tanggal_lahir') }}" required>
         @error('tanggal_lahir')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
 </div>
 
-
-
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Email Pribadi</label>
-        <input type="email" name="email_pribadi" class="form-input @error('email_pribadi') error @enderror"
-            value="{{ $peserta['email_pribadi'] ?? old('email_pribadi') }}" required>
+        <input type="email" name="email_pribadi" class="form-input lowercase @error('email_pribadi') error @enderror"
+            value="{{ $peserta['email_pribadi'] ?? old('email_pribadi') }}" required
+            placeholder="Contoh: muhammad.ali@example.com">
+        <small class="form-hint">Huruf akan otomatis kecil</small>
         @error('email_pribadi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -82,7 +86,7 @@
     <div class="form-group">
         <label class="form-label required">Nomor HP/WhatsApp</label>
         <input type="tel" name="nomor_hp" class="form-input @error('nomor_hp') error @enderror"
-            value="{{ $peserta['nomor_hp'] ?? old('nomor_hp') }}" required>
+            value="{{ $peserta['nomor_hp'] ?? old('nomor_hp') }}" required placeholder="Contoh: 081234567890">
         @error('nomor_hp')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -92,8 +96,10 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Olahraga Kegemaran</label>
-        <input type="text" name="olahraga_hobi" class="form-input @error('olahraga_hobi') error @enderror"
-            value="{{ $peserta['olahraga_hobi'] ?? old('olahraga_hobi') }}" required>
+        <input type="text" name="olahraga_hobi" class="form-input capitalize @error('olahraga_hobi') error @enderror"
+            value="{{ $peserta['olahraga_hobi'] ?? old('olahraga_hobi') }}" required
+            placeholder="Contoh: Sepak Bola, Badminton">
+        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
         @error('olahraga_hobi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -110,7 +116,6 @@
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
-
 </div>
 
 <div class="form-row">
@@ -137,8 +142,7 @@
         <select name="status_perkawinan" id="status_perkawinan"
             class="form-select @error('status_perkawinan') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="Belum Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Belum Menikah' ? 'selected' : '' }}>Belum
-                Menikah</option>
+            <option value="Belum Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Belum Menikah' ? 'selected' : '' }}>Belum Menikah</option>
             <option value="Menikah" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Menikah' ? 'selected' : '' }}>Menikah</option>
             <option value="Duda" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Duda' ? 'selected' : '' }}>Duda</option>
             <option value="Janda" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) == 'Janda' ? 'selected' : '' }}>Janda</option>
@@ -150,17 +154,14 @@
     <div class="form-group">
         <label class="form-label">Nama Istri/Suami</label>
         <input type="text" name="nama_pasangan" id="nama_pasangan"
-            class="form-input @error('nama_pasangan') error @enderror"
-            value="{{ $peserta['nama_pasangan'] ?? old('nama_pasangan') }}" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) != 'Menikah' ? 'disabled' : '' }}>
+            class="form-input capitalize @error('nama_pasangan') error @enderror"
+            value="{{ $peserta['nama_pasangan'] ?? old('nama_pasangan') }}" {{ ($peserta['status_perkawinan'] ?? old('status_perkawinan')) != 'Menikah' ? 'disabled' : '' }} placeholder="Contoh: Siti Fatimah">
+        <small class="form-hint">Hanya bisa diisi jika status "Menikah". Huruf akan otomatis kapital setiap kata</small>
         @error('nama_pasangan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
-        <small class="form-hint">Hanya bisa diisi jika status "Menikah"</small>
     </div>
 </div>
-
-
-
 
 <div class="form-row">
     <div class="form-group">
@@ -179,23 +180,26 @@
     </div>
     <div class="form-group">
         <label class="form-label required">Bidang Studi Pendidikan Terakhir</label>
-        <input type="text" name="bidang_studi" class="form-input @error('bidang_studi') error @enderror" 
-               value="{{ $peserta['bidang_studi'] ?? old('bidang_studi') }}" required>
+        <input type="text" name="bidang_studi" class="form-input capitalize @error('bidang_studi') error @enderror"
+            value="{{ $peserta['bidang_studi'] ?? old('bidang_studi') }}" required placeholder="Contoh: Ilmu Hukum">
+        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
         @error('bidang_studi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
-        <label class="form-label required">Bidang Keahlian (Keahlian atau Kompetensi yang menonjol pada diri peserta)</label>
-        <input type="text" name="bidang_keahlian" class="form-input @error('bidang_keahlian') error @enderror" 
-               value="{{ $peserta['bidang_keahlian'] ?? old('bidang_keahlian') }}" required>
+        <label class="form-label required">Bidang Keahlian (Keahlian atau Kompetensi yang menonjol pada diri
+            peserta)</label>
+        <input type="text" name="bidang_keahlian"
+            class="form-input capitalize @error('bidang_keahlian') error @enderror"
+            value="{{ $peserta['bidang_keahlian'] ?? old('bidang_keahlian') }}" required
+            placeholder="Contoh: Manajemen Pemerintahan">
+        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
         @error('bidang_keahlian')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
 </div>
-
-
 
 <div class="form-row">
     <div class="form-group">
@@ -206,8 +210,10 @@
             <option value="M" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'M' ? 'selected' : '' }}>M</option>
             <option value="L" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'L' ? 'selected' : '' }}>L</option>
             <option value="XL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XL' ? 'selected' : '' }}>XL</option>
-            <option value="XXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXL' ? 'selected' : '' }}>XXL</option>
-            <option value="XXXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+            <option value="XXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXL' ? 'selected' : '' }}>XXL
+            </option>
+            <option value="XXXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXXL' ? 'selected' : '' }}>XXXL
+            </option>
         </select>
         @error('ukuran_kaos')
             <small class="text-danger">{{ $message }}</small>
@@ -217,11 +223,16 @@
         <label class="form-label">Ukuran Kaos Olahraga</label>
         <select name="ukuran_training" class="form-select @error('ukuran_training') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'S' ? 'selected' : '' }}>S</option>
-            <option value="M" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'M' ? 'selected' : '' }}>M</option>
-            <option value="L" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'L' ? 'selected' : '' }}>L</option>
-            <option value="XL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XL' ? 'selected' : '' }}>XL</option>
-            <option value="XXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXL' ? 'selected' : '' }}>XXL</option>
+            <option value="S" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'S' ? 'selected' : '' }}>S
+            </option>
+            <option value="M" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'M' ? 'selected' : '' }}>M
+            </option>
+            <option value="L" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'L' ? 'selected' : '' }}>L
+            </option>
+            <option value="XL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XL' ? 'selected' : '' }}>XL
+            </option>
+            <option value="XXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXL' ? 'selected' : '' }}>
+                XXL</option>
             <option value="XXXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
         </select>
         @error('ukuran_training')
@@ -232,12 +243,18 @@
         <label class="form-label">Ukuran Celana</label>
         <select name="ukuran_celana" class="form-select @error('ukuran_celana') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'S' ? 'selected' : '' }}>S</option>
-            <option value="M" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'M' ? 'selected' : '' }}>M</option>
-            <option value="L" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'L' ? 'selected' : '' }}>L</option>
-            <option value="XL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XL' ? 'selected' : '' }}>XL</option>
-            <option value="XXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXL' ? 'selected' : '' }}>XXL</option>
-            <option value="XXXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+            <option value="S" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'S' ? 'selected' : '' }}>S
+            </option>
+            <option value="M" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'M' ? 'selected' : '' }}>M
+            </option>
+            <option value="L" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'L' ? 'selected' : '' }}>L
+            </option>
+            <option value="XL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XL' ? 'selected' : '' }}>XL
+            </option>
+            <option value="XXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXL' ? 'selected' : '' }}>XXL
+            </option>
+            <option value="XXXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXXL' ? 'selected' : '' }}>
+                XXXL</option>
         </select>
         @error('ukuran_celana')
             <small class="text-danger">{{ $message }}</small>
@@ -245,10 +262,11 @@
     </div>
 </div>
 
-
 <div class="form-group">
     <label class="form-label required">Alamat Rumah</label>
-    <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror" required>{{ $peserta['alamat_rumah'] ?? old('alamat_rumah') }}</textarea>
+    <textarea name="alamat_rumah" class="form-textarea capitalize @error('alamat_rumah') error @enderror" required
+        placeholder="Contoh: Jalan Merdeka No. 123, Kelurahan Menteng, Kecamatan Menteng">{{ $peserta['alamat_rumah'] ?? old('alamat_rumah') }}</textarea>
+    <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
     @error('alamat_rumah')
         <small class="text-danger">{{ $message }}</small>
     @enderror
@@ -256,13 +274,13 @@
 
 <div class="form-group">
     <label class="form-label ">Kondisi Peserta</label>
-    <textarea name="kondisi_peserta" class="form-textarea @error('kondisi_peserta') error @enderror" required>{{ $peserta['kondisi_peserta'] ?? old('kondisi_peserta') }}</textarea>
+    <textarea name="kondisi_peserta" class="form-textarea capitalize @error('kondisi_peserta') error @enderror" required
+        placeholder="Contoh: Sehat, Tidak Memiliki Riwayat Penyakit Berat">{{ $peserta['kondisi_peserta'] ?? old('kondisi_peserta') }}</textarea>
+    <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
     @error('kondisi_peserta')
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
-
-
 
 <div class="form-section-header">
     <i class="fas fa-building"></i> Data Kepegawaian
@@ -271,16 +289,20 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Asal Instansi</label>
-        <input type="text" name="asal_instansi" class="form-input @error('asal_instansi') error @enderror" 
-               placeholder="Contoh: Lembaga Administrasi Negara" value="{{ $peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') }}" required>
+        <input type="text" name="asal_instansi" class="form-input capitalize @error('asal_instansi') error @enderror"
+            placeholder="Contoh: Kementerian Kesehatan Republik Indonesia"
+            value="{{ $peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') }}" required>
+        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
         @error('asal_instansi')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
         <label class="form-label required">Unit Kerja Peserta</label>
-        <input type="text" name="unit_kerja" class="form-input @error('unit_kerja') error @enderror" 
-               placeholder="Contoh: Sekretariat Daerah Kota Makassar" value="{{ $peserta['kepegawaian']['unit_kerja'] ?? old('unit_kerja') }}" required>
+        <input type="text" name="unit_kerja" class="form-input capitalize @error('unit_kerja') error @enderror"
+            placeholder="Contoh: Direktorat Jenderal Pelayanan Kesehatan"
+            value="{{ $peserta['kepegawaian']['unit_kerja'] ?? old('unit_kerja') }}" required>
+        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
         @error('unit_kerja')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -290,18 +312,21 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Jabatan</label>
-        <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror" 
-               value="{{ $peserta['kepegawaian']['jabatan'] ?? old('jabatan') }}" required>
+        <input type="text" name="jabatan" class="form-input capitalize @error('jabatan') error @enderror"
+            value="{{ $peserta['kepegawaian']['jabatan'] ?? old('jabatan') }}" required
+            placeholder="Contoh: Perencana Ahli Pertama">
+        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
         @error('jabatan')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
-    
+
     <div class="form-group">
         <label class="form-label required">Eselon</label>
         <select name="eselon" class="form-select @error('eselon') error @enderror" required>
             <option value="">Pilih</option>
-            <option value="II" {{ ($peserta['kepegawaian']['eselon'] ?? old('eselon')) == 'II' ? 'selected' : '' }}>II</option>
+            <option value="II" {{ ($peserta['kepegawaian']['eselon'] ?? old('eselon')) == 'II' ? 'selected' : '' }}>II
+            </option>
             <option value="III/Pejabat Fungsional" {{ ($peserta['kepegawaian']['eselon'] ?? old('eselon')) == 'III/Pejabat Fungsional' ? 'selected' : '' }}>III/Pejabat Fungsional</option>
         </select>
         @error('eselon')
@@ -340,7 +365,7 @@
 
     <div class="form-group">
         <label class="form-label required">Pangkat</label>
-        <input type="text" name="pangkat" id="pangkat" class="form-input @error('pangkat') error @enderror"
+        <input type="text" name="pangkat" id="pangkat" class="form-input capitalize @error('pangkat') error @enderror"
             value="{{ old('pangkat', $peserta['kepegawaian']['pangkat'] ?? '') }}" readonly
             placeholder="Akan terisi otomatis berdasarkan golongan ruang">
         <div id="pangkat_description" class="form-hint" style="display: none;">
@@ -368,7 +393,8 @@
     </div>
     <div class="form-group">
         <label class="form-label required">Kabupaten (Lokasi Kantor/Tempat Tugas)</label>
-        <select name="id_kabupaten_kota" class="form-select @error('id_kabupaten_kota') error @enderror" required disabled>
+        <select name="id_kabupaten_kota" class="form-select @error('id_kabupaten_kota') error @enderror" required
+            disabled>
             <option value="">Pilih Kabupaten (Pilih Provinsi Dahulu)</option>
         </select>
         @error('id_kabupaten_kota')
@@ -379,7 +405,9 @@
 
 <div class="form-group">
     <label class="form-label required">Alamat Kantor</label>
-    <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror" required>{{ $peserta['kepegawaian']['alamat_kantor'] ?? old('alamat_kantor') }}</textarea>
+    <textarea name="alamat_kantor" class="form-textarea capitalize @error('alamat_kantor') error @enderror" required
+        placeholder="Contoh: Jalan HR Rasuna Said Kaveling 5, Kuningan, Jakarta Selatan">{{ $peserta['kepegawaian']['alamat_kantor'] ?? old('alamat_kantor') }}</textarea>
+    <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
     @error('alamat_kantor')
         <small class="text-danger">{{ $message }}</small>
     @enderror
@@ -388,16 +416,19 @@
 <div class="form-row">
     <div class="form-group">
         <label class="form-label">Nomor Telepon Kantor</label>
-        <input type="tel" name="nomor_telepon_kantor" class="form-input @error('nomor_telepon_kantor') error @enderror" 
-               value="{{ $peserta['kepegawaian']['nomor_telepon_kantor'] ?? old('nomor_telepon_kantor') }}">
+        <input type="tel" name="nomor_telepon_kantor" class="form-input @error('nomor_telepon_kantor') error @enderror"
+            value="{{ $peserta['kepegawaian']['nomor_telepon_kantor'] ?? old('nomor_telepon_kantor') }}"
+            placeholder="Contoh: 0211234567">
         @error('nomor_telepon_kantor')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
         <label class="form-label">Email Kantor</label>
-        <input type="email" name="email_kantor" class="form-input @error('email_kantor') error @enderror" 
-               value="{{ $peserta['kepegawaian']['email_kantor'] ?? old('email_kantor') }}">
+        <input type="email" name="email_kantor" class="form-input lowercase @error('email_kantor') error @enderror"
+            value="{{ $peserta['kepegawaian']['email_kantor'] ?? old('email_kantor') }}"
+            placeholder="Contoh: perencana@kemenkes.go.id">
+        <small class="form-hint">Huruf akan otomatis kecil</small>
         @error('email_kantor')
             <small class="text-danger">{{ $message }}</small>
         @enderror
@@ -778,7 +809,8 @@
     <select name="sudah_ada_mentor" id="sudah_ada_mentor" class="form-select @error('sudah_ada_mentor') error @enderror"
         required>
         <option value="">Pilih</option>
-        <option value="Ya" {{ ($peserta['sudah_ada_mentor'] ?? old('sudah_ada_mentor')) == 'Ya' ? 'selected' : '' }}>Ya</option>
+        <option value="Ya" {{ ($peserta['sudah_ada_mentor'] ?? old('sudah_ada_mentor')) == 'Ya' ? 'selected' : '' }}>Ya
+        </option>
         <option value="Tidak" {{ ($peserta['sudah_ada_mentor'] ?? old('sudah_ada_mentor')) == 'Tidak' ? 'selected' : '' }}>Tidak</option>
     </select>
     @error('sudah_ada_mentor')
@@ -786,14 +818,16 @@
     @enderror
 </div>
 
-<div id="mentor-container" style="display: {{ ($peserta['sudah_ada_mentor'] ?? old('sudah_ada_mentor')) == 'Ya' ? 'block' : 'none' }};">
+<div id="mentor-container"
+    style="display: {{ ($peserta['sudah_ada_mentor'] ?? old('sudah_ada_mentor')) == 'Ya' ? 'block' : 'none' }};">
     <div class="form-group">
         <label class="form-label required">Pilih Mentor atau Tambah Baru</label>
         <div class="mentor-options">
             <select name="mentor_mode" id="mentor_mode" class="form-select @error('mentor_mode') error @enderror">
                 <option value="">Pilih Menu</option>
-                <option value="pilih" {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'pilih' ? 'selected' : '' }}>Daftar mentor</option>
-                <option value="tambah" {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'tambah' ? 'selected' : '' }}>Tambah mentor(Jika tidak ada di daftar mentor)</option>
+                <option value="pilih" {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'pilih' ? 'selected' : '' }}>
+                    Daftar mentor</option>
+                <option value="tambah" {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'tambah' ? 'selected' : '' }}>Tambah mentor (Jika tidak ada di daftar mentor)</option>
             </select>
         </div>
         @error('mentor_mode')
@@ -802,7 +836,8 @@
     </div>
 
     <!-- Form untuk memilih mentor yang sudah ada -->
-    <div id="select-mentor-form" style="display: {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'pilih' ? 'block' : 'none' }};">
+    <div id="select-mentor-form"
+        style="display: {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'pilih' ? 'block' : 'none' }};">
         <div class="form-group">
             <label class="form-label required">Pilih Mentor</label>
             <select name="id_mentor" id="id_mentor" class="form-select @error('id_mentor') error @enderror">
@@ -818,7 +853,8 @@
             <div class="form-group">
                 <label class="form-label required">Nama Mentor</label>
                 <input type="text" name="nama_mentor" id="nama_mentor_select"
-                    class="form-input @error('nama_mentor') error @enderror" value="{{ $peserta['nama_mentor'] ?? old('nama_mentor') }}" readonly>
+                    class="form-input capitalize @error('nama_mentor') error @enderror"
+                    value="{{ $peserta['nama_mentor'] ?? old('nama_mentor') }}" readonly>
                 @error('nama_mentor')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -826,7 +862,8 @@
             <div class="form-group">
                 <label class="form-label required">Jabatan Mentor</label>
                 <input type="text" name="jabatan_mentor" id="jabatan_mentor_select"
-                    class="form-input @error('jabatan_mentor') error @enderror" value="{{ $peserta['jabatan_mentor'] ?? old('jabatan_mentor') }}" readonly>
+                    class="form-input capitalize @error('jabatan_mentor') error @enderror"
+                    value="{{ $peserta['jabatan_mentor'] ?? old('jabatan_mentor') }}" readonly>
                 @error('jabatan_mentor')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -838,7 +875,7 @@
                 <label class="form-label">Nomor Rekening Mentor</label>
                 <input type="text" name="nomor_rekening_mentor" id="nomor_rekening_mentor_select"
                     class="form-input @error('nomor_rekening_mentor') error @enderror"
-                    placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
+                    placeholder="Contoh: Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
                     value="{{ $peserta['nomor_rekening_mentor'] ?? old('nomor_rekening_mentor') }}" readonly>
                 @error('nomor_rekening_mentor')
                     <small class="text-danger">{{ $message }}</small>
@@ -847,7 +884,8 @@
             <div class="form-group">
                 <label class="form-label">NPWP Mentor</label>
                 <input type="text" name="npwp_mentor" id="npwp_mentor_select"
-                    class="form-input @error('npwp_mentor') error @enderror" value="{{ $peserta['npwp_mentor'] ?? old('npwp_mentor') }}" readonly>
+                    class="form-input @error('npwp_mentor') error @enderror"
+                    value="{{ $peserta['npwp_mentor'] ?? old('npwp_mentor') }}" readonly>
                 @error('npwp_mentor')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -856,7 +894,8 @@
     </div>
 
     <!-- Form untuk menambah mentor baru -->
-    <div id="add-mentor-form" style="display: {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'tambah' ? 'block' : 'none' }};">
+    <div id="add-mentor-form"
+        style="display: {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'tambah' ? 'block' : 'none' }};">
         <div class="alert alert-info">
             <i class="fas fa-info-circle"></i>
             Silakan lengkapi data mentor baru
@@ -866,7 +905,10 @@
             <div class="form-group">
                 <label class="form-label required">Nama Mentor</label>
                 <input type="text" name="nama_mentor_baru" id="nama_mentor_baru"
-                    class="form-input @error('nama_mentor_baru') error @enderror" value="{{ $peserta['nama_mentor_baru'] ?? old('nama_mentor_baru') }}">
+                    class="form-input capitalize @error('nama_mentor_baru') error @enderror"
+                    value="{{ $peserta['nama_mentor_baru'] ?? old('nama_mentor_baru') }}"
+                    placeholder="Contoh: Dr. Ahmad Supriyadi, M.Si.">
+                <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
                 @error('nama_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -874,8 +916,10 @@
             <div class="form-group">
                 <label class="form-label required">Jabatan Mentor</label>
                 <input type="text" name="jabatan_mentor_baru" id="jabatan_mentor_baru"
-                    class="form-input @error('jabatan_mentor_baru') error @enderror"
-                    value="{{ $peserta['jabatan_mentor_baru'] ?? old('jabatan_mentor_baru') }}">
+                    class="form-input capitalize @error('jabatan_mentor_baru') error @enderror"
+                    value="{{ $peserta['jabatan_mentor_baru'] ?? old('jabatan_mentor_baru') }}"
+                    placeholder="Contoh: Kepala Bagian Perencanaan">
+                <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
                 @error('jabatan_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -887,7 +931,7 @@
                 <label class="form-label">Nomor Rekening Mentor</label>
                 <input type="text" name="nomor_rekening_mentor_baru" id="nomor_rekening_mentor_baru"
                     class="form-input @error('nomor_rekening_mentor_baru') error @enderror"
-                    placeholder="Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
+                    placeholder="Contoh: Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
                     value="{{ $peserta['nomor_rekening_mentor_baru'] ?? old('nomor_rekening_mentor_baru') }}">
                 @error('nomor_rekening_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
@@ -896,7 +940,9 @@
             <div class="form-group">
                 <label class="form-label">NPWP Mentor</label>
                 <input type="text" name="npwp_mentor_baru" id="npwp_mentor_baru"
-                    class="form-input @error('npwp_mentor_baru') error @enderror" value="{{ $peserta['npwp_mentor_baru'] ?? old('npwp_mentor_baru') }}">
+                    class="form-input @error('npwp_mentor_baru') error @enderror"
+                    value="{{ $peserta['npwp_mentor_baru'] ?? old('npwp_mentor_baru') }}"
+                    placeholder="Contoh: 123456789012345">
                 @error('npwp_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -921,5 +967,12 @@
 
     .alert i {
         margin-right: 10px;
+    }
+
+    .form-hint {
+        font-size: 0.85rem;
+        color: var(--muted-color);
+        margin-top: 4px;
+        display: block;
     }
 </style>

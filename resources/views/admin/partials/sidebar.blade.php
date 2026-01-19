@@ -163,6 +163,16 @@
                 </div>
             @endif
         @endif
+
+        @if(auth()->user()->hasPermission('aktifitas.read'))
+        <div class="menu-item">
+            <a href="{{ route('aktifitas.index') }}" class="menu-link {{ request()->routeIs('admin.aktifitas.*') ? 'active' : '' }}">
+                <i class="fas fa-history menu-icon"></i>
+                <span class="menu-text">Aktivitas</span>
+            </a>
+        </div>
+        @endif
+        
         <!-- Logout -->
         <div class="menu-item">
             <a href="{{ route('logout') }}" class="menu-link">

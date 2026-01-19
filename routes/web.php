@@ -174,6 +174,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/update-password', [AuthController::class, 'updatePassword'])->name('update-password');
     });
 
+    Route::get('/aktifitas', [AdminController::class, 'histori'])->name('aktifitas.index');
+
     
 });
 

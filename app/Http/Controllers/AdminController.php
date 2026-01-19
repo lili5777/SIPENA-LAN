@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Aktifitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Peserta;
@@ -688,5 +689,48 @@ class AdminController extends Controller
             // Log error jika diperlukan
             // \Log::error('Gagal menghapus file lama: ' . $e->getMessage());
         }
+    }
+
+
+    public function histori(Request $request)
+    {
+        // Query dengan eager loading
+        $query = Aktifitas::with('user')->latest();
+
+        // Filter berdasarkan pencarian
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('deskripsi', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filter berdasarkan tanggal
+        if ($request->has('date_from') && !empty($request->date_from)) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && !empty($request->date_to)) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Pagination
+        $perPage = $request->per_page ?? 10;
+        $logs = $query->paginate($perPage);
+
+        // Statistik
+        $totalAktivitas = Aktifitas::count();
+        $aktivitasHariIni = Aktifitas::whereDate('created_at', today())->count();
+        $aktivitasMingguIni = Aktifitas::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
+
+        return view('admin.aktifitas.index', compact(
+            'logs',
+            'totalAktivitas',
+            'aktivitasHariIni',
+            'aktivitasMingguIni'
+        ));
     }
 }

@@ -5,1082 +5,1097 @@
 @section('page-title', 'Edit Data Peserta')
 
 @section('styles')
-    <style>
-        :root {
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --info-color: #3b82f6;
-            --dark-color: #1f2937;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
+        <style>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+            :root {
+                --success-color: #10b981;
+                --danger-color: #ef4444;
+                --warning-color: #f59e0b;
+                --info-color: #3b82f6;
+                --dark-color: #1f2937;
+                --gray-50: #f9fafb;
+                --gray-100: #f3f4f6;
+                --gray-200: #e5e7eb;
+                --gray-300: #d1d5db;
+                --gray-400: #9ca3af;
+                --gray-500: #6b7280;
+                --gray-600: #4b5563;
+                --gray-700: #374151;
+                --gray-800: #1f2937;
+                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+                --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--gray-50);
-            color: var(--gray-800);
-            line-height: 1.6;
-        }
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
 
-        /* Fixed Notification Container */
-        .notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            width: 400px;
-            max-width: calc(100vw - 40px);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--gray-50);
+                color: var(--gray-800);
+                line-height: 1.6;
+            }
 
-        .notification {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            box-shadow: var(--shadow-xl);
-            border-left: 4px solid;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            animation: slideInRight 0.3s ease-out;
-            transform: translateX(0);
-            transition: all 0.3s ease;
-        }
+            /* Tambahkan di dalam bagian styles, bisa di bagian root atau di bagian form inputs */
+    .form-input.capitalize,
+    .form-textarea.capitalize {
+        text-transform: capitalize;
+    }
 
-        .notification.hiding {
-            transform: translateX(100%);
-            opacity: 0;
-        }
+    .form-input.uppercase {
+        text-transform: uppercase;
+    }
 
-        @keyframes slideInRight {
-            from {
+    .form-input.lowercase {
+        text-transform: lowercase;
+    }
+
+            /* Fixed Notification Container */
+            .notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                width: 400px;
+                max-width: calc(100vw - 40px);
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .notification {
+                background: white;
+                border-radius: 12px;
+                padding: 1rem 1.25rem;
+                box-shadow: var(--shadow-xl);
+                border-left: 4px solid;
+                display: flex;
+                align-items: flex-start;
+                gap: 0.75rem;
+                animation: slideInRight 0.3s ease-out;
+                transform: translateX(0);
+                transition: all 0.3s ease;
+            }
+
+            .notification.hiding {
                 transform: translateX(100%);
                 opacity: 0;
             }
 
-            to {
-                transform: translateX(0);
-                opacity: 1;
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
             }
-        }
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
+            @keyframes slideInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .notification-success {
+                border-left-color: var(--success-color);
+                background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, white 10%);
             }
-        }
 
-        .notification-success {
-            border-left-color: var(--success-color);
-            background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, white 10%);
-        }
+            .notification-error {
+                border-left-color: var(--danger-color);
+                background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, white 10%);
+            }
 
-        .notification-error {
-            border-left-color: var(--danger-color);
-            background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, white 10%);
-        }
+            .notification-warning {
+                border-left-color: var(--warning-color);
+                background: linear-gradient(90deg, rgba(245, 158, 11, 0.05) 0%, white 10%);
+            }
 
-        .notification-warning {
-            border-left-color: var(--warning-color);
-            background: linear-gradient(90deg, rgba(245, 158, 11, 0.05) 0%, white 10%);
-        }
+            .notification-info {
+                border-left-color: var(--info-color);
+                background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, white 10%);
+            }
 
-        .notification-info {
-            border-left-color: var(--info-color);
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, white 10%);
-        }
+            .notification i {
+                margin-top: 0.125rem;
+                font-size: 1.25rem;
+            }
 
-        .notification i {
-            margin-top: 0.125rem;
-            font-size: 1.25rem;
-        }
+            .notification-success i {
+                color: var(--success-color);
+            }
 
-        .notification-success i {
-            color: var(--success-color);
-        }
+            .notification-error i {
+                color: var(--danger-color);
+            }
 
-        .notification-error i {
-            color: var(--danger-color);
-        }
+            .notification-warning i {
+                color: var(--warning-color);
+            }
 
-        .notification-warning i {
-            color: var(--warning-color);
-        }
+            .notification-info i {
+                color: var(--info-color);
+            }
 
-        .notification-info i {
-            color: var(--info-color);
-        }
+            .notification-content {
+                flex: 1;
+                min-width: 0;
+            }
 
-        .notification-content {
-            flex: 1;
-            min-width: 0;
-        }
+            .notification-title {
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+                font-size: 0.95rem;
+                color: var(--gray-800);
+            }
 
-        .notification-title {
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            font-size: 0.95rem;
-            color: var(--gray-800);
-        }
+            .notification-message {
+                font-size: 0.875rem;
+                color: var(--gray-600);
+            }
 
-        .notification-message {
-            font-size: 0.875rem;
-            color: var(--gray-600);
-        }
+            .notification-close {
+                background: none;
+                border: none;
+                color: var(--gray-400);
+                cursor: pointer;
+                padding: 0.25rem;
+                opacity: 0.7;
+                transition: opacity 0.2s;
+            }
 
-        .notification-close {
-            background: none;
-            border: none;
-            color: var(--gray-400);
-            cursor: pointer;
-            padding: 0.25rem;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .notification-close:hover {
-            opacity: 1;
-        }
-
-        /* Container */
-        .edit-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Header */
-        .edit-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            border-radius: 16px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .edit-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .edit-header::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -5%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .edit-header h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.025em;
-        }
-
-        .edit-header p {
-            opacity: 0.95;
-            font-size: 1.05rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: white;
-            text-decoration: none;
-            padding: 0.625rem 1.25rem;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateX(-5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Alert Messages */
-        .alert-container {
-            margin-bottom: 1.5rem;
-        }
-
-        .alert {
-            padding: 1rem 1.25rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            border: 1px solid;
-            animation: slideInDown 0.3s ease-out;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border-color: #6ee7b7;
-        }
-
-        .alert-danger {
-            background: #fee2e2;
-            color: #991b1b;
-            border-color: #fca5a5;
-        }
-
-        .alert-warning {
-            background: #fef3c7;
-            color: #92400e;
-            border-color: #fcd34d;
-        }
-
-        .alert-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border-color: #93c5fd;
-        }
-
-        .alert i {
-            margin-top: 0.125rem;
-            font-size: 1.25rem;
-        }
-
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-title {
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            font-size: 1rem;
-        }
-
-        .alert-message {
-            font-size: 0.95rem;
-            opacity: 0.95;
-        }
-
-        .alert-close {
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            padding: 0.25rem;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-
-        .alert-close:hover {
-            opacity: 1;
-        }
-
-        /* Error summary */
-        .error-summary {
-            background: #fee2e2;
-            border: 1px solid #fca5a5;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            animation: slideInDown 0.3s ease-out;
-        }
-
-        .error-summary h4 {
-            color: #991b1b;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .error-summary ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .error-summary li {
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .error-summary li:hover {
-            background-color: rgba(239, 68, 68, 0.1);
-        }
-
-        .error-summary li:last-child {
-            margin-bottom: 0;
-        }
-
-        .error-summary .error-count {
-            background: var(--danger-color);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        /* Form */
-        .edit-form {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow-xl);
-            overflow: hidden;
-        }
-
-        /* Tabs */
-        .form-tabs {
-            display: flex;
-            background: var(--gray-50);
-            border-bottom: 2px solid var(--gray-200);
-            overflow-x: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--gray-400) var(--gray-100);
-        }
-
-        .form-tabs::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .form-tabs::-webkit-scrollbar-track {
-            background: var(--gray-100);
-        }
-
-        .form-tabs::-webkit-scrollbar-thumb {
-            background: var(--gray-400);
-            border-radius: 3px;
-        }
-
-        .form-tab {
-            padding: 1.25rem 2rem;
-            background: none;
-            border: none;
-            font-weight: 600;
-            color: var(--gray-600);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            min-width: 180px;
-            justify-content: center;
-            font-size: 0.95rem;
-        }
-
-        .form-tab i {
-            font-size: 1.1rem;
-        }
-
-        .form-tab:hover:not(.active) {
-            color: var(--primary-color);
-            background: rgba(26, 58, 108, 0.05);
-        }
-
-        .form-tab.active {
-            color: var(--primary-color);
-            background: white;
-        }
-
-        .form-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        }
-
-        .form-tab.error::before {
-            content: '';
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            width: 8px;
-            height: 8px;
-            background: var(--danger-color);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
+            .notification-close:hover {
                 opacity: 1;
             }
 
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        /* Tab Content */
-        .form-tab-content {
-            display: none;
-            padding: 2.5rem;
-            animation: fadeInUp 0.4s ease-out;
-        }
-
-        .form-tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Section Header */
-        .form-section-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--gray-200);
-        }
-
-        .form-section-header i {
-            color: var(--primary-color);
-            background: linear-gradient(135deg, rgba(26, 58, 108, 0.1), rgba(37, 99, 235, 0.1));
-            width: 56px;
-            height: 56px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .form-section-header h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--dark-color);
-            letter-spacing: -0.025em;
-        }
-
-        /* Form Layout */
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-row-3 {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        /* Form Labels */
-        .form-label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.625rem;
-            color: var(--gray-700);
-            font-size: 0.95rem;
-        }
-
-        .form-label.required::after {
-            content: ' *';
-            color: var(--danger-color);
-            font-weight: 700;
-        }
-
-        /* Form Inputs */
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid var(--gray-300);
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            background: white;
-            font-family: inherit;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(26, 58, 108, 0.1);
-        }
-
-        .form-input:disabled,
-        .form-select:disabled,
-        .form-textarea:disabled {
-            background: var(--gray-100);
-            color: var(--gray-500);
-            cursor: not-allowed;
-        }
-
-        .form-input.error,
-        .form-select.error,
-        .form-textarea.error {
-            border-color: var(--danger-color);
-            background: #fef2f2;
-        }
-
-        .form-input.error:focus,
-        .form-select.error:focus,
-        .form-textarea.error:focus {
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
-        }
-
-        .form-input.success {
-            border-color: var(--success-color);
-        }
-
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-            line-height: 1.6;
-        }
-
-        .form-hint {
-            display: block;
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        .form-hint i {
-            margin-right: 0.25rem;
-        }
-
-        /* Error Messages */
-        .error-message {
-            color: var(--danger-color);
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            font-weight: 500;
-        }
-
-        .error-message i {
-            font-size: 0.875rem;
-        }
-
-        .text-danger {
-            color: var(--danger-color);
-        }
-
-        .text-success {
-            color: var(--success-color);
-        }
-
-        /* File Upload */
-        .form-file {
-            position: relative;
-            margin-top: 0.5rem;
-        }
-
-        .form-file-input {
-            position: absolute;
-            width: 0.1px;
-            height: 0.1px;
-            opacity: 0;
-            overflow: hidden;
-            z-index: -1;
-        }
-
-        .form-file-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2.5rem;
-            border: 2px dashed var(--gray-300);
-            border-radius: 12px;
-            background: var(--gray-50);
-            color: var(--gray-600);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .form-file-label:hover {
-            border-color: var(--primary-color);
-            background: #f0f4ff;
-        }
-
-        .form-file-label i {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-            color: var(--primary-color);
-        }
-
-        .form-file-label-text {
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-bottom: 0.25rem;
-        }
-
-        .form-file-label-hint {
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        .form-file-name {
-            margin-top: 1rem;
-        }
-
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: 10px;
-            border: 1px solid var(--gray-200);
-        }
-
-        .file-info i.fa-check-circle {
-            color: var(--success-color);
-            font-size: 1.25rem;
-        }
-
-        .file-info i.fa-file-pdf {
-            color: var(--danger-color);
-            font-size: 1.25rem;
-        }
-
-        .file-info i.fa-file-image {
-            color: var(--info-color);
-            font-size: 1.25rem;
-        }
-
-        .file-info-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .file-name {
-            font-weight: 600;
-            color: var(--gray-700);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .file-size {
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        .btn-change-file {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .btn-change-file:hover {
-            background: var(--secondary-color);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-remove-file {
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            padding: 0.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-remove-file:hover {
-            background: #dc2626;
-        }
-
-        .no-file {
-            color: var(--gray-400);
-            font-style: italic;
-            font-size: 0.9rem;
-        }
-
-        /* Mentor Container */
-        #mentor-container {
-            margin-top: 1.5rem;
-            padding: 2rem;
-            background: var(--gray-50);
-            border-radius: 12px;
-            border: 1px solid var(--gray-200);
-        }
-
-        /* Form Actions */
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2rem 2.5rem;
-            background: var(--gray-50);
-            border-top: 2px solid var(--gray-200);
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .form-actions-left {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 0.875rem 2rem;
-            border-radius: 10px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.625rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            font-size: 1rem;
-            border: none;
-        }
-
-        .btn-cancel {
-            background: white;
-            color: var(--gray-700);
-            border: 2px solid var(--gray-300);
-        }
-
-        .btn-cancel:hover {
-            background: var(--gray-100);
-            border-color: var(--gray-400);
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Progress Indicator */
-        .form-progress {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--gray-600);
-        }
-
-        .progress-text {
-            font-weight: 600;
-        }
-
-        .progress-bar-container {
-            width: 120px;
-            height: 6px;
-            background: var(--gray-200);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            transition: width 0.3s ease;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
+            /* Container */
             .edit-container {
-                padding: 1.5rem;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .edit-container {
-                padding: 1rem;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 2rem;
             }
 
+            /* Header */
             .edit-header {
-                padding: 2rem;
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+                color: white;
+                border-radius: 16px;
+                padding: 2.5rem;
+                margin-bottom: 2rem;
+                position: relative;
+                overflow: hidden;
+                box-shadow: var(--shadow-lg);
+            }
+
+            .edit-header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -10%;
+                width: 400px;
+                height: 400px;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+                border-radius: 50%;
+            }
+
+            .edit-header::after {
+                content: '';
+                position: absolute;
+                bottom: -30%;
+                left: -5%;
+                width: 300px;
+                height: 300px;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+                border-radius: 50%;
+            }
+
+            .header-content {
+                position: relative;
+                z-index: 1;
             }
 
             .edit-header h1 {
-                font-size: 1.75rem;
-            }
-
-            .form-tab {
-                min-width: 160px;
-                padding: 1rem 1.5rem;
-                font-size: 0.9rem;
-            }
-
-            .form-tab-content {
-                padding: 2rem;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .form-section-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 0.75rem;
-            }
-
-            .form-section-header i {
-                width: 50px;
-                height: 50px;
-            }
-
-            .form-section-header h3 {
-                font-size: 1.3rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .edit-header h1 {
-                font-size: 1.5rem;
+                font-size: 2rem;
+                font-weight: 800;
+                margin-bottom: 0.5rem;
+                letter-spacing: -0.025em;
             }
 
             .edit-header p {
-                font-size: 0.95rem;
+                opacity: 0.95;
+                font-size: 1.05rem;
+                margin-bottom: 1.5rem;
             }
 
-            .form-tab {
-                min-width: 140px;
-                padding: 0.875rem 1rem;
-                font-size: 0.875rem;
+            .back-button {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: white;
+                text-decoration: none;
+                padding: 0.625rem 1.25rem;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                font-weight: 600;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
             }
 
-            .form-tab i {
+            .back-button:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: translateX(-5px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+
+            /* Alert Messages */
+            .alert-container {
+                margin-bottom: 1.5rem;
+            }
+
+            .alert {
+                padding: 1rem 1.25rem;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                display: flex;
+                align-items: flex-start;
+                gap: 0.75rem;
+                border: 1px solid;
+                animation: slideInDown 0.3s ease-out;
+            }
+
+            .alert-success {
+                background: #d1fae5;
+                color: #065f46;
+                border-color: #6ee7b7;
+            }
+
+            .alert-danger {
+                background: #fee2e2;
+                color: #991b1b;
+                border-color: #fca5a5;
+            }
+
+            .alert-warning {
+                background: #fef3c7;
+                color: #92400e;
+                border-color: #fcd34d;
+            }
+
+            .alert-info {
+                background: #dbeafe;
+                color: #1e40af;
+                border-color: #93c5fd;
+            }
+
+            .alert i {
+                margin-top: 0.125rem;
+                font-size: 1.25rem;
+            }
+
+            .alert-content {
+                flex: 1;
+            }
+
+            .alert-title {
+                font-weight: 700;
+                margin-bottom: 0.25rem;
                 font-size: 1rem;
             }
 
-            .form-tab-content {
+            .alert-message {
+                font-size: 0.95rem;
+                opacity: 0.95;
+            }
+
+            .alert-close {
+                background: none;
+                border: none;
+                color: inherit;
+                cursor: pointer;
+                padding: 0.25rem;
+                opacity: 0.6;
+                transition: opacity 0.2s;
+            }
+
+            .alert-close:hover {
+                opacity: 1;
+            }
+
+            /* Error summary */
+            .error-summary {
+                background: #fee2e2;
+                border: 1px solid #fca5a5;
+                border-radius: 12px;
                 padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                animation: slideInDown 0.3s ease-out;
             }
 
-            .form-actions {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 1.5rem;
+            .error-summary h4 {
+                color: #991b1b;
+                margin-bottom: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
             }
 
-            .form-actions-left {
-                flex-direction: column;
-                width: 100%;
+            .error-summary ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
             }
 
-            .btn-cancel,
-            .btn-submit {
-                width: 100%;
-                justify-content: center;
+            .error-summary li {
+                margin-bottom: 0.75rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 8px;
+                transition: background-color 0.2s;
             }
 
-            .file-info {
-                flex-wrap: wrap;
+            .error-summary li:hover {
+                background-color: rgba(239, 68, 68, 0.1);
             }
 
-            .btn-change-file {
-                width: 100%;
-                justify-content: center;
+            .error-summary li:last-child {
+                margin-bottom: 0;
             }
 
-            .notification-container {
-                width: 350px;
-                right: 10px;
-                top: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .edit-header {
-                padding: 1.5rem;
+            .error-summary .error-count {
+                background: var(--danger-color);
+                color: white;
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.875rem;
+                font-weight: 600;
             }
 
-            .edit-header h1 {
-                font-size: 1.25rem;
+            /* Form */
+            .edit-form {
+                background: white;
+                border-radius: 16px;
+                box-shadow: var(--shadow-xl);
+                overflow: hidden;
             }
 
+            /* Tabs */
             .form-tabs {
-                flex-wrap: nowrap;
+                display: flex;
+                background: var(--gray-50);
+                border-bottom: 2px solid var(--gray-200);
                 overflow-x: auto;
+                scrollbar-width: thin;
+                scrollbar-color: var(--gray-400) var(--gray-100);
+            }
+
+            .form-tabs::-webkit-scrollbar {
+                height: 6px;
+            }
+
+            .form-tabs::-webkit-scrollbar-track {
+                background: var(--gray-100);
+            }
+
+            .form-tabs::-webkit-scrollbar-thumb {
+                background: var(--gray-400);
+                border-radius: 3px;
             }
 
             .form-tab {
-                flex: 0 0 auto;
-                min-width: 120px;
-                padding: 0.75rem 0.5rem;
-                font-size: 0.8rem;
-                flex-direction: column;
-                gap: 0.25rem;
+                padding: 1.25rem 2rem;
+                background: none;
+                border: none;
+                font-weight: 600;
+                color: var(--gray-600);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                min-width: 180px;
+                justify-content: center;
+                font-size: 0.95rem;
             }
 
             .form-tab i {
-                font-size: 1.25rem;
+                font-size: 1.1rem;
+            }
+
+            .form-tab:hover:not(.active) {
+                color: var(--primary-color);
+                background: rgba(26, 58, 108, 0.05);
+            }
+
+            .form-tab.active {
+                color: var(--primary-color);
+                background: white;
+            }
+
+            .form-tab.active::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            }
+
+            .form-tab.error::before {
+                content: '';
+                position: absolute;
+                top: 0.75rem;
+                right: 0.75rem;
+                width: 8px;
+                height: 8px;
+                background: var(--danger-color);
+                border-radius: 50%;
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    opacity: 1;
+                }
+
+                50% {
+                    opacity: 0.5;
+                }
+            }
+
+            /* Tab Content */
+            .form-tab-content {
+                display: none;
+                padding: 2.5rem;
+                animation: fadeInUp 0.4s ease-out;
+            }
+
+            .form-tab-content.active {
+                display: block;
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Section Header */
+            .form-section-header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid var(--gray-200);
+            }
+
+            .form-section-header i {
+                color: var(--primary-color);
+                background: linear-gradient(135deg, rgba(26, 58, 108, 0.1), rgba(37, 99, 235, 0.1));
+                width: 56px;
+                height: 56px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+
+            .form-section-header h3 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--dark-color);
+                letter-spacing: -0.025em;
+            }
+
+            /* Form Layout */
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .form-row-3 {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group.full-width {
+                grid-column: 1 / -1;
+            }
+
+            /* Form Labels */
+            .form-label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 0.625rem;
+                color: var(--gray-700);
+                font-size: 0.95rem;
+            }
+
+            .form-label.required::after {
+                content: ' *';
+                color: var(--danger-color);
+                font-weight: 700;
+            }
+
+            /* Form Inputs */
+            .form-input,
+            .form-select,
+            .form-textarea {
+                width: 100%;
+                padding: 0.875rem 1rem;
+                border: 2px solid var(--gray-300);
+                border-radius: 10px;
+                font-size: 1rem;
+                transition: all 0.2s ease;
+                background: white;
+                font-family: inherit;
+            }
+
+            .form-input:focus,
+            .form-select:focus,
+            .form-textarea:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 4px rgba(26, 58, 108, 0.1);
+            }
+
+            .form-input:disabled,
+            .form-select:disabled,
+            .form-textarea:disabled {
+                background: var(--gray-100);
+                color: var(--gray-500);
+                cursor: not-allowed;
+            }
+
+            .form-input.error,
+            .form-select.error,
+            .form-textarea.error {
+                border-color: var(--danger-color);
+                background: #fef2f2;
+            }
+
+            .form-input.error:focus,
+            .form-select.error:focus,
+            .form-textarea.error:focus {
+                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+            }
+
+            .form-input.success {
+                border-color: var(--success-color);
+            }
+
+            .form-textarea {
+                min-height: 120px;
+                resize: vertical;
+                line-height: 1.6;
+            }
+
+            .form-hint {
+                display: block;
+                margin-top: 0.5rem;
+                font-size: 0.875rem;
+                color: var(--gray-500);
+            }
+
+            .form-hint i {
+                margin-right: 0.25rem;
+            }
+
+            /* Error Messages */
+            .error-message {
+                color: var(--danger-color);
+                font-size: 0.875rem;
+                margin-top: 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.375rem;
+                font-weight: 500;
+            }
+
+            .error-message i {
+                font-size: 0.875rem;
+            }
+
+            .text-danger {
+                color: var(--danger-color);
+            }
+
+            .text-success {
+                color: var(--success-color);
+            }
+
+            /* File Upload */
+            .form-file {
+                position: relative;
+                margin-top: 0.5rem;
+            }
+
+            .form-file-input {
+                position: absolute;
+                width: 0.1px;
+                height: 0.1px;
+                opacity: 0;
+                overflow: hidden;
+                z-index: -1;
             }
 
             .form-file-label {
-                padding: 2rem 1rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 2.5rem;
+                border: 2px dashed var(--gray-300);
+                border-radius: 12px;
+                background: var(--gray-50);
+                color: var(--gray-600);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-align: center;
             }
 
-            .notification-container {
-                width: 300px;
-                right: 10px;
-                left: 10px;
-                margin: 0 auto;
-            }
-        }
-
-        /* Smooth Scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Focus Visible for Accessibility */
-        *:focus-visible {
-            outline: 2px solid var(--primary-color);
-            outline-offset: 2px;
-        }
-
-        /* Highlight error fields */
-        .error-field {
-            animation: pulseError 1.5s ease-in-out;
-            border-color: var(--danger-color) !important;
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2) !important;
-        }
-
-        @keyframes pulseError {
-
-            0%,
-            100% {
-                background-color: transparent;
+            .form-file-label:hover {
+                border-color: var(--primary-color);
+                background: #f0f4ff;
             }
 
-            50% {
-                background-color: rgba(239, 68, 68, 0.1);
+            .form-file-label i {
+                font-size: 2.5rem;
+                margin-bottom: 0.75rem;
+                color: var(--primary-color);
             }
-        }
 
-        /* Required field indicator */
-        .required-indicator {
-            color: var(--danger-color);
-            margin-left: 2px;
-        }
-    </style>
+            .form-file-label-text {
+                font-weight: 600;
+                color: var(--gray-700);
+                margin-bottom: 0.25rem;
+            }
+
+            .form-file-label-hint {
+                font-size: 0.875rem;
+                color: var(--gray-500);
+            }
+
+            .form-file-name {
+                margin-top: 1rem;
+            }
+
+            .file-info {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 1rem;
+                background: var(--gray-50);
+                border-radius: 10px;
+                border: 1px solid var(--gray-200);
+            }
+
+            .file-info i.fa-check-circle {
+                color: var(--success-color);
+                font-size: 1.25rem;
+            }
+
+            .file-info i.fa-file-pdf {
+                color: var(--danger-color);
+                font-size: 1.25rem;
+            }
+
+            .file-info i.fa-file-image {
+                color: var(--info-color);
+                font-size: 1.25rem;
+            }
+
+            .file-info-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .file-name {
+                font-weight: 600;
+                color: var(--gray-700);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .file-size {
+                font-size: 0.875rem;
+                color: var(--gray-500);
+            }
+
+            .btn-change-file {
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                font-size: 0.875rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.375rem;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+
+            .btn-change-file:hover {
+                background: var(--secondary-color);
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-md);
+            }
+
+            .btn-remove-file {
+                background: var(--danger-color);
+                color: white;
+                border: none;
+                padding: 0.5rem;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .btn-remove-file:hover {
+                background: #dc2626;
+            }
+
+            .no-file {
+                color: var(--gray-400);
+                font-style: italic;
+                font-size: 0.9rem;
+            }
+
+            /* Mentor Container */
+            #mentor-container {
+                margin-top: 1.5rem;
+                padding: 2rem;
+                background: var(--gray-50);
+                border-radius: 12px;
+                border: 1px solid var(--gray-200);
+            }
+
+            /* Form Actions */
+            .form-actions {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 2rem 2.5rem;
+                background: var(--gray-50);
+                border-top: 2px solid var(--gray-200);
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .form-actions-left {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+            }
+
+            .btn {
+                padding: 0.875rem 2rem;
+                border-radius: 10px;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.625rem;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                cursor: pointer;
+                font-size: 1rem;
+                border: none;
+            }
+
+            .btn-cancel {
+                background: white;
+                color: var(--gray-700);
+                border: 2px solid var(--gray-300);
+            }
+
+            .btn-cancel:hover {
+                background: var(--gray-100);
+                border-color: var(--gray-400);
+            }
+
+            .btn-submit {
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                color: white;
+                box-shadow: var(--shadow-md);
+            }
+
+            .btn-submit:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .btn-submit:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            /* Loading Spinner */
+            .spinner {
+                display: inline-block;
+                width: 1rem;
+                height: 1rem;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                border-top-color: white;
+                animation: spin 0.8s linear infinite;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* Progress Indicator */
+            .form-progress {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.875rem;
+                color: var(--gray-600);
+            }
+
+            .progress-text {
+                font-weight: 600;
+            }
+
+            .progress-bar-container {
+                width: 120px;
+                height: 6px;
+                background: var(--gray-200);
+                border-radius: 3px;
+                overflow: hidden;
+            }
+
+            .progress-bar {
+                height: 100%;
+                background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+                transition: width 0.3s ease;
+            }
+
+            /* Responsive */
+            @media (max-width: 1200px) {
+                .edit-container {
+                    padding: 1.5rem;
+                }
+            }
+
+            @media (max-width: 992px) {
+                .edit-container {
+                    padding: 1rem;
+                }
+
+                .edit-header {
+                    padding: 2rem;
+                }
+
+                .edit-header h1 {
+                    font-size: 1.75rem;
+                }
+
+                .form-tab {
+                    min-width: 160px;
+                    padding: 1rem 1.5rem;
+                    font-size: 0.9rem;
+                }
+
+                .form-tab-content {
+                    padding: 2rem;
+                }
+
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .form-section-header {
+                    flex-direction: column;
+                    text-align: center;
+                    gap: 0.75rem;
+                }
+
+                .form-section-header i {
+                    width: 50px;
+                    height: 50px;
+                }
+
+                .form-section-header h3 {
+                    font-size: 1.3rem;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .edit-header h1 {
+                    font-size: 1.5rem;
+                }
+
+                .edit-header p {
+                    font-size: 0.95rem;
+                }
+
+                .form-tab {
+                    min-width: 140px;
+                    padding: 0.875rem 1rem;
+                    font-size: 0.875rem;
+                }
+
+                .form-tab i {
+                    font-size: 1rem;
+                }
+
+                .form-tab-content {
+                    padding: 1.5rem;
+                }
+
+                .form-actions {
+                    flex-direction: column;
+                    align-items: stretch;
+                    padding: 1.5rem;
+                }
+
+                .form-actions-left {
+                    flex-direction: column;
+                    width: 100%;
+                }
+
+                .btn-cancel,
+                .btn-submit {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .file-info {
+                    flex-wrap: wrap;
+                }
+
+                .btn-change-file {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .notification-container {
+                    width: 350px;
+                    right: 10px;
+                    top: 10px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .edit-header {
+                    padding: 1.5rem;
+                }
+
+                .edit-header h1 {
+                    font-size: 1.25rem;
+                }
+
+                .form-tabs {
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
+                }
+
+                .form-tab {
+                    flex: 0 0 auto;
+                    min-width: 120px;
+                    padding: 0.75rem 0.5rem;
+                    font-size: 0.8rem;
+                    flex-direction: column;
+                    gap: 0.25rem;
+                }
+
+                .form-tab i {
+                    font-size: 1.25rem;
+                }
+
+                .form-file-label {
+                    padding: 2rem 1rem;
+                }
+
+                .notification-container {
+                    width: 300px;
+                    right: 10px;
+                    left: 10px;
+                    margin: 0 auto;
+                }
+            }
+
+            /* Smooth Scrolling */
+            html {
+                scroll-behavior: smooth;
+            }
+
+            /* Focus Visible for Accessibility */
+            *:focus-visible {
+                outline: 2px solid var(--primary-color);
+                outline-offset: 2px;
+            }
+
+            /* Highlight error fields */
+            .error-field {
+                animation: pulseError 1.5s ease-in-out;
+                border-color: var(--danger-color) !important;
+                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2) !important;
+            }
+
+            @keyframes pulseError {
+
+                0%,
+                100% {
+                    background-color: transparent;
+                }
+
+                50% {
+                    background-color: rgba(239, 68, 68, 0.1);
+                }
+            }
+
+            /* Required field indicator */
+            .required-indicator {
+                color: var(--danger-color);
+                margin-left: 2px;
+            }
+        </style>
 @endsection
 
 @section('content')
@@ -1196,8 +1211,8 @@
 
                     <div class="form-group">
                         <label class="form-label required">Nama Lengkap</label>
-                        <input type="text" name="nama_lengkap" class="form-input @error('nama_lengkap') error @enderror"
-                            value="{{ old('nama_lengkap', $peserta->nama_lengkap) }}" required>
+                        <input type="text" name="nama_lengkap" class="form-input capitalize @error('nama_lengkap') error @enderror"
+                            value="{{ old('nama_lengkap', $peserta->nama_lengkap) }}" required placeholder="Contoh: Muhammad Ali, S.H., M.H.">
                         @error('nama_lengkap')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1210,8 +1225,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Nama Panggilan</label>
-                        <input type="text" name="nama_panggilan" class="form-input @error('nama_panggilan') error @enderror"
-                            value="{{ old('nama_panggilan', $peserta->nama_panggilan) }}">
+                        <input type="text" name="nama_panggilan" class="form-input capitalize @error('nama_panggilan') error @enderror"
+                            value="{{ old('nama_panggilan', $peserta->nama_panggilan) }}" placeholder="Contoh: Rudi">
                         @error('nama_panggilan')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1286,8 +1301,8 @@
                     <div class="form-group">
                         <label class="form-label">Nama Pasangan</label>
                         <input type="text" name="nama_pasangan" id="nama_pasangan"
-                            class="form-input @error('nama_pasangan') error @enderror"
-                            value="{{ old('nama_pasangan', $peserta->nama_pasangan) }}" {{ old('status_perkawinan', $peserta->status_perkawinan) == 'Menikah' ? '' : 'disabled' }}>
+                            class="form-input capitalize @error('nama_pasangan') error @enderror"
+                            value="{{ old('nama_pasangan', $peserta->nama_pasangan) }}" {{ old('status_perkawinan', $peserta->status_perkawinan) == 'Menikah' ? '' : 'disabled' }} placeholder="Contoh: Siti Fatimah">
                         <small class="form-hint"><i class="fas fa-info-circle"></i> Diisi hanya jika status
                             "Menikah"</small>
                         @error('nama_pasangan')
@@ -1305,8 +1320,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label required">Tempat Lahir</label>
-                        <input type="text" name="tempat_lahir" class="form-input @error('tempat_lahir') error @enderror"
-                            value="{{ old('tempat_lahir', $peserta->tempat_lahir) }}" required>
+                        <input type="text" name="tempat_lahir" class="form-input capitalize @error('tempat_lahir') error @enderror"
+                            value="{{ old('tempat_lahir', $peserta->tempat_lahir) }}" required placeholder="Contoh: Jakarta">
                         @error('tempat_lahir')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1331,8 +1346,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label required">Email Pribadi</label>
-                        <input type="email" name="email_pribadi" class="form-input @error('email_pribadi') error @enderror"
-                            value="{{ old('email_pribadi', $peserta->email_pribadi) }}" required>
+                        <input type="email" name="email_pribadi" class="form-input lowercase @error('email_pribadi') error @enderror"
+                            value="{{ old('email_pribadi', $peserta->email_pribadi) }}" required placeholder="Contoh: muhammad.ali@example.com">
                         @error('email_pribadi')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1356,8 +1371,8 @@
 
                 <div class="form-group full-width">
                     <label class="form-label required">Alamat Rumah</label>
-                    <textarea name="alamat_rumah" class="form-textarea @error('alamat_rumah') error @enderror" required
-                        placeholder="Masukkan alamat lengkap">{{ old('alamat_rumah', $peserta->alamat_rumah) }}</textarea>
+                    <textarea name="alamat_rumah" class="form-textarea capitalize @error('alamat_rumah') error @enderror" required
+                        placeholder="Contoh: Jalan Merdeka No. 123, Kelurahan Menteng, Jakarta">{{ old('alamat_rumah', $peserta->alamat_rumah) }}</textarea>
                     @error('alamat_rumah')
                         <div class="error-message">
                             <i class="fas fa-exclamation-circle"></i>
@@ -1369,9 +1384,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Olahraga & Hobi</label>
-                        <input type="text" name="olahraga_hobi" class="form-input @error('olahraga_hobi') error @enderror"
-                            value="{{ old('olahraga_hobi', $peserta->olahraga_hobi) }}"
-                            placeholder="Contoh: Futsal, Membaca">
+                        <input type="text" name="olahraga_hobi" class="form-input capitalize @error('olahraga_hobi') error @enderror"
+                            value="{{ old('olahraga_hobi', $peserta->olahraga_hobi) }}" placeholder="Contoh: Sepak Bola, Badminton">
                         @error('olahraga_hobi')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1472,7 +1486,7 @@
 
                     <div class="form-group">
                         <label class="form-label required">Bidang Studi</label>
-                        <input type="text" name="bidang_studi" class="form-input @error('bidang_studi') error @enderror"
+                        <input type="text" name="bidang_studi" class="form-input capitalize @error('bidang_studi') error @enderror"
                             value="{{ old('bidang_studi', $peserta->bidang_studi) }}" placeholder="Contoh: Ilmu Komputer">
                         @error('bidang_studi')
                             <div class="error-message">
@@ -1486,10 +1500,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Bidang Keahlian</label>
-                        <input type="text" name="bidang_keahlian"
-                            class="form-input @error('bidang_keahlian') error @enderror"
-                            value="{{ old('bidang_keahlian', $peserta->bidang_keahlian) }}"
-                            placeholder="Contoh: Data Science">
+                        <input type="text" name="bidang_keahlian" class="form-input capitalize @error('bidang_keahlian') error @enderror"
+                            value="{{ old('bidang_keahlian', $peserta->bidang_keahlian) }}" placeholder="Contoh: Data Science">
                         @error('bidang_keahlian')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1500,8 +1512,8 @@
 
                     <div class="form-group">
                         <label class="form-label">Kondisi Peserta</label>
-                        <textarea name="kondisi_peserta" class="form-textarea @error('kondisi_peserta') error @enderror"
-                            placeholder="Catatan khusus (alergi, kondisi kesehatan, dll)">{{ old('kondisi_peserta', $peserta->kondisi_peserta) }}</textarea>
+                        <textarea name="kondisi_peserta" class="form-textarea capitalize @error('kondisi_peserta') error @enderror"
+                            placeholder="Contoh: Sehat, Tidak Memiliki Alergi, Bebas Riwayat Penyakit">{{ old('kondisi_peserta', $peserta->kondisi_peserta) }}</textarea>
                         @error('kondisi_peserta')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1524,8 +1536,9 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label required">Asal Instansi</label>
-                        <input type="text" name="asal_instansi" class="form-input @error('asal_instansi') error @enderror"
-                            value="{{ old('asal_instansi', $kepegawaian->asal_instansi ?? '') }}" required>
+                        <input type="text" name="asal_instansi" class="form-input capitalize @error('asal_instansi') error @enderror"
+                            value="{{ old('asal_instansi', $kepegawaian->asal_instansi ?? '') }}" required
+                            placeholder="Contoh: Kementerian Kesehatan Republik Indonesia">
                         @error('asal_instansi')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1536,8 +1549,9 @@
 
                     <div class="form-group">
                         <label class="form-label required">Unit Kerja/Detail Instansi</label>
-                        <input type="text" name="unit_kerja" class="form-input @error('unit_kerja') error @enderror"
-                            value="{{ old('unit_kerja', $kepegawaian->unit_kerja ?? '') }}">
+                        <input type="text" name="unit_kerja" class="form-input capitalize @error('unit_kerja') error @enderror"
+                            value="{{ old('unit_kerja', $kepegawaian->unit_kerja ?? '') }}"
+                            placeholder="Contoh: Direktorat Jenderal Pelayanan Kesehatan">
                         @error('unit_kerja')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1594,8 +1608,8 @@
 
                 <div class="form-group full-width">
                     <label class="form-label required">Alamat Kantor</label>
-                    <textarea name="alamat_kantor" class="form-textarea @error('alamat_kantor') error @enderror" required
-                        placeholder="Masukkan alamat kantor lengkap">{{ old('alamat_kantor', $kepegawaian->alamat_kantor ?? '') }}</textarea>
+                    <textarea name="alamat_kantor" class="form-textarea capitalize @error('alamat_kantor') error @enderror" required
+                        placeholder="Contoh: Jalan HR Rasuna Said Kaveling 5, Kuningan, Jakarta Selatan">{{ old('alamat_kantor', $kepegawaian->alamat_kantor ?? '') }}</textarea>
                     @error('alamat_kantor')
                         <div class="error-message">
                             <i class="fas fa-exclamation-circle"></i>
@@ -1621,9 +1635,8 @@
 
                     <div class="form-group">
                         <label class="form-label">Email Kantor</label>
-                        <input type="email" name="email_kantor" class="form-input @error('email_kantor') error @enderror"
-                            value="{{ old('email_kantor', $kepegawaian->email_kantor ?? '') }}"
-                            placeholder="nama@instansi.go.id">
+                        <input type="email" name="email_kantor" class="form-input lowercase @error('email_kantor') error @enderror"
+                            value="{{ old('email_kantor', $kepegawaian->email_kantor ?? '') }}" placeholder="Contoh: perencana@kemenkes.go.id">
                         @error('email_kantor')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1636,8 +1649,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label required">Jabatan</label>
-                        <input type="text" name="jabatan" class="form-input @error('jabatan') error @enderror"
-                            value="{{ old('jabatan', $kepegawaian->jabatan ?? '') }}" required>
+                        <input type="text" name="jabatan" class="form-input capitalize @error('jabatan') error @enderror"
+                            value="{{ old('jabatan', $kepegawaian->jabatan ?? '') }}" required placeholder="Contoh: Perencana Ahli Pertama">
                         @error('jabatan')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -1702,7 +1715,7 @@
 
                     <div class="form-group">
                         <label class="form-label required">Pangkat</label>
-                        <input type="text" name="pangkat" id="pangkat" class="form-input @error('pangkat') error @enderror"
+                        <input type="text" name="pangkat" id="pangkat" class="form-input capitalize @error('pangkat') error @enderror"
                             value="{{ old('pangkat', $kepegawaian->pangkat ?? '') }}" readonly
                             placeholder="Akan terisi otomatis berdasarkan golongan ruang">
                         <div id="pangkat_description" class="form-hint" style="display: none;">
@@ -1727,8 +1740,8 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label required">Nomor SK CPNS</label>
-                                <input type="text" name="nomor_sk_cpns" class="form-input @error('nomor_sk_cpns') error @enderror"
-                                    value="{{ old('nomor_sk_cpns', $kepegawaian->nomor_sk_cpns ?? '') }}">
+                                <input type="text" name="nomor_sk_cpns" class="form-input uppercase @error('nomor_sk_cpns') error @enderror"
+                                    value="{{ old('nomor_sk_cpns', $kepegawaian->nomor_sk_cpns ?? '') }}" placeholder="Contoh: 820/KPTS/2023">
                                 @error('nomor_sk_cpns')
                                     <div class="error-message">
                                         <i class="fas fa-exclamation-circle"></i>
@@ -1756,9 +1769,8 @@
                         @if (!($jenisPelatihanData->kode_pelatihan == "LATSAR"))
                             <div class="form-group">
                                 <label class="form-label required">Nomor SK Terakhir</label>
-                                <input type="text" name="nomor_sk_terakhir"
-                                    class="form-input @error('nomor_sk_terakhir') error @enderror"
-                                    value="{{ old('nomor_sk_terakhir', $kepegawaian->nomor_sk_terakhir ?? '') }}">
+                                <input type="text" name="nomor_sk_terakhir" class="form-input uppercase @error('nomor_sk_terakhir') error @enderror"
+                                    value="{{ old('nomor_sk_terakhir', $kepegawaian->nomor_sk_terakhir ?? '') }}" placeholder="Contoh: 123/SE/2023">
                                 @error('nomor_sk_terakhir')
                                     <div class="error-message">
                                         <i class="fas fa-exclamation-circle"></i>
@@ -1875,13 +1887,12 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label class="form-label">Nama Mentor</label>
-                                        <input type="text" name="nama_mentor" id="nama_mentor_select" class="form-input" readonly
+                                        <input type="text" name="nama_mentor" id="nama_mentor_select" class="form-input capitalize" readonly
                                             value="{{ old('nama_mentor', $pendaftaranTerbaru->mentor->nama_mentor ?? '') }}">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Jabatan Mentor</label>
-                                        <input type="text" name="jabatan_mentor" id="jabatan_mentor_select" class="form-input"
-                                            readonly
+                                        <input type="text" name="jabatan_mentor" id="jabatan_mentor_select" class="form-input capitalize" readonly
                                             value="{{ old('jabatan_mentor', $pendaftaranTerbaru->mentor->jabatan_mentor ?? '') }}">
                                     </div>
                                 </div>
@@ -1919,8 +1930,9 @@
                                 <div class="form-group">
                                     <label class="form-label required">Nama Mentor</label>
                                     <input type="text" name="nama_mentor_baru" id="nama_mentor_baru"
-                                        class="form-input @error('nama_mentor_baru') error @enderror"
-                                        value="{{ old('nama_mentor_baru', $pendaftaranTerbaru->mentor->nama_mentor ?? '') }}">
+                                        class="form-input capitalize @error('nama_mentor_baru') error @enderror"
+                                        value="{{ old('nama_mentor_baru', $pendaftaranTerbaru->mentor->nama_mentor ?? '') }}"
+                                        placeholder="Contoh: Dr. Ahmad Supriyadi, M.Si.">
                                     @error('nama_mentor_baru')
                                         <div class="error-message">
                                             <i class="fas fa-exclamation-circle"></i>
@@ -1931,8 +1943,9 @@
                                 <div class="form-group">
                                     <label class="form-label required">Jabatan Mentor</label>
                                     <input type="text" name="jabatan_mentor_baru" id="jabatan_mentor_baru"
-                                        class="form-input @error('jabatan_mentor_baru') error @enderror"
-                                        value="{{ old('jabatan_mentor_baru', $pendaftaranTerbaru->mentor->jabatan_mentor ?? '') }}">
+                                        class="form-input capitalize @error('jabatan_mentor_baru') error @enderror"
+                                        value="{{ old('jabatan_mentor_baru', $pendaftaranTerbaru->mentor->jabatan_mentor ?? '') }}"
+                                        placeholder="Contoh: Kepala Bagian Perencanaan">
                                     @error('jabatan_mentor_baru')
                                         <div class="error-message">
                                             <i class="fas fa-exclamation-circle"></i>
@@ -2084,25 +2097,25 @@
                     </div>
 
                     @php
-                        $kepegawaianDocs = [
-                            ['name' => 'file_sk_jabatan', 'label' => 'SK Jabatan', 'wajib' => 'required'],
-                            ['name' => 'file_sk_pangkat', 'label' => 'SK Pangkat', 'wajib' => 'required'],
-                            ['name' => 'file_sk_cpns', 'label' => 'SK CPNS', 'wajib' => 'required'],
-                            ['name' => 'file_spmt', 'label' => 'SPMT', 'wajib' => 'required'],
-                            ['name' => 'file_skp', 'label' => 'SKP', 'wajib' => '-'],
-                        ];
+    $kepegawaianDocs = [
+        ['name' => 'file_sk_jabatan', 'label' => 'SK Jabatan', 'wajib' => 'required'],
+        ['name' => 'file_sk_pangkat', 'label' => 'SK Pangkat', 'wajib' => 'required'],
+        ['name' => 'file_sk_cpns', 'label' => 'SK CPNS', 'wajib' => 'required'],
+        ['name' => 'file_spmt', 'label' => 'SPMT', 'wajib' => 'required'],
+        ['name' => 'file_skp', 'label' => 'SKP', 'wajib' => '-'],
+    ];
 
-                        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
-                            $kepegawaianDocs = array_filter($kepegawaianDocs, function ($doc) {
-                                return !in_array($doc['name'], ['file_sk_jabatan', 'file_sk_pangkat']);
-                            });
-                        }
+    if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
+        $kepegawaianDocs = array_filter($kepegawaianDocs, function ($doc) {
+            return !in_array($doc['name'], ['file_sk_jabatan', 'file_sk_pangkat']);
+        });
+    }
 
-                        if (isset($jenisPelatihanData->kode_pelatihan) && ($jenisPelatihanData->kode_pelatihan == "PKN_TK_II" || $jenisPelatihanData->kode_pelatihan == "PKA" || $jenisPelatihanData->kode_pelatihan == "PKP")) {
-                            $kepegawaianDocs = array_filter($kepegawaianDocs, function ($doc) {
-                                return !in_array($doc['name'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
-                            });
-                        }
+    if (isset($jenisPelatihanData->kode_pelatihan) && ($jenisPelatihanData->kode_pelatihan == "PKN_TK_II" || $jenisPelatihanData->kode_pelatihan == "PKA" || $jenisPelatihanData->kode_pelatihan == "PKP")) {
+        $kepegawaianDocs = array_filter($kepegawaianDocs, function ($doc) {
+            return !in_array($doc['name'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
+        });
+    }
                     @endphp
 
                     @foreach($kepegawaianDocs as $doc)
@@ -2150,35 +2163,35 @@
                     </div>
 
                     @php
-                        $pendaftaranDocs = [
-                            ['name' => 'file_surat_tugas', 'label' => 'Surat Tugas', 'wajib' => '-'],
-                            ['name' => 'file_surat_kesediaan', 'label' => 'Surat Kesediaan', 'wajib' => 'required'],
-                            ['name' => 'file_pakta_integritas', 'label' => 'Pakta Integritas', 'wajib' => 'required'],
-                            ['name' => 'file_surat_sehat', 'label' => 'Surat Sehat', 'wajib' => '-'],
-                            ['name' => 'file_surat_komitmen', 'label' => 'Surat Komitmen', 'wajib' => '-'],
-                            ['name' => 'file_surat_kelulusan_seleksi', 'label' => 'Surat Kelulusan Seleksi', 'wajib' => '-'],
-                            ['name' => 'file_surat_bebas_narkoba', 'label' => 'Surat Bebas Narkoba', 'wajib' => '-'],
-                            ['name' => 'file_surat_pernyataan_administrasi', 'label' => 'Surat Pernyataan Tidak Sedang mempertanggungjawabkan PenyelesaianAdministrasi','wajib' => 'required'],
-                            ['name' => 'file_persetujuan_mentor', 'label' => 'Surat Persetujuan Mentor','wajib' => 'required'],
-                        ];
+    $pendaftaranDocs = [
+        ['name' => 'file_surat_tugas', 'label' => 'Surat Tugas', 'wajib' => '-'],
+        ['name' => 'file_surat_kesediaan', 'label' => 'Surat Kesediaan', 'wajib' => 'required'],
+        ['name' => 'file_pakta_integritas', 'label' => 'Pakta Integritas', 'wajib' => 'required'],
+        ['name' => 'file_surat_sehat', 'label' => 'Surat Sehat', 'wajib' => '-'],
+        ['name' => 'file_surat_komitmen', 'label' => 'Surat Komitmen', 'wajib' => '-'],
+        ['name' => 'file_surat_kelulusan_seleksi', 'label' => 'Surat Kelulusan Seleksi', 'wajib' => '-'],
+        ['name' => 'file_surat_bebas_narkoba', 'label' => 'Surat Bebas Narkoba', 'wajib' => '-'],
+        ['name' => 'file_surat_pernyataan_administrasi', 'label' => 'Surat Pernyataan Tidak Sedang mempertanggungjawabkan PenyelesaianAdministrasi', 'wajib' => 'required'],
+        ['name' => 'file_persetujuan_mentor', 'label' => 'Surat Persetujuan Mentor', 'wajib' => 'required'],
+    ];
 
-                        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
-                            $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
-                                return !in_array($doc['name'], ['file_pakta_integritas', 'file_surat_komitmen', 'file_surat_kelulusan_seleksi', 'file_surat_bebas_narkoba', 'file_surat_pernyataan_administrasi', 'file_persetujuan_mentor']);
-                            });
-                        }
+    if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
+        $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
+            return !in_array($doc['name'], ['file_pakta_integritas', 'file_surat_komitmen', 'file_surat_kelulusan_seleksi', 'file_surat_bebas_narkoba', 'file_surat_pernyataan_administrasi', 'file_persetujuan_mentor']);
+        });
+    }
 
-                        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
-                            $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
-                                return !in_array($doc['name'], ['file_surat_pernyataan_administrasi', 'file_persetujuan_mentor', 'file_surat_kesediaan']);
-                            });
-                        }
+    if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
+        $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
+            return !in_array($doc['name'], ['file_surat_pernyataan_administrasi', 'file_persetujuan_mentor', 'file_surat_kesediaan']);
+        });
+    }
 
-                        if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
-                            $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
-                                return !in_array($doc['name'], ['file_surat_komitmen', 'file_sertifikat_penghargaan']);
-                            });
-                        }
+    if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
+        $pendaftaranDocs = array_filter($pendaftaranDocs, function ($doc) {
+            return !in_array($doc['name'], ['file_surat_komitmen', 'file_sertifikat_penghargaan']);
+        });
+    }
                     @endphp
 
                     @foreach($pendaftaranDocs as $doc)
@@ -2250,6 +2263,84 @@
         window.allKabupatenData = @json($kabupatenList);
         const validationFailed = @json($errors->any() ? true : false);
         const hasErrorsOnLoad = validationFailed;
+
+        // ===== AUTO-CAPITALIZATION FUNCTIONS =====
+            function setupAutoCapitalization() {
+                // Function to capitalize every word
+                function capitalizeWords(str) {
+                    return str.replace(/\b\w/g, function (char) {
+                        return char.toUpperCase();
+                    });
+                }
+
+                // Function for lowercase
+                function toLowerCase(str) {
+                    return str.toLowerCase();
+                }
+
+                // Function for uppercase
+                function toUpperCase(str) {
+                    return str.toUpperCase();
+                }
+
+                // Setup event listeners for capitalize class
+                document.querySelectorAll('.form-input.capitalize, .form-textarea.capitalize').forEach(function (input) {
+                    input.addEventListener('input', function (e) {
+                        if (this.value) {
+                            this.value = capitalizeWords(this.value);
+                        }
+                    });
+
+                    input.addEventListener('change', function (e) {
+                        if (this.value) {
+                            this.value = capitalizeWords(this.value);
+                        }
+                    });
+
+                    // Apply to existing values
+                    if (input.value) {
+                        input.value = capitalizeWords(input.value);
+                    }
+                });
+
+                // Setup event listeners for lowercase class
+                document.querySelectorAll('.form-input.lowercase').forEach(function (input) {
+                    input.addEventListener('input', function (e) {
+                        if (this.value) {
+                            this.value = toLowerCase(this.value);
+                        }
+                    });
+
+                    input.addEventListener('change', function (e) {
+                        if (this.value) {
+                            this.value = toLowerCase(this.value);
+                        }
+                    });
+
+                    if (input.value) {
+                        input.value = toLowerCase(input.value);
+                    }
+                });
+
+                // Setup event listeners for uppercase class
+                document.querySelectorAll('.form-input.uppercase').forEach(function (input) {
+                    input.addEventListener('input', function (e) {
+                        if (this.value) {
+                            this.value = toUpperCase(this.value);
+                        }
+                    });
+
+                    input.addEventListener('change', function (e) {
+                        if (this.value) {
+                            this.value = toUpperCase(this.value);
+                        }
+                    });
+
+                    if (input.value) {
+                        input.value = toUpperCase(input.value);
+                    }
+                });
+            }
 
         // ===== NOTIFICATION SYSTEM =====
         class NotificationSystem {
@@ -2493,6 +2584,8 @@
             const editForm = document.getElementById('editForm');
             const submitBtn = document.getElementById('submitBtn');
             let formValidator;
+
+            setupAutoCapitalization();
 
             // Initialize form validator
             if (editForm) {
