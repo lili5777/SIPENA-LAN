@@ -194,6 +194,10 @@ class PesertaController extends Controller
             'tanggal_verifikasi' => now()
         ]);
 
+        $jenisPelatihan = $pendaftaran->jenisPelatihan->nama_pelatihan;
+        $angkatan = $pendaftaran->angkatan->nama_angkatan;
+        aktifitas("Mengubah Status Pendaftaran {$jenisPelatihan} - {$angkatan}", $peserta);
+
         return response()->json([
             'success' => true,
             'message' => 'Status pendaftaran berhasil diperbarui'
@@ -701,6 +705,9 @@ class PesertaController extends Controller
                 }
             }
 
+            $angkatan = $angkatan->nama_angkatan;
+            aktifitas("Menambahkan Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatan}", $peserta);
+
             // 10. RESPONSE
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -1139,6 +1146,9 @@ class PesertaController extends Controller
                 }
             }
 
+            $angkatan = $angkatan->nama_angkatan;
+            aktifitas("Memperbarui Data Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatan}", $peserta);
+
             // 8. RESPONSE
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -1311,7 +1321,9 @@ class PesertaController extends Controller
             if($user){
                 $user->delete();
             }
-            aktifitas('Menghapus User', $user);
+
+            $angkatan = $angkatan->nama_angkatan;
+            aktifitas("Menghapus User {$jenisPelatihan->nama_pelatihan} - {$angkatan}", $peserta);
 
 
             if (request()->ajax()) {

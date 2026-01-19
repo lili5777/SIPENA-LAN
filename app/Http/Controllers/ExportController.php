@@ -11,6 +11,7 @@ use App\Models\Pendaftaran;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExportController extends Controller
 {
@@ -65,6 +66,7 @@ class ExportController extends Controller
 
         $fileName .= '.xlsx';
 
+        aktifitas('Mengekspor Data Peserta');
         // Kirim parameter filter ke export class
         return Excel::download(
             new DataPeserta($jenisPelatihan, $angkatan, $tahun),
@@ -104,6 +106,8 @@ class ExportController extends Controller
         }
 
         $fileName = implode('_', $fileNameParts) . '.xlsx';
+
+        aktifitas('Mengekspor Komposisi Peserta');
 
         // Kirim parameter filter ke export class
         return Excel::download(
@@ -201,6 +205,8 @@ class ExportController extends Controller
         $filename = 'Absensi_' . str_replace(' ', '_', $jenisPelatihan ?: 'Semua') . '_' .
             str_replace(' ', '_', $angkatan ?: 'Semua') . '_' .
             ($tahun ?: 'Semua') . '.pdf';
+
+        aktifitas('Mengekspor Absen Peserta');
 
         return $pdf->stream($filename);
     }

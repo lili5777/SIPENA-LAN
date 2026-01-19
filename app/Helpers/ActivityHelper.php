@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Aktifikat;
+use App\Models\Aktifitas;
 
 if (!function_exists('aktifitas')) {
     function aktifitas(string $action, $subject = null)
@@ -12,14 +12,17 @@ if (!function_exists('aktifitas')) {
         $name = null;
 
         if ($subject) {
-            $name = $subject->name
+            $name = $subject->nama_lengkap
                 ?? $subject->title
+                ?? $subject->nama_angkatan
+                ?? $subject->nama_mentor
+                ?? $subject->name
                 ?? ($subject->id ?? null);
         }
 
-        return Aktifikat::create([
+        return Aktifitas::create([
             'deskripsi' => $name
-                ? "{$action} dengan {$name}"
+                ? "{$action} ({$name})"
                 : $action,
             'user_id' => auth()->id(),
         ]);

@@ -79,6 +79,6 @@ class User extends Authenticatable
 
     public function aktifikats()
     {
-        return $this->hasMany(Aktifikat::class);
+        return $this->hasMany(Aktifitas::class);
     }
 }

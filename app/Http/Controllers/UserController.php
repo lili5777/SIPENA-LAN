@@ -61,6 +61,7 @@ class UserController extends Controller
                     ]);
                 }
             }
+            aktifitas("Memperbaharui Akses PIC");
 
             return response()->json([
                 'success' => true,
@@ -97,6 +98,8 @@ class UserController extends Controller
             'role_id' => $data['role_id'],
         ]);
 
+        aktifitas("Membuat User Baru", $user);
+
         return redirect()->route('users.index')->with('success', 'User berhasil dibuat.');
     }
 
@@ -125,7 +128,7 @@ class UserController extends Controller
         $user->role_id = $data['role_id'];
         $user->save();
 
-
+        aktifitas("Memperbaharui User",$user);
         return redirect()->route('users.index')->with('success', 'User berhasil diupdate.');
     }
 
@@ -133,6 +136,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete(); // Hapus user
+        aktifitas("Menghapus User", $user);
         return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
     }
 

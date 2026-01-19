@@ -103,6 +103,7 @@ class AngkatanController extends Controller
 
             DB::commit();
 
+            aktifitas("Membuat Angkatan Baru",$angkatan);
             return redirect()->route('angkatan.index')
                 ->with('success', 'Angkatan berhasil ditambahkan!');
         } catch (\Exception $e) {
@@ -177,7 +178,7 @@ class AngkatanController extends Controller
             ]);
 
             DB::commit();
-
+            aktifitas("Memperbaharui Angkatan Baru", $angkatan);
             return redirect()->route('angkatan.index')
                 ->with('success', 'Angkatan berhasil diperbarui!');
         } catch (\Exception $e) {
@@ -203,7 +204,7 @@ class AngkatanController extends Controller
 
         try {
             $angkatan->delete();
-
+            aktifitas("Menghapus Angkatan Baru", $angkatan);
             if (request()->ajax()) {
                 return response()->json([
                     'success' => true,

@@ -94,19 +94,20 @@ class MentorController extends Controller
         try {
             DB::beginTransaction();
 
-            Mentor::create([
-                'nama_mentor' => $request->nama_mentor,
-                'jabatan_mentor' => $request->jabatan_mentor,
-                'nomor_rekening' => $request->nomor_rekening,
-                'npwp_mentor' => $request->npwp_mentor,
-                'email_mentor' => $request->email_mentor,
-                'nomor_hp_mentor' => $request->nomor_hp_mentor,
-                'status_aktif' => $request->status_aktif,
-                'dibuat_pada' => now()
-            ]);
+            $mentor=Mentor::create([
+                        'nama_mentor' => $request->nama_mentor,
+                        'jabatan_mentor' => $request->jabatan_mentor,
+                        'nomor_rekening' => $request->nomor_rekening,
+                        'npwp_mentor' => $request->npwp_mentor,
+                        'email_mentor' => $request->email_mentor,
+                        'nomor_hp_mentor' => $request->nomor_hp_mentor,
+                        'status_aktif' => $request->status_aktif,
+                        'dibuat_pada' => now()
+                    ]);
 
             DB::commit();
 
+            aktifitas("Membuat Mentor Baru",$mentor);
             return redirect()->route('mentor.index')
                 ->with('success', 'Mentor berhasil ditambahkan!');
         } catch (\Exception $e) {
@@ -173,7 +174,7 @@ class MentorController extends Controller
             ]);
 
             DB::commit();
-
+            aktifitas("Memperbaharui Mentor Baru", $mentor);
             return redirect()->route('mentor.index')
                 ->with('success', 'Mentor berhasil diperbarui!');
         } catch (\Exception $e) {
@@ -206,6 +207,8 @@ class MentorController extends Controller
 
         try {
             $mentor->delete();
+
+            aktifitas("Menghapus Mentor Baru", $mentor);
 
             if (request()->ajax()) {
                 return response()->json([

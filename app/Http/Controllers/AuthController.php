@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DeepCopy\f001\A;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +33,8 @@ class AuthController extends Controller
         // Cek kredensial untuk login
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();  // Regenerasi session untuk keamanan
+
+            aktifitas('Login ke Sistem', Auth::user());
             return redirect()->intended('dashboard'); // Redirect ke dashboard jika berhasil login
         }
 
@@ -106,6 +109,7 @@ class AuthController extends Controller
             $user->password = Hash::make($request->new_password);
             $user->save();
 
+            aktifitas('Mengubah Password', $user);
             return redirect()
                 ->route('admin.akun.index')
                 ->with('success', 'Password berhasil diubah');

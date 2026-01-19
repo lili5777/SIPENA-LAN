@@ -60,7 +60,7 @@ class RoleController extends Controller
         }
 
         
-
+        aktifitas("Membuat Role Baru: {$role->name}", );
         # Redirect ke halaman daftar role dengan pesan sukses
         return redirect()->route('roles.index')->with('success', 'Role berhasil dibuat.');
     }
@@ -77,7 +77,7 @@ class RoleController extends Controller
         $role->delete();
 
         
-
+        aktifitas("Menghapus Role {$role->name}");
         # Kembali ke halaman daftar role dengan pesan sukses
         return redirect()->route('roles.index')->with('success', 'Role berhasil dihapus.');
     }
@@ -122,7 +122,7 @@ class RoleController extends Controller
             $role->permissions()->detach();
         }
 
-      
+        aktifitas("Memperbaharui Role {$role->name}");
 
         # Redirect ke daftar role dengan pesan sukses
         return redirect()->route('roles.index')->with('success', 'Role berhasil diperbarui.');

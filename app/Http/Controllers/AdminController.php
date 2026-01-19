@@ -633,6 +633,8 @@ class AdminController extends Controller
                 }
             }
 
+            aktifitas('Perbarui Data Peserta', $peserta);
+
             // 8. RESPONSE
             return redirect()->route('dashboard')
                 ->with('success', 'Data berhasil diperbarui!')
