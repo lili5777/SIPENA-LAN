@@ -56,6 +56,12 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 // Route Protected Area
 Route::middleware('auth')->group(function () {
 
+    Route::get('/preview-drive', [AdminController::class, 'preview'])->name('drive.preview');
+    Route::get('/download-drive', [AdminController::class, 'download'])->name('drive.download');
+
+
+
+
 
     // Route Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');

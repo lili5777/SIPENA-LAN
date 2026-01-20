@@ -755,4 +755,47 @@ class AdminController extends Controller
             'aktivitasMingguIni'
         ));
     }
+
+
+    public function preview(Request $request)
+    {
+        $path = $request->query('path');
+        abort_if(!$path, 404);
+
+        // hardening sederhana: block path aneh
+        abort_if(str_contains($path, '..'), 403);
+
+        if (!Storage::disk('google')->exists($path)) {
+            abort(404, 'File tidak ditemukan');
+        }
+
+        $mime = Storage::disk('google')->mimeType($path) ?? 'application/octet-stream';
+        $content = Storage::disk('google')->get($path);
+
+        return response($content, 200)
+            ->header('Content-Type', $mime)
+            ->header('Content-Disposition', 'inline')
+            ->header('X-Content-Type-Options', 'nosniff');
+    }
+
+    public function download(Request $request)
+    {
+        // 1. Validasi parameter
+        $request->validate([
+            'path' => 'required|string',
+        ]);
+
+        $path = $request->path;
+
+        // 2. Cek apakah file ada di Google Drive
+        if (!Storage::disk('google')->exists($path)) {
+            abort(404, 'File tidak ditemukan di Google Drive');
+        }
+
+        // 3. Ambil nama file
+        $fileName = basename($path);
+
+        // 4. Download file
+        return Storage::disk('google')->download($path, $fileName);
+    }
 }

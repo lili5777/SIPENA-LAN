@@ -17,6 +17,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendEmail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -46,7 +47,7 @@ class PesertaController extends Controller
     {
         $jenisData = $this->getJenisData($jenis);
         $jenisPelatihanId = $jenisData['id'];
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Ambil angkatan yang bisa diakses PIC
         $picAngkatanIds = $user->picPesertas
