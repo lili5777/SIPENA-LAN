@@ -1776,6 +1776,130 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 
 @section('scripts')
     <script>
+        // ============================================
+            // REALTIME AUTO CAPITALIZATION (HURUF PERTAMA SAJA)
+            // ============================================
+            function setupRealtimeAutoCapitalization() {
+                // Field yang ingin auto capitalize huruf pertama setiap kata
+                const capitalizeFields = [
+                    'nama_lengkap',
+                    'nama_panggilan',
+                    'tempat_lahir',
+                    'nama_pasangan',
+                    'asal_instansi',
+                    'unit_kerja',
+                    'jabatan',
+                    'bidang_studi',
+                    'bidang_keahlian',
+                    'olahraga_hobi',
+                    'nama_mentor_baru',
+                    'jabatan_mentor_baru'
+                ];
+
+                capitalizeFields.forEach(fieldName => {
+                    const input = document.querySelector(`[name="${fieldName}"]`);
+                    if (input) {
+                        input.addEventListener('input', function (e) {
+                            // Simpan posisi cursor
+                            const start = this.selectionStart;
+                            const end = this.selectionEnd;
+
+                            // Ambil nilai saat ini
+                            const value = this.value;
+
+                            // Kapitalisasi huruf pertama setiap kata
+                            let newValue = '';
+                            let capitalizeNext = true;
+
+                            for (let i = 0; i < value.length; i++) {
+                                const char = value[i];
+
+                                if (capitalizeNext && char.match(/[a-zA-Z]/)) {
+                                    newValue += char.toUpperCase();
+                                    capitalizeNext = false;
+                                } else {
+                                    newValue += char;
+                                }
+
+                                // Setelah spasi, huruf berikutnya harus dikapital
+                                if (char === ' ' || char === '-' || char === "'") {
+                                    capitalizeNext = true;
+                                }
+                            }
+
+                            // Update nilai jika ada perubahan
+                            if (value !== newValue) {
+                                this.value = newValue;
+
+                                // Kembalikan posisi cursor (ditambah 1 karena ada perubahan)
+                                const diff = newValue.length - value.length;
+                                this.setSelectionRange(start + diff, end + diff);
+                            }
+                        });
+
+                        // Format nilai yang sudah ada (edit mode)
+                        if (input.value) {
+                            setTimeout(() => {
+                                let value = input.value;
+                                let newValue = '';
+                                let capitalizeNext = true;
+
+                                for (let i = 0; i < value.length; i++) {
+                                    const char = value[i];
+
+                                    if (capitalizeNext && char.match(/[a-zA-Z]/)) {
+                                        newValue += char.toUpperCase();
+                                        capitalizeNext = false;
+                                    } else {
+                                        newValue += char;
+                                    }
+
+                                    if (char === ' ' || char === '-' || char === "'") {
+                                        capitalizeNext = true;
+                                    }
+                                }
+
+                                if (value !== newValue) {
+                                    input.value = newValue;
+                                }
+                            }, 100);
+                        }
+                    }
+                });
+
+                // Email field - lowercase semua secara realtime
+                const emailFields = ['email_pribadi', 'email_kantor'];
+                emailFields.forEach(fieldName => {
+                    const input = document.querySelector(`[name="${fieldName}"]`);
+                    if (input) {
+                        input.addEventListener('input', function (e) {
+                            // Simpan posisi cursor
+                            const start = this.selectionStart;
+                            const end = this.selectionEnd;
+
+                            // Ubah ke lowercase
+                            const value = this.value;
+                            const lowercased = value.toLowerCase();
+
+                            // Jika ada perubahan, update nilai
+                            if (value !== lowercased) {
+                                this.value = lowercased;
+
+                                // Kembalikan posisi cursor
+                                this.setSelectionRange(start, end);
+                            }
+                        });
+
+                        // Format nilai yang sudah ada
+                        if (input.value) {
+                            setTimeout(() => {
+                                input.value = input.value.toLowerCase();
+                            }, 100);
+                        }
+                    }
+                });
+            }
+
         document.addEventListener('DOMContentLoaded', function () {
             // ============================================
             // KONFIGURASI AWAL
@@ -1819,6 +1943,8 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             // Golongan ruang dan pangkat
             const golonganRuangSelect = document.getElementById('golongan_ruang');
             const pangkatInput = document.getElementById('pangkat');
+
+            setupRealtimeAutoCapitalization();
 
             // Pangkat mapping
             const pangkatMapping = {
@@ -2415,7 +2541,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 
                                 return; // Stop di sini, jangan lanjut ke loop biasa
                             }
-                            
+
                             Object.keys(data.errors).forEach(field => {
                                 let input = document.querySelector(`[name="${field}"]`);
 

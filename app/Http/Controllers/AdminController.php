@@ -13,6 +13,8 @@ use App\Models\Pendaftaran;
 use App\Models\Provinsi;
 use App\Models\Kabupaten;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
+
 
 class AdminController extends Controller
 {
@@ -452,50 +454,83 @@ class AdminController extends Controller
 
                 // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
                 $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
-                $fullPath = public_path($folderPath);
+                // $fullPath = public_path($folderPath);
 
-                // Buat folder jika belum ada
-                if (!file_exists($fullPath)) {
-                    mkdir($fullPath, 0755, true);
-                }
+                // // Buat folder jika belum ada
+                // if (!file_exists($fullPath)) {
+                //     mkdir($fullPath, 0755, true);
+                // }
             }
+
+            // $files = [];
+            // foreach ($fileFields as $field) {
+            //     if ($request->hasFile($field)) {
+            //         try {
+            //             // Jika tidak ada pendaftaran, gunakan folder default
+            //             if (!$fullPath) {
+            //                 $folderPath = "Berkas/{$tahun}/default/{$request->nip_nrp}";
+            //                 $fullPath = public_path($folderPath);
+
+            //                 if (!file_exists($fullPath)) {
+            //                     mkdir($fullPath, 0755, true);
+            //                 }
+            //             }
+
+            //             // Ambil ekstensi file
+            //             $extension = $request->file($field)->getClientOriginalExtension();
+
+            //             // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
+            //             $fieldName = str_replace('file_', '', $field);
+            //             $fileName = $fieldName . '.' . $extension;
+
+            //             // Pindahkan file ke folder yang sudah ditentukan
+            //             $request->file($field)->move($fullPath, $fileName);
+
+            //             // Simpan path relatif untuk database (DENGAN SLASH DI AWAL)
+            //             $files[$field] = '/' . $folderPath . '/' . $fileName;
+
+            //             // Hapus file lama jika ada
+            //             $this->deleteOldFile($peserta, $pendaftaranTerbaru, $kepegawaian, $field);
+            //         } catch (\Exception $e) {
+            //             throw ValidationException::withMessages([
+            //                 $field => ['Gagal mengupload file: ' . $e->getMessage()]
+            //             ]);
+            //         }
+            //     }
+            // }
 
             $files = [];
+
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
-                    try {
-                        // Jika tidak ada pendaftaran, gunakan folder default
-                        if (!$fullPath) {
-                            $folderPath = "Berkas/{$tahun}/default/{$request->nip_nrp}";
-                            $fullPath = public_path($folderPath);
 
-                            if (!file_exists($fullPath)) {
-                                mkdir($fullPath, 0755, true);
-                            }
-                        }
-
-                        // Ambil ekstensi file
-                        $extension = $request->file($field)->getClientOriginalExtension();
-
-                        // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
-                        $fieldName = str_replace('file_', '', $field);
-                        $fileName = $fieldName . '.' . $extension;
-
-                        // Pindahkan file ke folder yang sudah ditentukan
-                        $request->file($field)->move($fullPath, $fileName);
-
-                        // Simpan path relatif untuk database (DENGAN SLASH DI AWAL)
-                        $files[$field] = '/' . $folderPath . '/' . $fileName;
-
-                        // Hapus file lama jika ada
-                        $this->deleteOldFile($peserta, $pendaftaranTerbaru, $kepegawaian, $field);
-                    } catch (\Exception $e) {
-                        throw ValidationException::withMessages([
-                            $field => ['Gagal mengupload file: ' . $e->getMessage()]
-                        ]);
+                    // Pastikan folder path ada
+                    if (!$folderPath) {
+                        $folderPath = "Berkas/{$tahun}/default/{$request->nip_nrp}";
                     }
+
+                    // Ambil ekstensi
+                    $extension = $request->file($field)->getClientOriginalExtension();
+                    $fieldName = str_replace('file_', '', $field);
+                    $fileName = $fieldName . '.' . $extension;
+
+                    // FULL PATH GOOGLE DRIVE
+                    $drivePath = "{$folderPath}/{$fileName}";
+
+                    // 🔥 HAPUS FILE LAMA DI DRIVE
+                    $this->deleteOldFile($peserta, $pendaftaranTerbaru, $kepegawaian, $field);
+
+                    // 🔥 SIMPAN KE GOOGLE DRIVE
+                    Storage::disk('google')->put(
+                        $drivePath,
+                        file_get_contents($request->file($field))
+                    );
+
+                    // SIMPAN PATH RELATIF KE DB
+                    $files[$field] = $drivePath;
                 }
             }
+
 
             // 4. UPDATE DATA PESERTA
             $pesertaUpdateData = [
@@ -659,35 +694,22 @@ class AdminController extends Controller
         try {
             $oldFilePath = null;
 
-            // Cek di model Peserta
             if (in_array($field, ['file_ktp', 'file_pas_foto']) && $peserta->$field) {
                 $oldFilePath = $peserta->$field;
-            }
-            // Cek di model KepegawaianPeserta
-            elseif (
+            } elseif (
                 in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp'])
                 && $kepegawaian && $kepegawaian->$field
             ) {
                 $oldFilePath = $kepegawaian->$field;
-            }
-            // Cek di model Pendaftaran
-            elseif ($pendaftaran && $pendaftaran->$field) {
+            } elseif ($pendaftaran && $pendaftaran->$field) {
                 $oldFilePath = $pendaftaran->$field;
             }
 
-            // Hapus file lama jika ada
-            if ($oldFilePath) {
-                // Hilangkan leading slash jika ada
-                $filePath = ltrim($oldFilePath, '/');
-                $fullPath = public_path($filePath);
-
-                if (file_exists($fullPath)) {
-                    unlink($fullPath);
-                }
+            if ($oldFilePath && Storage::disk('google')->exists($oldFilePath)) {
+                Storage::disk('google')->delete($oldFilePath);
             }
         } catch (\Exception $e) {
-            // Log error jika diperlukan
-            // \Log::error('Gagal menghapus file lama: ' . $e->getMessage());
+            // optional log
         }
     }
 

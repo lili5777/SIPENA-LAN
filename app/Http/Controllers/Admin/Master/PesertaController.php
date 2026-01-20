@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\SendEmail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 
 class PesertaController extends Controller
@@ -542,29 +543,55 @@ class PesertaController extends Controller
 
             // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
             $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
-            $fullPath = public_path($folderPath);
+            // $fullPath = public_path($folderPath);
 
-            // Buat folder jika belum ada
-            if (!file_exists($fullPath)) {
-                mkdir($fullPath, 0755, true);
-            }
+            // // Buat folder jika belum ada
+            // if (!file_exists($fullPath)) {
+            //     mkdir($fullPath, 0755, true);
+            // }
+
+            // $files = [];
+            // foreach ($fileFields as $field) {
+            //     if ($request->hasFile($field)) {
+            //         // Ambil nama file asli dan ekstensi
+            //         $originalName = $request->file($field)->getClientOriginalName();
+            //         $extension = $request->file($field)->getClientOriginalExtension();
+
+            //         // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
+            //         $fieldName = str_replace('file_', '', $field);
+            //         $fileName = $fieldName . '.' . $extension;
+
+            //         // Pindahkan file ke folder yang sudah ditentukan
+            //         $request->file($field)->move($fullPath, $fileName);
+
+            //         // Simpan path relatif untuk database
+            //         $files[$field] = '/' . $folderPath . '/' . $fileName;
+            //     }
+            // }
 
             $files = [];
+
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
-                    // Ambil nama file asli dan ekstensi
-                    $originalName = $request->file($field)->getClientOriginalName();
-                    $extension = $request->file($field)->getClientOriginalExtension();
 
-                    // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
+                    $file = $request->file($field);
+                    $extension = $file->getClientOriginalExtension();
+
+                    // nama file tanpa prefix file_
                     $fieldName = str_replace('file_', '', $field);
                     $fileName = $fieldName . '.' . $extension;
 
-                    // Pindahkan file ke folder yang sudah ditentukan
-                    $request->file($field)->move($fullPath, $fileName);
+                    // PATH DI GOOGLE DRIVE
+                    $drivePath = "{$folderPath}/{$fileName}";
 
-                    // Simpan path relatif untuk database
-                    $files[$field] = '/' . $folderPath . '/' . $fileName;
+                    // UPLOAD LANGSUNG KE GOOGLE DRIVE
+                    Storage::disk('google')->put(
+                        $drivePath,
+                        file_get_contents($file)
+                    );
+
+                    // SIMPAN PATH DRIVE KE DATABASE
+                    $files[$field] = $drivePath;
                 }
             }
 
@@ -951,46 +978,90 @@ class PesertaController extends Controller
 
             // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
             $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
-            $fullPath = public_path($folderPath);
+            // $fullPath = public_path($folderPath);
 
-            // Buat folder jika belum ada
-            if (!file_exists($fullPath)) {
-                mkdir($fullPath, 0755, true);
-            }
+            // // Buat folder jika belum ada
+            // if (!file_exists($fullPath)) {
+            //     mkdir($fullPath, 0755, true);
+            // }
+
+            // $files = [];
+            // foreach ($fileFields as $field) {
+            //     if ($request->hasFile($field)) {
+            //         // Ambil ekstensi file
+            //         $extension = $request->file($field)->getClientOriginalExtension();
+
+            //         // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
+            //         $fieldName = str_replace('file_', '', $field);
+            //         $fileName = $fieldName . '.' . $extension;
+
+            //         // Pindahkan file ke folder yang sudah ditentukan
+            //         $request->file($field)->move($fullPath, $fileName);
+
+            //         // Simpan path relatif untuk database (DENGAN SLASH DI AWAL)
+            //         $files[$field] = '/' . $folderPath . '/' . $fileName;
+            //     } else {
+            //         // Untuk update, jika tidak ada file baru, pertahankan file lama
+            //         if ($field === 'file_ktp' && $peserta && $peserta->file_ktp) {
+            //             $files[$field] = $peserta->file_ktp;
+            //         } elseif ($field === 'file_pas_foto' && $peserta && $peserta->file_pas_foto) {
+            //             $files[$field] = $peserta->file_pas_foto;
+            //         } elseif (in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp']) && $kepegawaian) {
+            //             // Field dari kepegawaian
+            //             $dbField = $field;
+            //             if ($kepegawaian->$dbField) {
+            //                 $files[$field] = $kepegawaian->$dbField;
+            //             }
+            //         } elseif ($pendaftaran->$field) {
+            //             // Field dari pendaftaran
+            //             $files[$field] = $pendaftaran->$field;
+            //         }
+            //     }
+            // }
 
             $files = [];
-            foreach ($fileFields as $field) {
-                if ($request->hasFile($field)) {
-                    // Ambil ekstensi file
-                    $extension = $request->file($field)->getClientOriginalExtension();
 
-                    // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
+            foreach ($fileFields as $field) {
+
+                // JIKA ADA FILE BARU
+                if ($request->hasFile($field)) {
+
+                    $file = $request->file($field);
+                    $extension = $file->getClientOriginalExtension();
                     $fieldName = str_replace('file_', '', $field);
                     $fileName = $fieldName . '.' . $extension;
 
-                    // Pindahkan file ke folder yang sudah ditentukan
-                    $request->file($field)->move($fullPath, $fileName);
+                    // PATH TETAP (INI KUNCI OVERWRITE)
+                    $drivePath = "{$folderPath}/{$fileName}";
 
-                    // Simpan path relatif untuk database (DENGAN SLASH DI AWAL)
-                    $files[$field] = '/' . $folderPath . '/' . $fileName;
-                } else {
-                    // Untuk update, jika tidak ada file baru, pertahankan file lama
-                    if ($field === 'file_ktp' && $peserta && $peserta->file_ktp) {
+                    // OPTIONAL: hapus file lama (rapi)
+                    if (!empty($pendaftaran->$field)) {
+                        Storage::disk('google')->delete($pendaftaran->$field);
+                    }
+
+                    // UPLOAD → AUTO OVERWRITE
+                    Storage::disk('google')->put(
+                        $drivePath,
+                        file_get_contents($file)
+                    );
+
+                    $files[$field] = $drivePath;
+                }
+                // JIKA TIDAK ADA FILE BARU → PAKAI FILE LAMA
+                else {
+
+                    if ($field === 'file_ktp' && $peserta?->file_ktp) {
                         $files[$field] = $peserta->file_ktp;
-                    } elseif ($field === 'file_pas_foto' && $peserta && $peserta->file_pas_foto) {
+                    } elseif ($field === 'file_pas_foto' && $peserta?->file_pas_foto) {
                         $files[$field] = $peserta->file_pas_foto;
-                    } elseif (in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp']) && $kepegawaian) {
-                        // Field dari kepegawaian
-                        $dbField = $field;
-                        if ($kepegawaian->$dbField) {
-                            $files[$field] = $kepegawaian->$dbField;
-                        }
+                    } elseif ($kepegawaian && isset($kepegawaian->$field)) {
+                        $files[$field] = $kepegawaian->$field;
                     } elseif ($pendaftaran->$field) {
-                        // Field dari pendaftaran
                         $files[$field] = $pendaftaran->$field;
                     }
                 }
             }
+
 
             // 4. UPDATE PESERTA
             $pesertaData = [
@@ -1194,39 +1265,47 @@ class PesertaController extends Controller
         try {
             $jenisData = $this->getJenisData($jenis);
 
-            // Cari pendaftaran berdasarkan ID
-            $pendaftaran = Pendaftaran::with(['peserta', 'peserta.kepegawaianPeserta', 'pesertaMentor'])
-                ->findOrFail($id);
+            // Ambil pendaftaran + relasi
+            $pendaftaran = Pendaftaran::with([
+                'peserta',
+                'peserta.kepegawaianPeserta',
+                'pesertaMentor'
+            ])->findOrFail($id);
 
-            // Verifikasi jenis pelatihan sesuai
+            // Validasi jenis pelatihan
             if ($pendaftaran->id_jenis_pelatihan != $jenisData['id']) {
                 abort(404, 'Data tidak ditemukan untuk jenis pelatihan ini');
             }
 
             $peserta = $pendaftaran->peserta;
-           
 
-            // 1. Hapus file-file yang terkait
+            /*
+        |--------------------------------------------------------------------------
+        | 1. KUMPULKAN SEMUA FILE YANG TERKAIT
+        |--------------------------------------------------------------------------
+        */
             $filesToDelete = [];
 
-            // File dari peserta
+            // File peserta
             if ($peserta) {
                 $filesToDelete[] = $peserta->file_ktp;
                 $filesToDelete[] = $peserta->file_pas_foto;
             }
 
-            // File dari kepegawaian
+            // File kepegawaian
             if ($peserta && $peserta->kepegawaianPeserta) {
-                $kepegawaian = $peserta->kepegawaianPeserta;
-                $filesToDelete[] = $kepegawaian->file_sk_jabatan;
-                $filesToDelete[] = $kepegawaian->file_sk_pangkat;
-                $filesToDelete[] = $kepegawaian->file_sk_cpns;
-                $filesToDelete[] = $kepegawaian->file_spmt;
-                $filesToDelete[] = $kepegawaian->file_skp;
+                $k = $peserta->kepegawaianPeserta;
+                $filesToDelete = array_merge($filesToDelete, [
+                    $k->file_sk_jabatan,
+                    $k->file_sk_pangkat,
+                    $k->file_sk_cpns,
+                    $k->file_spmt,
+                    $k->file_skp,
+                ]);
             }
 
-            // File dari pendaftaran
-            $fileFields = [
+            // File pendaftaran
+            $pendaftaranFileFields = [
                 'file_surat_tugas',
                 'file_surat_kesediaan',
                 'file_pakta_integritas',
@@ -1236,96 +1315,93 @@ class PesertaController extends Controller
                 'file_surat_bebas_narkoba',
                 'file_surat_pernyataan_administrasi',
                 'file_sertifikat_penghargaan',
-                'file_persetujuan_mentor'
+                'file_persetujuan_mentor',
             ];
 
-            foreach ($fileFields as $field) {
-                if ($pendaftaran->$field) {
+            foreach ($pendaftaranFileFields as $field) {
+                if (!empty($pendaftaran->$field)) {
                     $filesToDelete[] = $pendaftaran->$field;
                 }
             }
 
-            // Hapus file fisik
-            foreach ($filesToDelete as $file) {
-                if ($file) {
-                    // Hilangkan leading slash jika ada untuk public_path
-                    $filePath = ltrim($file, '/');
-                    $fullPath = public_path($filePath);
-
-                    if (file_exists($fullPath)) {
-                        unlink($fullPath);
-                    }
-                }
+            /*
+        |--------------------------------------------------------------------------
+        | 2. HAPUS FILE DI GOOGLE DRIVE
+        |--------------------------------------------------------------------------
+        */
+            foreach (array_filter($filesToDelete) as $filePath) {
+                Storage::disk('google')->delete($filePath);
             }
 
-            // Hapus folder kosong jika semua file sudah dihapus
-            // Struktur: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
+            /*
+        |--------------------------------------------------------------------------
+        | 3. HAPUS FOLDER NIP (BESERTA ISINYA)
+        |--------------------------------------------------------------------------
+        */
             if ($peserta) {
                 $tahun = date('Y');
+
                 $jenisPelatihan = JenisPelatihan::find($pendaftaran->id_jenis_pelatihan);
-                $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
                 $angkatan = Angkatan::find($pendaftaran->id_angkatan);
-                $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
-                $nip = $peserta->nip_nrp;
 
-                $nipFolderPath = public_path("Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}");
+                $folderPath = "Berkas/{$tahun}/" .
+                    str_replace(' ', '_', $jenisPelatihan->kode_pelatihan) . '/' .
+                    str_replace(' ', '_', $angkatan->nama_angkatan) . '/' .
+                    $peserta->nip_nrp;
 
-                // Hapus folder NIP jika kosong
-                if (is_dir($nipFolderPath) && count(scandir($nipFolderPath)) == 2) { // hanya . dan ..
-                    rmdir($nipFolderPath);
-
-                    // Hapus folder angkatan jika kosong
-                    $angkataFolderPath = public_path("Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}");
-                    if (is_dir($angkataFolderPath) && count(scandir($angkataFolderPath)) == 2) {
-                        rmdir($angkataFolderPath);
-
-                        // Hapus folder jenis pelatihan jika kosong
-                        $jenisFolderPath = public_path("Berkas/{$tahun}/{$kodeJenisPelatihan}");
-                        if (is_dir($jenisFolderPath) && count(scandir($jenisFolderPath)) == 2) {
-                            rmdir($jenisFolderPath);
-
-                            // Hapus folder tahun jika kosong
-                            $tahunFolderPath = public_path("Berkas/{$tahun}");
-                            if (is_dir($tahunFolderPath) && count(scandir($tahunFolderPath)) == 2) {
-                                rmdir($tahunFolderPath);
-                            }
-                        }
-                    }
-                }
+                Storage::disk('google')->deleteDirectory($folderPath);
             }
 
-            // 2. Hapus data mentor jika ada
+            /*
+        |--------------------------------------------------------------------------
+        | 4. HAPUS DATA RELASI
+        |--------------------------------------------------------------------------
+        */
+
+            // Mentor
             PesertaMentor::where('id_pendaftaran', $pendaftaran->id)->delete();
 
-            // 3. Hapus data kepegawaian jika ada
+            // Kepegawaian
             if ($peserta && $peserta->kepegawaianPeserta) {
                 $peserta->kepegawaianPeserta->delete();
             }
 
-            // 4. Hapus pendaftaran
+            // Hapus pendaftaran
             $pendaftaran->delete();
 
-            // 5. Cek apakah peserta masih memiliki pendaftaran lain
-            $otherRegistrations = Pendaftaran::where('id_peserta', $peserta->id)->count();
+            /*
+        |--------------------------------------------------------------------------
+        | 5. HAPUS PESERTA & USER JIKA TIDAK ADA PENDAFTARAN LAIN
+        |--------------------------------------------------------------------------
+        */
+            if ($peserta) {
+                $jumlahPendaftaranLain = Pendaftaran::where('id_peserta', $peserta->id)->count();
 
-            if ($otherRegistrations == 0) {
-
-                $user = User::where('peserta_id', $peserta->id)->first();
-                if ($user) {
-                    $user->delete();
+                if ($jumlahPendaftaranLain === 0) {
+                    $user = User::where('peserta_id', $peserta->id)->first();
+                    if ($user) {
+                        $user->delete();
+                    }
+                    $peserta->delete();
                 }
-                $peserta->delete();
             }
 
-            $user=User::where('peserta_id',$peserta->id)->first();
-            if($user){
-                $user->delete();
-            }
+            /*
+        |--------------------------------------------------------------------------
+        | 6. LOG AKTIVITAS
+        |--------------------------------------------------------------------------
+        */
+            $angkatanNama = $angkatan->nama_angkatan ?? '-';
+            aktifitas(
+                "Menghapus Data Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatanNama}",
+                $peserta
+            );
 
-            $angkatan = $angkatan->nama_angkatan;
-            aktifitas("Menghapus User {$jenisPelatihan->nama_pelatihan} - {$angkatan}", $peserta);
-
-
+            /*
+        |--------------------------------------------------------------------------
+        | 7. RESPONSE
+        |--------------------------------------------------------------------------
+        */
             if (request()->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -1333,9 +1409,11 @@ class PesertaController extends Controller
                 ]);
             }
 
-            return redirect()->route('peserta.index', ['jenis' => $jenis])
+            return redirect()
+                ->route('peserta.index', ['jenis' => $jenis])
                 ->with('success', 'Data peserta berhasil dihapus');
         } catch (\Exception $e) {
+
             if (request()->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -1343,7 +1421,8 @@ class PesertaController extends Controller
                 ], 500);
             }
 
-            return redirect()->route('peserta.index', ['jenis' => $jenis])
+            return redirect()
+                ->route('peserta.index', ['jenis' => $jenis])
                 ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
