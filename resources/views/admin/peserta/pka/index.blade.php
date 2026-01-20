@@ -903,9 +903,12 @@
                     content.querySelectorAll('.view-document').forEach(button => {
                         button.addEventListener('click', function (e) {
                             e.preventDefault();
-                            const url = this.getAttribute('data-url');
+                            const path = this.getAttribute('data-path');
                             const title = this.getAttribute('data-title');
-                            openDocumentViewer(url, title);
+                            // openDocumentViewer(url, title);
+                            if (path) {
+                                window.open(`/preview-drive?path=${encodeURIComponent(path)}`, '_blank');
+                            }
                         });
                     });
                 }
@@ -1349,7 +1352,7 @@
                                         </div>
                                         <div class="d-flex justify-content-end gap-2">
                                             <button type="button" class="btn btn-sm btn-outline-${dokumen.color} view-document" 
-                                                    data-url="${dokumen.file}" data-title="${dokumen.title}">
+                                                    data-path="${dokumen.file}" data-title="${dokumen.title}">
                                                 <i class="fas fa-eye me-1"></i> Lihat
                                             </button>
                                         </div>
@@ -1455,7 +1458,7 @@
                                                         <p class="fw-semibold mb-0">${mentor.nomor_hp_mentor || '-'}</p>
                                                     </div>
                                                 </div>
-                                                
+
                                             </div>
                                         </div>
                                         <div class="col-md-4 text-md-end">
@@ -1467,11 +1470,11 @@
                                 </div>
                             </div>
 
-                        
+
                         </div>
                     `;
                 }
-                
+
                 // Helper Functions untuk Status
                 function getStatusIcon(status) {
                     const statusLower = status.toLowerCase();

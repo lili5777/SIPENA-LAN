@@ -859,7 +859,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
     ];
                                 @endphp
 
-                                @foreach($dokumenFields as $field => $label)
+                                {{-- @foreach($dokumenFields as $field => $label)
                                     @if($pendaftaran->$field)
                                         <div class="form-group">
                                             <label class="form-label">{{ $label }} Saat Ini</label>
@@ -873,13 +873,13 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                             </div>
                                         </div>
                                     @endif
-                                @endforeach
+                                @endforeach --}}
                             @endif
 
                             <!-- KTP -->
                             <div class="form-group">
                                 <label class="form-label">Upload KTP</label>
-                                <div class="form-hint">Format PDF/JPG/PNG, maksimal 5MB</div>
+                                <div class="form-hint">Format PDF/JPG/PNG, maksimal 1MB</div>
                                 <div class="form-file">
                                     <input type="file" name="file_ktp" id="file_ktp"
                                         class="form-file-input @error('file_ktp') error @enderror"
@@ -904,7 +904,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                             </div>
 
                             <!-- Current Photo Preview -->
-                            @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
+                            {{-- @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
                                 <div class="form-group">
                                     <label class="form-label">Pasfoto Saat Ini</label>
                                     <div class="current-file-preview">
@@ -913,19 +913,19 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                         <small class="d-block text-muted mt-1">Pasfoto yang sudah diunggah</small>
                                     </div>
                                 </div>
-                            @endif
+                            @endif --}}
 
                             <!-- Pas Foto -->
                             <div class="form-group">
                                 <label class="form-label">Upload Pasfoto peserta berwarna</label>
-                                <div class="form-hint">Format JPG/PNG, maksimal 5MB</div>
+                                <div class="form-hint">Format JPG/PNG, maksimal 1MB</div>
                                 <div class="form-file">
                                     <input type="file" name="file_pas_foto" id="file_pas_foto"
                                         class="form-file-input @error('file_pas_foto') error @enderror"
                                         accept=".jpg,.jpeg,.png">
                                     <label class="form-file-label" for="file_pas_foto">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 5MB)' }}</span>
+                                        <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 1MB)' }}</span>
                                     </label>
                                     <div class="form-file-name" id="filePasFotoName">
                                         @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
@@ -943,7 +943,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                             </div>
 
                             <!-- SK Jabatan dan Pangkat -->
-                            @if($isEdit && $kepegawaianData)
+                            {{-- @if($isEdit && $kepegawaianData)
                                 @if($kepegawaianData->file_sk_jabatan)
                                     <div class="form-group">
                                         <label class="form-label">SK Jabatan Saat Ini</label>
@@ -971,18 +971,18 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                         </div>
                                     </div>
                                 @endif
-                            @endif
+                            @endif --}}
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Unggah Bukti SK Jabatan Terakhir</label>
-                                    <div class="form-hint">Format PDF, maksimal 5MB</div>
+                                    <div class="form-hint">Format PDF, maksimal 1MB</div>
                                     <div class="form-file">
                                         <input type="file" name="file_sk_jabatan" id="file_sk_jabatan"
                                             class="form-file-input @error('file_sk_jabatan') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_sk_jabatan">
                                             <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_sk_jabatan ? 'Ganti SK Jabatan' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                            <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_sk_jabatan ? 'Ganti SK Jabatan' : 'Klik untuk mengunggah file PDF (maks. 1MB)' }}</span>
                                         </label>
                                         <div class="form-file-name" id="fileSkJabatanName">
                                             @if($isEdit && $kepegawaianData && $kepegawaianData->file_sk_jabatan)
@@ -1000,13 +1000,13 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Unggah Bukti SK Pangkat/Golongan Ruang Terakhir</label>
-                                    <div class="form-hint">Format PDF, maksimal 5MB</div>
+                                    <div class="form-hint">Format PDF, maksimal 1MB</div>
                                     <div class="form-file">
                                         <input type="file" name="file_sk_pangkat" id="file_sk_pangkat"
                                             class="form-file-input @error('file_sk_pangkat') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_sk_pangkat">
                                             <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_sk_pangkat ? 'Ganti SK Pangkat' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                            <span>{{ $isEdit && $kepegawaianData && $kepegawaianData->file_sk_pangkat ? 'Ganti SK Pangkat' : 'Klik untuk mengunggah file PDF (maks. 1MB)' }}</span>
                                         </label>
                                         <div class="form-file-name" id="fileSkPangkatName">
                                             @if($isEdit && $kepegawaianData && $kepegawaianData->file_sk_pangkat)
@@ -1035,7 +1035,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                         class="form-file-input @error('file_surat_tugas') error @enderror" accept=".pdf">
                                     <label class="form-file-label" for="file_surat_tugas">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pendaftaran->file_surat_tugas ? 'Ganti Surat Tugas' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        <span>{{ $isEdit && $pendaftaran->file_surat_tugas ? 'Ganti Surat Tugas' : 'Klik untuk mengunggah file PDF (maks. 1MB)' }}</span>
                                     </label>
                                     <div class="form-file-name" id="fileSuratTugasName">
                                         @if($isEdit && $pendaftaran->file_surat_tugas)
@@ -1055,14 +1055,14 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                             <!-- Pakta Integritas -->
                             <div class="form-group">
                                 <label class="form-label">Unggah Scan Pakta Integritas (Formulir menggunakan Kop Instansi)</label>
-                                <div class="form-hint">Format PDF, maksimal 5MB</div>
+                                <div class="form-hint">Format PDF, maksimal 1MB</div>
                                 <div class="form-file">
                                     <input type="file" name="file_pakta_integritas" id="file_pakta_integritas"
                                         class="form-file-input @error('file_pakta_integritas') error @enderror"
                                         accept=".pdf">
                                     <label class="form-file-label" for="file_pakta_integritas">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pendaftaran->file_pakta_integritas ? 'Ganti Pakta Integritas' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        <span>{{ $isEdit && $pendaftaran->file_pakta_integritas ? 'Ganti Pakta Integritas' : 'Klik untuk mengunggah file PDF (maks. 1MB)' }}</span>
                                     </label>
                                     <div class="form-file-name" id="filePaktaIntegritasName">
                                         @if($isEdit && $pendaftaran->file_pakta_integritas)
@@ -1088,7 +1088,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                         class="form-file-input @error('file_surat_komitmen') error @enderror" accept=".pdf">
                                     <label class="form-file-label" for="file_surat_komitmen">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pendaftaran->file_surat_komitmen ? 'Ganti Surat Komitmen' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        <span>{{ $isEdit && $pendaftaran->file_surat_komitmen ? 'Ganti Surat Komitmen' : 'Klik untuk mengunggah file PDF (maks. 1MB)' }}</span>
                                     </label>
                                     <div class="form-file-name" id="fileSuratKomitmenName">
                                         @if($isEdit && $pendaftaran->file_surat_komitmen)
@@ -1117,7 +1117,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                         accept=".pdf">
                                     <label class="form-file-label" for="file_surat_kelulusan_seleksi">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pendaftaran->file_surat_kelulusan_seleksi ? 'Ganti Surat Kelulusan' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                        <span>{{ $isEdit && $pendaftaran->file_surat_kelulusan_seleksi ? 'Ganti Surat Kelulusan' : 'Klik untuk mengunggah file PDF (maks. 1MB)' }}</span>
                                     </label>
                                     <div class="form-file-name" id="fileSuratKelulusanName">
                                         @if($isEdit && $pendaftaran->file_surat_kelulusan_seleksi)
@@ -1139,13 +1139,13 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Unggah Surat Keterangan Berbadan Sehat</label>
-                                    <div class="form-hint">Format PDF, maksimal 5MB</div>
+                                    <div class="form-hint">Format PDF, maksimal 1MB</div>
                                     <div class="form-file">
                                         <input type="file" name="file_surat_sehat" id="file_surat_sehat"
                                             class="form-file-input @error('file_surat_sehat') error @enderror" accept=".pdf">
                                         <label class="form-file-label" for="file_surat_sehat">
                                             <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $pendaftaran->file_surat_sehat ? 'Ganti Surat Sehat' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                            <span>{{ $isEdit && $pendaftaran->file_surat_sehat ? 'Ganti Surat Sehat' : 'Klik untuk mengunggah file PDF (maks. 1MB)' }}</span>
                                         </label>
                                         <div class="form-file-name" id="fileSuratSehatName">
                                             @if($isEdit && $pendaftaran->file_surat_sehat)
@@ -1163,14 +1163,14 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Unggah Surat Keterangan Bebas Narkoba</label>
-                                    <div class="form-hint">Format PDF, maksimal 5MB</div>
+                                    <div class="form-hint">Format PDF, maksimal 1MB</div>
                                     <div class="form-file">
                                         <input type="file" name="file_surat_bebas_narkoba" id="file_surat_bebas_narkoba"
                                             class="form-file-input @error('file_surat_bebas_narkoba') error @enderror"
                                             accept=".pdf">
                                         <label class="form-file-label" for="file_surat_bebas_narkoba">
                                             <i class="fas fa-cloud-upload-alt"></i>
-                                            <span>{{ $isEdit && $pendaftaran->file_surat_bebas_narkoba ? 'Ganti Surat Bebas Narkoba' : 'Klik untuk mengunggah file PDF (maks. 5MB)' }}</span>
+                                            <span>{{ $isEdit && $pendaftaran->file_surat_bebas_narkoba ? 'Ganti Surat Bebas Narkoba' : 'Klik untuk mengunggah file PDF (maks. 1MB)' }}</span>
                                         </label>
                                         <div class="form-file-name" id="fileSuratBebasNarkobaName">
                                             @if($isEdit && $pendaftaran->file_surat_bebas_narkoba)
@@ -1887,7 +1887,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             // Golongan ruang dan pangkat
             const golonganRuangSelect = document.getElementById('golongan_ruang');
             const pangkatInput = document.getElementById('pangkat');
-            
+
             setupRealtimeAutoCapitalization();
 
             // Pangkat mapping
