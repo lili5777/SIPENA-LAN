@@ -44,6 +44,9 @@
                         <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
                     </a>
                     @endif
+                    <a href="{{ route('admin.import.peserta') }}" class="submenu-link">
+                        <i class="fas fa-file-invoice me-2"></i> Import Peserta
+                    </a>
                 </div>
             </div>
 

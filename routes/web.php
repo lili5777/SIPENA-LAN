@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Master\PesertaController;
 use App\Http\Controllers\Admin\Mentor\MentorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UploadController;
@@ -58,9 +59,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/preview-drive', [AdminController::class, 'preview'])->name('drive.preview');
     Route::get('/download-drive', [AdminController::class, 'download'])->name('drive.download');
-
-
-
 
 
     // Route Dashboard
@@ -173,6 +171,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/absen-peserta', [ExportController::class, 'indexAbsen'])->name('absenpeserta')->middleware('permission:export.absen');
         Route::get('/absen', [ExportController::class, 'exportAbsen'])->name('absen')->middleware('permission:export.absen');
     });
+
+    Route::get('/import/peserta', [ImportController::class, 'showImportForm'])->name('admin.import.peserta');
+    Route::post('/import/peserta', [ImportController::class, 'importPeserta'])->name('admin.import.peserta.process');
+    Route::get('/import/peserta/template', [ImportController::class, 'downloadTemplate'])->name('admin.import.peserta.template');
 
     // Route Update Akun dan Password
     Route::prefix('admin/akun')->name('admin.akun.')->group(function () {
