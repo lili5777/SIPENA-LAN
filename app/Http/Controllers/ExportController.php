@@ -13,7 +13,9 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use ZipArchive;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 class ExportController extends Controller
 {
     public function index()
@@ -236,4 +238,201 @@ class ExportController extends Controller
 
         return $pdf->stream($filename);
     }
+
+    // Method untuk menampilkan halaman form export foto
+    public function foto()
+    {
+        return view('admin.export.export-foto');
+    }
+
+    // Method untuk memproses export foto
+    public function exportFoto(Request $request)
+    {
+        try {
+            // Validasi input
+            $validated = $request->validate([
+                'jenis_pelatihan' => 'nullable|string',
+                'angkatan' => 'nullable|string',
+                'tahun' => 'nullable|integer',
+            ]);
+
+            // Query untuk mendapatkan peserta berdasarkan filter
+            $query = Pendaftaran::with(['peserta', 'angkatan', 'jenisPelatihan']);
+
+            if (!empty($validated['jenis_pelatihan'])) {
+                $query->whereHas('jenisPelatihan', function ($q) use ($validated) {
+                    $q->where('nama_pelatihan', $validated['jenis_pelatihan']);
+                });
+            }
+
+            if (!empty($validated['angkatan'])) {
+                $query->whereHas('angkatan', function ($q) use ($validated) {
+                    $q->where('nama_angkatan', $validated['angkatan']);
+                });
+            }
+
+            if (!empty($validated['tahun'])) {
+                $query->whereHas('angkatan', function ($q) use ($validated) {
+                    $q->where('tahun', $validated['tahun']);
+                });
+            }
+
+            // Ambil data peserta
+            $pendaftaran = $query->get();
+
+            if ($pendaftaran->isEmpty()) {
+                return response()->json(['error' => 'Tidak ada data peserta ditemukan'], 404);
+            }
+
+            // Hitung jumlah peserta dengan foto
+            $totalWithFoto = $pendaftaran->filter(function ($item) {
+                return !empty($item->peserta->file_pas_foto);
+            })->count();
+
+            if ($totalWithFoto === 0) {
+                return response()->json(['error' => 'Tidak ada foto yang ditemukan'], 404);
+            }
+
+            // Buat file ZIP temporary
+            $zipFileName = "foto_peserta_" . now()->format('Ymd_His') . ".zip";
+            $tempZipPath = storage_path('app/temp/' . $zipFileName);
+
+            // Pastikan folder temp ada
+            if (!file_exists(storage_path('app/temp'))) {
+                mkdir(storage_path('app/temp'), 0755, true);
+            }
+
+            $zip = new \ZipArchive();
+
+            if ($zip->open($tempZipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                return response()->json(['error' => 'Gagal membuat file ZIP'], 500);
+            }
+
+            $fotoCount = 0;
+            $counter = 1; // Inisialisasi counter
+
+            foreach ($pendaftaran as $daftar) {
+                $peserta = $daftar->peserta;
+
+                if (!empty($peserta->file_pas_foto)) {
+                    try {
+                        // Cek apakah file ada di Google Drive
+                        if (Storage::disk('google')->exists($peserta->file_pas_foto)) {
+                            // Dapatkan konten file dari Google Drive
+                            $fileContent = Storage::disk('google')->get($peserta->file_pas_foto);
+
+                            // Generate nama file dengan counter
+                            $fileName = $this->generateFileName($peserta, $daftar, $counter);
+
+                            // Tambahkan file ke ZIP
+                            $zip->addFromString($fileName, $fileContent);
+                            $fotoCount++;
+                            $counter++; // Increment counter setiap file berhasil ditambahkan
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error adding file to ZIP: ' . $e->getMessage());
+                        continue;
+                    }
+                }
+            }
+
+            // Tambahkan file info
+            if ($fotoCount > 0) {
+                $infoContent = "EXPORT FOTO PESERTA\n";
+                $infoContent .= "========================\n";
+                $infoContent .= "Tanggal Export: " . now()->format('d-m-Y H:i:s') . "\n";
+                $infoContent .= "Total Foto: " . $fotoCount . " dari " . $pendaftaran->count() . " peserta\n";
+                $infoContent .= "Filter:\n";
+                $infoContent .= "- Jenis Pelatihan: " . ($validated['jenis_pelatihan'] ?? 'Semua') . "\n";
+                $infoContent .= "- Angkatan: " . ($validated['angkatan'] ?? 'Semua') . "\n";
+                $infoContent .= "- Tahun: " . ($validated['tahun'] ?? 'Semua') . "\n";
+                $zip->addFromString('INFO_EXPORT.txt', $infoContent);
+            }
+
+            // Tutup ZIP
+            $zip->close();
+
+            // Download file dan hapus setelah selesai
+            return response()->download($tempZipPath, $zipFileName)->deleteFileAfterSend(true);
+        } catch (\Exception $e) {
+            \Log::error('Export Foto Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // Helper function untuk generate nama file
+    private function generateFileName($peserta, $pendaftaran, $counter)
+    {
+        // Ambil ekstensi asli file
+        $originalFileName = basename($peserta->file_pas_foto);
+        $extension = pathinfo($originalFileName, PATHINFO_EXTENSION);
+
+        if (empty($extension)) {
+            // Coba deteksi dari MIME type atau gunakan default
+            $extension = 'jpg';
+        }
+
+        // Bersihkan karakter khusus untuk nama file
+        $cleanString = function ($str) {
+            $str = preg_replace('/[^\p{L}\p{N}\s]/u', '', $str); // Hapus simbol
+            $str = trim($str);
+            $str = str_replace(' ', '_', $str);
+            return strtolower($str); // Tambahkan lowercase untuk konsistensi
+        };
+
+        // Gunakan nama lengkap peserta
+        $namaPeserta = $cleanString($peserta->nama_lengkap ?? 'peserta_' . $peserta->id);
+
+        // Format: counter.namapeserta.extension
+        return $counter . '.' . $namaPeserta . '.' . strtolower($extension);
+    }
+
+
+    public function fotoStats(Request $request)
+    {
+        try {
+            $query = Pendaftaran::with(['peserta', 'angkatan', 'jenisPelatihan']);
+
+            if ($request->filled('jenis_pelatihan')) {
+                $query->whereHas('jenisPelatihan', function ($q) use ($request) {
+                    $q->where('nama_pelatihan', $request->jenis_pelatihan);
+                });
+            }
+
+            if ($request->filled('angkatan')) {
+                $query->whereHas('angkatan', function ($q) use ($request) {
+                    $q->where('nama_angkatan', $request->angkatan);
+                });
+            }
+
+            if ($request->filled('tahun')) {
+                $query->whereHas('angkatan', function ($q) use ($request) {
+                    $q->where('tahun', $request->tahun);
+                });
+            }
+
+            $totalPeserta = $query->count();
+
+            $totalWithFoto = $query->whereHas('peserta', function ($q) {
+                $q->whereNotNull('file_pas_foto')
+                    ->where('file_pas_foto', '!=', '');
+            })->count();
+
+            $persentase = $totalPeserta > 0 ? round(($totalWithFoto / $totalPeserta) * 100, 1) : 0;
+
+            return response()->json([
+                'success' => true,
+                'total_peserta' => $totalPeserta,
+                'total_dengan_foto' => $totalWithFoto,
+                'persentase' => $persentase
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Stats Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat statistik: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
 }

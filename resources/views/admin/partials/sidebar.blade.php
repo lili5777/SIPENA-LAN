@@ -20,151 +20,154 @@
         </div>
 
         @if (auth()->user()->role->name != "user")
-            <!-- Master Data -->
-            <div class="menu-item has-submenu">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-database menu-icon"></i>
-                    <span class="menu-text">Master Data</span>
-                    <i class="fas fa-chevron-right menu-arrow"></i>
-                </a>
-                <div class="submenu">
-                    @if(auth()->user()->hasPermission('angkatan.read'))
-                    <a href="{{ route('angkatan.index') }}" class="submenu-link">
-                        <i class="fas fa-handshake me-2"></i> Angkatan
-                    </a>
-                    @endif
-                    {{-- <a href="" class="submenu-link">
-                        <i class="fas fa-handshake me-2"></i> Mitra Kerja
-                    </a>
-                    <a href="" class="submenu-link">
-                        <i class="fas fa-book me-2"></i> Materi Pelatihan
-                    </a> --}}
-                    @if(auth()->user()->hasPermission('mentor.read'))
-                    <a href="{{ route('mentor.index') }}" class="submenu-link">
-                        <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
-                    </a>
-                    @endif
-                    <a href="{{ route('admin.import.peserta') }}" class="submenu-link">
-                        <i class="fas fa-file-invoice me-2"></i> Import Peserta
-                    </a>
-                </div>
-            </div>
-
-
-
-            {{-- Peserta --}}
-            <div class="menu-item has-submenu">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-user menu-icon"></i>
-                    <span class="menu-text">Peserta</span>
-                    <i class="fas fa-chevron-right menu-arrow"></i>
-                </a>
-                <div class="submenu">
-                    @php
-                        $user = auth()->user();
-                        $isAdmin = in_array($user->role->name, ['admin', 'super admin']);
-                    @endphp
-
-                    @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 1)->count() > 0)
-                        <a href="{{ route('peserta.index', ['jenis' => 'pkn']) }}" class="submenu-link">
-                            <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
+                    <!-- Master Data -->
+                    <div class="menu-item has-submenu">
+                        <a href="#" class="menu-link">
+                            <i class="fas fa-database menu-icon"></i>
+                            <span class="menu-text">Master Data</span>
+                            <i class="fas fa-chevron-right menu-arrow"></i>
                         </a>
-                    @endif
-
-                    @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 2)->count() > 0)
-                        <a href="{{ route('peserta.index', ['jenis' => 'latsar']) }}" class="submenu-link">
-                            <i class="fas fa-user-tie me-2"></i> Peserta LATSAR
-                        </a>
-                    @endif
-
-                    @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 3)->count() > 0)
-                        <a href="{{ route('peserta.index', ['jenis' => 'pka']) }}" class="submenu-link">
-                            <i class="fas fa-users-gear me-2"></i> Peserta PKA
-                        </a>
-                    @endif
-
-                    @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 4)->count() > 0)
-                        <a href="{{ route('peserta.index', ['jenis' => 'pkp']) }}" class="submenu-link">
-                            <i class="fas fa-user-check me-2"></i> Peserta PKP
-                        </a>
-                    @endif
-                </div>
-            </div>
-
-
-            <!-- Pelatihan & Kelas -->
-            {{-- <div class="menu-item has-submenu">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-graduation-cap menu-icon"></i>
-                    <span class="menu-text">Pelatihan & Kelas</span>
-                    <i class="fas fa-chevron-right menu-arrow"></i>
-                </a>
-                <div class="submenu">
-                    <a href="" class="submenu-link">
-                        <i class="fas fa-calendar-alt me-2"></i> Jadwal Pelatihan
-                    </a>
-                    <a href="" class="submenu-link">
-                        <i class="fas fa-users me-2"></i> Kelas Aktif
-                    </a>
-                    <a href="" class="submenu-link">
-                        <i class="fas fa-clipboard-check me-2"></i> Presensi
-                    </a>
-                    <a href="" class="submenu-link">
-                        <i class="fas fa-star me-2"></i> Penilaian
-                    </a>
-                </div>
-            </div> --}}
-
-
-            <!-- Laporan & Analisis -->
-            <div class="menu-item has-submenu">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-chart-line menu-icon"></i>
-                    <span class="menu-text">Export Laporan</span>
-                    <i class="fas fa-chevron-right menu-arrow"></i>
-                </a>
-                <div class="submenu">
-                    <a href="{{ route('admin.export.datapeserta') }}" class="submenu-link">
-                        <i class="fas fa-chart-bar me-2"></i> Data Peserta
-                    </a>
-                    <a href="{{ route('admin.export.absenpeserta') }}" class="submenu-link">
-                        <i class="fas fa-chart-pie me-2"></i> Absensi Peserta
-                    </a>
-                    <a href="{{ route('admin.export.komposisipeserta') }}" class="submenu-link">
-                        <i class="fas fa-file-invoice me-2"></i> Komposisi Peserta
-                    </a>
-                    {{-- <a href="" class="submenu-link">
-                        <i class="fas fa-clipboard-list me-2"></i> Evaluasi Program
-                    </a> --}}
-                </div>
-            </div>
-
-
-            <!-- Pengaturan Sistem -->
-            @if (auth()->user()->role->name == "admin")
-                <div class="menu-item has-submenu">
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-cog menu-icon"></i>
-                        <span class="menu-text">Pengaturan Sistem</span>
-                        <i class="fas fa-chevron-right menu-arrow"></i>
-                    </a>
-                    <div class="submenu">
-                        {{-- @if(auth()->user()->hasPermission('user.read')) --}}
-                            <a href="{{ route('users.index') }}" class="submenu-link">
-                                <i class="fas fa-users-cog me-2"></i> Manajemen User
+                        <div class="submenu">
+                            @if(auth()->user()->hasPermission('angkatan.read'))
+                            <a href="{{ route('angkatan.index') }}" class="submenu-link">
+                                <i class="fas fa-handshake me-2"></i> Angkatan
                             </a>
-                        {{-- @endif --}}
-                        {{-- @if(auth()->user()->hasPermission('role.read')) --}}
-                            <a href="{{ route('roles.index') }}" class="submenu-link">
-                                <i class="fas fa-user-shield me-2"></i> Peran & Hak Akses
+                            @endif
+                            {{-- <a href="" class="submenu-link">
+                                <i class="fas fa-handshake me-2"></i> Mitra Kerja
                             </a>
-                        {{-- @endif --}}
-                        {{-- <a href="#" class="submenu-link">
-                            <i class="fas fa-sliders-h me-2"></i> Konfigurasi Sistem
-                        </a> --}}
+                            <a href="" class="submenu-link">
+                                <i class="fas fa-book me-2"></i> Materi Pelatihan
+                            </a> --}}
+                            @if(auth()->user()->hasPermission('mentor.read'))
+                            <a href="{{ route('mentor.index') }}" class="submenu-link">
+                                <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
+                            </a>
+                            @endif
+                            <a href="{{ route('admin.import.peserta') }}" class="submenu-link">
+                                <i class="fas fa-file-invoice me-2"></i> Import Peserta
+                            </a>
+                        </div>
                     </div>
-                </div>
-            @endif
+
+
+
+                    {{-- Peserta --}}
+                    <div class="menu-item has-submenu">
+                        <a href="#" class="menu-link">
+                            <i class="fas fa-user menu-icon"></i>
+                            <span class="menu-text">Peserta</span>
+                            <i class="fas fa-chevron-right menu-arrow"></i>
+                        </a>
+                        <div class="submenu">
+                            @php
+            $user = auth()->user();
+            $isAdmin = in_array($user->role->name, ['admin', 'super admin']);
+                            @endphp
+
+                            @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 1)->count() > 0)
+                                <a href="{{ route('peserta.index', ['jenis' => 'pkn']) }}" class="submenu-link">
+                                    <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
+                                </a>
+                            @endif
+
+                            @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 2)->count() > 0)
+                                <a href="{{ route('peserta.index', ['jenis' => 'latsar']) }}" class="submenu-link">
+                                    <i class="fas fa-user-tie me-2"></i> Peserta LATSAR
+                                </a>
+                            @endif
+
+                            @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 3)->count() > 0)
+                                <a href="{{ route('peserta.index', ['jenis' => 'pka']) }}" class="submenu-link">
+                                    <i class="fas fa-users-gear me-2"></i> Peserta PKA
+                                </a>
+                            @endif
+
+                            @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 4)->count() > 0)
+                                <a href="{{ route('peserta.index', ['jenis' => 'pkp']) }}" class="submenu-link">
+                                    <i class="fas fa-user-check me-2"></i> Peserta PKP
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+
+
+                    <!-- Pelatihan & Kelas -->
+                    {{-- <div class="menu-item has-submenu">
+                        <a href="#" class="menu-link">
+                            <i class="fas fa-graduation-cap menu-icon"></i>
+                            <span class="menu-text">Pelatihan & Kelas</span>
+                            <i class="fas fa-chevron-right menu-arrow"></i>
+                        </a>
+                        <div class="submenu">
+                            <a href="" class="submenu-link">
+                                <i class="fas fa-calendar-alt me-2"></i> Jadwal Pelatihan
+                            </a>
+                            <a href="" class="submenu-link">
+                                <i class="fas fa-users me-2"></i> Kelas Aktif
+                            </a>
+                            <a href="" class="submenu-link">
+                                <i class="fas fa-clipboard-check me-2"></i> Presensi
+                            </a>
+                            <a href="" class="submenu-link">
+                                <i class="fas fa-star me-2"></i> Penilaian
+                            </a>
+                        </div>
+                    </div> --}}
+
+
+                    <!-- Laporan & Analisis -->
+                    <div class="menu-item has-submenu">
+                        <a href="#" class="menu-link">
+                            <i class="fas fa-chart-line menu-icon"></i>
+                            <span class="menu-text">Export Laporan</span>
+                            <i class="fas fa-chevron-right menu-arrow"></i>
+                        </a>
+                        <div class="submenu">
+                            <a href="{{ route('admin.export.datapeserta') }}" class="submenu-link">
+                                <i class="fas fa-chart-bar me-2"></i> Data Peserta
+                            </a>
+                            <a href="{{ route('admin.export.absenpeserta') }}" class="submenu-link">
+                                <i class="fas fa-chart-pie me-2"></i> Absensi Peserta
+                            </a>
+                            <a href="{{ route('admin.export.komposisipeserta') }}" class="submenu-link">
+                                <i class="fas fa-file-invoice me-2"></i> Komposisi Peserta
+                            </a>
+                            <a href="{{ route('export.foto') }}" class="submenu-link">
+                                <i class="fas fa-user-tie me-2"></i> Export Foto
+                            </a>
+                            {{-- <a href="" class="submenu-link">
+                                <i class="fas fa-clipboard-list me-2"></i> Evaluasi Program
+                            </a> --}}
+                        </div>
+                    </div>
+
+
+                    <!-- Pengaturan Sistem -->
+                    @if (auth()->user()->role->name == "admin")
+                        <div class="menu-item has-submenu">
+                            <a href="#" class="menu-link">
+                                <i class="fas fa-cog menu-icon"></i>
+                                <span class="menu-text">Pengaturan Sistem</span>
+                                <i class="fas fa-chevron-right menu-arrow"></i>
+                            </a>
+                            <div class="submenu">
+                                {{-- @if(auth()->user()->hasPermission('user.read')) --}}
+                                    <a href="{{ route('users.index') }}" class="submenu-link">
+                                        <i class="fas fa-users-cog me-2"></i> Manajemen User
+                                    </a>
+                                {{-- @endif --}}
+                                {{-- @if(auth()->user()->hasPermission('role.read')) --}}
+                                    <a href="{{ route('roles.index') }}" class="submenu-link">
+                                        <i class="fas fa-user-shield me-2"></i> Peran & Hak Akses
+                                    </a>
+                                {{-- @endif --}}
+                                {{-- <a href="#" class="submenu-link">
+                                    <i class="fas fa-sliders-h me-2"></i> Konfigurasi Sistem
+                                </a> --}}
+                            </div>
+                        </div>
+                    @endif
         @endif
 
         @if(auth()->user()->hasPermission('aktifitas.read'))

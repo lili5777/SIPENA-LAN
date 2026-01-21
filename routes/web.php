@@ -61,6 +61,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/download-drive', [AdminController::class, 'download'])->name('drive.download');
 
 
+    // Halaman form export foto
+    Route::get('/admin/export/foto', [ExportController::class, 'foto'])->name('export.foto');
+    Route::post('/admin/export/foto/proses', [ExportController::class, 'exportFoto'])->name('admin.export.foto');
+    // routes/web.php
+    Route::get('/admin/export/foto/stats', [ExportController::class, 'fotoStats'])->name('export.foto.stats');
+
+
     // Route Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
