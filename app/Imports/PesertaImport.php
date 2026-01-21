@@ -146,13 +146,18 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
                         'unit_kerja'    => $row['unit_kerja'] ?? null,
                         'jabatan'       => $row['jabatan'] ?? null,
                         'pangkat'       => $row['pangkat'] ?? null,
-                        'golongan'      => $row['golongan_ruang'] ?? null,
+                        'golongan_ruang'      => $row['golongan_ruang'] ?? null,
                         'eselon'        => $row['eselon'] ?? null,
                         'alamat_kantor' => $row['alamat_kantor'] ?? null,
                         'nomor_telepon_kantor'   => $row['nomor_telepon_kantor'] ?? null,
                         'email_kantor'  => $row['email_kantor'] ?? null,
                         'id_provinsi'   => $provinsi?->id,
                         'id_kabupaten_kota'  => $kabupaten?->id,
+                        'nomor_sk_cpns' => $row['nomor_sk_cpns'] ?? null,
+                        'nomor_sk_terakhir' => $row['nomor_sk_terakhir'] ?? null,
+                        'tanggal_sk_jabatan' => $row['tanggal_sk_jabatan'] ?? null,
+                        'tahun_lulus_pkp_pim_iv' => $row['tahun_lulus_pkp_pim_iv'] ?? null,
+                        'tanggal_sk_cpns' => $row['tanggal_sk_cpns'] ?? null,
                     ]
                 );
 

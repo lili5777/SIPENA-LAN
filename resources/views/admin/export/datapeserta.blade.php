@@ -57,7 +57,7 @@
 
         .export-form {
             display: grid;
-            grid-template-columns: repeat(3, 1fr) auto;
+            grid-template-columns: repeat(4, 1fr) auto;
             gap: 1.5rem;
             align-items: end;
         }
@@ -77,6 +77,19 @@
         .form-label i {
             color: var(--primary-color);
             margin-right: 0.5rem;
+        }
+
+        .form-label .badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .badge-required {
+            background: var(--danger-color);
+            color: white;
         }
 
         .form-select {
@@ -103,6 +116,10 @@
 
         .form-select:hover {
             border-color: #cbd5e1;
+        }
+
+        .form-select.required {
+            border-color: var(--danger-color);
         }
 
         .btn-export {
@@ -145,25 +162,68 @@
 
         .export-info {
             margin-top: 1.5rem;
-            padding: 1rem;
+            padding: 1.25rem;
             background: #f0f9ff;
             border-radius: 8px;
             border-left: 4px solid var(--primary-color);
+        }
+
+        .export-info-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
-        .export-info i {
+        .export-info-header i {
             color: var(--primary-color);
             font-size: 1.25rem;
-            flex-shrink: 0;
         }
 
-        .export-info p {
+        .export-info-header h4 {
             margin: 0;
-            color: #475569;
+            color: var(--dark-color);
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .template-comparison {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .template-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .template-item h5 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
             font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .template-item h5 i {
+            font-size: 0.9rem;
+        }
+
+        .template-item ul {
+            margin: 0;
+            padding-left: 1.25rem;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .template-item ul li {
+            margin-bottom: 0.25rem;
         }
 
         @keyframes fadeIn {
@@ -179,7 +239,7 @@
         }
 
         /* Responsive Styles */
-        @media (max-width: 992px) {
+        @media (max-width: 1200px) {
             .export-form {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 1rem;
@@ -202,6 +262,10 @@
             .btn-export {
                 grid-column: span 1;
                 max-width: 100%;
+            }
+
+            .template-comparison {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -231,7 +295,25 @@
             </div>
         </div>
 
-        <form action="{{ route('admin.export.peserta') }}" method="GET" class="export-form">
+        <form action="{{ route('admin.export.peserta') }}" method="GET" class="export-form" id="exportForm">
+            <!-- Template -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-file-alt"></i>
+                    Template Export
+                    <span class="badge badge-required">WAJIB</span>
+                </label>
+                <select name="template" class="form-select" id="template" required>
+                    <option value="">-- Pilih Template --</option>
+                    <option value="form_registrasi" {{ request('template') == 'form_registrasi' ? 'selected' : '' }}>
+                        Form Registrasi
+                    </option>
+                    <option value="smart_bangkom" {{ request('template') == 'smart_bangkom' ? 'selected' : '' }}>
+                        Smart Bangkom
+                    </option>
+                </select>
+            </div>
+
             <!-- Jenis Pelatihan -->
             <div class="form-group">
                 <label class="form-label">
@@ -323,11 +405,42 @@
         </form>
 
         <div class="export-info">
-            <i class="fas fa-info-circle"></i>
-            <p>
-                <strong>Info:</strong> Pilih filter untuk mengekspor data peserta. Data akan diekspor dalam format Excel
-                (.xlsx).
-                Jika tidak memilih filter tertentu, semua data akan diekspor.
+            <div class="export-info-header">
+                <i class="fas fa-info-circle"></i>
+                <h4>Informasi Template Export</h4>
+            </div>
+
+            <div class="template-comparison">
+                <div class="template-item">
+                    <h5>
+                        <i class="fas fa-clipboard-list"></i>
+                        Form Registrasi
+                    </h5>
+                    <ul>
+                        <li><strong>40 Kolom Lengkap</strong> - Data detail peserta</li>
+                        <li>Termasuk data mentor dan kepegawaian</li>
+                        <li>Cocok untuk dokumentasi dan backup</li>
+                        <li>Format: NO, JENIS PELATIHAN, ANGKATAN, TAHUN, NIP/NRP, NAMA, dst...</li>
+                    </ul>
+                </div>
+
+                <div class="template-item">
+                    <h5>
+                        <i class="fas fa-table"></i>
+                        Smart Bangkom
+                    </h5>
+                    <ul>
+                        <li><strong>16 Kolom Ringkas</strong> - Data esensial</li>
+                        <li>Sesuai format sistem Smart Bangkom</li>
+                        <li>Cocok untuk upload ke aplikasi Smart Bangkom</li>
+                        <li>Format: nama, no_identitas, jenis_kelamin, agama, dst...</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #64748b;">
+                <strong>Catatan:</strong> Pilih filter untuk mengekspor data spesifik. Jika tidak memilih filter,
+                semua data akan diekspor. Nama file akan disesuaikan otomatis dengan template dan filter yang dipilih.
             </p>
         </div>
     </div>
@@ -337,11 +450,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const exportBtn = document.querySelector('.btn-export');
-            const exportForm = document.querySelector('.export-form');
+            const exportForm = document.getElementById('exportForm');
+            const templateSelect = document.getElementById('template');
 
+            // Validasi template sebelum submit
             if (exportForm && exportBtn) {
-                exportForm.addEventListener('submit', function () {
-                    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+                exportForm.addEventListener('submit', function (e) {
+                    if (!templateSelect.value) {
+                        e.preventDefault();
+                        alert('Silakan pilih template export terlebih dahulu!');
+                        templateSelect.classList.add('required');
+                        templateSelect.focus();
+                        return false;
+                    }
+
+                    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses..';
                     exportBtn.disabled = true;
 
                     // Re-enable after 5 seconds if form submission fails
@@ -349,6 +472,15 @@
                         exportBtn.innerHTML = '<i class="fas fa-file-excel"></i> Export Data';
                         exportBtn.disabled = false;
                     }, 5000);
+                });
+            }
+
+            // Remove required class when template is selected
+            if (templateSelect) {
+                templateSelect.addEventListener('change', function () {
+                    if (this.value) {
+                        this.classList.remove('required');
+                    }
                 });
             }
         });

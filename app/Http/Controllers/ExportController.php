@@ -6,6 +6,7 @@ use App\Models\JenisPelatihan;
 use App\Models\Angkatan;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DataPeserta;
+use App\Exports\DataPesertaSmartBangkom;
 use App\Exports\KomposisiPeserta;
 use App\Models\Pendaftaran;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -35,21 +36,38 @@ class ExportController extends Controller
      */
     public function exportPeserta()
     {
-        // Ambil parameter filter dari request
+        // Ambil parameter dari request
+        $template = request('template'); // wajib
         $jenisPelatihan = request('jenis_pelatihan');
         $angkatan = request('angkatan');
         $tahun = request('tahun');
 
-        // Buat nama file berdasarkan filter yang dipilih
+        // Validasi template wajib dipilih
+        if (empty($template)) {
+            return redirect()->back()->with('error', 'Silakan pilih template export terlebih dahulu!');
+        }
+
+        // Validasi template harus valid
+        if (!in_array($template, ['form_registrasi', 'smart_bangkom'])) {
+            return redirect()->back()->with('error', 'Template yang dipilih tidak valid!');
+        }
+
+        // Buat nama file berdasarkan template dan filter
         $fileNameParts = [];
 
+        // Tambahkan prefix berdasarkan template
+        if ($template === 'smart_bangkom') {
+            $fileNameParts[] = 'SMART_BANGKOM';
+        } else {
+            $fileNameParts[] = 'DATA_PESERTA';
+        }
+
+        // Tambahkan filter jika ada
         if ($jenisPelatihan) {
-            // Replace spasi dengan underscore dan hapus karakter khusus
             $fileNameParts[] = str_replace(' ', '_', strtoupper($jenisPelatihan));
         }
 
         if ($angkatan) {
-            // Convert "Angkatan I" menjadi "ANGKATAN_I"
             $fileNameParts[] = str_replace(' ', '_', strtoupper($angkatan));
         }
 
@@ -57,21 +75,29 @@ class ExportController extends Controller
             $fileNameParts[] = $tahun;
         }
 
-        // Jika tidak ada filter, gunakan nama default
-        if (empty($fileNameParts)) {
-            $fileName = 'DATA_PESERTA_' . date('Y_m_d');
-        } else {
-            $fileName = implode('_', $fileNameParts);
+        // Jika hanya ada prefix template, tambahkan tanggal
+        if (count($fileNameParts) === 1) {
+            $fileNameParts[] = date('Y_m_d');
         }
 
-        $fileName .= '.xlsx';
+        $fileName = implode('_', $fileNameParts) . '.xlsx';
 
-        aktifitas('Mengekspor Data Peserta');
-        // Kirim parameter filter ke export class
-        return Excel::download(
-            new DataPeserta($jenisPelatihan, $angkatan, $tahun),
-            $fileName
-        );
+        // Pilih export class dan log aktifitas berdasarkan template
+        if ($template === 'smart_bangkom') {
+            aktifitas('Mengekspor Data Peserta - Template Smart Bangkom');
+
+            return Excel::download(
+                new DataPesertaSmartBangkom($jenisPelatihan, $angkatan, $tahun),
+                $fileName
+            );
+        } else {
+            aktifitas('Mengekspor Data Peserta - Template Form Registrasi');
+
+            return Excel::download(
+                new DataPeserta($jenisPelatihan, $angkatan, $tahun),
+                $fileName
+            );
+        }
     }
 
     /**

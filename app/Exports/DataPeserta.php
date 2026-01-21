@@ -9,13 +9,16 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
-class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyles, WithEvents, ShouldAutoSize
+class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyles, WithEvents, ShouldAutoSize, WithColumnFormatting
 {
     protected $jenisPelatihan;
     protected $angkatan;
@@ -65,48 +68,47 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
     public function headings(): array
     {
         return [
-            [
-                'NO',
-                'JENIS PELATIHAN',
-                'ANGKATAN',
-                'TAHUN',
-                'NIP/NRP',
-                'NAMA',
-                'JENIS KELAMIN',
-                'AGAMA',
-                'TEMPAT LAHIR',
-                'TGL LAHIR',
-                'ALAMAT ASAL',
-                'ALAMAT INSTANSI',
-                'INSTANSI',
-                'INSTANSI DETAIL',
-                'PROVINSI',
-                'KABUPATEN/KOTA',
-                'JABATAN',
-                'NOMOR SK JABATAN',
-                'TANGGAL SK JABATAN',
-                'PANGKAT / GOLONGAN',
-                'ESELON',
-                'NOMOR HP/WA PESERTA',
-                'E-MAIL PESERTA',
-                'NOMOR TELEPON INSTANSI',
-                'E-MAIL INSTANSI',
-                'STATUS PERKAWINAN',
-                'NAMA SUAMI/ISTRI',
-                'PENDIDIKAN TERAKHIR',
-                'BIDANG PENDIDIKAN TERAKHIR',
-                'HOBI / KESUKAAN',
-                'UKURAN KAOS',
-                'UKURAN BAJU TAKTIKAL',
-                'UKURAN CELANA TAKTIKAL',
-                'MEROKOK/TIDAK MEROKOK',
-                'NAMA MENTOR',
-                'JABATAN MENTOR',
-                'NOMOR REKENING MENTOR',
-                'NPWP MENTOR',
-                'EMAIL MENTOR',
-                'NOMOR HP MENTOR',
-            ]
+            'NO',
+            'JENIS PELATIHAN',
+            'ANGKATAN',
+            'TAHUN',
+            'NIP/NRP',
+            'NAMA',
+            'JENIS KELAMIN',
+            'AGAMA',
+            'TEMPAT LAHIR',
+            'TGL LAHIR',
+            'ALAMAT ASAL',
+            'ALAMAT INSTANSI',
+            'INSTANSI',
+            'INSTANSI DETAIL',
+            'PROVINSI',
+            'KABUPATEN/KOTA',
+            'JABATAN',
+            'NOMOR SK JABATAN',
+            'TANGGAL SK JABATAN',
+            'PANGKAT',
+            'GOLONGAN',
+            'ESELON',
+            'NOMOR HP/WA PESERTA',
+            'E-MAIL PESERTA',
+            'NOMOR TELEPON INSTANSI',
+            'E-MAIL INSTANSI',
+            'STATUS PERKAWINAN',
+            'NAMA SUAMI/ISTRI',
+            'PENDIDIKAN TERAKHIR',
+            'BIDANG PENDIDIKAN TERAKHIR',
+            'HOBI / KESUKAAN',
+            'UKURAN KAOS',
+            'UKURAN BAJU TAKTIKAL',
+            'UKURAN CELANA TAKTIKAL',
+            'MEROKOK/TIDAK MEROKOK',
+            'NAMA MENTOR',
+            'JABATAN MENTOR',
+            'NOMOR REKENING MENTOR',
+            'NPWP MENTOR',
+            'EMAIL MENTOR',
+            'NOMOR HP MENTOR',
         ];
     }
 
@@ -125,7 +127,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             $pendaftaran->jenisPelatihan->nama_pelatihan ?? '-',
             $pendaftaran->angkatan->nama_angkatan ?? '-',
             $pendaftaran->angkatan->tahun ?? '-',
-            "'".($peserta->nip_nrp) ?? '-',
+            $peserta->nip_nrp ?? '-', // Tanpa prefix '
             $peserta->nama_lengkap ?? '-',
             $peserta->jenis_kelamin ?? '-',
             $peserta->agama ?? '-',
@@ -140,7 +142,8 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             $kepegawaian->jabatan ?? '-',
             $kepegawaian->nomor_sk_cpns ?? '-',
             $kepegawaian->tanggal_sk_cpns ? \Carbon\Carbon::parse($kepegawaian->tanggal_sk_cpns)->format('d-m-Y') : '-',
-            ($kepegawaian->pangkat ?? '-') . ' - ' . ($kepegawaian->golongan_ruang ?? '-'),
+            $kepegawaian->pangkat ?? '-',
+            $kepegawaian->golongan_ruang ?? '-',
             $kepegawaian->eselon ?? '-',
             $peserta->nomor_hp ?? '-',
             $peserta->email_pribadi ?? '-',
@@ -161,6 +164,19 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             $mentor->npwp_mentor ?? '-',
             $mentor->email_mentor ?? '-',
             $mentor->nomor_hp_mentor ?? '-',
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'E' => NumberFormat::FORMAT_TEXT, // Kolom NIP/NRP (kolom E)
+            'R' => NumberFormat::FORMAT_TEXT, // Kolom Nomor SK Jabatan
+            'W' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP/WA Peserta (kolom W)
+            'Y' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Telepon Instansi
+            'AL' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Rekening Mentor
+            'AM' => NumberFormat::FORMAT_TEXT, // Kolom NPWP Mentor
+            'AO' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP Mentor
         ];
     }
 
@@ -197,6 +213,22 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
 
                 $highestRow = $sheet->getHighestRow();
                 $highestColumn = $sheet->getHighestColumn();
+
+                // KUNCI UTAMA: Format kolom-kolom yang berisi angka panjang sebagai TEXT
+                $textColumns = ['E', 'R', 'W', 'Y', 'AL', 'AM', 'AO'];
+
+                foreach ($textColumns as $col) {
+                    // Set format code '@' untuk TEXT
+                    $sheet->getStyle($col . '1:' . $col . $highestRow)
+                        ->getNumberFormat()
+                        ->setFormatCode('@');
+
+                    // Set explicit data type untuk setiap cell
+                    for ($row = 2; $row <= $highestRow; $row++) {
+                        $cell = $sheet->getCell($col . $row);
+                        $cell->setValueExplicit($cell->getValue(), DataType::TYPE_STRING);
+                    }
+                }
 
                 // Border untuk semua data
                 $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([
