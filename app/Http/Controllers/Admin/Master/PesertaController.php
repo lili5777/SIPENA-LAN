@@ -17,6 +17,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendEmail;
+use App\Models\AksiPerubahan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
@@ -35,6 +36,7 @@ class PesertaController extends Controller
         'pkp' => ['id' => 4, 'nama' => 'PKP']
     ];
 
+
     private function getJenisData($jenis)
     {
         if (!array_key_exists($jenis, $this->jenisMapping)) {
@@ -42,6 +44,7 @@ class PesertaController extends Controller
         }
         return $this->jenisMapping[$jenis];
     }
+
 
     public function index(Request $request, $jenis)
     {
@@ -127,11 +130,10 @@ class PesertaController extends Controller
         ]);
     }
 
+
     /**
      * Update status pendaftaran.
      */
-
-
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -226,6 +228,9 @@ class PesertaController extends Controller
 
         $isEdit = false;
 
+        $kunci_judul=false;
+        $aksiPerubahan = null;
+
         session(['jenis_pelatihan' => $jenis]);
 
         if ($request->ajax()) {
@@ -244,7 +249,9 @@ class PesertaController extends Controller
             'provinsiList',
             'kabupatenList',
             'isEdit',
-            'jenis'
+            'jenis',
+            'kunci_judul',
+            'aksiPerubahan'
         ));
     }
 
@@ -259,7 +266,8 @@ class PesertaController extends Controller
             'peserta.kepegawaianPeserta.provinsi',
             'peserta.kepegawaianPeserta.kabupaten',
             'angkatan',
-            'pesertaMentor.mentor'
+            'pesertaMentor.mentor',
+            'aksiPerubahan'
         ])->findOrFail($id);
 
         // Verifikasi jenis pelatihan sesuai
@@ -272,6 +280,8 @@ class PesertaController extends Controller
             ->where('status_angkatan', 'Dibuka')->get();
         $provinsiList = Provinsi::all();
         $kabupatenList = Kabupaten::all();
+        $kunci_judul = optional($pendaftaran->angkatan)->kunci_judul ?? false;
+        $aksiPerubahan = $pendaftaran->aksiPerubahan->first();
 
         $isEdit = true;
 
@@ -282,7 +292,9 @@ class PesertaController extends Controller
             'provinsiList',
             'kabupatenList',
             'isEdit',
-            'jenis'
+            'jenis',
+            'kunci_judul',
+            'aksiPerubahan'
         ));
     }
 
@@ -420,6 +432,7 @@ class PesertaController extends Controller
                     'npwp_mentor' => 'nullable|string|max:50',
                     'has_mentor' => 'nullable|in:Ya,Tidak',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
+                    'judul'=>'nullable'
                 ],
                 [
                     'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
@@ -1216,6 +1229,13 @@ class PesertaController extends Controller
                 if ($pesertaMentor) {
                     $pesertaMentor->delete();
                 }
+            }
+
+            if ($request->judul) {
+                AksiPerubahan::updateOrCreate(
+                    ['id_pendaftar' => $pendaftaran->id],
+                    ['judul'=> $request->judul]
+                );
             }
 
             $angkatan = $angkatan->nama_angkatan;

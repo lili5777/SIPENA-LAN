@@ -21,6 +21,8 @@ class Angkatan extends Model
         'kuota',
         'status_angkatan',
         'dibuat_pada', // tambahkan ini
+        'kunci_edit',
+        'kunci_judul'
     ];
 
     // Casting untuk properti tanggal
@@ -47,4 +49,6 @@ class Angkatan extends Model
     {
         return $this->hasMany(PicPeserta::class, 'angkatan_id');
     }
+
+    
 }

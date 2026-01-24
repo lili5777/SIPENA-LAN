@@ -50,6 +50,15 @@ class PendaftaranController extends Controller
                 ], 404);
             }
 
+            if ($peserta->batasan == true) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'NIP/NRP ini sudah melakukan pengisian formulir'
+                ], 403);
+            }
+
+
+
             // Cari pendaftaran dengan relasi
             $existingPendaftaran = Pendaftaran::with('angkatan')
                 ->where('id_peserta', $peserta->id)
@@ -818,6 +827,10 @@ class PendaftaranController extends Controller
                     );
                 }
             }
+
+            $peserta->update([
+                'batasan' => true
+            ]);
 
             // 9. RESPONSE
             if ($request->ajax() || $request->wantsJson()) {

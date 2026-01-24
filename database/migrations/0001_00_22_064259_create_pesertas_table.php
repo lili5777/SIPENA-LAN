@@ -35,6 +35,7 @@ return new class extends Migration
             $table->string('file_ktp', 255)->nullable();
             $table->string('file_pas_foto', 255)->nullable();
             $table->boolean('status_aktif')->default(true);
+            $table->boolean('batasan')->default(false);
             $table->timestamp('dibuat_pada')->useCurrent();
             $table->timestamp('diperbarui_pada')->useCurrent()->useCurrentOnUpdate();
             $table->index('nip_nrp', 'idx_peserta_nip');

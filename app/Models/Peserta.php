@@ -38,6 +38,7 @@ class Peserta extends Model
         'file_ktp',
         'file_pas_foto',
         'status_aktif',
+        'batasan',
     ];
 
     protected $dates = ['tanggal_lahir'];

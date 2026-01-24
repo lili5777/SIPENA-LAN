@@ -88,6 +88,18 @@ class AngkatanController extends Controller
         ]);
 
         try {
+
+            $exists = Angkatan::where('nama_angkatan', $request->nama_angkatan)
+                ->where('tahun', $request->tahun)
+                ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
+                ->exists();
+
+            if ($exists) {
+                return back()
+                    ->withErrors(['nama_angkatan' => 'Angkatan dengan nama dan tahun ini sudah ada'])
+                    ->withInput();
+            }
+
             DB::beginTransaction();
 
             $angkatan = Angkatan::create([
@@ -98,6 +110,8 @@ class AngkatanController extends Controller
                 'tanggal_selesai' => $request->tanggal_selesai,
                 'kuota' => $request->kuota,
                 'status_angkatan' => $request->status_angkatan,
+                'kunci_edit' => $request->kunci_edit,
+                'kunci_judul' => $request->kunci_judul,
                 'dibuat_pada' => now()
             ]);
 
@@ -165,6 +179,20 @@ class AngkatanController extends Controller
         ]);
 
         try {
+            $exists = Angkatan::where('nama_angkatan', $request->nama_angkatan)
+                ->where('tahun', $request->tahun)
+                ->where('id_jenis_pelatihan',$request->id_jenis_pelatihan)
+                ->where('id', '!=', $angkatan->id) 
+                ->exists();
+
+            if ($exists) {
+                return back()
+                    ->withErrors([
+                        'nama_angkatan' => 'Angkatan dengan nama dan tahun ini sudah ada.'
+                    ])
+                    ->withInput();
+            }
+
             DB::beginTransaction();
 
             $angkatan->update([
@@ -174,7 +202,9 @@ class AngkatanController extends Controller
                 'tanggal_mulai' => $request->tanggal_mulai,
                 'tanggal_selesai' => $request->tanggal_selesai,
                 'kuota' => $request->kuota,
-                'status_angkatan' => $request->status_angkatan
+                'status_angkatan' => $request->status_angkatan,
+                'kunci_edit'=>$request->kunci_edit,
+                'kunci_judul' => $request->kunci_judul,
             ]);
 
             DB::commit();

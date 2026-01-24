@@ -17,6 +17,8 @@ return new class extends Migration
             $table->date('tanggal_selesai')->nullable();
             $table->integer('kuota')->nullable();
             $table->enum('status_angkatan', ['Dibuka', 'Ditutup', 'Berlangsung', 'Selesai'])->default('Dibuka');
+            $table->boolean('kunci_edit')->default(false);
+            $table->boolean('kunci_judul')->default(false);
             $table->timestamp('dibuat_pada')->useCurrent();
             $table->index(['id_jenis_pelatihan', 'status_angkatan'], 'idx_jenis_status');
             $table->index('status_angkatan', 'idx_angkatan_status');

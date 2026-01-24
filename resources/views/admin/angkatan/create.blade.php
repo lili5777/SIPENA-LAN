@@ -69,13 +69,13 @@
                 Form {{ $isEdit ? 'Edit' : 'Tambah' }} Angkatan
             </h5>
         </div>
-        
+
         <form method="POST" action="{{ $isEdit ? route('angkatan.update', $angkatan->id) : route('angkatan.store') }}" id="angkatanForm">
             @csrf
             @if($isEdit)
                 @method('PUT')
             @endif
-            
+
             <div class="card-body">
                 <div class="row">
                     <!-- Kolom Kiri -->
@@ -250,6 +250,64 @@
                             <small class="text-muted mt-1 d-block">
                                 <i class="fas fa-info-circle me-1"></i>
                                 Tanggal selesai pelatihan (opsional)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    {{-- Kunci Edit --}}
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="kunci_edit" class="form-label fw-semibold">
+                                <i class="fas fa-lock-open me-1 text-primary"></i>
+                                Status Edit Form
+                            </label>
+
+                            <select name="kunci_edit" id="kunci_edit" class="form-select @error('kunci_edit') is-invalid @enderror">
+                                <option value="1" {{ old('kunci_edit', $isEdit ? $angkatan->kunci_edit : 0) == 1 ? 'selected' : '' }}>
+                                    Buka
+                                </option>
+                                <option value="0" {{ old('kunci_edit', $isEdit ? $angkatan->kunci_edit : 0) == 0 ? 'selected' : '' }}>
+                                    Tutup
+                                </option>
+                            </select>
+
+                            @error('kunci_edit')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Jika ditutup, peserta tidak dapat mengedit data
+                            </small>
+                        </div>
+                    </div>
+
+                    {{-- Kunci Judul --}}
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="kunci_judul" class="form-label fw-semibold">
+                                <i class="fas fa-lightbulb me-1 text-primary"></i>
+                                Status Judul Aksi Perubahan
+                            </label>
+
+                            <select name="kunci_judul" id="kunci_judul" class="form-select @error('kunci_judul') is-invalid @enderror">
+                                <option value="1" {{ old('kunci_judul', $isEdit ? $angkatan->kunci_judul : 0) == 1 ? 'selected' : '' }}>
+                                    Buka
+                                </option>
+                                <option value="0" {{ old('kunci_judul', $isEdit ? $angkatan->kunci_judul : 0) == 0 ? 'selected' : '' }}>
+                                    Tutup
+                                </option>
+                            </select>
+
+                            @error('kunci_judul')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Jika ditutup, peserta tidak dapat mengisi judul aksi perubahan
                             </small>
                         </div>
                     </div>

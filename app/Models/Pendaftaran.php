@@ -65,4 +65,9 @@ class Pendaftaran extends Model
     {
         return $this->hasMany(LogAktivitas::class, 'id_pendaftaran');
     }
+
+    public function aksiPerubahan()
+    {
+        return $this->hasMany(AksiPerubahan::class, 'id_pendaftar');
+    }
 }

@@ -1,30 +1,30 @@
 @php
-// Ambil jenis dari route
-$jenis = request()->route('jenis');
+    // Ambil jenis dari route
+    $jenis = request()->route('jenis');
 
-// Mapping nama dan ID
-$jenisMapping = [
-    'pkn' => ['nama' => 'PKN TK II', 'id' => 1, 'kode' => 'PKN_TK_II'],
-    'cpns' => ['nama' => 'PD CPNS', 'id' => 2, 'kode' => 'PD_CPNS'],
-    'pka' => ['nama' => 'PKA', 'id' => 3, 'kode' => 'PKA'],
-    'pkp' => ['nama' => 'PKP', 'id' => 4, 'kode' => 'PKP']
-];
+    // Mapping nama dan ID
+    $jenisMapping = [
+        'pkn' => ['nama' => 'PKN TK II', 'id' => 1, 'kode' => 'PKN_TK_II'],
+        'cpns' => ['nama' => 'PD CPNS', 'id' => 2, 'kode' => 'PD_CPNS'],
+        'pka' => ['nama' => 'PKA', 'id' => 3, 'kode' => 'PKA'],
+        'pkp' => ['nama' => 'PKP', 'id' => 4, 'kode' => 'PKP']
+    ];
 
-$jenisData = $jenisMapping[$jenis] ?? ['nama' => 'Pelatihan', 'id' => 1, 'kode' => 'DEFAULT'];
-$jenisNama = $jenisData['nama'];
-$jenisPelatihanId = $jenisData['id'];
-$jenisKode = $jenisData['kode'];
+    $jenisData = $jenisMapping[$jenis] ?? ['nama' => 'Pelatihan', 'id' => 1, 'kode' => 'DEFAULT'];
+    $jenisNama = $jenisData['nama'];
+    $jenisPelatihanId = $jenisData['id'];
+    $jenisKode = $jenisData['kode'];
 
-// Data untuk form (dari controller)
-$pesertaData = $isEdit ? $pendaftaran->peserta : null;
-$kepegawaianData = $isEdit ? ($pendaftaran->peserta->kepegawaianPeserta ?? null) : null;
-$mentorData = $isEdit ? ($pendaftaran->pesertaMentor->first() ?? null) : null;
+    // Data untuk form (dari controller)
+    $pesertaData = $isEdit ? $pendaftaran->peserta : null;
+    $kepegawaianData = $isEdit ? ($pendaftaran->peserta->kepegawaianPeserta ?? null) : null;
+    $mentorData = $isEdit ? ($pendaftaran->pesertaMentor->first() ?? null) : null;
 
-// Tentukan fields yang required berdasarkan jenis
-$isCPNS = $jenis === 'cpns';
-$isPKA = $jenis === 'pka';
-$isPKP = $jenis === 'pkp';
-$isPKN = $jenis === 'pkn';
+    // Tentukan fields yang required berdasarkan jenis
+    $isCPNS = $jenis === 'cpns';
+    $isPKA = $jenis === 'pka';
+    $isPKP = $jenis === 'pkp';
+    $isPKN = $jenis === 'pkn';
 @endphp
 
 @extends('admin.partials.layout')
@@ -802,6 +802,26 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                     </div>
                                 </div>
                             </div>
+
+                            @if ($kunci_judul == true)
+                                <!-- Data Projek -->
+                                <div class="form-section-header">
+                                    <i class="fas fa-lightbulb"></i>Projek Aksi Perubahan
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Judul</label>
+                                    <input type="text" name="judul"
+                                        class="form-input @error('judul') error @enderror"
+                                        value="{{ optional($aksiPerubahan)->judul ?? old('judul') }}"
+                                        placeholder="anunya">
+                                    @error('judul')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            @endif
+                            
+                           
                         </div>
 
                         <div class="step-navigation">
