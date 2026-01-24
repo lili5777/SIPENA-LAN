@@ -434,5 +434,238 @@ class ExportController extends Controller
             ], 500);
         }
     }
-    
+
+    /**
+     * Halaman view untuk export sertifikat
+     */
+    public function viewExportSertifikat()
+    {
+        return view('admin.export.sertifikat');
+    }
+
+    /**
+     * Export Sertifikat Peserta ke PDF
+     * Setiap peserta mendapat 1 halaman landscape
+     */
+    public function exportSertifikat(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'jenis_pelatihan' => 'required',
+            'angkatan' => 'required',
+            'tahun' => 'required'
+        ]);
+
+        // Ambil filter dari request
+        $jenisPelatihan = $request->jenis_pelatihan;
+        $angkatan = $request->angkatan;
+        $tahun = $request->tahun;
+
+        // Query data peserta dengan filter dan relasi lengkap
+        $query = Pendaftaran::with([
+            'peserta',
+            'peserta.kepegawaian',
+            'peserta.kepegawaian.kabupaten',
+            'peserta.kepegawaian.provinsi',
+            'angkatan',
+            'angkatan.jenisPelatihan',
+            'jenisPelatihan'
+        ])->where('status_pendaftaran','Diterima');
+
+        // Apply filters
+        if ($jenisPelatihan) {
+            $query->whereHas('jenisPelatihan', function ($q) use ($jenisPelatihan) {
+                $q->where('nama_pelatihan', $jenisPelatihan);
+            });
+        }
+
+        if ($angkatan) {
+            $query->whereHas('angkatan', function ($q) use ($angkatan) {
+                $q->where('nama_angkatan', $angkatan);
+            });
+        }
+
+        if ($tahun) {
+            $query->whereHas('angkatan', function ($q) use ($tahun) {
+                $q->where('tahun', $tahun);
+            });
+        }
+
+        // Ambil data dan urutkan berdasarkan NDH atau ID
+        $pendaftaranList = $query->get()->sortBy(function ($pendaftaran) {
+            return $pendaftaran->peserta->ndh ?? 999;
+        });
+
+        // Jika tidak ada data
+        if ($pendaftaranList->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada data peserta untuk filter yang dipilih.');
+        }
+
+        // Format data peserta untuk PDF
+        $peserta = $pendaftaranList->map(function ($pendaftaran, $index) {
+            $p = $pendaftaran->peserta;
+            $kepeg = $p->kepegawaian;
+
+            // Ambil NDH dari tabel peserta, atau gunakan nomor urut jika tidak ada
+            $ndh = $p->ndh ?? str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+
+            // Ambil nama kabupaten dari relasi
+            $kabupaten = '';
+            if ($kepeg && $kepeg->kabupaten) {
+                $kabupaten = $kepeg->kabupaten->name;
+            } elseif ($kepeg && $kepeg->asal_instansi) {
+                // Fallback: ekstrak dari nama instansi
+                $kabupaten = $this->extractKabupaten($kepeg->asal_instansi);
+            }
+
+            // Ambil foto dari Google Drive dan convert ke base64
+            $fotoBase64 = null;
+            if ($p->file_pas_foto) {
+                $fotoBase64 = $this->getImageFromGoogleDrive($p->file_pas_foto);
+            }
+
+            return [
+                'nama' => $p->nama_lengkap ?? '-',
+                'nip' => $p->nip_nrp ?? '-',
+                'ndh' => str_pad($ndh, 2, '0', STR_PAD_LEFT),
+                'kabupaten' => $kabupaten ?: '-',
+                'foto' => $fotoBase64,
+                'instansi' => $kepeg->asal_instansi ?? '-'
+            ];
+        })->values()->toArray();
+
+        // Ekstrak angkatan tanpa kata "Angkatan"
+        $angkatanLabel = str_replace('Angkatan ', '', $angkatan);
+
+        // Convert logo dan badges ke base64
+        $logoBase64 = $this->getImageFromLocalFile('gambar/pusjar.png');
+        $badge1Base64 = $this->getImageFromLocalFile('gambar/wbbm.png');
+        $badge2Base64 = $this->getImageFromLocalFile('gambar/hut.png');
+        $bgBannerBase64 = $this->getImageFromLocalFile('gambar/bg_banner.png');
+
+        // Data untuk PDF
+        $data = [
+            'jenis_pelatihan' => $jenisPelatihan,
+            'angkatan' => $angkatanLabel,
+            'tahun' => $tahun,
+            'peserta' => $peserta,
+            'logo' => $logoBase64,
+            'badge1' => $badge1Base64,
+            'badge2' => $badge2Base64,
+            'bg_banner' => $bgBannerBase64,
+        ];
+
+        // Generate PDF dengan orientasi landscape
+        $pdf = Pdf::loadView('admin.export.templatesertifikat', $data);
+        $pdf->setPaper('A4', 'landscape');
+
+        // Set options untuk performance
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'Arial'
+        ]);
+
+        // Nama file
+        $filename = 'Sertifikat_' . str_replace(' ', '_', $jenisPelatihan) . '_' .
+            str_replace(' ', '_', $angkatan) . '_' .
+            $tahun . '.pdf';
+
+        // Log aktivitas
+        aktifitas('Mengekspor Sertifikat Peserta ' . $jenisPelatihan . ' ' . $angkatan . ' ' . $tahun);
+
+        return $pdf->stream($filename);
+    }
+
+    /**
+     * Ambil gambar dari Google Drive dan convert ke base64
+     * 
+     * @param string $path Path file di Google Drive
+     * @return string|null Base64 encoded image dengan data URI
+     */
+    private function getImageFromGoogleDrive($path)
+    {
+        try {
+            // Cek apakah file ada di Google Drive
+            if (!\Storage::disk('google')->exists($path)) {
+                return null;
+            }
+
+            // Ambil content file dari Google Drive
+            $content = \Storage::disk('google')->get($path);
+
+            // Ambil MIME type
+            $mimeType = \Storage::disk('google')->mimeType($path);
+
+            // Convert ke base64
+            $base64 = base64_encode($content);
+
+            // Return sebagai data URI untuk digunakan di img src
+            return 'data:' . $mimeType . ';base64,' . $base64;
+        } catch (\Exception $e) {
+            // Log error jika perlu
+            \Log::error('Error getting image from Google Drive: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Ambil gambar dari file lokal dan convert ke base64
+     * 
+     * @param string $relativePath Path relatif dari public folder
+     * @return string|null Base64 encoded image dengan data URI
+     */
+    private function getImageFromLocalFile($relativePath)
+    {
+        try {
+            $fullPath = public_path($relativePath);
+
+            if (!file_exists($fullPath)) {
+                \Log::error('File not found: ' . $fullPath);
+                return null;
+            }
+
+            $content = file_get_contents($fullPath);
+            $mimeType = mime_content_type($fullPath);
+            $base64 = base64_encode($content);
+
+            return 'data:' . $mimeType . ';base64,' . $base64;
+        } catch (\Exception $e) {
+            \Log::error('Error loading local image: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Helper function untuk ekstrak nama kabupaten dari instansi
+     * Contoh: "Pemerintah Kabupaten Barru" -> "Kabupaten Barru"
+     */
+    private function extractKabupaten($instansi)
+    {
+        // Pattern untuk mencari nama kabupaten/kota
+        $patterns = [
+            '/Kabupaten\s+([A-Za-z\s]+)/i',
+            '/Kota\s+([A-Za-z\s]+)/i',
+            '/Kab\.\s+([A-Za-z\s]+)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $instansi, $matches)) {
+                // Return "Kabupaten/Kota Nama"
+                if (stripos($matches[0], 'Kab.') !== false) {
+                    return 'Kabupaten ' . trim($matches[1]);
+                }
+                return trim($matches[0]);
+            }
+        }
+
+        // Jika tidak ketemu pattern, ambil 2-3 kata terakhir
+        $words = explode(' ', $instansi);
+        if (count($words) >= 2) {
+            return implode(' ', array_slice($words, -2));
+        }
+
+        return $instansi;
+    }
+
 }

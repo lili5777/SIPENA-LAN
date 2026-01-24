@@ -659,11 +659,6 @@ $startYear = 2020;
                     // Create FormData
                     const formData = new FormData(this);
 
-                    // Add additional options
-                    // formData.append('use_nip', document.getElementById('use_nip').checked ? 1 : 0);
-                    // formData.append('include_angkatan', document.getElementById('include_angkatan').checked ? 1 : 0);
-                    // formData.append('skip_missing', document.getElementById('skip_missing').checked ? 1 : 0);
-                    // formData.append('add_info', document.getElementById('add_info').checked ? 1 : 0);
 
                     // Simulate progress
                     let progress = 10;

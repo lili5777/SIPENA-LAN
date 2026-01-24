@@ -177,6 +177,14 @@ Route::middleware('auth')->group(function () {
         //  Route export Absen
         Route::get('/absen-peserta', [ExportController::class, 'indexAbsen'])->name('absenpeserta')->middleware('permission:export.absen');
         Route::get('/absen', [ExportController::class, 'exportAbsen'])->name('absen')->middleware('permission:export.absen');
+
+        // Halaman Export Sertifikat  
+        Route::get('/sertifikat', [ExportController::class, 'viewExportSertifikat'])
+            ->name('sertifikat.view');
+
+        // Proses Export Sertifikat
+        Route::get('/sertifikat/pdf', [ExportController::class, 'exportSertifikat'])
+            ->name('sertifikat');
     });
 
     Route::get('/import/peserta', [ImportController::class, 'showImportForm'])->name('admin.import.peserta');
