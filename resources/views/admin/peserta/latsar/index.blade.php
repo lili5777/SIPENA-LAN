@@ -1047,9 +1047,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 text-md-end">
-                                        <div class="avatar-placeholder rounded-3 bg-primary bg-opacity-10 p-4 d-inline-block">
-                                            <i class="fas fa-user fa-4x text-primary"></i>
+                                    <div class="col-md-4 text-center">
+                                        <div class="avatar-placeholder rounded-3 bg-primary bg-opacity-10 p-4 d-inline-flex flex-column align-items-center">
+                                            <i class="fas fa-user fa-4x text-primary mb-2"></i>
+
+                                            <label class="text-muted small mt-2">NDH</label>
+                                            <p class="fw-semibold mb-0 text-center">
+                                                ${peserta.ndh ?? '-'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

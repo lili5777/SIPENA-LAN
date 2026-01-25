@@ -585,7 +585,7 @@
         </div>
     @endif
 
-    @if ($kunci_judul == false)
+    @if ($kunci_judul == 0)
         <div class="no-data">
             <div class="no-data-icon">
                 <i class="fas fa-lock"></i>

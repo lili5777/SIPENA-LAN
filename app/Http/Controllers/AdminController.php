@@ -65,7 +65,8 @@ class AdminController extends Controller
                 // Ambil semua pendaftaran untuk ditampilkan
                 $semuaPendaftaran = $peserta->pendaftaran;
 
-                $kunci_judul = optional($pendaftaranTerbaru?->angkatan)->kunci_judul ?? false;
+                $kunci_judul = $pendaftaranTerbaru->angkatan->kunci_edit ?? false;
+                
 
                 // Jika ada pendaftaran terbaru, ambil data mentor
                 if ($pendaftaranTerbaru && $pendaftaranTerbaru->pesertaMentor->isNotEmpty()) {

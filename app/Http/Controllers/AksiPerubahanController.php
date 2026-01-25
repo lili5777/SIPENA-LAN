@@ -31,7 +31,7 @@ class AksiPerubahanController extends Controller
         
         // Ambil aksi perubahan untuk pendaftaran ini (seharusnya cuma 1)
         $aksiPerubahan = AksiPerubahan::where('id_pendaftar', $pendaftaran->id)->first();
-        $kunci_judul = optional($pendaftaran->angkatan)->kunci_judul ?? false;
+        $kunci_judul = $pendaftaran->angkatan->kunci_judul ?? false;
         // dd($kunci_judul);
         
         return view('admin.aksiperubahan.index', compact('aksiPerubahan', 'pendaftaran','kunci_judul'));

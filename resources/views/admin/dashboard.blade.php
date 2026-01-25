@@ -1055,7 +1055,7 @@
                     <span>Data Peserta</span>
                 </div>
                 <div class="section-actions">
-                    @if ($kunci_judul == true)
+                    @if ($kunci_judul == 1)
                         <a href="{{ route('admin.dashboard.edit') }}" class="btn-edit" title="Edit Data Peserta">
                             <i class="fas fa-edit"></i>
                             Edit Data
