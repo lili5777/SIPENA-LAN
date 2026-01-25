@@ -40,7 +40,7 @@ class DataPesertaSmartBangkom implements FromCollection, WithHeadings, WithMappi
             'peserta.kepegawaianPeserta.kabupaten',
             'angkatan',
             'jenisPelatihan'
-        ]);
+        ])->where('status_pendaftaran', 'Diterima');
 
         // Apply filters jika ada - berdasarkan nama, bukan ID
         if ($this->jenisPelatihan) {

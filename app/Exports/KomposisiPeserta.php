@@ -35,7 +35,7 @@ class KomposisiPeserta implements FromCollection, WithHeadings, WithStyles, With
             'peserta.kepegawaianPeserta',
             'jenisPelatihan',
             'angkatan'
-        ]);
+        ])->where('status_pendaftaran','Diterima');
 
         // Apply filters
         if ($this->jenisPelatihan) {

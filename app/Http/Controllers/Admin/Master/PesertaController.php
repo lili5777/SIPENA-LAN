@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 
 class PesertaController extends Controller
@@ -1293,167 +1294,158 @@ class PesertaController extends Controller
     public function destroy($jenis, $id)
     {
         try {
-            $jenisData = $this->getJenisData($jenis);
+            DB::transaction(function () use ($jenis, $id) {
 
-            // Ambil pendaftaran + relasi
-            $pendaftaran = Pendaftaran::with([
-                'peserta',
-                'peserta.kepegawaianPeserta',
-                'pesertaMentor'
-            ])->findOrFail($id);
+                // =========================
+                // 1. AMBIL DATA PENDAFTARAN
+                // =========================
+                $jenisData = $this->getJenisData($jenis);
 
-            // Validasi jenis pelatihan
-            if ($pendaftaran->id_jenis_pelatihan != $jenisData['id']) {
-                abort(404, 'Data tidak ditemukan untuk jenis pelatihan ini');
-            }
+                $pendaftaran = Pendaftaran::with([
+                    'peserta',
+                    'peserta.kepegawaianPeserta',
+                    'pesertaMentor',
+                    'angkatan',
+                    'jenisPelatihan',
+                ])->lockForUpdate()->findOrFail($id);
 
-            $peserta = $pendaftaran->peserta;
-
-            /*
-        |--------------------------------------------------------------------------
-        | 1. KUMPULKAN SEMUA FILE YANG TERKAIT
-        |--------------------------------------------------------------------------
-        */
-            $filesToDelete = [];
-
-            // File peserta
-            if ($peserta) {
-                $filesToDelete[] = $peserta->file_ktp;
-                $filesToDelete[] = $peserta->file_pas_foto;
-            }
-
-            // File kepegawaian
-            if ($peserta && $peserta->kepegawaianPeserta) {
-                $k = $peserta->kepegawaianPeserta;
-                $filesToDelete = array_merge($filesToDelete, [
-                    $k->file_sk_jabatan,
-                    $k->file_sk_pangkat,
-                    $k->file_sk_cpns,
-                    $k->file_spmt,
-                    $k->file_skp,
-                ]);
-            }
-
-            // File pendaftaran
-            $pendaftaranFileFields = [
-                'file_surat_tugas',
-                'file_surat_kesediaan',
-                'file_pakta_integritas',
-                'file_surat_komitmen',
-                'file_surat_kelulusan_seleksi',
-                'file_surat_sehat',
-                'file_surat_bebas_narkoba',
-                'file_surat_pernyataan_administrasi',
-                'file_sertifikat_penghargaan',
-                'file_persetujuan_mentor',
-            ];
-
-            foreach ($pendaftaranFileFields as $field) {
-                if (!empty($pendaftaran->$field)) {
-                    $filesToDelete[] = $pendaftaran->$field;
+                if ($pendaftaran->id_jenis_pelatihan != $jenisData['id']) {
+                    abort(404, 'Data tidak ditemukan');
                 }
-            }
 
-            /*
-        |--------------------------------------------------------------------------
-        | 2. HAPUS FILE DI GOOGLE DRIVE
-        |--------------------------------------------------------------------------
-        */
-            foreach (array_filter($filesToDelete) as $filePath) {
-                Storage::disk('google')->delete($filePath);
-            }
+                $peserta = $pendaftaran->peserta;
+                $angkatan = $pendaftaran->angkatan;
+                $jenisPelatihan = $pendaftaran->jenisPelatihan;
 
-            /*
-        |--------------------------------------------------------------------------
-        | 3. HAPUS FOLDER NIP (BESERTA ISINYA)
-        |--------------------------------------------------------------------------
-        */
-            if ($peserta) {
-                $tahun = date('Y');
+                // =========================
+                // 2. KUMPULKAN FILE
+                // =========================
+                $filesToDelete = [];
 
-                $jenisPelatihan = JenisPelatihan::find($pendaftaran->id_jenis_pelatihan);
-                $angkatan = Angkatan::find($pendaftaran->id_angkatan);
+                if ($peserta) {
+                    $filesToDelete[] = $peserta->file_ktp;
+                    $filesToDelete[] = $peserta->file_pas_foto;
+                }
 
-                $folderPath = "Berkas/{$tahun}/" .
-                    str_replace(' ', '_', $jenisPelatihan->kode_pelatihan) . '/' .
-                    str_replace(' ', '_', $angkatan->nama_angkatan) . '/' .
-                    $peserta->nip_nrp;
+                if ($peserta && $peserta->kepegawaianPeserta) {
+                    $k = $peserta->kepegawaianPeserta;
+                    $filesToDelete = array_merge($filesToDelete, [
+                        $k->file_sk_jabatan,
+                        $k->file_sk_pangkat,
+                        $k->file_sk_cpns,
+                        $k->file_spmt,
+                        $k->file_skp,
+                    ]);
+                }
 
-                Storage::disk('google')->deleteDirectory($folderPath);
-            }
+                $pendaftaranFiles = [
+                    'file_surat_tugas',
+                    'file_surat_kesediaan',
+                    'file_pakta_integritas',
+                    'file_surat_komitmen',
+                    'file_surat_kelulusan_seleksi',
+                    'file_surat_sehat',
+                    'file_surat_bebas_narkoba',
+                    'file_surat_pernyataan_administrasi',
+                    'file_sertifikat_penghargaan',
+                    'file_persetujuan_mentor',
+                ];
 
-            /*
-        |--------------------------------------------------------------------------
-        | 4. HAPUS DATA RELASI
-        |--------------------------------------------------------------------------
-        */
-
-            // Mentor
-            PesertaMentor::where('id_pendaftaran', $pendaftaran->id)->delete();
-
-            // Kepegawaian
-            if ($peserta && $peserta->kepegawaianPeserta) {
-                $peserta->kepegawaianPeserta->delete();
-            }
-
-            // Hapus pendaftaran
-            $pendaftaran->delete();
-
-            /*
-        |--------------------------------------------------------------------------
-        | 5. HAPUS PESERTA & USER JIKA TIDAK ADA PENDAFTARAN LAIN
-        |--------------------------------------------------------------------------
-        */
-            if ($peserta) {
-                $jumlahPendaftaranLain = Pendaftaran::where('id_peserta', $peserta->id)->count();
-
-                if ($jumlahPendaftaranLain === 0) {
-                    $user = User::where('peserta_id', $peserta->id)->first();
-                    if ($user) {
-                        $user->delete();
+                foreach ($pendaftaranFiles as $field) {
+                    if (!empty($pendaftaran->$field)) {
+                        $filesToDelete[] = $pendaftaran->$field;
                     }
-                    $peserta->delete();
                 }
-            }
 
-            /*
-        |--------------------------------------------------------------------------
-        | 6. LOG AKTIVITAS
-        |--------------------------------------------------------------------------
-        */
-            $angkatanNama = $angkatan->nama_angkatan ?? '-';
-            aktifitas(
-                "Menghapus Data Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatanNama}",
-                $peserta
-            );
+                // =========================
+                // 3. HAPUS FILE (SETELAH COMMIT)
+                // =========================
+                DB::afterCommit(function () use ($filesToDelete, $peserta, $angkatan, $jenisPelatihan) {
 
-            /*
-        |--------------------------------------------------------------------------
-        | 7. RESPONSE
-        |--------------------------------------------------------------------------
-        */
+                    foreach (array_filter($filesToDelete) as $file) {
+                        Storage::disk('google')->delete($file);
+                    }
+
+                    if ($peserta) {
+                        $folderPath = "Berkas/" . date('Y') . "/" .
+                            str_replace(' ', '_', $jenisPelatihan->kode_pelatihan) . "/" .
+                            str_replace(' ', '_', $angkatan->nama_angkatan) . "/" .
+                            $peserta->nip_nrp;
+
+                        Storage::disk('google')->deleteDirectory($folderPath);
+                    }
+                });
+
+                // =========================
+                // 4. HAPUS RELASI
+                // =========================
+                PesertaMentor::where('id_pendaftaran', $pendaftaran->id)->delete();
+
+                if ($peserta && $peserta->kepegawaianPeserta) {
+                    $peserta->kepegawaianPeserta->delete();
+                }
+
+                $pendaftaran->delete();
+
+                // =========================
+                // 5. RAPINKAN NDH (AMAN)
+                // =========================
+                $pesertaBerNDH = Peserta::whereHas('pendaftaran', function ($q) use ($angkatan) {
+                    $q->where('id_angkatan', $angkatan->id);
+                })
+                    ->whereNotNull('ndh')
+                    ->orderBy('ndh')
+                    ->lockForUpdate()
+                    ->get();
+
+                $no = 1;
+                foreach ($pesertaBerNDH as $p) {
+                    $p->update(['ndh' => $no++]);
+                }
+                // =========================
+                // 6. HAPUS PESERTA & USER
+                // =========================
+                if ($peserta) {
+                    $jumlahPendaftaran = Pendaftaran::where('id_peserta', $peserta->id)->count();
+
+                    if ($jumlahPendaftaran === 0) {
+                        User::where('peserta_id', $peserta->id)->delete();
+                        $peserta->delete();
+                    }
+                }
+
+                // =========================
+                // 7. LOG
+                // =========================
+                aktifitas(
+                    "Menghapus Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatan->nama_angkatan}",
+                    $peserta
+                );
+            });
+
+            // =========================
+            // 8. RESPONSE
+            // =========================
             if (request()->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Data peserta berhasil dihapus'
+                    'message' => 'Data peserta berhasil dihapus & NDH dirapikan'
                 ]);
             }
 
             return redirect()
                 ->route('peserta.index', ['jenis' => $jenis])
-                ->with('success', 'Data peserta berhasil dihapus');
-        } catch (\Exception $e) {
+                ->with('success', 'Data peserta berhasil dihapus & NDH dirapikan');
+        } catch (\Throwable $e) {
 
             if (request()->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal menghapus data: ' . $e->getMessage()
+                    'message' => $e->getMessage()
                 ], 500);
             }
 
-            return redirect()
-                ->route('peserta.index', ['jenis' => $jenis])
-                ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+            return back()->with('error', $e->getMessage());
         }
     }
 }

@@ -41,7 +41,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'angkatan',
             'pesertaMentor.mentor',
             'jenisPelatihan'
-        ]);
+        ])->where('status_pendaftaran', 'Diterima');
 
         // Apply filters jika ada - berdasarkan nama, bukan ID
         if ($this->jenisPelatihan) {
