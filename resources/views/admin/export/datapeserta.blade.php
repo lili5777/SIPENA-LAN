@@ -288,6 +288,26 @@
 
 @section('content')
     <div class="export-section">
+        {{-- ALERT ERROR --}}
+        @if (session('error'))
+            <div class="alert alert-danger" style="
+                background: #fee2e2;
+                border-left: 5px solid #ef4444;
+                color: #7f1d1d;
+                padding: 1rem 1.25rem;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                animation: fadeIn 0.5s ease-out;
+            ">
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Error!</strong>
+                </div>
+                <div style="margin-top:0.5rem;">
+                    {{ session('error') }}
+                </div>
+            </div>
+        @endif
         <div class="section-header">
             <div class="section-title">
                 <i class="fas fa-file-export"></i>
