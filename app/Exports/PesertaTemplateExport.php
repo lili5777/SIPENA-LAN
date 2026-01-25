@@ -23,7 +23,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
             // ================= CONTOH 1 =================
             [
                 'PKA',
-                'Angkatan II',
+                'Angkatan I',
                 '2026',
                 '197905012005011001',
                 'Ahmad Fauzi, S.STP',
@@ -67,7 +67,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
             // ================= CONTOH 2 =================
             [
                 'LATSAR',
-                'Angkatan II',
+                'Angkatan I',
                 '2026',
                 '199001122020121001',
                 'Siti Rahmawati, S.IP',
@@ -111,7 +111,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
             // ================= CONTOH 3 =================
             [
                 'PKP',
-                'Angkatan II',
+                'Angkatan I',
                 '2026',
                 '198512312010011002',
                 'Rizal Mahendra, S.Kom',
@@ -155,7 +155,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
             // ================= CONTOH 4 =================
             [
                 'PKN TK II',
-                'Angkatan II',
+                'Angkatan I',
                 '2026',
                 '197811112003031004',
                 'Dedi Kurniawan, M.AP',

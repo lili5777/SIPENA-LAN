@@ -220,20 +220,54 @@ class PesertaController extends Controller
         $jenisData = $this->getJenisData($jenis);
         $jenisPelatihanId = $jenisData['id'];
 
+        $user = Auth::user();
+
+        // =====================================
+        // AMBIL ANGKATAN YANG DIAKSES OLEH PIC
+        // =====================================
+        $picAngkatanIds = [];
+
+        if ($user->role->name === 'pic') {
+            $picAngkatanIds = $user->picPesertas
+                ->where('jenispelatihan_id', $jenisPelatihanId)
+                ->pluck('angkatan_id')
+                ->unique()
+                ->toArray();
+        }
+
+        // =====================
+        // DATA MASTER
+        // =====================
         $mentorList = Mentor::where('status_aktif', true)->get();
-        $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
-            ->where('status_angkatan', 'Dibuka')
-            ->get();
+
+        // =====================
+        // QUERY ANGKATAN
+        // =====================
+        $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
+            ->where('status_angkatan', 'Dibuka');
+
+        // Filter khusus PIC
+        if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
+            $angkatanQuery->whereIn('id', $picAngkatanIds);
+        }
+
+        $angkatanList = $angkatanQuery->get();
+
         $provinsiList = Provinsi::all();
         $kabupatenList = Kabupaten::all();
 
+        // =====================
+        // FLAG VIEW
+        // =====================
         $isEdit = false;
-
-        $kunci_judul=false;
+        $kunci_judul = false;
         $aksiPerubahan = null;
 
         session(['jenis_pelatihan' => $jenis]);
 
+        // =====================
+        // RESPONSE AJAX
+        // =====================
         if ($request->ajax()) {
             return response()->json([
                 'jenis_pelatihan' => $jenisPelatihanId,
@@ -244,6 +278,9 @@ class PesertaController extends Controller
             ]);
         }
 
+        // =====================
+        // VIEW
+        // =====================
         return view("admin.peserta.{$jenis}.create", compact(
             'mentorList',
             'angkatanList',

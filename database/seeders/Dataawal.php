@@ -60,29 +60,20 @@ class Dataawal extends Seeder
             Angkatan::create([
                 'id_jenis_pelatihan' => $jp->id,
                 'nama_angkatan' => 'Angkatan I',
-                'tahun' => 2025,
+                'tahun' => 2026,
                 'tanggal_mulai' => '2025-01-01',
                 'tanggal_selesai' => '2025-03-31',
                 'kuota' => 50,
-                'status_angkatan' => 'Ditutup',
-            ]);
-
-            Angkatan::create([
-                'id_jenis_pelatihan' => $jp->id,
-                'nama_angkatan' => 'Angkatan II',
-                'tahun' => 2026,
-                'tanggal_mulai' => '2026-01-01',
-                'tanggal_selesai' => '2026-03-31',
-                'kuota' => 50,
                 'status_angkatan' => 'Dibuka',
             ]);
+
         }
 
         // Buat PICPESERTA
         PicPeserta::create([
             'user_id' => 3, // ID user PIC
             'jenispelatihan_id' => 2, // Sesuaikan dengan jenis pelatihan yang ada
-            'angkatan_id' => 1, // Sesuaikan dengan angkatan yang ada
+            'angkatan_id' => 2, // Sesuaikan dengan angkatan yang ada
         ]);
 
         // Ambil data provinsi

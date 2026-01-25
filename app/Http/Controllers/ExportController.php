@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Auth;
 use ZipArchive;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
+use App\Exports\DataPesertaSmartBangkomTemplate;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 class ExportController extends Controller
 {
     public function index()
@@ -88,10 +93,101 @@ class ExportController extends Controller
         if ($template === 'smart_bangkom') {
             aktifitas('Mengekspor Data Peserta - Template Smart Bangkom');
 
-            return Excel::download(
-                new DataPesertaSmartBangkom($jenisPelatihan, $angkatan, $tahun),
-                $fileName
-            );
+            // return Excel::download(
+            //     new DataPesertaSmartBangkom($jenisPelatihan, $angkatan, $tahun),
+            //     $fileName
+            // );
+            // return Excel::download(
+            //    new DataPesertaSmartBangkomTemplate($jenisPelatihan, $angkatan, $tahun),
+            //   $fileName
+            // );
+            $templatePath = public_path('smartbangkom.xlsx');
+
+
+            if (!file_exists($templatePath)) {
+                abort(404, 'Template Excel tidak ditemukan');
+            }
+
+
+            // 🔑 Load TEMPLATE ASLI
+            $spreadsheet = IOFactory::load($templatePath);
+            $sheet = $spreadsheet->getActiveSheet();
+
+
+            // 🔍 Ambil data peserta
+            $data = Pendaftaran::with(['peserta.kepegawaianPeserta'])
+                ->where('status_pendaftaran', 'Diterima')
+                ->get();
+
+
+            // ✅ Mulai isi dari BARIS KE-3
+            $row = 3;
+
+
+            foreach ($data as $item) {
+                $p = $item->peserta;
+                $k = $p->kepegawaianPeserta;
+
+
+                // 🔁 Mapping gender sesuai dropdown template
+                $gender = match (strtolower($p->jenis_kelamin)) {
+                    'perempuan', 'wanita' => 'Wanita',
+                    'laki-laki', 'laki laki', 'pria' => 'Pria',
+                    default => '',
+                };
+
+
+                // ===== ISI CELL SESUAI TEMPLATE =====
+                $sheet->setCellValue("A{$row}", $p->nama_lengkap);
+                $sheet->setCellValueExplicit("B{$row}", $p->nip_nrp, DataType::TYPE_STRING);
+                $sheet->setCellValue("C{$row}", $gender);
+                $sheet->setCellValue("D{$row}", $p->agama);
+                $sheet->setCellValue("E{$row}", $p->tempat_lahir);
+
+
+                // 📅 TANGGAL LAHIR (dd-mm-yy)
+                if ($p->tanggal_lahir) {
+                    $sheet->setCellValue(
+                        "F{$row}",
+                        Date::PHPToExcel($p->tanggal_lahir)
+                    );
+
+
+                    $sheet->getStyle("F{$row}")
+                        ->getNumberFormat()
+                        ->setFormatCode('dd-mm-yyyy');
+                } else {
+                    $sheet->setCellValue("F{$row}", '');
+                }
+
+
+                $sheet->setCellValue("G{$row}", $p->email_pribadi);
+                $sheet->setCellValueExplicit(
+                    "H{$row}",
+                    $p->nomor_hp ?? ($k->nomor_telepon_kantor ?? ''),
+                    DataType::TYPE_STRING
+                );
+
+
+                $sheet->setCellValue("I{$row}", 'PNS');
+                $sheet->setCellValue("J{$row}", $k->golongan_ruang ?? '');
+                $sheet->setCellValue("K{$row}", $k->pangkat ?? '');
+                $sheet->setCellValue("L{$row}", $k->jabatan ?? '');
+                $sheet->setCellValue("M{$row}", 'PNBP');
+                $sheet->setCellValue("N{$row}", 'APBD');
+                $sheet->setCellValue("O{$row}", $k->asal_instansi ?? '');
+                $sheet->setCellValue("P{$row}", $k->alamat_kantor ?? '');
+
+
+                $row++;
+            }
+
+
+            // ⬇️ Download TANPA MERUSAK TEMPLATE
+            return response()->streamDownload(function () use ($spreadsheet) {
+                $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+                $writer->save('php://output');
+            }, 'SMART_BANGKOM.xlsx');
         } else {
             aktifitas('Mengekspor Data Peserta - Template Form Registrasi');
 
