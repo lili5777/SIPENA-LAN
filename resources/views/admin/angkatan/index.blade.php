@@ -230,123 +230,139 @@
                     </thead>
                     <tbody>
                         @forelse($angkatan as $index => $item)
-                            @php
-                                // Mapping status untuk ikon dan warna
-                                $statusConfig = [
-                                    'Dibuka' => [
-                                        'color' => 'status-success',
-                                        'icon' => 'fa-door-open',
-                                        'text' => 'Dibuka'
-                                    ],
-                                    'Berlangsung' => [
-                                        'color' => 'status-info',
-                                        'icon' => 'fa-play-circle',
-                                        'text' => 'Berlangsung'
-                                    ],
-                                    'Selesai' => [
-                                        'color' => 'status-warning',
-                                        'icon' => 'fa-check-circle',
-                                        'text' => 'Selesai'
-                                    ],
-                                    'Ditutup' => [
-                                        'color' => 'status-danger',
-                                        'icon' => 'fa-door-closed',
-                                        'text' => 'Ditutup'
-                                    ]
-                                ];
+                                                    @php
+                            // Mapping status untuk ikon dan warna
+                            $statusConfig = [
+                                'Dibuka' => [
+                                    'color' => 'status-success',
+                                    'icon' => 'fa-door-open',
+                                    'text' => 'Dibuka'
+                                ],
+                                'Berlangsung' => [
+                                    'color' => 'status-info',
+                                    'icon' => 'fa-play-circle',
+                                    'text' => 'Berlangsung'
+                                ],
+                                'Selesai' => [
+                                    'color' => 'status-warning',
+                                    'icon' => 'fa-check-circle',
+                                    'text' => 'Selesai'
+                                ],
+                                'Ditutup' => [
+                                    'color' => 'status-danger',
+                                    'icon' => 'fa-door-closed',
+                                    'text' => 'Ditutup'
+                                ]
+                            ];
 
-                                $currentStatus = $item->status_angkatan;
-                                $statusData = $statusConfig[$currentStatus] ?? [
-                                    'color' => 'status-secondary',
-                                    'icon' => 'fa-question-circle',
-                                    'text' => $currentStatus
-                                ];
-                            @endphp
-                            <tr class="angkatan-row" data-angkatan-id="{{ $item->id }}">
-                                <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="angkatan-icon me-3"
-                                            style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold angkatan-name">{{ $item->nama_angkatan }}</div>
-                                            <div class="text-muted small">
-                                                <i class="fas fa-clock me-1"></i>
-                                                Dibuat: {{ $item->dibuat_pada ? \Carbon\Carbon::parse($item->dibuat_pada)->format('d/m/Y H:i') : '-' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <p class="mb-0 fw-semibold angkatan-jenis">
-                                        <i class="fas fa-graduation-cap me-1"></i>
-                                        {{ $item->jenisPelatihan->nama_pelatihan ?? '-' }}
-                                    </p>
-                                </td>
-                                <td>
-                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        {{ $item->tahun }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <p class="mb-0 text-muted small">
-                                        <i class="fas fa-calendar-day me-1"></i>
-                                        Mulai: {{ $item->tanggal_mulai ? \Carbon\Carbon::parse($item->tanggal_mulai)->format('d/m/Y') : '-' }}
-                                        <br>
-                                        <i class="fas fa-calendar-check me-1"></i>
-                                        Selesai: {{ $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->format('d/m/Y') : '-' }}
-                                    </p>
-                                </td>
-                                <td>
-                                    <div class="progress" style="height: 8px;">
-                                        @php
-                                            $pesertaCount = $item->pendaftaran->count() ?? 0;
-                                            $kuota = $item->kuota ?? 1;
-                                            $percentage = $kuota > 0 ? min(100, ($pesertaCount / $kuota) * 100) : 0;
-                                            $color = $percentage >= 90 ? 'bg-danger' : ($percentage >= 70 ? 'bg-warning' : 'bg-success');
-                                        @endphp
-                                        <div class="progress-bar {{ $color }}" role="progressbar" 
-                                             style="width: {{ $percentage }}%" 
-                                             aria-valuenow="{{ $percentage }}" 
-                                             aria-valuemin="0" 
-                                             aria-valuemax="100"
-                                             data-bs-toggle="tooltip" 
-                                             title="{{ $pesertaCount }}/{{ $kuota }} peserta">
-                                        </div>
-                                    </div>
-                                    <small class="text-muted mt-1 d-block">
-                                        {{ $pesertaCount }}/{{ $kuota }} peserta
-                                    </small>
-                                </td>
-                                <td>
-                                    <span class="badge custom-badge {{ $statusData['color'] }} angkatan-status">
-                                        <i class="fas {{ $statusData['icon'] }} me-1"></i>
-                                        {{ $statusData['text'] }}
-                                    </span>
-                                </td>
-                                <td class="text-center pe-4">
-                                    <div class="btn-group" role="group">
-                                        @if(auth()->user()->hasPermission('angkatan.update'))
-                                        <a href="{{ route('angkatan.edit', $item->id) }}" 
-                                           class="btn btn-sm btn-outline-warning btn-action"
-                                           data-bs-toggle="tooltip" title="Edit Angkatan">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        @endif
-                                        @if(auth()->user()->hasPermission('angkatan.delete'))
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-angkatan"
-                                            data-id="{{ $item->id }}" 
-                                            data-name="{{ $item->nama_angkatan }}"
-                                            data-bs-toggle="tooltip" title="Hapus Angkatan">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
+                            $currentStatus = $item->status_angkatan;
+                            $statusData = $statusConfig[$currentStatus] ?? [
+                                'color' => 'status-secondary',
+                                'icon' => 'fa-question-circle',
+                                'text' => $currentStatus
+                            ];
+                                                    @endphp
+                                                    <tr class="angkatan-row" data-angkatan-id="{{ $item->id }}">
+                                                        <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="angkatan-icon me-3"
+                                                                    style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
+                                                                    <i class="fas fa-calendar-alt"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="fw-bold angkatan-name">{{ $item->nama_angkatan }}</div>
+                                                                    <div class="text-muted small">
+                                                                        <i class="fas fa-clock me-1"></i>
+                                                                        Dibuat: {{ $item->dibuat_pada ? \Carbon\Carbon::parse($item->dibuat_pada)->format('d/m/Y H:i') : '-' }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <p class="mb-0 fw-semibold angkatan-jenis">
+                                                                <i class="fas fa-graduation-cap me-1"></i>
+                                                                {{ $item->jenisPelatihan->nama_pelatihan ?? '-' }}
+                                                            </p>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                                                <i class="fas fa-calendar me-1"></i>
+                                                                {{ $item->tahun }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <p class="mb-0 text-muted small">
+                                                                <i class="fas fa-calendar-day me-1"></i>
+                                                                Mulai: {{ $item->tanggal_mulai ? \Carbon\Carbon::parse($item->tanggal_mulai)->format('d/m/Y') : '-' }}
+                                                                <br>
+                                                                <i class="fas fa-calendar-check me-1"></i>
+                                                                Selesai: {{ $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->format('d/m/Y') : '-' }}
+                                                            </p>
+                                                        </td>
+                                                        <td>
+                                                            <div class="progress" style="height: 8px;">
+                                                                @php
+                            $pesertaCount = $item->pendaftaran->count() ?? 0;
+                            $kuota = $item->kuota ?? 1;
+                            $percentage = $kuota > 0 ? min(100, ($pesertaCount / $kuota) * 100) : 0;
+                            $color = $percentage >= 90 ? 'bg-danger' : ($percentage >= 70 ? 'bg-warning' : 'bg-success');
+                                                                @endphp
+                                                                <div class="progress-bar {{ $color }}" role="progressbar" 
+                                                                     style="width: {{ $percentage }}%" 
+                                                                     aria-valuenow="{{ $percentage }}" 
+                                                                     aria-valuemin="0" 
+                                                                     aria-valuemax="100"
+                                                                     data-bs-toggle="tooltip" 
+                                                                     title="{{ $pesertaCount }}/{{ $kuota }} peserta">
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-muted mt-1 d-block">
+                                                                {{ $pesertaCount }}/{{ $kuota }} peserta
+                                                            </small>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge custom-badge {{ $statusData['color'] }} angkatan-status">
+                                                                <i class="fas {{ $statusData['icon'] }} me-1"></i>
+                                                                {{ $statusData['text'] }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-center pe-4">
+                                                            <div class="btn-group" role="group">
+                                                                @php
+                            $canEdit = auth()->user()->hasPermission('angkatan.update');
+                            $canDelete = auth()->user()->hasPermission('angkatan.delete');
+
+                            // Jika user adalah PIC, cek akses ke angkatan ini
+                            if (auth()->user()->isPic()) {
+                                $hasAccess = auth()->user()->picPesertas()
+                                    ->where('angkatan_id', $item->id)
+                                    ->exists();
+
+                                $canEdit = $canEdit && $hasAccess;
+                                $canDelete = $canDelete && $hasAccess;
+                            }
+                                                                @endphp
+                                                                @if($canEdit)
+                                                                <a href="{{ route('angkatan.edit', $item->id) }}" class="btn btn-sm btn-outline-warning btn-action"
+                                                                    data-bs-toggle="tooltip" title="Edit Angkatan">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                                                @endif
+
+                                                                @if($canDelete)
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-angkatan" data-id="{{ $item->id }}"
+                                                                        data-name="{{ $item->nama_angkatan }}" data-bs-toggle="tooltip" title="Hapus Angkatan">
+                                                                        <i class="fas fa-trash-alt"></i>
+                                                                    </button>
+                                                                @endif
+
+                                                                @if(!$canEdit && !$canDelete)
+                                                                <span class="badge bg-secondary">Tidak Ada Akses</span>
+                                                                @endif
+                                                            </div>
+                                                        </td>
+                                                    </tr>
                         @empty
                             <tr class="empty-state-row">
                                 <td colspan="8" class="text-center py-5">
@@ -356,9 +372,11 @@
                                         </div>
                                         <h5 class="text-muted mb-2">Belum ada angkatan</h5>
                                         <p class="text-muted mb-4">Tidak ada angkatan yang terdaftar</p>
+                                        @if (auth()->user()->role()->name == 'admin')
                                         <a href="{{ route('angkatan.create') }}" class="btn btn-primary">
                                             <i class="fas fa-plus me-1"></i> Tambah Angkatan
                                         </a>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

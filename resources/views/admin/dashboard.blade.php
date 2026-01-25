@@ -1055,10 +1055,13 @@
                     <span>Data Peserta</span>
                 </div>
                 <div class="section-actions">
-                    <a href="{{ route('admin.dashboard.edit') }}" class="btn-edit" title="Edit Data Peserta">
-                        <i class="fas fa-edit"></i>
-                        Edit Data
-                    </a>
+                    @if ($kunci_judul == true)
+                        <a href="{{ route('admin.dashboard.edit') }}" class="btn-edit" title="Edit Data Peserta">
+                            <i class="fas fa-edit"></i>
+                            Edit Data
+                        </a>
+                    @endif
+
                     <button class="btn-refresh" onclick="window.location.reload()">
                         <i class="fas fa-redo"></i>
                         Refresh
@@ -1943,8 +1946,8 @@
                                 </span>
                                 <span class="data-value">
                                     @php
-                $statusMentoring = $pendaftaranTerbaru->pesertaMentor->first()->status_mentoring ?? null;
-                $statusClass = $statusMentoring === 'aktif' ? 'active' : ($statusMentoring === 'selesai' ? 'success' : 'pending');
+            $statusMentoring = $pendaftaranTerbaru->pesertaMentor->first()->status_mentoring ?? null;
+            $statusClass = $statusMentoring === 'aktif' ? 'active' : ($statusMentoring === 'selesai' ? 'success' : 'pending');
                                     @endphp
                                     @if($statusMentoring)
                                         <span class="status-badge {{ $statusClass }}">
@@ -2053,37 +2056,37 @@
                                 </h5>
 
                                 @php
-                                    $dokumenKepegawaian = [
-                                        ['field' => 'file_sk_jabatan', 'name' => 'SK Jabatan', 'icon' => 'fa-file-contract', 'empty_icon' => 'fa-file'],
-                                        ['field' => 'file_sk_pangkat', 'name' => 'SK Pangkat', 'icon' => 'fa-medal', 'empty_icon' => 'fa-file'],
-                                        ['field' => 'file_sk_cpns', 'name' => 'SK CPNS', 'icon' => 'fa-file-signature', 'empty_icon' => 'fa-file'],
-                                        ['field' => 'file_spmt', 'name' => 'SPMT', 'icon' => 'fa-handshake', 'empty_icon' => 'fa-file'],
-                                        ['field' => 'file_skp', 'name' => 'SKP', 'icon' => 'fa-chart-line', 'empty_icon' => 'fa-file'],
-                                    ];
+        $dokumenKepegawaian = [
+            ['field' => 'file_sk_jabatan', 'name' => 'SK Jabatan', 'icon' => 'fa-file-contract', 'empty_icon' => 'fa-file'],
+            ['field' => 'file_sk_pangkat', 'name' => 'SK Pangkat', 'icon' => 'fa-medal', 'empty_icon' => 'fa-file'],
+            ['field' => 'file_sk_cpns', 'name' => 'SK CPNS', 'icon' => 'fa-file-signature', 'empty_icon' => 'fa-file'],
+            ['field' => 'file_spmt', 'name' => 'SPMT', 'icon' => 'fa-handshake', 'empty_icon' => 'fa-file'],
+            ['field' => 'file_skp', 'name' => 'SKP', 'icon' => 'fa-chart-line', 'empty_icon' => 'fa-file'],
+        ];
 
-                                    if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
-                                        $dokumenKepegawaian = array_filter($dokumenKepegawaian, function ($dokumen) {
-                                            return !in_array($dokumen['field'], ['file_sk_jabatan', 'file_sk_pangkat']);
-                                        });
-                                    }
+        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
+            $dokumenKepegawaian = array_filter($dokumenKepegawaian, function ($dokumen) {
+                return !in_array($dokumen['field'], ['file_sk_jabatan', 'file_sk_pangkat']);
+            });
+        }
 
-                                    if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
-                                        $dokumenKepegawaian = array_filter($dokumenKepegawaian, function ($dokumen) {
-                                            return !in_array($dokumen['field'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
-                                        });
-                                    }
+        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
+            $dokumenKepegawaian = array_filter($dokumenKepegawaian, function ($dokumen) {
+                return !in_array($dokumen['field'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
+            });
+        }
 
-                                    if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
-                                        $dokumenKepegawaian = array_filter($dokumenKepegawaian, function ($dokumen) {
-                                            return !in_array($dokumen['field'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
-                                        });
-                                    }
+        if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
+            $dokumenKepegawaian = array_filter($dokumenKepegawaian, function ($dokumen) {
+                return !in_array($dokumen['field'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
+            });
+        }
                                 @endphp
 
                                 @foreach($dokumenKepegawaian as $dokumen)
                                     @php
-                                        $hasFile = !empty($kepegawaian->{$dokumen['field']});
-                                        $filePath = $hasFile ? $kepegawaian->{$dokumen['field']} : '';
+            $hasFile = !empty($kepegawaian->{$dokumen['field']});
+            $filePath = $hasFile ? $kepegawaian->{$dokumen['field']} : '';
                                     @endphp
                                     <div class="file-item {{ !$hasFile ? 'empty' : '' }}">
                                         <div class="file-info">
@@ -2125,42 +2128,42 @@
                                 </h5>
 
                                 @php
-                                    $dokumenPendaftaran = [
-                                        ['field' => 'file_surat_tugas', 'name' => 'Surat Tugas', 'icon' => 'fa-envelope', 'empty_icon' => 'fa-envelope-open'],
-                                        ['field' => 'file_surat_kesediaan', 'name' => 'Surat Kesediaan', 'icon' => 'fa-hand-paper', 'empty_icon' => 'fa-hand'],
-                                        ['field' => 'file_pakta_integritas', 'name' => 'Pakta Integritas', 'icon' => 'fa-scroll', 'empty_icon' => 'fa-scroll'],
-                                        ['field' => 'file_surat_komitmen', 'name' => 'Surat Komitmen', 'icon' => 'fa-file-signature', 'empty_icon' => 'fa-file'],
-                                        ['field' => 'file_surat_kelulusan_seleksi', 'name' => 'Surat Kelulusan Seleksi', 'icon' => 'fa-graduation-cap', 'empty_icon' => 'fa-graduation-cap'],
-                                        ['field' => 'file_surat_sehat', 'name' => 'Surat Sehat', 'icon' => 'fa-heart', 'empty_icon' => 'fa-heart'],
-                                        ['field' => 'file_surat_bebas_narkoba', 'name' => 'Surat Bebas Narkoba', 'icon' => 'fa-ban', 'empty_icon' => 'fa-ban'],
-                                        ['field' => 'file_surat_pernyataan_administrasi', 'name' => 'Pernyataan Administrasi', 'icon' => 'fa-clipboard-check', 'empty_icon' => 'fa-clipboard'],
-                                        ['field' => 'file_sertifikat_penghargaan', 'name' => 'Sertifikat Penghargaan', 'icon' => 'fa-award', 'empty_icon' => 'fa-award'],
-                                        ['field' => 'file_persetujuan_mentor', 'name' => 'Persetujuan Mentor', 'icon' => 'fa-user-check', 'empty_icon' => 'fa-user'],
-                                    ];
+        $dokumenPendaftaran = [
+            ['field' => 'file_surat_tugas', 'name' => 'Surat Tugas', 'icon' => 'fa-envelope', 'empty_icon' => 'fa-envelope-open'],
+            ['field' => 'file_surat_kesediaan', 'name' => 'Surat Kesediaan', 'icon' => 'fa-hand-paper', 'empty_icon' => 'fa-hand'],
+            ['field' => 'file_pakta_integritas', 'name' => 'Pakta Integritas', 'icon' => 'fa-scroll', 'empty_icon' => 'fa-scroll'],
+            ['field' => 'file_surat_komitmen', 'name' => 'Surat Komitmen', 'icon' => 'fa-file-signature', 'empty_icon' => 'fa-file'],
+            ['field' => 'file_surat_kelulusan_seleksi', 'name' => 'Surat Kelulusan Seleksi', 'icon' => 'fa-graduation-cap', 'empty_icon' => 'fa-graduation-cap'],
+            ['field' => 'file_surat_sehat', 'name' => 'Surat Sehat', 'icon' => 'fa-heart', 'empty_icon' => 'fa-heart'],
+            ['field' => 'file_surat_bebas_narkoba', 'name' => 'Surat Bebas Narkoba', 'icon' => 'fa-ban', 'empty_icon' => 'fa-ban'],
+            ['field' => 'file_surat_pernyataan_administrasi', 'name' => 'Pernyataan Administrasi', 'icon' => 'fa-clipboard-check', 'empty_icon' => 'fa-clipboard'],
+            ['field' => 'file_sertifikat_penghargaan', 'name' => 'Sertifikat Penghargaan', 'icon' => 'fa-award', 'empty_icon' => 'fa-award'],
+            ['field' => 'file_persetujuan_mentor', 'name' => 'Persetujuan Mentor', 'icon' => 'fa-user-check', 'empty_icon' => 'fa-user'],
+        ];
 
-                                    if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
-                                        $dokumenPendaftaran = array_filter($dokumenPendaftaran, function ($dokumen) {
-                                            return !in_array($dokumen['field'], ['file_pakta_integritas', 'file_surat_komitmen', 'file_surat_kelulusan_seleksi', 'file_surat_bebas_narkoba', 'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan', 'file_persetujuan_mentor']);
-                                        });
-                                    }
+        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
+            $dokumenPendaftaran = array_filter($dokumenPendaftaran, function ($dokumen) {
+                return !in_array($dokumen['field'], ['file_pakta_integritas', 'file_surat_komitmen', 'file_surat_kelulusan_seleksi', 'file_surat_bebas_narkoba', 'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan', 'file_persetujuan_mentor']);
+            });
+        }
 
-                                    if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
-                                        $dokumenPendaftaran = array_filter($dokumenPendaftaran, function ($dokumen) {
-                                            return !in_array($dokumen['field'], ['file_surat_kesediaan', 'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan', 'file_persetujuan_mentor']);
-                                        });
-                                    }
+        if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
+            $dokumenPendaftaran = array_filter($dokumenPendaftaran, function ($dokumen) {
+                return !in_array($dokumen['field'], ['file_surat_kesediaan', 'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan', 'file_persetujuan_mentor']);
+            });
+        }
 
-                                    if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
-                                        $dokumenPendaftaran = array_filter($dokumenPendaftaran, function ($dokumen) {
-                                            return !in_array($dokumen['field'], ['file_surat_komitmen', 'file_sertifikat_penghargaan', 'file_surat_pernyataan_administrasi']);
-                                        });
-                                    }
+        if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
+            $dokumenPendaftaran = array_filter($dokumenPendaftaran, function ($dokumen) {
+                return !in_array($dokumen['field'], ['file_surat_komitmen', 'file_sertifikat_penghargaan', 'file_surat_pernyataan_administrasi']);
+            });
+        }
                                 @endphp
 
                                 @foreach($dokumenPendaftaran as $dokumen)
                                     @php
-                                        $hasFile = !empty($pendaftaranTerbaru->{$dokumen['field']});
-                                        $filePath = $hasFile ? $pendaftaranTerbaru->{$dokumen['field']} : '';
+            $hasFile = !empty($pendaftaranTerbaru->{$dokumen['field']});
+            $filePath = $hasFile ? $pendaftaranTerbaru->{$dokumen['field']} : '';
                                     @endphp
                                     <div class="file-item {{ !$hasFile ? 'empty' : '' }}">
                                         <div class="file-info">

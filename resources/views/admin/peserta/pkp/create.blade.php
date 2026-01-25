@@ -664,7 +664,49 @@ $isPKN = $jenis === 'pkn';
                                     @error('tahun_lulus_pkp_pim_iv')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
+                            </div>
+
+                            @if ($kunci_judul == true)
+                                <!-- Data Projek -->
+                                <div class="form-section-header">
+                                    <i class="fas fa-lightbulb"></i>Projek Aksi Perubahan
                                 </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Judul</label>
+                                    <input type="text" name="judul"
+                                        class="form-input @error('judul') error @enderror"
+                                        value="{{ old('judul', optional($aksiPerubahan)->judul) }}"
+                                        placeholder="anunya">
+                                    @error('judul')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Upload Hasil Projek</label>
+                                    <div class="form-hint">Format PDF, maksimal 1MB</div>
+                                    <div class="form-file">
+                                        <input type="file" name="file" id="file"
+                                            class="form-file-input @error('file') error @enderror"
+                                            accept=".pdf">
+                                        <label class="form-file-label" for="file">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span>{{ $isEdit && $aksiPerubahan && $aksiPerubahan->file ? 'Ganti File Projek' : 'Klik untuk mengunggah file Projek' }}</span>
+                                        </label>
+                                        <div class="form-file-name" id="filee">
+                                            @if ($isEdit && $aksiPerubahan && $aksiPerubahan->file)
+                                                File sudah ada: {{ basename($aksiPerubahan->file) }}
+                                            @else
+                                                Belum ada file dipilih
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @error('file')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            @endif
 
                             <!-- Data Mentor -->
                             <div class="form-section-header">
@@ -1981,6 +2023,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             // File input elements - semua file inputs
             const fileInputs = [
                 { input: document.getElementById('file_ktp'), display: document.getElementById('fileKtpName') },
+                { input: document.getElementById('file'), display: document.getElementById('filee') },
                 { input: document.getElementById('file_pas_foto'), display: document.getElementById('filePasFotoName') },
                 { input: document.getElementById('file_sk_jabatan'), display: document.getElementById('fileSkJabatanName') },
                 { input: document.getElementById('file_sk_pangkat'), display: document.getElementById('fileSkPangkatName') },

@@ -31,6 +31,7 @@ class AdminController extends Controller
         $jenisPelatihanData = null;
         $angkatanData = null;
         $semuaPendaftaran = [];
+        $kunci_judul = false;
 
         // Ambil data peserta jika role user adalah 'user'
         if ($user->role->name == 'user') {
@@ -64,6 +65,8 @@ class AdminController extends Controller
                 // Ambil semua pendaftaran untuk ditampilkan
                 $semuaPendaftaran = $peserta->pendaftaran;
 
+                $kunci_judul = optional($pendaftaranTerbaru?->angkatan)->kunci_judul ?? false;
+
                 // Jika ada pendaftaran terbaru, ambil data mentor
                 if ($pendaftaranTerbaru && $pendaftaranTerbaru->pesertaMentor->isNotEmpty()) {
                     $mentorData = $pendaftaranTerbaru->pesertaMentor->first()->mentor;
@@ -90,7 +93,8 @@ class AdminController extends Controller
             'mentorData',
             'jenisPelatihanData',
             'angkatanData',
-            'semuaPendaftaran'
+            'semuaPendaftaran',
+            'kunci_judul'
         ));
     }
 

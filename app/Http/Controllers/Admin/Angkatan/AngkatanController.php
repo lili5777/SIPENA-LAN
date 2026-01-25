@@ -17,6 +17,13 @@ class AngkatanController extends Controller
     {
         $query = Angkatan::with(['jenisPelatihan', 'pendaftaran']);
 
+        // Filter berdasarkan role PIC
+        if (auth()->user()->isPic()) {
+            // Ambil ID angkatan yang boleh diakses PIC
+            $allowedAngkatanIds = auth()->user()->picPesertas()->pluck('angkatan_id');
+            $query->whereIn('id', $allowedAngkatanIds);
+        }
+
         // Filter by tahun
         if ($request->filled('tahun')) {
             $query->where('tahun', $request->tahun);

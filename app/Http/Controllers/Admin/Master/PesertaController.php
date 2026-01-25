@@ -881,6 +881,7 @@ class PesertaController extends Controller
                     'npwp_mentor' => 'nullable|string|max:50',
                     'has_mentor' => 'nullable|in:Ya,Tidak',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
+                    'file' => 'nullable|file|mimes:pdf|max:1024',
                 ],
                 [
                     'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
@@ -980,7 +981,9 @@ class PesertaController extends Controller
                 'file_sk_cpns',
                 'file_spmt',
                 'file_skp',
-                'file_persetujuan_mentor'
+                'file_persetujuan_mentor',
+                'file',
+                // 'biodata'
             ];
 
             // Ambil data untuk struktur folder
@@ -1231,10 +1234,16 @@ class PesertaController extends Controller
                 }
             }
 
-            if ($request->judul) {
+            if ($request->filled('judul')) {
                 AksiPerubahan::updateOrCreate(
                     ['id_pendaftar' => $pendaftaran->id],
-                    ['judul'=> $request->judul]
+                    [
+                        'judul' => $request->judul,
+                        'file'  => $files['file'] ?? optional(
+                            AksiPerubahan::where('id_pendaftar', $pendaftaran->id)->first()
+                        )->file,
+                        // 'biodata' => $request->biodata,
+                    ]
                 );
             }
 

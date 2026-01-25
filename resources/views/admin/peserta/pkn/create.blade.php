@@ -1,30 +1,30 @@
 @php
-    // Ambil jenis dari route
-    $jenis = request()->route('jenis');
+// Ambil jenis dari route
+$jenis = request()->route('jenis');
 
-    // Mapping nama dan ID
-    $jenisMapping = [
-        'pkn' => ['nama' => 'PKN TK II', 'id' => 1, 'kode' => 'PKN_TK_II'],
-        'cpns' => ['nama' => 'PD CPNS', 'id' => 2, 'kode' => 'PD_CPNS'],
-        'pka' => ['nama' => 'PKA', 'id' => 3, 'kode' => 'PKA'],
-        'pkp' => ['nama' => 'PKP', 'id' => 4, 'kode' => 'PKP']
-    ];
+// Mapping nama dan ID
+$jenisMapping = [
+    'pkn' => ['nama' => 'PKN TK II', 'id' => 1, 'kode' => 'PKN_TK_II'],
+    'cpns' => ['nama' => 'PD CPNS', 'id' => 2, 'kode' => 'PD_CPNS'],
+    'pka' => ['nama' => 'PKA', 'id' => 3, 'kode' => 'PKA'],
+    'pkp' => ['nama' => 'PKP', 'id' => 4, 'kode' => 'PKP']
+];
 
-    $jenisData = $jenisMapping[$jenis] ?? ['nama' => 'Pelatihan', 'id' => 1, 'kode' => 'DEFAULT'];
-    $jenisNama = $jenisData['nama'];
-    $jenisPelatihanId = $jenisData['id'];
-    $jenisKode = $jenisData['kode'];
+$jenisData = $jenisMapping[$jenis] ?? ['nama' => 'Pelatihan', 'id' => 1, 'kode' => 'DEFAULT'];
+$jenisNama = $jenisData['nama'];
+$jenisPelatihanId = $jenisData['id'];
+$jenisKode = $jenisData['kode'];
 
-    // Data untuk form (dari controller)
-    $pesertaData = $isEdit ? $pendaftaran->peserta : null;
-    $kepegawaianData = $isEdit ? ($pendaftaran->peserta->kepegawaianPeserta ?? null) : null;
-    $mentorData = $isEdit ? ($pendaftaran->pesertaMentor->first() ?? null) : null;
+// Data untuk form (dari controller)
+$pesertaData = $isEdit ? $pendaftaran->peserta : null;
+$kepegawaianData = $isEdit ? ($pendaftaran->peserta->kepegawaianPeserta ?? null) : null;
+$mentorData = $isEdit ? ($pendaftaran->pesertaMentor->first() ?? null) : null;
 
-    // Tentukan fields yang required berdasarkan jenis
-    $isCPNS = $jenis === 'cpns';
-    $isPKA = $jenis === 'pka';
-    $isPKP = $jenis === 'pkp';
-    $isPKN = $jenis === 'pkn';
+// Tentukan fields yang required berdasarkan jenis
+$isCPNS = $jenis === 'cpns';
+$isPKA = $jenis === 'pka';
+$isPKP = $jenis === 'pkp';
+$isPKN = $jenis === 'pkn';
 @endphp
 
 @extends('admin.partials.layout')
@@ -813,9 +813,33 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                     <label class="form-label">Judul</label>
                                     <input type="text" name="judul"
                                         class="form-input @error('judul') error @enderror"
-                                        value="{{ optional($aksiPerubahan)->judul ?? old('judul') }}"
+                                        value="{{ old('judul', optional($aksiPerubahan)->judul) }}"
                                         placeholder="anunya">
                                     @error('judul')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Upload Hasil Projek</label>
+                                    <div class="form-hint">Format PDF, maksimal 1MB</div>
+                                    <div class="form-file">
+                                        <input type="file" name="file" id="file"
+                                            class="form-file-input @error('file') error @enderror"
+                                            accept=".pdf">
+                                        <label class="form-file-label" for="file">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span>{{ $isEdit && $aksiPerubahan && $aksiPerubahan->file ? 'Ganti File Projek' : 'Klik untuk mengunggah file Projek' }}</span>
+                                        </label>
+                                        <div class="form-file-name" id="filee">
+                                            @if ($isEdit && $aksiPerubahan && $aksiPerubahan->file)
+                                                File sudah ada: {{ basename($aksiPerubahan->file) }}
+                                            @else
+                                                Belum ada file dipilih
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @error('file')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
@@ -1958,6 +1982,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                 { input: document.getElementById('file_surat_pernyataan_administrasi'), display: document.getElementById('fileSuratPernyataanName') },
                 { input: document.getElementById('file_persetujuan_mentor'), display: document.getElementById('filePersetujuanMentorName') },
                 { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') },
+                { input: document.getElementById('file'), display: document.getElementById('filee') },
             ].filter(item => item.input); // Hanya yang ada di DOM
 
             // ============================================

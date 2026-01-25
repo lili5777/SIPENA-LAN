@@ -5,6 +5,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Admin\Master\PesertaController;
 use App\Http\Controllers\Admin\Mentor\MentorController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AksiPerubahanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\PendaftaranController;
@@ -198,6 +199,12 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/aktifitas', [AdminController::class, 'histori'])->name('aktifitas.index');
+
+
+    Route::get('/aksi-perubahan', [AksiPerubahanController::class, 'index'])->name('aksiperubahan');
+    Route::post('/aksi-perubahan/store', [AksiPerubahanController::class, 'store'])->name('aksiperubahan.store');
+    Route::put('/aksi-perubahan/{id}', [AksiPerubahanController::class, 'update'])->name('aksiperubahan.update');
+    Route::delete('/aksi-perubahan/{id}', [AksiPerubahanController::class, 'destroy'])->name('aksiperubahan.destroy');
 
     
 });

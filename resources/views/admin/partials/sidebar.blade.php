@@ -19,6 +19,15 @@
             </a>
         </div>
 
+        @if (auth()->user()->role->name == "user")
+            <div class="menu-item">
+                <a href="{{ route('aksiperubahan') }}" class="menu-link">
+                    <i class="fas fa-project-diagram menu-icon"></i>
+                    <span class="menu-text">Aksi Perubahan</span>
+                </a>
+            </div>
+        @endif
+
         @if (auth()->user()->role->name != "user")
                     <!-- Master Data -->
                     <div class="menu-item has-submenu">
@@ -61,8 +70,8 @@
                         </a>
                         <div class="submenu">
                             @php
-            $user = auth()->user();
-            $isAdmin = in_array($user->role->name, ['admin', 'super admin']);
+    $user = auth()->user();
+    $isAdmin = in_array($user->role->name, ['admin', 'super admin']);
                             @endphp
 
                             @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 1)->count() > 0)
