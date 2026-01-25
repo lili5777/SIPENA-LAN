@@ -296,11 +296,13 @@
                                                                                                                                     <i class="fas {{ $statusData['icon'] }} me-1"></i>
                                                                                                                                     {{ $statusData['text'] }}
                                                                                                                                 </span>
-                                                                                                                                <button type="button" class="btn btn-sm btn-outline-warning update-status"
-                                                                                                                                    data-id="{{ $daftar->id }}" data-status="{{ $daftar->status_pendaftaran }}"
-                                                                                                                                    data-bs-toggle="tooltip" title="Ubah Status">
-                                                                                                                                    <i class="fas fa-edit me-1"></i> Verifikasi
-                                                                                                                                </button>
+                                                                                                                                @if ($daftar->status_pendaftaran != 'Diterima')
+                                                                                                                                    <button type="button" class="btn btn-sm btn-outline-warning update-status"
+                                                                                                                                        data-id="{{ $daftar->id }}" data-status="{{ $daftar->status_pendaftaran }}"
+                                                                                                                                        data-bs-toggle="tooltip" title="Ubah Status">
+                                                                                                                                        <i class="fas fa-edit me-1"></i> Verifikasi
+                                                                                                                                    </button>
+                                                                                                                                @endif
                                                                                                                             </div>
                                                                                                                         </td>
                                                                                                                         <td class="text-center pe-4">

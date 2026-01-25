@@ -41,9 +41,9 @@
                 <small class="text-white opacity-75">{{ auth()->user()->email }}</small>
             </div>
             <div class="p-2">
-                <a href="{{ route('admin.akun.index') }}" class="dropdown-item p-3">
+                {{-- <a href="{{ route('admin.akun.index') }}" class="dropdown-item p-3">
                     <i class="fas fa-user-cog me-2"></i> Profil Saya
-                </a>
+                </a> --}}
                 <a href="#" class="dropdown-item p-3">
                     <i class="fas fa-question-circle me-2"></i> Bantuan
                 </a>

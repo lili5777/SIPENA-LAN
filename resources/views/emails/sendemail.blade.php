@@ -142,17 +142,16 @@
 
         .cta-button {
             display: inline-block;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-            text-decoration: none;
-            padding: 14px 30px;
-            border-radius: 8px;
+            background-color: #4f46e5; /* fallback */
+            background-image: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #ffffff !important;
+            text-decoration: none !important;
+            padding: 14px 32px;
+            border-radius: 10px;
             font-weight: 600;
             font-size: 16px;
-            margin: 10px 0 30px;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+            border: 2px solid #ffffff; /* biar makin kontras */
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.25);
         }
 
         .cta-button:hover {
@@ -243,15 +242,7 @@
                 </div>
             </div>
 
-            <div class="warning-box">
-                <div class="warning-icon">
-                    <span style="font-size: 1.2em;">⚠️</span>
-                </div>
-                <div class="warning-text">
-                    Untuk keamanan akun Anda, segera ganti password setelah login pertama kali. Jangan berikan informasi
-                    login ini kepada siapapun.
-                </div>
-            </div>
+            
 
             <div style="text-align: center;">
                 <a href="#" class="cta-button">Login ke Akun Anda</a>
