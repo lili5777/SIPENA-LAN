@@ -127,7 +127,7 @@
             <option value="Kristen" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen' ? 'selected' : '' }}>Kristen
             </option>
             <option value="Kristen Protestan" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen Protestan' ? 'selected' : '' }}>
-                Kristen
+                Kristen Protestan
             </option>
             <option value="Katolik" {{ ($peserta['agama'] ?? old('agama')) == 'Katolik' ? 'selected' : '' }}>Katolik
             </option>

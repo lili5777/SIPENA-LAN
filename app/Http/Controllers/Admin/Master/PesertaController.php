@@ -90,7 +90,8 @@ class PesertaController extends Controller
             $pendaftaranQuery->where('id_angkatan', $request->angkatan);
         }
 
-        $pendaftaran = $pendaftaranQuery->latest('tanggal_daftar')->get();
+        // $pendaftaran = $pendaftaranQuery->latest('tanggal_daftar')->get();
+        $pendaftaran = $pendaftaranQuery->orderBy('id', 'asc')->get();
         $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
 
         return view("admin.peserta.{$jenis}.index", compact(

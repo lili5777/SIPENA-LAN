@@ -1260,6 +1260,8 @@
                             </option>
                             <option value="Kristen" {{ old('agama', $peserta->agama) == 'Kristen' ? 'selected' : '' }}>Kristen
                             </option>
+                            <option value="Kristen Protestan" {{ old('agama', $peserta->agama) == 'Kristen Protestan' ? 'selected' : '' }}>Kristen Protestan
+                            </option>
                             <option value="Katolik" {{ old('agama', $peserta->agama) == 'Katolik' ? 'selected' : '' }}>Katolik
                             </option>
                             <option value="Hindu" {{ old('agama', $peserta->agama) == 'Hindu' ? 'selected' : '' }}>Hindu
