@@ -155,7 +155,7 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
                         'id_kabupaten_kota'  => $kabupaten?->id,
                         'nomor_sk_cpns' => $row['nomor_sk_cpns'] ?? null,
                         'nomor_sk_terakhir' => $row['nomor_sk_terakhir'] ?? null,
-                        'tanggal_sk_jabatan' => $row['tanggal_sk_jabatan'] ?? null,
+                        'tanggal_sk_jabatan' => $this->parseDate($row['tanggal_sk_jabatan'] ?? null),
                         'tahun_lulus_pkp_pim_iv' => $row['tahun_lulus_pkp_pim_iv'] ?? null,
                         'tanggal_sk_cpns' => $row['tanggal_sk_cpns'] ?? null,
                     ]
@@ -210,15 +210,55 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
             }
         }
 
-        $jk = strtolower($row['jenis_kelamin']);
-        if (!in_array($jk, ['laki-laki', 'perempuan', 'l', 'p'])) {
-            $this->errors[] = "Baris {$rowNumber}: Jenis kelamin tidak valid";
+        $jk = strtolower(trim($row['jenis_kelamin']));
+
+        $mapping = [
+            'l'         => 'Laki-laki',
+            'laki-laki' => 'Laki-laki',
+            'laki laki' => 'Laki-laki',
+            'pria'      => 'Laki-laki',
+            'p'         => 'Perempuan',
+            'perempuan' => 'Perempuan',
+            'wanita'    => 'Perempuan',
+        ];
+
+        if (!array_key_exists($jk, $mapping)) {
+            $this->errors[] =
+                "Baris {$rowNumber}: Jenis kelamin '{$row['jenis_kelamin']}' tidak valid";
             return false;
         }
 
-        $row['jenis_kelamin'] = in_array($jk, ['l', 'laki-laki']) ? 'Laki-laki' : 'Perempuan';
+        $row['jenis_kelamin'] = $mapping[$jk];
+
+        // ================= AGAMA =================
+        if (!empty($row['agama'])) {
+            $agama = strtolower(trim($row['agama']));
+
+            $agamaMap = [
+                'islam' => 'Islam',
+                'kristen' => 'Kristen',
+                'kristen protestan' => 'Kristen',
+                'protestan' => 'Kristen',
+                'katolik' => 'Katolik',
+                'hindu' => 'Hindu',
+                'budha' => 'Buddha',
+                'buddha' => 'Buddha',
+                'konghucu' => 'Konghucu',
+                'khonghucu' => 'Konghucu',
+            ];
+
+            if (!array_key_exists($agama, $agamaMap)) {
+                $this->errors[] =
+                    "Baris {$rowNumber}: Agama '{$row['agama']}' tidak dikenali";
+                return false;
+            }
+
+            $row['agama'] = $agamaMap[$agama];
+        }
+
         return true;
     }
+
 
     protected function parseDate($date)
     {

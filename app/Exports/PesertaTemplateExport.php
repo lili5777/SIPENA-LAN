@@ -31,7 +31,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'Ahmad',
                 'Islam',
                 'Makassar',
-                '1979-05-01',
+                '01-05-2004',
                 'Jl. Perintis Kemerdekaan No. 10',
                 'ahmad.fauzi@email.com',
                 '081111111111',
@@ -57,7 +57,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'Pembina',
                 'IV/a',
                 'II.a',
-                '2023-02-10',
+                '01-05-2025',
                 '821.2/CPNS/2005',
                 '821.2/SK/2024',
                 '2005-03-01',
@@ -75,7 +75,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'Siti',
                 'Islam',
                 'Bandung',
-                '1990-01-12',
+                '01-05-2024',
                 'Jl. Asia Afrika No. 20',
                 'siti.rahmawati@email.com',
                 '082222222222',
@@ -101,7 +101,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'Penata Muda',
                 'III/a',
                 '',
-                '2024-01-05',
+                '01-05-2024',
                 '800/CPNS/2020',
                 '800/SK/2024',
                 '2020-12-01',
@@ -119,7 +119,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'Rizal',
                 'Islam',
                 'Yogyakarta',
-                '1985-12-31',
+                '11-11-1979',
                 'Jl. Kaliurang Km 5',
                 'rizal@email.com',
                 '083333333333',
@@ -145,7 +145,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'Penata',
                 'III/c',
                 '',
-                '2022-06-20',
+                '11-11-1978',
                 '197/CPNS/2010',
                 '197/SK/2023',
                 '2010-02-01',
@@ -163,7 +163,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'Dedi',
                 'Islam',
                 'Surabaya',
-                '1978-11-11',
+                '11-11-1978',
                 'Jl. Raya Darmo No. 15',
                 'dedi.kurniawan@email.com',
                 '084444444444',
@@ -189,7 +189,7 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'Pembina Utama Muda',
                 'IV/c',
                 'II',
-                '2021-09-15',
+                '15-09-2021',
                 '821/CPNS/2003',
                 '821/SK/2024',
                 '2003-04-01',
@@ -277,6 +277,15 @@ class PesertaTemplateExport implements FromArray, WithHeadings, WithStyles, With
 
         // PERBAIKAN: Format kolom NIP/NRP sebagai TEXT agar tidak jadi scientific notation
         $sheet->getStyle('D:D')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+
+        // Format TANGGAL_LAHIR
+        $sheet->getStyle('J:J')->getNumberFormat()->setFormatCode('dd-mm-yyyy');
+
+        // Format TANGGAL_SK_JABATAN
+        $sheet->getStyle('AJ:AJ')->getNumberFormat()->setFormatCode('dd-mm-yyyy');
+
+        // Format TANGGAL_SK_CPNS
+        $sheet->getStyle('AM:AM')->getNumberFormat()->setFormatCode('dd-mm-yyyy');
 
         // Format kolom NOMOR_HP sebagai TEXT
         $sheet->getStyle('M:M')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);

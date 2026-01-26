@@ -551,8 +551,8 @@
                             <tr>
                                 <td>10</td>
                                 <td>TANGGAL_LAHIR</td>
-                                <td>Date (YYYY-MM-DD)</td>
-                                <td>1980-01-01</td>
+                                <td>Date (DD-MM-YYYY)</td>
+                                <td>01-01-1980</td>
                                 <td><span class="optional">Opsional</span></td>
                             </tr>
                             <tr>
@@ -733,8 +733,8 @@
                             <tr>
                                 <td>36</td>
                                 <td>TANGGAL_SK_JABATAN</td>
-                                <td>Date (YYYY-MM-DD)</td>
-                                <td>2024-01-15</td>
+                                <td>Date (DD-MM-YYYY)</td>
+                                <td>01-05-2024</td>
                                 <td><span class="optional">Opsional</span></td>
                             </tr>
                             <tr>
@@ -754,8 +754,8 @@
                             <tr>
                                 <td>39</td>
                                 <td>TANGGAL_SK_CPNS</td>
-                                <td>Date (YYYY-MM-DD)</td>
-                                <td>2011-01-15</td>
+                                <td>Date Date (DD-MM-YYYY)</td>
+                                <td>01-06-2011</td>
                                 <td><span class="optional">Opsional</span></td>
                             </tr>
                             <tr>

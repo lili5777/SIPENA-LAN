@@ -119,9 +119,9 @@ class AksiPerubahanController extends Controller
             ->with(['jenisPelatihan', 'angkatan', 'peserta'])
             ->first();
         
-        if ($aksiPerubahan->id_pendaftar !== $pendaftaran->id) {
-            return back()->with('error', 'Anda tidak memiliki akses untuk mengubah data ini.');
-        }
+        // if ($aksiPerubahan->id_pendaftar !== $pendaftaran->id) {
+        //     return back()->with('error', 'Anda tidak memiliki akses untuk mengubah data ini.');
+        // }
         
         $data = [
             'judul' => $request->judul,

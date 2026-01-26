@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('nama_lengkap', 200);
             $table->string('nama_panggilan', 100)->nullable();
             $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
-            $table->enum('agama', ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'])->nullable();
+            $table->enum('agama', ['Islam', 'Kristen', 'Katolik', 'Kristen Protestan', 'Hindu', 'Buddha', 'Konghucu'])->nullable();
             $table->string('tempat_lahir', 100)->nullable();
             $table->date('tanggal_lahir')->nullable();
             $table->text('alamat_rumah')->nullable();
