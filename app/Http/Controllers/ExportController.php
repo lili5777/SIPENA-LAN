@@ -407,7 +407,7 @@ class ExportController extends Controller
             }
 
             $fotoCount = 0;
-            $counter = 1; // Inisialisasi counter
+            // $counter = 1; 
 
             foreach ($pendaftaran as $daftar) {
                 $peserta = $daftar->peserta;
@@ -419,13 +419,13 @@ class ExportController extends Controller
                             // Dapatkan konten file dari Google Drive
                             $fileContent = Storage::disk('google')->get($peserta->file_pas_foto);
 
-                            // Generate nama file dengan counter
-                            $fileName = $this->generateFileName($peserta, $daftar, $counter);
+
+                            $fileName = $this->generateFileName($peserta, $daftar);
 
                             // Tambahkan file ke ZIP
                             $zip->addFromString($fileName, $fileContent);
                             $fotoCount++;
-                            $counter++; // Increment counter setiap file berhasil ditambahkan
+                            // $counter++; // Increment counter setiap file berhasil ditambahkan
                         }
                     } catch (\Exception $e) {
                         \Log::error('Error adding file to ZIP: ' . $e->getMessage());
@@ -459,30 +459,32 @@ class ExportController extends Controller
     }
 
     // Helper function untuk generate nama file
-    private function generateFileName($peserta, $pendaftaran, $counter)
+    private function generateFileName($peserta, $pendaftaran)
     {
         // Ambil ekstensi asli file
         $originalFileName = basename($peserta->file_pas_foto);
         $extension = pathinfo($originalFileName, PATHINFO_EXTENSION);
 
         if (empty($extension)) {
-            // Coba deteksi dari MIME type atau gunakan default
             $extension = 'jpg';
         }
 
-        // Bersihkan karakter khusus untuk nama file
+        // Helper untuk bersihkan string
         $cleanString = function ($str) {
-            $str = preg_replace('/[^\p{L}\p{N}\s]/u', '', $str); // Hapus simbol
+            $str = preg_replace('/[^\p{L}\p{N}\s]/u', '', $str);
             $str = trim($str);
             $str = str_replace(' ', '_', $str);
-            return strtolower($str); // Tambahkan lowercase untuk konsistensi
+            return strtolower($str);
         };
 
-        // Gunakan nama lengkap peserta
-        $namaPeserta = $cleanString($peserta->nama_lengkap ?? 'peserta_' . $peserta->id);
+        // 🔢 Ambil NDH
+        $ndh = $peserta->ndh ?? 'ndh_' . $peserta->id;
 
-        // Format: counter.namapeserta.extension
-        return $counter . '.' . $namaPeserta . '.' . strtolower($extension);
+        // Nama peserta
+        $namaPeserta = $cleanString($peserta->nama_lengkap ?? 'peserta');
+
+        // 🧾 Format akhir: NDH_nama.extension
+        return $ndh . '.' . $namaPeserta . '.' . strtolower($extension);
     }
 
 
