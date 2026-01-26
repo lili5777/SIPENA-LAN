@@ -155,7 +155,7 @@ class PendaftaranController extends Controller
                 'nip_nrp' => 'required|string|max:50',
                 'nama_panggilan' => 'nullable|string|max:100',
                 'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-                'agama' => 'required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
+                'agama' => 'required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Kristen Protestan',
                 'tempat_lahir' => 'required|string|max:100',
                 'tanggal_lahir' => 'required|date',
                 'alamat_rumah' => 'required|string',

@@ -237,7 +237,7 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
             $agamaMap = [
                 'islam' => 'Islam',
                 'kristen' => 'Kristen',
-                'kristen protestan' => 'Kristen',
+                'kristen protestan' => 'Kristen Protestan',
                 'protestan' => 'Kristen',
                 'katolik' => 'Katolik',
                 'hindu' => 'Hindu',

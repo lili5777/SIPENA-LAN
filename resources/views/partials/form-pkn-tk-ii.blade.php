@@ -126,6 +126,9 @@
             <option value="Islam" {{ ($peserta['agama'] ?? old('agama')) == 'Islam' ? 'selected' : '' }}>Islam</option>
             <option value="Kristen" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen' ? 'selected' : '' }}>Kristen
             </option>
+            <option value="Kristen Protestan" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen Protestan' ? 'selected' : '' }}>
+                Kristen
+            </option>
             <option value="Katolik" {{ ($peserta['agama'] ?? old('agama')) == 'Katolik' ? 'selected' : '' }}>Katolik
             </option>
             <option value="Hindu" {{ ($peserta['agama'] ?? old('agama')) == 'Hindu' ? 'selected' : '' }}>Hindu</option>

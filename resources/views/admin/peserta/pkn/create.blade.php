@@ -243,6 +243,7 @@ $isPKN = $jenis === 'pkn';
                                         <option value="">Pilih</option>
                                         <option value="Islam" {{ ($pesertaData && $pesertaData->agama == 'Islam') || old('agama') == 'Islam' ? 'selected' : '' }}>Islam</option>
                                         <option value="Kristen" {{ ($pesertaData && $pesertaData->agama == 'Kristen') || old('agama') == 'Kristen' ? 'selected' : '' }}>Kristen</option>
+                                        <option value="Kristen Protestan" {{ ($pesertaData && $pesertaData->agama == 'Kristen Protestan') || old('agama') == 'Kristen Protestan' ? 'selected' : '' }}>Kristen Protestan</option>
                                         <option value="Katolik" {{ ($pesertaData && $pesertaData->agama == 'Katolik') || old('agama') == 'Katolik' ? 'selected' : '' }}>Katolik</option>
                                         <option value="Hindu" {{ ($pesertaData && $pesertaData->agama == 'Hindu') || old('agama') == 'Hindu' ? 'selected' : '' }}>Hindu</option>
                                         <option value="Buddha" {{ ($pesertaData && $pesertaData->agama == 'Buddha') || old('agama') == 'Buddha' ? 'selected' : '' }}>Buddha</option>

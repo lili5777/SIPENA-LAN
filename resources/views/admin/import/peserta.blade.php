@@ -537,7 +537,7 @@
                             <tr>
                                 <td>8</td>
                                 <td>AGAMA</td>
-                                <td>Text (Islam/Kristen/Katolik/Hindu/Buddha/Konghucu)</td>
+                                <td>Text (Islam/Kristen/Kristen Protestan/Katolik/Hindu/Buddha/Konghucu)</td>
                                 <td>Islam</td>
                                 <td><span class="optional">Opsional</span></td>
                             </tr>

@@ -414,7 +414,7 @@ class PesertaController extends Controller
                     // Semua field berikut diubah dari required menjadi nullable
                     'nama_panggilan' => 'nullable|string|max:100',
                     'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
-                    'agama' => 'nullable|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
+                    'agama' => 'nullable|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Kristen Protestan',
                     'tempat_lahir' => 'nullable|string|max:100',
                     'tanggal_lahir' => 'nullable|date',
                     'alamat_rumah' => 'nullable|string',
@@ -863,7 +863,7 @@ class PesertaController extends Controller
                     // Semua field berikut nullable
                     'nama_panggilan' => 'nullable|string|max:100',
                     'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
-                    'agama' => 'nullable|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
+                    'agama' => 'nullable|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Kristen Protestan',
                     'tempat_lahir' => 'nullable|string|max:100',
                     'tanggal_lahir' => 'nullable|date',
                     'alamat_rumah' => 'nullable|string',
