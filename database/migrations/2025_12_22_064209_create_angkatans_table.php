@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('status_angkatan', ['Dibuka', 'Ditutup', 'Berlangsung', 'Selesai'])->default('Dibuka');
             $table->boolean('kunci_edit')->default(false);
             $table->boolean('kunci_judul')->default(false);
+            $table->string('link_gb_wa', 100)->nullable();
             $table->timestamp('dibuat_pada')->useCurrent();
             $table->index(['id_jenis_pelatihan', 'status_angkatan'], 'idx_jenis_status');
             $table->index('status_angkatan', 'idx_angkatan_status');

@@ -151,6 +151,8 @@
                                 Tahun pelaksanaan angkatan
                             </small>
                         </div>
+
+
                     </div>
 
                     <!-- Kolom Kanan -->
@@ -208,6 +210,28 @@
                                 Status menentukan apakah angkatan masih menerima pendaftaran
                             </small>
                         </div>
+
+                        <!-- Link WA -->
+                        <div class="mb-4">
+                            <label for="link_gb_wa" class="form-label fw-semibold">
+                                <i class="fas fa-link me-1 text-primary"></i>
+                                Link GB WA <span class="text-danger">*</span>
+                            </label>
+
+                            <input type="url" class="form-control @error('link_gb_wa') is-invalid @enderror" id="link_gb_wa" name="link_gb_wa"
+                                value="{{ old('link_gb_wa', $isEdit ? $angkatan->link_gb_wa : '') }}"
+                                placeholder="https://chat.whatsapp.com/xxxxxxxx">
+
+                            @error('link_gb_wa')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Masukkan link Grup WhatsApp angkatan
+                            </small>
+                        </div>
+
                     </div>
                 </div>
 

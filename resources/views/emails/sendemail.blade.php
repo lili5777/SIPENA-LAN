@@ -240,14 +240,42 @@
                     <div class="info-label">Password:</div>
                     <div class="info-value">{{ $data['password'] }}</div>
                 </div>
+
+                <div style="text-align: center;">
+                    <a href="#" class="cta-button">Login ke Akun Anda</a>
+                    <p style="color: #718096; font-size: 14px;">Klik tombol di atas untuk langsung menuju halaman login</p>
+                </div>
+                
+            </div>
+
+            <div class="info-card">
+                <h2>
+                    <span style="font-size: 1.2em; margin-right: 10px;">💬</span>
+                    Grup WhatsApp Angkatan
+                </h2>
+            
+                <p style="color:#4a5568; margin-bottom:15px;">
+                    Silakan bergabung ke Grup WhatsApp resmi angkatan melalui tautan di bawah ini:
+                </p>
+            
+                <div style="text-align:center;">
+                    <a href="{{ $data['link_gb_wa'] }}" target="_blank" class="cta-button"
+                        style="background-image: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+                        Gabung Grup WhatsApp
+                    </a>
+                </div>
+            
+                <p style="margin-top:15px; font-size:14px; color:#718096; text-align:center;">
+                    Jika tombol tidak berfungsi, salin dan buka link berikut:<br>
+                    <span style="word-break: break-all; color:#4f46e5;">
+                        {{ $data['link_gb_wa'] }}
+                    </span>
+                </p>
             </div>
 
             
 
-            <div style="text-align: center;">
-                <a href="#" class="cta-button">Login ke Akun Anda</a>
-                <p style="color: #718096; font-size: 14px;">Klik tombol di atas untuk langsung menuju halaman login</p>
-            </div>
+            
         </div>
 
         <div class="footer">

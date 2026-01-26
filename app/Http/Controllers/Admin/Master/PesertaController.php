@@ -146,7 +146,14 @@ class PesertaController extends Controller
         $pendaftaran = Pendaftaran::findOrFail($id);
         $role = Role::where('name', 'user')->first();
         $peserta = $pendaftaran->peserta;
-        // dd($peserta);
+
+        // 🔒 VALIDASI LINK GB WA DI ANGKATAN
+        if (empty($pendaftaran->angkatan->link_gb_wa)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Link Grup WhatsApp angkatan belum diisi. Silakan lengkapi terlebih dahulu.'
+            ], 422);
+        }
 
         if ($request->status_pendaftaran == 'Diterima') {
 
@@ -188,6 +195,7 @@ class PesertaController extends Controller
                 'name'     => $user->name,
                 'email'    => $user->email,
                 'password' => $passwordAsli,
+                'link_gb_wa' => $pendaftaran->angkatan->link_gb_wa,
             ];
 
             // kirim email ke peserta

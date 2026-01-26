@@ -22,7 +22,8 @@ class Angkatan extends Model
         'status_angkatan',
         'dibuat_pada', // tambahkan ini
         'kunci_edit',
-        'kunci_judul'
+        'kunci_judul',
+        'link_gb_wa'
     ];
 
     // Casting untuk properti tanggal

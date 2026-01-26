@@ -75,7 +75,8 @@ class AngkatanController extends Controller
             'tanggal_mulai' => 'nullable|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'kuota' => 'nullable|integer|min:1',
-            'status_angkatan' => 'required|in:Dibuka,Diutup,Berlangsung,Selesai'
+            'status_angkatan' => 'required|in:Dibuka,Diutup,Berlangsung,Selesai',
+            'link_gb_wa' => 'nullable|string|max:100'
         ], [
             'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
             'id_jenis_pelatihan.exists' => 'Jenis pelatihan tidak valid.',
@@ -91,7 +92,8 @@ class AngkatanController extends Controller
             'kuota.integer' => 'Kuota harus berupa angka.',
             'kuota.min' => 'Kuota minimal 1.',
             'status_angkatan.required' => 'Status angkatan wajib dipilih.',
-            'status_angkatan.in' => 'Status angkatan tidak valid.'
+            'status_angkatan.in' => 'Status angkatan tidak valid.',
+            'link_gb_wa.max' => 'link GB WA Maksimal 100 karakter'
         ]);
 
         try {
@@ -119,6 +121,7 @@ class AngkatanController extends Controller
                 'status_angkatan' => $request->status_angkatan,
                 'kunci_edit' => $request->kunci_edit,
                 'kunci_judul' => $request->kunci_judul,
+                'link_gb_wa' => $request->link_gb_wa,
                 'dibuat_pada' => now()
             ]);
 
@@ -166,7 +169,8 @@ class AngkatanController extends Controller
             'tanggal_mulai' => 'nullable|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'kuota' => 'nullable|integer|min:1',
-            'status_angkatan' => 'required|in:Dibuka,Diutup,Berlangsung,Selesai'
+            'status_angkatan' => 'required|in:Dibuka,Diutup,Berlangsung,Selesai',
+            'link_gb_wa' => 'nullable|string|max:100'
         ], [
             'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
             'id_jenis_pelatihan.exists' => 'Jenis pelatihan tidak valid.',
@@ -182,7 +186,8 @@ class AngkatanController extends Controller
             'kuota.integer' => 'Kuota harus berupa angka.',
             'kuota.min' => 'Kuota minimal 1.',
             'status_angkatan.required' => 'Status angkatan wajib dipilih.',
-            'status_angkatan.in' => 'Status angkatan tidak valid.'
+            'status_angkatan.in' => 'Status angkatan tidak valid.',
+            'link_gb_wa.max' => 'link GB WA Maksimal 100 karakter'
         ]);
 
         try {
@@ -212,6 +217,7 @@ class AngkatanController extends Controller
                 'status_angkatan' => $request->status_angkatan,
                 'kunci_edit'=>$request->kunci_edit,
                 'kunci_judul' => $request->kunci_judul,
+                'link_gb_wa' => $request->link_gb_wa,
             ]);
 
             DB::commit();

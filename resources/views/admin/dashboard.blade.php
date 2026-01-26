@@ -1359,10 +1359,19 @@
                             </div>
                             <div class="data-item">
                                 <span class="data-label">
-                                    <i class="fas fa-calendar"></i>
-                                    Tahun
+                                    <i class="fas fa-link"></i>
+                                    Link GB WA
                                 </span>
-                                <span class="data-value">{{ $angkatanData->tahun ?? 'Belum diisi' }}</span>
+
+                                <span class="data-value">
+                                    @if(!empty($angkatanData->link_gb_wa))
+                                        <a href="{{ $angkatanData->link_gb_wa }}" target="_blank" class="text-primary fw-semibold">
+                                            Gabung Grup WhatsApp
+                                        </a>
+                                    @else
+                                        <span class="text-muted">Belum diisi</span>
+                                    @endif
+                                </span>
                             </div>
                         </div>
                     </div>
