@@ -1062,6 +1062,12 @@
                         </a>
                     @endif
 
+                    <a href="{{ route('admin.peserta.report', ['id' => $pendaftaranTerbaru->id ?? 0]) }}" class="btn-edit"
+                        title="Generate Report PDF" target="_blank">
+                        <i class="fas fa-file-pdf"></i>
+                        Generate Report
+                    </a>
+
                     <button class="btn-refresh" onclick="window.location.reload()">
                         <i class="fas fa-redo"></i>
                         Refresh

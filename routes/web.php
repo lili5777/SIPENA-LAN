@@ -201,10 +201,27 @@ Route::middleware('auth')->group(function () {
     Route::get('/aktifitas', [AdminController::class, 'histori'])->name('aktifitas.index');
 
 
-    Route::get('/aksi-perubahan', [AksiPerubahanController::class, 'index'])->name('aksiperubahan');
+    // Route::get('/aksi-perubahan', [AksiPerubahanController::class, 'index'])->name('aksiperubahan');
+    // Route::post('/aksi-perubahan/store', [AksiPerubahanController::class, 'store'])->name('aksiperubahan.store');
+    // Route::put('/aksi-perubahan/{id}', [AksiPerubahanController::class, 'update'])->name('aksiperubahan.update');
+    // Route::delete('/aksi-perubahan/{id}', [AksiPerubahanController::class, 'destroy'])->name('aksiperubahan.destroy');
+    Route::get('/aksi-perubahan', [AksiPerubahanController::class, 'index'])->name('aksiperubahan.index');
     Route::post('/aksi-perubahan/store', [AksiPerubahanController::class, 'store'])->name('aksiperubahan.store');
     Route::put('/aksi-perubahan/{id}', [AksiPerubahanController::class, 'update'])->name('aksiperubahan.update');
+    Route::put('/aksi-perubahan/{id}/upload-pengesahan', [AksiPerubahanController::class, 'uploadPengesahan'])->name('aksiperubahan.upload-pengesahan');
     Route::delete('/aksi-perubahan/{id}', [AksiPerubahanController::class, 'destroy'])->name('aksiperubahan.destroy');
+
+    Route::get('/peserta/report/{id?}', [AdminController::class, 'generateReport'])->name('admin.peserta.report');
+
+    Route::get('/peserta/{jenis}/{id}/swap', [PesertaController::class, 'showSwapForm'])
+        ->name('peserta.swap.form');
+
+    Route::post('/peserta/{jenis}/{id}/swap', [PesertaController::class, 'swapAngkatan'])
+        ->name('peserta.swap.process');
+
+    // Route untuk AJAX - HARUS tanpa parameter {jenis} atau dengan optional parameter
+    Route::post('/peserta/get-peserta-angkatan', [PesertaController::class, 'getPesertaAngkatan'])
+        ->name('peserta.get-peserta-angkatan');
 
     
 });

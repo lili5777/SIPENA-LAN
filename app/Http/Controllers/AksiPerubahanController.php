@@ -4,190 +4,254 @@ namespace App\Http\Controllers;
 
 use App\Models\AksiPerubahan;
 use App\Models\Pendaftaran;
-use App\Models\JenisPelatihan;
-use App\Models\Angkatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class AksiPerubahanController extends Controller
 {
     public function index()
     {
         $user = auth()->user();
-        
+
         // Ambil pendaftaran terbaru user
         $pendaftaran = Pendaftaran::where('id_peserta', $user->peserta_id)
             ->with(['jenisPelatihan', 'angkatan', 'peserta'])
             ->latest('tanggal_daftar')
             ->first();
-        
+
         if (!$pendaftaran) {
-            return view('user.aksi-perubahan.index', [
+            return view('admin.aksiperubahan.index', [
                 'aksiPerubahan' => null,
                 'pendaftaran' => null,
                 'message' => 'Anda belum terdaftar dalam pelatihan apapun.'
             ]);
         }
-        
-        // Ambil aksi perubahan untuk pendaftaran ini (seharusnya cuma 1)
+
+        // Ambil aksi perubahan untuk pendaftaran ini
         $aksiPerubahan = AksiPerubahan::where('id_pendaftar', $pendaftaran->id)->first();
         $kunci_judul = $pendaftaran->angkatan->kunci_judul ?? false;
-        // dd($kunci_judul);
-        
-        return view('admin.aksiperubahan.index', compact('aksiPerubahan', 'pendaftaran','kunci_judul'));
+
+        return view('admin.aksiperubahan.index', compact('aksiPerubahan', 'pendaftaran', 'kunci_judul'));
     }
-    
+
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:255',
-            'biodata' => 'nullable|string',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120'
+            'abstrak' => 'nullable|string',
+            'kategori_aksatika' => 'nullable|in:pilihan1,pilihan2',
+            'file' => 'nullable|file|mimes:pdf|max:5120',
+            'link_video' => 'nullable|max:500',
+            'link_laporan_majalah' => 'nullable|max:500',
         ]);
-        
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
         $user = auth()->user();
         $pendaftaran = Pendaftaran::where('id_peserta', $user->peserta_id)
             ->with(['jenisPelatihan', 'angkatan', 'peserta'])
             ->latest('tanggal_daftar')
             ->first();
-        
+
         if (!$pendaftaran) {
             return back()->with('error', 'Anda belum terdaftar dalam pelatihan.');
         }
-        
+
         // Cek apakah sudah ada aksi perubahan
         $existing = AksiPerubahan::where('id_pendaftar', $pendaftaran->id)->first();
         if ($existing) {
             return back()->with('error', 'Anda sudah memiliki Aksi Perubahan. Silakan edit yang sudah ada.');
         }
-        
+
         $data = [
             'id_pendaftar' => $pendaftaran->id,
             'judul' => $request->judul,
-            'biodata' => $request->biodata,
+            'abstrak' => $request->abstrak,
+            'kategori_aksatika' => $request->kategori_aksatika,
+            'link_video' => $request->link_video,
+            'link_laporan_majalah' => $request->link_laporan_majalah,
         ];
-        
-        // Upload file ke Google Drive dengan struktur folder yang sama
+
+        // Upload file ke Google Drive
         if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $extension = $file->getClientOriginalExtension();
-            
-            // Ambil data untuk struktur folder
-            $tahun = date('Y');
-            $jenisPelatihan = $pendaftaran->jenisPelatihan;
-            $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
-            $angkatan = $pendaftaran->angkatan;
-            $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
-            $nip = $pendaftaran->peserta->nip_nrp;
-            
-            // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
-            $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
-            
-            // Nama file: aksi_perubahan.extension
-            $fileName = 'aksi_perubahan.' . $extension;
-            
-            // PATH di Google Drive
-            $drivePath = "{$folderPath}/{$fileName}";
-            
-            // Upload ke Google Drive
-            Storage::disk('google')->put(
-                $drivePath,
-                file_get_contents($file)
-            );
-            
-            $data['file'] = $drivePath;
+            $filePath = $this->uploadFileToDrive($request->file('file'), $pendaftaran, 'aksi_perubahan', 'pdf');
+            if ($filePath) {
+                $data['file'] = $filePath;
+            }
         }
-        
+
         AksiPerubahan::create($data);
-        
+
         return back()->with('success', 'Aksi Perubahan berhasil ditambahkan!');
     }
-    
+
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:255',
-            'biodata' => 'nullable|string',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120'
+            'abstrak' => 'nullable|string',
+            'kategori_aksatika' => 'nullable|in:pilihan1,pilihan2',
+            'file' => 'nullable|file|mimes:pdf|max:5120',
+            'link_video' => 'nullable|url|max:500',
+            'link_laporan_majalah' => 'nullable|url|max:500',
         ]);
-        
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
         $aksiPerubahan = AksiPerubahan::findOrFail($id);
-        
+
         // Validasi kepemilikan
         $user = auth()->user();
         $pendaftaran = Pendaftaran::where('id_peserta', $user->peserta_id)
             ->with(['jenisPelatihan', 'angkatan', 'peserta'])
             ->first();
-        
-        // if ($aksiPerubahan->id_pendaftar !== $pendaftaran->id) {
-        //     return back()->with('error', 'Anda tidak memiliki akses untuk mengubah data ini.');
-        // }
-        
+
+        if ($aksiPerubahan->id_pendaftar !== $pendaftaran->id) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk mengubah data ini.');
+        }
+
         $data = [
             'judul' => $request->judul,
-            'biodata' => $request->biodata,
+            'abstrak' => $request->abstrak,
+            'kategori_aksatika' => $request->kategori_aksatika,
+            'link_video' => $request->link_video,
+            'link_laporan_majalah' => $request->link_laporan_majalah,
         ];
-        
-        // Upload file baru ke Google Drive (akan overwrite file lama)
+
+        // Upload file baru ke Google Drive jika ada
         if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $extension = $file->getClientOriginalExtension();
-            
-            // Ambil data untuk struktur folder
-            $tahun = date('Y');
-            $jenisPelatihan = $pendaftaran->jenisPelatihan;
-            $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
-            $angkatan = $pendaftaran->angkatan;
-            $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
-            $nip = $pendaftaran->peserta->nip_nrp;
-            
-            // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
-            $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
-            
-            // Nama file: aksi_perubahan.extension
-            $fileName = 'aksi_perubahan.' . $extension;
-            
-            // PATH di Google Drive (tetap sama untuk overwrite)
-            $drivePath = "{$folderPath}/{$fileName}";
-            
-            // Hapus file lama jika ada (optional, untuk kebersihan)
+            // Hapus file lama jika ada
             if ($aksiPerubahan->file && Storage::disk('google')->exists($aksiPerubahan->file)) {
                 Storage::disk('google')->delete($aksiPerubahan->file);
             }
-            
-            // Upload file baru ke Google Drive
+
+            $filePath = $this->uploadFileToDrive($request->file('file'), $pendaftaran, 'aksi_perubahan', 'pdf');
+            if ($filePath) {
+                $data['file'] = $filePath;
+            }
+        }
+
+        $aksiPerubahan->update($data);
+
+        return back()->with('success', 'Aksi Perubahan berhasil diperbarui!');
+    }
+
+    public function uploadPengesahan(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'lembar_pengesahan' => 'required|file|mimes:pdf|max:5120',
+            'catatan' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $aksiPerubahan = AksiPerubahan::findOrFail($id);
+
+        // Validasi kepemilikan
+        $user = auth()->user();
+        $pendaftaran = Pendaftaran::where('id_peserta', $user->peserta_id)
+            ->with(['jenisPelatihan', 'angkatan', 'peserta'])
+            ->first();
+
+        if ($aksiPerubahan->id_pendaftar !== $pendaftaran->id) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk mengupload dokumen ini.');
+        }
+
+        // Hapus file lama jika ada
+        if ($aksiPerubahan->lembar_pengesahan && Storage::disk('google')->exists($aksiPerubahan->lembar_pengesahan)) {
+            Storage::disk('google')->delete($aksiPerubahan->lembar_pengesahan);
+        }
+
+        // Upload file pengesahan ke Google Drive
+        $filePath = $this->uploadFileToDrive($request->file('lembar_pengesahan'), $pendaftaran, 'lembar_pengesahan', 'pdf');
+
+        if ($filePath) {
+            $aksiPerubahan->update([
+                'lembar_pengesahan' => $filePath,
+            ]);
+
+            // Log atau simpan catatan jika diperlukan
+            if ($request->catatan) {
+                // Anda bisa menyimpan catatan di tabel terpisah atau di kolom jika tersedia
+                // Contoh: Log::create([...])
+            }
+
+            return back()->with('success', 'Lembar pengesahan berhasil diunggah!');
+        }
+
+        return back()->with('error', 'Gagal mengunggah lembar pengesahan.');
+    }
+
+    private function uploadFileToDrive($file, $pendaftaran, $fileName, $extension = null)
+    {
+        try {
+            $tahun = date('Y');
+            $jenisPelatihan = $pendaftaran->jenisPelatihan;
+            $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan ?? 'pelatihan');
+            $angkatan = $pendaftaran->angkatan;
+            $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan ?? 'angkatan');
+            $nip = $pendaftaran->peserta->nip_nrp ?? 'unknown';
+
+            // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
+            $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+
+            // Gunakan extension dari file jika tidak ditentukan
+            if (!$extension) {
+                $extension = $file->getClientOriginalExtension();
+            }
+
+            // Nama file: nama_file.extension
+            $finalFileName = $fileName . '.' . $extension;
+
+            // PATH di Google Drive
+            $drivePath = "{$folderPath}/{$finalFileName}";
+
+            // Upload ke Google Drive
             Storage::disk('google')->put(
                 $drivePath,
                 file_get_contents($file)
             );
-            
-            $data['file'] = $drivePath;
+
+            return $drivePath;
+        } catch (\Exception $e) {
+            \Log::error('Error uploading file to Google Drive: ' . $e->getMessage());
+            return false;
         }
-        
-        $aksiPerubahan->update($data);
-        
-        return back()->with('success', 'Aksi Perubahan berhasil diperbarui!');
     }
-    
+
     public function destroy($id)
     {
         $aksiPerubahan = AksiPerubahan::findOrFail($id);
-        
+
         // Validasi kepemilikan
         $user = auth()->user();
         $pendaftaran = Pendaftaran::where('id_peserta', $user->peserta_id)->first();
-        
+
         if ($aksiPerubahan->id_pendaftar !== $pendaftaran->id) {
             return back()->with('error', 'Anda tidak memiliki akses untuk menghapus data ini.');
         }
-        
+
         // Hapus file dari Google Drive jika ada
-        if ($aksiPerubahan->file && Storage::disk('google')->exists($aksiPerubahan->file)) {
-            Storage::disk('google')->delete($aksiPerubahan->file);
+        $filesToDelete = [
+            'file' => $aksiPerubahan->file,
+            'lembar_pengesahan' => $aksiPerubahan->lembar_pengesahan,
+        ];
+
+        foreach ($filesToDelete as $file) {
+            if ($file && Storage::disk('google')->exists($file)) {
+                Storage::disk('google')->delete($file);
+            }
         }
-        
+
         $aksiPerubahan->delete();
-        
+
         return back()->with('success', 'Aksi Perubahan berhasil dihapus!');
     }
 }

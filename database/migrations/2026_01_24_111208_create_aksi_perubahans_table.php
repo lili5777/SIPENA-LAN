@@ -15,8 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_pendaftar')->constrained('pendaftaran')->onDelete('cascade');
             $table->string('judul');
+            $table->text('abstrak')->nullable();
+            $table->enum('kategori_aksatika', ['pilihan1', 'pilihan2'])->nullable();
             $table->string('file')->nullable();
-            $table->string('biodata')->nullable();
+            $table->string('link_video')->nullable();
+            $table->string('link_laporan_majalah')->nullable();
+            $table->string('lembar_pengesahan')->nullable();
             $table->timestamps();
         });
     }

@@ -10,8 +10,12 @@ class AksiPerubahan extends Model
     protected $fillable = [
         'id_pendaftar',
         'judul',
+        'abstrak',
+        'kategori_aksatika',
         'file',
-        'biodata'
+        'link_video',
+        'link_laporan_majalah',
+        'lembar_pengesahan',
     ];
 
     public function pendaftaran()

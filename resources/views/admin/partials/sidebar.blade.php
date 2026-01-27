@@ -21,7 +21,7 @@
 
         @if (auth()->user()->role->name == "user")
             <div class="menu-item">
-                <a href="{{ route('aksiperubahan') }}" class="menu-link">
+                <a href="{{ route('aksiperubahan.index') }}" class="menu-link">
                     <i class="fas fa-project-diagram menu-icon"></i>
                     <span class="menu-text">Aksi Perubahan</span>
                 </a>

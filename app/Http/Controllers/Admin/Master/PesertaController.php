@@ -114,7 +114,8 @@ class PesertaController extends Controller
             'peserta.kepegawaianPeserta.kabupaten',
             'angkatan',
             'pesertaMentor.mentor',
-            'jenisPelatihan'
+            'jenisPelatihan',
+            'aksiPerubahan'
         ])
             ->findOrFail($id);
 
@@ -127,7 +128,8 @@ class PesertaController extends Controller
                 'provinsi' => $pendaftaran->peserta->kepegawaianPeserta->provinsi,
                 'kabupaten' => $pendaftaran->peserta->kepegawaianPeserta->kabupaten,
                 'angkatan' => $pendaftaran->angkatan,
-                'mentor' => $pendaftaran->pesertaMentor->first()?->mentor ?? null
+                'mentor' => $pendaftaran->pesertaMentor->first()?->mentor ?? null,
+                'aksi_perubahan' => $pendaftaran->aksiPerubahan ?? null,
             ]
         ]);
     }
@@ -1494,6 +1496,476 @@ class PesertaController extends Controller
             }
 
             return back()->with('error', $e->getMessage());
+        }
+    }
+
+
+    public function showSwapForm(Request $request, $jenis, $id)
+    {
+        if (auth()->user()->role->name !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $jenisData = $this->getJenisData($jenis);
+        $jenisPelatihanId = $jenisData['id'];
+
+        // Get current peserta
+        $pendaftaranAsal = Pendaftaran::with(['peserta', 'angkatan', 'jenisPelatihan'])
+            ->findOrFail($id);
+
+        // Verify jenis pelatihan
+        if ($pendaftaranAsal->id_jenis_pelatihan != $jenisPelatihanId) {
+            abort(404, 'Data tidak ditemukan untuk jenis pelatihan ini');
+        }
+
+        // Get all other angkatan (excluding current angkatan)
+        $angkatanTujuanList = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
+            ->where('id', '!=', $pendaftaranAsal->id_angkatan)
+            ->where('status_angkatan', 'Dibuka')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('nama_angkatan', 'asc')
+            ->get();
+
+        return view('admin.peserta.swap', compact(
+            'pendaftaranAsal',
+            'angkatanTujuanList',
+            'jenis'
+        ));
+    }
+
+    /**
+     * Get peserta list for selected angkatan (for dropdown).
+     */
+    /**
+     * Get peserta list for selected angkatan (for dropdown).
+     */
+    public function getPesertaAngkatan(Request $request, $jenis = null)
+    {
+        if (auth()->user()->role->name !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        // Debug: Log request
+        \Log::info('getPesertaAngkatan request:', $request->all());
+
+        $request->validate([
+            'angkatan_id' => 'required|exists:angkatan,id',
+            'exclude_peserta_id' => 'nullable|exists:peserta,id'
+        ]);
+
+        $angkatanId = $request->angkatan_id;
+        $excludePesertaId = $request->exclude_peserta_id;
+
+        try {
+            // Debug: Check angkatan exists
+            $angkatan = Angkatan::find($angkatanId);
+            \Log::info('Angkatan found:', ['id' => $angkatanId, 'nama' => $angkatan->nama_angkatan ?? 'not found']);
+
+            // Get all peserta in the selected angkatan
+            $pesertaList = Pendaftaran::with(['peserta', 'peserta.kepegawaianPeserta'])
+                ->where('id_angkatan', $angkatanId)
+                ->whereHas('peserta', function ($query) use ($excludePesertaId) {
+                    if ($excludePesertaId) {
+                        $query->where('id', '!=', $excludePesertaId);
+                    }
+                })
+                ->get()
+                ->map(function ($pendaftaran) {
+                    return [
+                        'id' => $pendaftaran->id,
+                        'peserta_id' => $pendaftaran->peserta->id,
+                        'nama' => $pendaftaran->peserta->nama_lengkap ?? 'Nama tidak tersedia',
+                        'nip_nrp' => $pendaftaran->peserta->nip_nrp ?? '-',
+                        'ndh' => $pendaftaran->peserta->ndh,
+                        'asal_instansi' => $pendaftaran->peserta->kepegawaianPeserta->asal_instansi ?? '-'
+                    ];
+                });
+
+            \Log::info('Peserta list found:', ['count' => count($pesertaList)]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $pesertaList,
+                'count' => count($pesertaList)
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in getPesertaAngkatan:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
+
+    /**
+     * Process swapping peserta between angkatan (NDH ikut angkatan).
+     */
+    public function swapAngkatan(Request $request, $jenis, $id)
+    {
+        if (auth()->user()->role->name !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya admin yang dapat melakukan tindakan ini.'
+            ], 403);
+        }
+
+        $request->validate([
+            'angkatan_tujuan_id' => 'required|exists:angkatan,id',
+            'peserta_tujuan_id' => 'required|exists:pendaftaran,id',
+            'catatan_swap' => 'nullable|string|max:500'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $jenisData = $this->getJenisData($jenis);
+            $jenisPelatihanId = $jenisData['id'];
+
+            // Get peserta asal (current peserta yang akan ditukar)
+            $pendaftaranAsal = Pendaftaran::with([
+                'peserta',
+                'angkatan',
+                'jenisPelatihan',
+                'peserta.kepegawaianPeserta'
+            ])->findOrFail($id);
+
+            // Verify jenis pelatihan
+            if ($pendaftaranAsal->id_jenis_pelatihan != $jenisPelatihanId) {
+                throw new \Exception('Data tidak ditemukan untuk jenis pelatihan ini');
+            }
+
+            // Get peserta tujuan (peserta yang akan ditukar)
+            $pendaftaranTujuan = Pendaftaran::with([
+                'peserta',
+                'angkatan',
+                'jenisPelatihan',
+                'peserta.kepegawaianPeserta'
+            ])->findOrFail($request->peserta_tujuan_id);
+
+            // Verify that both peserta are in the same jenis pelatihan
+            if ($pendaftaranTujuan->id_jenis_pelatihan != $jenisPelatihanId) {
+                throw new \Exception('Peserta tujuan tidak berada dalam jenis pelatihan yang sama');
+            }
+
+            // Verify that they are from different angkatan
+            if ($pendaftaranAsal->id_angkatan == $pendaftaranTujuan->id_angkatan) {
+                throw new \Exception('Peserta harus berasal dari angkatan yang berbeda');
+            }
+
+            $angkatanAsal = $pendaftaranAsal->angkatan;
+            $angkatanTujuan = $pendaftaranTujuan->angkatan;
+
+            $pesertaAsal = $pendaftaranAsal->peserta;
+            $pesertaTujuan = $pendaftaranTujuan->peserta;
+
+            // Backup NDH values
+            $ndhAsal = $pesertaAsal->ndh;    // NDH Ali: 2
+            $ndhTujuan = $pesertaTujuan->ndh; // NDH Rizal: 1
+
+            // === STEP 1: Swap folder paths for both peserta ===
+
+            // File paths for peserta asal
+            $tahun = date('Y');
+            $kodeJenisPelatihan = str_replace(' ', '_', $pendaftaranAsal->jenisPelatihan->kode_pelatihan);
+
+            $namaAngkatanAsal = str_replace(' ', '_', $angkatanAsal->nama_angkatan);
+            $namaAngkatanTujuan = str_replace(' ', '_', $angkatanTujuan->nama_angkatan);
+
+            $folderPathAsal = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatanAsal}/{$pesertaAsal->nip_nrp}";
+            $folderPathTujuan = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatanTujuan}/{$pesertaTujuan->nip_nrp}";
+
+            $folderPathTemp = "Berkas/{$tahun}/{$kodeJenisPelatihan}/TEMP/{$pesertaAsal->nip_nrp}_{$pesertaTujuan->nip_nrp}_" . time();
+
+            // === STEP 2: Create temporary backup of files ===
+            try {
+                // Copy peserta asal files to temp location
+                if (Storage::disk('google')->exists($folderPathAsal)) {
+                    $filesAsal = Storage::disk('google')->listContents($folderPathAsal);
+                    foreach ($filesAsal as $file) {
+                        if (isset($file['path'])) {
+                            $sourcePath = $file['path'];
+                            $filename = basename($sourcePath);
+                            $tempPath = $folderPathTemp . "/asal/{$filename}";
+
+                            try {
+                                $fileContent = Storage::disk('google')->get($sourcePath);
+                                Storage::disk('google')->put($tempPath, $fileContent);
+                            } catch (\Exception $e) {
+                                // Skip if file doesn't exist
+                            }
+                        }
+                    }
+                }
+
+                // Copy peserta tujuan files to temp location
+                if (Storage::disk('google')->exists($folderPathTujuan)) {
+                    $filesTujuan = Storage::disk('google')->listContents($folderPathTujuan);
+                    foreach ($filesTujuan as $file) {
+                        if (isset($file['path'])) {
+                            $sourcePath = $file['path'];
+                            $filename = basename($sourcePath);
+                            $tempPath = $folderPathTemp . "/tujuan/{$filename}";
+
+                            try {
+                                $fileContent = Storage::disk('google')->get($sourcePath);
+                                Storage::disk('google')->put($tempPath, $fileContent);
+                            } catch (\Exception $e) {
+                                // Skip if file doesn't exist
+                            }
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Error creating temp backup: ' . $e->getMessage());
+                // Continue anyway
+            }
+
+            // === STEP 3: SWAP NDH VALUES (NDH ikut angkatan) ===
+            // Inilah perbedaan utama: NDH di-swap (ikut angkatan)
+            // Ali (NDH 2) pindah ke Angkatan 2, dapat NDH 1 (dari Rizal)
+            // Rizal (NDH 1) pindah ke Angkatan 1, dapat NDH 2 (dari Ali)
+
+            $pesertaAsal->ndh = $ndhTujuan; // Ali dapat NDH 1
+            $pesertaTujuan->ndh = $ndhAsal; // Rizal dapat NDH 2
+
+            // === STEP 4: Update file paths in database ===
+
+            // Function to update file paths
+            function updateFilePaths($pendaftaran, $oldFolder, $newFolder)
+            {
+                $peserta = $pendaftaran->peserta;
+                $kepegawaian = $peserta->kepegawaianPeserta;
+
+                // Update peserta files
+                $pesertaFields = ['file_ktp', 'file_pas_foto'];
+                foreach ($pesertaFields as $field) {
+                    if ($peserta->$field && strpos($peserta->$field, $oldFolder) !== false) {
+                        $peserta->$field = str_replace($oldFolder, $newFolder, $peserta->$field);
+                    }
+                }
+
+                // Update kepegawaian files
+                if ($kepegawaian) {
+                    $kepegawaianFields = ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp'];
+                    foreach ($kepegawaianFields as $field) {
+                        if ($kepegawaian->$field && strpos($kepegawaian->$field, $oldFolder) !== false) {
+                            $kepegawaian->$field = str_replace($oldFolder, $newFolder, $kepegawaian->$field);
+                        }
+                    }
+                }
+
+                // Update pendaftaran files
+                $pendaftaranFields = [
+                    'file_surat_tugas',
+                    'file_surat_kesediaan',
+                    'file_pakta_integritas',
+                    'file_surat_komitmen',
+                    'file_surat_kelulusan_seleksi',
+                    'file_surat_sehat',
+                    'file_surat_bebas_narkoba',
+                    'file_surat_pernyataan_administrasi',
+                    'file_sertifikat_penghargaan',
+                    'file_persetujuan_mentor'
+                ];
+
+                foreach ($pendaftaranFields as $field) {
+                    if ($pendaftaran->$field && strpos($pendaftaran->$field, $oldFolder) !== false) {
+                        $pendaftaran->$field = str_replace($oldFolder, $newFolder, $pendaftaran->$field);
+                    }
+                }
+
+                // Update aksi perubahan file
+                $aksiPerubahan = $pendaftaran->aksiPerubahan->first();
+                if ($aksiPerubahan && $aksiPerubahan->file) {
+                    if (strpos($aksiPerubahan->file, $oldFolder) !== false) {
+                        $aksiPerubahan->file = str_replace($oldFolder, $newFolder, $aksiPerubahan->file);
+                        $aksiPerubahan->save();
+                    }
+                }
+
+                return [$peserta, $kepegawaian, $pendaftaran];
+            }
+
+            // Swap file paths for peserta asal (moving to tujuan folder)
+            list($pesertaAsal, $kepegawaianAsal, $pendaftaranAsal) = updateFilePaths(
+                $pendaftaranAsal,
+                $folderPathAsal,
+                $folderPathTujuan
+            );
+
+            // Swap file paths for peserta tujuan (moving to asal folder)
+            list($pesertaTujuan, $kepegawaianTujuan, $pendaftaranTujuan) = updateFilePaths(
+                $pendaftaranTujuan,
+                $folderPathTujuan,
+                $folderPathAsal
+            );
+
+            // === STEP 5: Swap angkatan IDs ===
+            $tempAngkatanId = $pendaftaranAsal->id_angkatan;
+            $pendaftaranAsal->id_angkatan = $pendaftaranTujuan->id_angkatan;
+            $pendaftaranTujuan->id_angkatan = $tempAngkatanId;
+
+            // === STEP 6: Save all changes ===
+            $pesertaAsal->save();
+            $pesertaTujuan->save();
+
+            if ($kepegawaianAsal) $kepegawaianAsal->save();
+            if ($kepegawaianTujuan) $kepegawaianTujuan->save();
+
+            $pendaftaranAsal->save();
+            $pendaftaranTujuan->save();
+
+            // === STEP 7: Move actual files in Google Drive ===
+            try {
+                // Delete old folders
+                Storage::disk('google')->deleteDirectory($folderPathAsal);
+                Storage::disk('google')->deleteDirectory($folderPathTujuan);
+
+                // Copy temp files to new locations
+                // Copy asal files to tujuan folder
+                $tempAsalPath = $folderPathTemp . "/asal";
+                if (Storage::disk('google')->exists($tempAsalPath)) {
+                    $tempFiles = Storage::disk('google')->listContents($tempAsalPath);
+                    foreach ($tempFiles as $file) {
+                        if (isset($file['path'])) {
+                            $sourcePath = $file['path'];
+                            $filename = basename($sourcePath);
+                            $destPath = $folderPathTujuan . "/{$filename}";
+
+                            try {
+                                $fileContent = Storage::disk('google')->get($sourcePath);
+                                Storage::disk('google')->put($destPath, $fileContent);
+                            } catch (\Exception $e) {
+                                // Skip if error
+                            }
+                        }
+                    }
+                }
+
+                // Copy tujuan files to asal folder
+                $tempTujuanPath = $folderPathTemp . "/tujuan";
+                if (Storage::disk('google')->exists($tempTujuanPath)) {
+                    $tempFiles = Storage::disk('google')->listContents($tempTujuanPath);
+                    foreach ($tempFiles as $file) {
+                        if (isset($file['path'])) {
+                            $sourcePath = $file['path'];
+                            $filename = basename($sourcePath);
+                            $destPath = $folderPathAsal . "/{$filename}";
+
+                            try {
+                                $fileContent = Storage::disk('google')->get($sourcePath);
+                                Storage::disk('google')->put($destPath, $fileContent);
+                            } catch (\Exception $e) {
+                                // Skip if error
+                            }
+                        }
+                    }
+                }
+
+                // Clean up temp folder
+                Storage::disk('google')->deleteDirectory($folderPathTemp);
+            } catch (\Exception $e) {
+                \Log::error('Error moving files: ' . $e->getMessage());
+                // Don't rollback if file movement fails
+            }
+
+            // === STEP 8: Update NDH sequencing if needed ===
+            // Pastikan tidak ada duplikasi NDH dalam angkatan yang sama
+
+            // Check for duplicate NDH in Angkatan 1 (setelah Rizal pindah)
+            $this->validateAndFixNDHSequence($angkatanAsal->id);
+
+            // Check for duplicate NDH in Angkatan 2 (setelah Ali pindah)
+            $this->validateAndFixNDHSequence($angkatanTujuan->id);
+
+            // === STEP 9: Log activities ===
+            $jenisPelatihan = $pendaftaranAsal->jenisPelatihan;
+
+            // Log for peserta asal
+            aktifitas(
+                "Swap angkatan: " . $pesertaAsal->nama_lengkap .
+                    " pindah dari {$angkatanAsal->nama_angkatan} (NDH {$ndhAsal}) " .
+                    "ke {$angkatanTujuan->nama_angkatan} (NDH {$ndhTujuan})",
+                $pesertaAsal,
+                $request->catatan_swap
+            );
+
+            // Log for peserta tujuan
+            aktifitas(
+                "Swap angkatan: " . $pesertaTujuan->nama_lengkap .
+                    " pindah dari {$angkatanTujuan->nama_angkatan} (NDH {$ndhTujuan}) " .
+                    "ke {$angkatanAsal->nama_angkatan} (NDH {$ndhAsal})",
+                $pesertaTujuan,
+                $request->catatan_swap
+            );
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil menukar tempat ' . $pesertaAsal->nama_lengkap .
+                    ' (sekarang NDH ' . $ndhTujuan . ' di ' . $angkatanTujuan->nama_angkatan . ') dengan ' .
+                    $pesertaTujuan->nama_lengkap . ' (sekarang NDH ' . $ndhAsal . ' di ' . $angkatanAsal->nama_angkatan . ')',
+                'redirect_url' => route('peserta.index', ['jenis' => $jenis])
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Swap angkatan error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Validate and fix NDH sequence in an angkatan.
+     */
+    private function validateAndFixNDHSequence($angkatanId)
+    {
+        // Get all peserta in this angkatan
+        $pesertaList = Peserta::whereHas('pendaftaran', function ($query) use ($angkatanId) {
+            $query->where('id_angkatan', $angkatanId);
+        })
+            ->whereNotNull('ndh')
+            ->orderBy('ndh')
+            ->get();
+
+        // Check for duplicate NDH
+        $ndhCounts = [];
+        foreach ($pesertaList as $peserta) {
+            $ndh = $peserta->ndh;
+            if (!isset($ndhCounts[$ndh])) {
+                $ndhCounts[$ndh] = 0;
+            }
+            $ndhCounts[$ndh]++;
+        }
+
+        // If there are duplicates, re-sequence
+        $hasDuplicates = false;
+        foreach ($ndhCounts as $count) {
+            if ($count > 1) {
+                $hasDuplicates = true;
+                break;
+            }
+        }
+
+        if ($hasDuplicates) {
+            $counter = 1;
+            foreach ($pesertaList as $peserta) {
+                $peserta->ndh = $counter++;
+                $peserta->save();
+            }
         }
     }
 }

@@ -143,6 +143,28 @@
             color: white;
         }
 
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            border: none;
+            padding: 0.625rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+
         .content-card {
             background: white;
             border-radius: 15px;
@@ -181,6 +203,26 @@
             word-break: break-word;
             line-height: 1.5;
             white-space: pre-wrap;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .link-item i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .link-text {
+            flex: 1;
+            word-break: break-all;
         }
 
         .file-preview {
@@ -336,7 +378,8 @@
             border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             width: 90%;
-            max-width: 600px;
+            max-width: 800px;
+            /* Diperbesar untuk 2 kolom */
             animation: slideUp 0.3s ease;
         }
 
@@ -379,8 +422,21 @@
             color: var(--danger-color);
         }
 
+        /* Grid untuk 2 kolom */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+            /* Ambil full width */
         }
 
         .form-label {
@@ -405,6 +461,15 @@
             box-shadow: 0 0 0 3px rgba(26, 58, 108, 0.1);
         }
 
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
         textarea.form-control {
             resize: vertical;
             min-height: 120px;
@@ -420,6 +485,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
+            margin-top: 1rem;
         }
 
         .btn-submit:hover {
@@ -457,6 +523,15 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -544,6 +619,12 @@
                 align-items: stretch;
             }
 
+            .form-row {
+                grid-template-columns: 1fr;
+                /* 1 kolom di mobile */
+                gap: 1rem;
+            }
+
             .no-data {
                 padding: 3rem 1.5rem;
             }
@@ -619,10 +700,10 @@
                             <i class="fas fa-edit"></i>
                             Edit
                         </button>
-                        {{-- <button onclick="confirmDelete()" class="btn-danger">
-                            <i class="fas fa-trash"></i>
-                            Hapus
-                        </button> --}}
+                        <button onclick="openPengajuanModal()" class="btn-success">
+                            <i class="fas fa-file-signature"></i>
+                            Ajukan Pengesahan
+                        </button>
                     </div>
                 </div>
 
@@ -635,21 +716,39 @@
                         <span class="data-value">{{ $aksiPerubahan->judul ?? '-' }}</span>
                     </div>
 
-                    {{-- @if($aksiPerubahan->biodata)
-                    <div class="data-item">
-                        <span class="data-label">
-                            <i class="fas fa-align-left"></i>
-                            Deskripsi / Biodata
-                        </span>
-                        <span class="data-value">{{ $aksiPerubahan->biodata }}</span>
-                    </div>
-                    @endif --}}
+                    @if($aksiPerubahan->abstrak)
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-align-left"></i>
+                                Abstrak
+                            </span>
+                            <span class="data-value">{{ $aksiPerubahan->abstrak }}</span>
+                        </div>
+                    @endif
+
+                    @if($aksiPerubahan->kategori_aksatika)
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-tags"></i>
+                                Kategori Aksatika
+                            </span>
+                            <span class="data-value">
+                                @if($aksiPerubahan->kategori_aksatika == 'pilihan1')
+                                    Pilihan 1
+                                @elseif($aksiPerubahan->kategori_aksatika == 'pilihan2')
+                                    Pilihan 2
+                                @else
+                                    {{ $aksiPerubahan->kategori_aksatika }}
+                                @endif
+                            </span>
+                        </div>
+                    @endif
 
                     @if($aksiPerubahan->file)
                         <div class="data-item">
                             <span class="data-label">
-                                <i class="fas fa-file"></i>
-                                Dokumen Hasil
+                                <i class="fas fa-file-pdf"></i>
+                                Dokumen Aksi Perubahan
                             </span>
                             <div class="file-preview">
                                 <div class="file-icon">
@@ -663,18 +762,73 @@
                                     title="Lihat Dokumen">
                                     <i class="fas fa-eye"></i>
                                 </a>
+                                <a href="{{ Storage::disk('google')->url($aksiPerubahan->file) }}" download class="btn-icon"
+                                    title="Download Dokumen">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($aksiPerubahan->link_video)
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-video"></i>
+                                Link Video
+                            </span>
+                            <div class="link-item">
+                                <i class="fas fa-link"></i>
+                                <div class="link-text">{{ $aksiPerubahan->link_video }}</div>
+                                <a href="{{ $aksiPerubahan->link_video }}" target="_blank" class="btn-icon" title="Buka Link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($aksiPerubahan->link_laporan_majalah)
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-newspaper"></i>
+                                Link Laporan Majalah
+                            </span>
+                            <div class="link-item">
+                                <i class="fas fa-link"></i>
+                                <div class="link-text">{{ $aksiPerubahan->link_laporan_majalah }}</div>
+                                <a href="{{ $aksiPerubahan->link_laporan_majalah }}" target="_blank" class="btn-icon" title="Buka Link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($aksiPerubahan->lembar_pengesahan)
+                        <div class="data-item">
+                            <span class="data-label">
+                                <i class="fas fa-file-signature"></i>
+                                Lembar Pengesahan
+                            </span>
+                            <div class="file-preview">
+                                <div class="file-icon">
+                                    <i class="fas fa-file-signature"></i>
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name">{{ basename($aksiPerubahan->lembar_pengesahan) }}</div>
+                                    <div class="file-size">Dokumen Pengesahan</div>
+                                </div>
+                                <a href="{{ Storage::disk('google')->url($aksiPerubahan->lembar_pengesahan) }}" target="_blank"
+                                    class="btn-icon" title="Lihat Dokumen">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ Storage::disk('google')->url($aksiPerubahan->lembar_pengesahan) }}" download
+                                    class="btn-icon" title="Download Dokumen">
+                                    <i class="fas fa-download"></i>
+                                </a>
                             </div>
                         </div>
                     @endif
                 </div>
             </div>
-
-            <!-- Hidden Delete Form -->
-            <form id="deleteForm" action="{{ route('aksiperubahan.destroy', $aksiPerubahan->id) }}" method="POST"
-                style="display: none;">
-                @csrf
-                @method('DELETE')
-            </form>
 
         @else
             <!-- Tidak Ada Data - Tampilkan Tombol Tambah -->
@@ -704,23 +858,64 @@
                 </div>
                 <button class="close" onclick="closeAddModal()">&times;</button>
             </div>
-            <form action="{{ route('aksiperubahan.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('aksiperubahan.store') }}" method="POST" enctype="multipart/form-data" id="addForm">
                 @csrf
-                <div class="form-group">
+
+                <!-- Judul - Full Width -->
+                <div class="form-group full-width">
                     <label class="form-label">Judul Aksi Perubahan *</label>
                     <input type="text" name="judul" class="form-control" required
                         placeholder="Masukkan judul aksi perubahan">
                 </div>
 
-                {{-- <div class="form-group">
-                    <label class="form-label">Deskripsi / Biodata</label>
-                    <textarea name="biodata" class="form-control"
-                        placeholder="Masukkan deskripsi atau biodata aksi perubahan (opsional)"></textarea>
-                </div> --}}
+                <!-- Abstrak - Full Width -->
+                <div class="form-group full-width">
+                    <label class="form-label">Abstrak</label>
+                    <textarea name="abstrak" class="form-control" placeholder="Masukkan abstrak aksi perubahan (opsional)"
+                        rows="5"></textarea>
+                </div>
 
-                <div class="form-group">
-                    <label class="form-label">Dokumen Hasil (PDF - Max 5MB)</label>
-                    <input type="file" name="file" class="form-control" accept=".pdf">
+                <!-- Row 1: Kategori dan File (2 kolom) -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Kategori Aksatika</label>
+                        <select name="kategori_aksatika" class="form-control">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="pilihan1">Pilihan 1</option>
+                            <option value="pilihan2">Pilihan 2</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Dokumen Aksi Perubahan (PDF - Max 5MB)</label>
+                        <input type="file" name="file" class="form-control" accept=".pdf">
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Format: PDF, maksimal 5MB
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Link Video dan Link Laporan (2 kolom) -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Link Video</label>
+                        <input type="url" name="link_video" class="form-control" placeholder="https://example.com/video">
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Link video presentasi/demo
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Link Laporan Majalah</label>
+                        <input type="url" name="link_laporan_majalah" class="form-control"
+                            placeholder="https://example.com/laporan">
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Link laporan di majalah
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-submit" id="btnSubmitAdd">
@@ -748,36 +943,71 @@
                     <button class="close" onclick="closeEditModal()">&times;</button>
                 </div>
                 <form action="{{ route('aksiperubahan.update', $aksiPerubahan->id) }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" id="editForm">
                     @csrf
                     @method('PUT')
-                    <div class="form-group">
+
+                    <!-- Judul - Full Width -->
+                    <div class="form-group full-width">
                         <label class="form-label">Judul Aksi Perubahan *</label>
                         <input type="text" name="judul" class="form-control" required value="{{ $aksiPerubahan->judul }}"
                             placeholder="Masukkan judul aksi perubahan">
                     </div>
 
-                    {{-- <div class="form-group">
-                        <label class="form-label">Deskripsi / Biodata</label>
-                        <textarea name="biodata" class="form-control"
-                            placeholder="Masukkan deskripsi atau biodata aksi perubahan (opsional)">{{ $aksiPerubahan->biodata }}</textarea>
-                    </div> --}}
+                    <!-- Abstrak - Full Width -->
+                    <div class="form-group full-width">
+                        <label class="form-label">Abstrak</label>
+                        <textarea name="abstrak" class="form-control" placeholder="Masukkan abstrak aksi perubahan (opsional)"
+                            rows="5">{{ $aksiPerubahan->abstrak }}</textarea>
+                    </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Dokumen Hasil (PDF Max 5MB)</label>
-                        @if($aksiPerubahan->file)
-                            <div class="file-preview mb-2">
-                                <div class="file-icon">
-                                    <i class="fas fa-file"></i>
+                    <!-- Row 1: Kategori dan File (2 kolom) -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Kategori Aksatika</label>
+                            <select name="kategori_aksatika" class="form-control">
+                                <option value="">-- Pilih Kategori --</option>
+                                <option value="pilihan1" {{ $aksiPerubahan->kategori_aksatika == 'pilihan1' ? 'selected' : '' }}>
+                                    Pilihan 1</option>
+                                <option value="pilihan2" {{ $aksiPerubahan->kategori_aksatika == 'pilihan2' ? 'selected' : '' }}>
+                                    Pilihan 2</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Dokumen Aksi Perubahan</label>
+                            @if($aksiPerubahan->file)
+                                <div class="file-preview mb-2">
+                                    <div class="file-icon">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="file-info">
+                                        <div class="file-name">{{ basename($aksiPerubahan->file) }}</div>
+                                        <div class="file-size">File saat ini</div>
+                                    </div>
                                 </div>
-                                <div class="file-info">
-                                    <div class="file-name">{{ basename($aksiPerubahan->file) }}</div>
-                                    <div class="file-size">File saat ini</div>
-                                </div>
+                            @endif
+                            <input type="file" name="file" class="form-control" accept=".pdf">
+                            <div class="form-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Kosongkan jika tidak ingin mengubah file
                             </div>
-                        @endif
-                        <input type="file" name="file" class="form-control" accept=".pdf">
-                        <small style="color: #64748b; font-size: 0.85rem;">Kosongkan jika tidak ingin mengubah file</small>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Link Video dan Link Laporan (2 kolom) -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Link Video</label>
+                            <input type="url" name="link_video" class="form-control" value="{{ $aksiPerubahan->link_video }}"
+                                placeholder="https://example.com/video">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Link Laporan Majalah</label>
+                            <input type="url" name="link_laporan_majalah" class="form-control"
+                                value="{{ $aksiPerubahan->link_laporan_majalah }}" placeholder="https://example.com/laporan">
+                        </div>
                     </div>
 
                     <button type="submit" class="btn-submit" id="btnSubmitEdit">
@@ -787,6 +1017,77 @@
                         <span class="spinner-wrapper" style="display: none;">
                             <span class="spinner"></span>
                             <span>Mengupdate...</span>
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Pengajuan Pengesahan (TETAP FULL WIDTH) -->
+        <div id="pengajuanModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i class="fas fa-file-signature"></i>
+                        Ajukan Lembar Pengesahan
+                    </div>
+                    <button class="close" onclick="closePengajuanModal()">&times;</button>
+                </div>
+                <form action="{{ route('aksiperubahan.upload-pengesahan', $aksiPerubahan->id) }}" method="POST"
+                    enctype="multipart/form-data" id="pengajuanForm">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle"></i>
+                        Unggah lembar pengesahan yang sudah ditandatangani oleh pimpinan/penanggung jawab.
+                    </div>
+
+                    <!-- Judul Aksi Perubahan - Full Width -->
+                    <div class="form-group">
+                        <label class="form-label">Judul Aksi Perubahan</label>
+                        <input type="text" class="form-control" value="{{ $aksiPerubahan->judul }}" readonly>
+                    </div>
+
+                    <!-- Lembar Pengesahan - Full Width -->
+                    <div class="form-group">
+                        <label class="form-label">Lembar Pengesahan * (PDF - Max 5MB)</label>
+                        @if($aksiPerubahan->lembar_pengesahan)
+                            <div class="file-preview mb-2">
+                                <div class="file-icon">
+                                    <i class="fas fa-file-signature"></i>
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name">{{ basename($aksiPerubahan->lembar_pengesahan) }}</div>
+                                    <div class="file-size">File saat ini</div>
+                                </div>
+                            </div>
+                            <div class="form-hint">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Mengganti file akan menghapus file sebelumnya
+                            </div>
+                        @endif
+                        <input type="file" name="lembar_pengesahan" class="form-control" accept=".pdf" required>
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Format: PDF, maksimal 5MB, sudah ditandatangani
+                        </div>
+                    </div>
+
+                    <!-- Catatan - Full Width -->
+                    {{-- <div class="form-group">
+                        <label class="form-label">Catatan (Opsional)</label>
+                        <textarea name="catatan" class="form-control" placeholder="Masukkan catatan tambahan jika diperlukan"
+                            rows="3"></textarea>
+                    </div> --}}
+
+                    <button type="submit" class="btn-submit" id="btnSubmitPengajuan">
+                        <span class="btn-text">
+                            <i class="fas fa-paper-plane"></i> Ajukan Pengesahan
+                        </span>
+                        <span class="spinner-wrapper" style="display: none;">
+                            <span class="spinner"></span>
+                            <span>Mengunggah...</span>
                         </span>
                     </button>
                 </form>
@@ -813,32 +1114,34 @@
         }
 
         // Handle Add Form Submit
-        document.querySelector('#addModal form').addEventListener('submit', function (e) {
+        document.getElementById('addForm')?.addEventListener('submit', function (e) {
             const button = document.getElementById('btnSubmitAdd');
             showLoading(button);
         });
 
         // Handle Edit Form Submit
-        @if($aksiPerubahan)
-            document.querySelector('#editModal form').addEventListener('submit', function (e) {
-                const button = document.getElementById('btnSubmitEdit');
-                showLoading(button);
-            });
-        @endif
+        document.getElementById('editForm')?.addEventListener('submit', function (e) {
+            const button = document.getElementById('btnSubmitEdit');
+            showLoading(button);
+        });
 
-            function openAddModal() {
-                document.getElementById('addModal').classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
+        // Handle Pengajuan Form Submit
+        document.getElementById('pengajuanForm')?.addEventListener('submit', function (e) {
+            const button = document.getElementById('btnSubmitPengajuan');
+            showLoading(button);
+        });
+
+        // Modal Functions
+        function openAddModal() {
+            document.getElementById('addModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
 
         function closeAddModal() {
             document.getElementById('addModal').classList.remove('active');
             document.body.style.overflow = 'auto';
-            // Reset form and button state
-            const form = document.querySelector('#addModal form');
             const button = document.getElementById('btnSubmitAdd');
-            form.reset();
-            hideLoading(button);
+            if (button) hideLoading(button);
         }
 
         function openEditModal() {
@@ -849,29 +1152,70 @@
         function closeEditModal() {
             document.getElementById('editModal').classList.remove('active');
             document.body.style.overflow = 'auto';
-            // Reset button state
-            @if($aksiPerubahan)
-                const button = document.getElementById('btnSubmitEdit');
-                hideLoading(button);
-            @endif
-            }
+            const button = document.getElementById('btnSubmitEdit');
+            if (button) hideLoading(button);
+        }
 
-        function confirmDelete() {
-            if (confirm('Apakah Anda yakin ingin menghapus Aksi Perubahan ini? Data yang sudah dihapus tidak dapat dikembalikan.')) {
-                document.getElementById('deleteForm').submit();
+        function openPengajuanModal() {
+            document.getElementById('pengajuanModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePengajuanModal() {
+            document.getElementById('pengajuanModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            const button = document.getElementById('btnSubmitPengajuan');
+            if (button) hideLoading(button);
+        }
+
+        // File validation
+        function validateFile(input, maxSizeMB = 5) {
+            if (input.files.length > 0) {
+                const fileSize = input.files[0].size / 1024 / 1024; // in MB
+                if (fileSize > maxSizeMB) {
+                    alert(`Ukuran file terlalu besar. Maksimal ${maxSizeMB}MB.`);
+                    input.value = '';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Add file validation to all file inputs
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function () {
+                validateFile(this, 5);
+            });
+        });
+
+        // URL validation
+        function validateURL(input) {
+            if (input.value && !input.value.startsWith('http://') && !input.value.startsWith('https://')) {
+                input.value = 'https://' + input.value;
             }
         }
+
+        // Add URL validation to all URL inputs
+        document.querySelectorAll('input[type="url"]').forEach(input => {
+            input.addEventListener('blur', function () {
+                validateURL(this);
+            });
+        });
 
         // Close modal when clicking outside
         window.onclick = function (event) {
             const addModal = document.getElementById('addModal');
             const editModal = document.getElementById('editModal');
+            const pengajuanModal = document.getElementById('pengajuanModal');
 
             if (event.target == addModal) {
                 closeAddModal();
             }
             if (event.target == editModal) {
                 closeEditModal();
+            }
+            if (event.target == pengajuanModal) {
+                closePengajuanModal();
             }
         }
 
@@ -880,6 +1224,7 @@
             if (e.key === 'Escape') {
                 closeAddModal();
                 closeEditModal();
+                closePengajuanModal();
             }
         });
 
@@ -887,10 +1232,22 @@
         setTimeout(function () {
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
+                if (!alert.classList.contains('alert-success') && !alert.classList.contains('alert-error')) {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => alert.remove(), 500);
+                }
+            });
+        }, 5000);
+
+        // Hide success/error alerts after 8 seconds
+        setTimeout(function () {
+            const alerts = document.querySelectorAll('.alert-success, .alert-error');
+            alerts.forEach(alert => {
                 alert.style.opacity = '0';
                 alert.style.transition = 'opacity 0.5s ease';
                 setTimeout(() => alert.remove(), 500);
             });
-        }, 5000);
+        }, 8000);
     </script>
 @endsection

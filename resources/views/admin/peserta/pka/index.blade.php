@@ -311,6 +311,14 @@
                                                                                                                                     data-id="{{ $daftar->id }}" data-bs-toggle="tooltip" title="Lihat Detail">
                                                                                                                                     <i class="fas fa-eye"></i>
                                                                                                                                 </button>
+                                                                                                                                @if(auth()->user()->role->name === 'admin')
+                                                                                                                                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-action swap-angkatan"
+                                                                                                                                                                data-id="{{ $daftar->id }}" 
+                                                                                                                                                                data-jenis="{{ request()->route('jenis') }}"
+                                                                                                                                                                data-bs-toggle="tooltip" title="Swap/Tukar dengan Peserta Lain (NDH ikut angkatan)">
+                                                                                                                                                                <i class="fas fa-exchange-alt"></i>
+                                                                                                                                                            </button>
+                                                                                                                                                            @endif
                                                                                                                                 <a href="{{ route('peserta.edit', ['jenis' => request()->route('jenis'), 'id' => $daftar->id]) }}" class="btn btn-sm btn-outline-warning btn-action"
                                                                                                                                     data-bs-toggle="tooltip" title="Edit Peserta">
                                                                                                                                     <i class="fas fa-edit"></i>
@@ -447,6 +455,10 @@
                             data-bs-toggle="tab" data-bs-target="#nav-mentor" type="button" role="tab">
                             <i class="fas fa-chalkboard-teacher me-2"></i>Mentor
                         </button>
+                        <button class="nav-link px-4 py-3 rounded-top-3 fw-semibold" id="nav-aksi-tab" data-bs-toggle="tab"
+                            data-bs-target="#nav-aksi" type="button" role="tab">
+                            <i class="fas fa-lightbulb me-2"></i>Aksi Perubahan
+                        </button>
                     </div>
                 </nav>
 
@@ -487,6 +499,17 @@
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                                 <p class="mt-3 text-muted">Memuat data mentor...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="nav-aksi" role="tabpanel" tabindex="0">
+                        <div id="aksiContent" class="p-4" style="max-height: 60vh; overflow-y: auto;">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Memuat data aksi perubahan...</p>
                             </div>
                         </div>
                     </div>
@@ -731,6 +754,16 @@
                     });
                 });
 
+                // Swap angkatan button
+                document.querySelectorAll('.swap-angkatan').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const pendaftaranId = this.getAttribute('data-id');
+                        const jenis = this.getAttribute('data-jenis');
+                        
+                        window.location.href = `/peserta/${jenis}/${pendaftaranId}/swap`;
+                    });
+                });
+
                 // Update Status - PERBAIKAN: Gunakan data-status yang benar
                 document.querySelectorAll('.update-status').forEach(button => {
                     button.addEventListener('click', function () {
@@ -881,6 +914,7 @@
                             loadDataPesertaContent(data);
                             loadDokumenContent(data);
                             loadMentorContent(data);
+                            loadAksiContent(data); 
                         } else {
                             showDetailError();
                         }
@@ -914,6 +948,164 @@
                         });
                     });
                 }
+
+                // Load Aksi Perubahan Content
+function loadAksiContent(data) {
+    const content = document.getElementById('aksiContent');
+    content.innerHTML = generateAksiHTML(data);
+
+    // Add event listeners for document viewer
+    content.querySelectorAll('.view-aksi-document').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            const path = this.getAttribute('data-path');
+            const title = this.getAttribute('data-title');
+            if (path) {
+                window.open(`/preview-drive?path=${encodeURIComponent(path)}`, '_blank');
+            }
+        });
+    });
+}
+
+// Generate Aksi Perubahan HTML
+function generateAksiHTML(data) {
+    const aksiList = data.aksi_perubahan || [];
+    
+    if (aksiList.length === 0) {
+        return `
+            <div class="aksi-content text-center py-5">
+                <div class="empty-state">
+                    <div class="empty-state-icon mb-4">
+                        <i class="fas fa-lightbulb fa-4x" style="color: #e9ecef;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">Belum Ada Aksi Perubahan</h4>
+                    <p class="text-muted mb-4">Peserta ini belum mengirimkan aksi perubahan</p>
+                </div>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="aksi-container">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0 d-flex align-items-center">
+                    <div class="icon-wrapper bg-warning bg-opacity-10 p-2 rounded-3 me-3">
+                        <i class="fas fa-lightbulb text-warning"></i>
+                    </div>
+                    <span>Aksi Perubahan</span>
+                </h5>
+                <div class="text-muted small">
+                    <i class="fas fa-list-check me-1"></i>
+                    ${aksiList.length} aksi perubahan
+                </div>
+            </div>
+
+            <!-- List Aksi Perubahan -->
+            <div class="row g-4">
+                ${aksiList.map((aksi, index) => aksiCard(aksi, index + 1)).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// Aksi Card Component
+function aksiCard(aksi, index) {
+    const kategoriMap = {
+        'inovasi': { color: 'success', icon: 'fa-bolt', text: 'Inovasi' },
+        'improvement': { color: 'info', icon: 'fa-chart-line', text: 'Improvement' },
+        'problem_solving': { color: 'primary', icon: 'fa-puzzle-piece', text: 'Problem Solving' }
+    };
+
+    const kategori = kategoriMap[aksi.kategori_aksatika] || { color: 'secondary', icon: 'fa-question', text: aksi.kategori_aksatika };
+
+    return `
+        <div class="col-xl-6 col-lg-12">
+            <div class="aksi-card card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="badge-number me-3">
+                            <span class="badge bg-primary rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                ${index}
+                            </span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-2 text-dark">${aksi.judul || 'Aksi Perubahan'}</h6>
+                            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                <span class="badge bg-${kategori.color} bg-opacity-10 text-${kategori.color}">
+                                    <i class="fas ${kategori.icon} me-1"></i>${kategori.text}
+                                </span>
+                            </div>
+                            ${aksi.abstrak ? `
+                                <div class="abstrak-section mb-3">
+                                    <label class="text-muted small">Abstrak</label>
+                                    <p class="mb-0 text-dark" style="line-height: 1.5;">
+                                        ${aksi.abstrak}
+                                    </p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <!-- Dokumen dan Link -->
+                    <div class="row g-2">
+                        ${aksi.file ? `
+                            <div class="col-md-6">
+                                <div class="dokumen-item d-flex align-items-center p-2 border rounded">
+                                    <div class="dokumen-icon bg-primary bg-opacity-10 rounded p-2 me-2">
+                                        <i class="fas fa-file-pdf text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block">Dokumen Aksi Perubahan</small>
+                                        <small class="fw-semibold">file_aksi.pdf</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary view-aksi-document" 
+                                            data-path="${aksi.file}" data-title="Dokumen Aksi Perubahan">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${aksi.link_video ? `
+                            <div class="col-md-6">
+                                <div class="link-item d-flex align-items-center p-2 border rounded">
+                                    <div class="link-icon bg-danger bg-opacity-10 rounded p-2 me-2">
+                                        <i class="fab fa-youtube text-danger"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block">Video Presentasi</small>
+                                        <small class="fw-semibold">Link YouTube</small>
+                                    </div>
+                                    <a href="${aksi.link_video}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${aksi.link_laporan_majalah ? `
+                            <div class="col-md-6">
+                                <div class="link-item d-flex align-items-center p-2 border rounded">
+                                    <div class="link-icon bg-info bg-opacity-10 rounded p-2 me-2">
+                                        <i class="fas fa-newspaper text-info"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block">Laporan Majalah</small>
+                                        <small class="fw-semibold">Link Artikel</small>
+                                    </div>
+                                    <a href="${aksi.link_laporan_majalah}" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
                 // Load Mentor Content
                 function loadMentorContent(data) {
@@ -2243,5 +2435,62 @@
                     margin-bottom: 1rem;
                 }
             }
+            /* Aksi Perubahan Styling */
+.aksi-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    border-left: 4px solid #ffc107;
+}
+
+.aksi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    border-color: #ffc107;
+}
+
+.badge-number {
+    flex-shrink: 0;
+}
+
+.badge-number .badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.abstrak-section {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.dokumen-item, .link-item {
+    transition: all 0.2s ease;
+    background-color: #f8f9fa;
+}
+
+.dokumen-item:hover, .link-item:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.dokumen-icon, .link-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .aksi-card {
+        margin-bottom: 1rem;
+    }
+    
+    .dokumen-item, .link-item {
+        margin-bottom: 0.5rem;
+    }
+}
         </style>
 @endsection
