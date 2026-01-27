@@ -411,7 +411,6 @@ class PesertaController extends Controller
                 ]);
             }
 
-
             // 3. VALIDASI INPUT UMUM (HANYA angkatan, nip_nrp, nama_lengkap YANG REQUIRED)
             $validated = $request->validate(
                 [
@@ -440,8 +439,8 @@ class PesertaController extends Controller
                     'ukuran_celana' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                     'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                     'kondisi_peserta' => 'nullable|string',
-                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024 ',
-                    'file_pas_foto' => 'nullable|file|mimes:jpg,png|max:1024 ',
+                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024',
+                    'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
                     'asal_instansi' => 'nullable|string|max:200',
                     'unit_kerja' => 'nullable|string|max:200',
                     'id_provinsi' => 'nullable',
@@ -453,23 +452,23 @@ class PesertaController extends Controller
                     'pangkat' => 'nullable|string|max:50',
                     'golongan_ruang' => 'nullable|string|max:50',
                     'eselon' => 'nullable|string|max:50',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_spmt' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_skp' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024 ',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
                     'nomor_sk_cpns' => 'nullable|string|max:100',
-                    'nomor_sk_terakhirs' => 'nullable|string|max:100',
+                    'nomor_sk_terakhir' => 'nullable|string|max:100',
                     'tanggal_sk_cpns' => 'nullable|date',
                     'tanggal_sk_jabatan' => 'nullable|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
@@ -479,7 +478,7 @@ class PesertaController extends Controller
                     'npwp_mentor' => 'nullable|string|max:50',
                     'has_mentor' => 'nullable|in:Ya,Tidak',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
-                    'judul'=>'nullable'
+                    'judul' => 'nullable'
                 ],
                 [
                     'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
@@ -504,6 +503,8 @@ class PesertaController extends Controller
                     'ukuran_training.in' => 'Ukuran training yang dipilih tidak valid.',
                     'has_mentor.in' => 'Pilihan memiliki mentor harus Ya atau Tidak.',
                     'sudah_ada_mentor.in' => 'Pilihan sudah ada mentor harus Ya atau Tidak.',
+                    'file_pas_foto.mimes' => 'Pas foto harus berupa file JPG, JPEG, atau PNG.',
+                    'file_pas_foto.max' => 'Pas foto maksimal 1MB.',
                 ]
             );
 
@@ -516,11 +517,11 @@ class PesertaController extends Controller
             if ($kode === 'PKN_TK_II') {
                 $additionalRules = [
                     'eselon' => 'nullable|string|max:50',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024 ',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
                 ];
             }
 
@@ -528,10 +529,10 @@ class PesertaController extends Controller
                 $additionalRules = [
                     'nomor_sk_cpns' => 'nullable|string|max:100',
                     'tanggal_sk_cpns' => 'nullable|date',
-                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_spmt' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_skp' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024 ',
+                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
                     'pangkat' => 'nullable|string|max:50',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
                     'nomor_rekening_mentor' => 'nullable|string|max:200',
@@ -544,12 +545,12 @@ class PesertaController extends Controller
                     'eselon' => 'nullable|string|max:50',
                     'tanggal_sk_jabatan' => 'nullable|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024 ',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
                 ];
             }
@@ -595,64 +596,69 @@ class PesertaController extends Controller
             ];
 
             // Ambil data untuk struktur folder
-            $tahun = date('Y'); // Tahun saat ini (2026)
-            $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
-            $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan); // contoh: LATSAR, PKN_TK_II, dll
+            $tahun = date('Y');
+            $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
             $angkatan = Angkatan::find($request->id_angkatan);
-            $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan); // contoh: Angkatan I, Angkatan II, dll
+            $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
             $nip = $request->nip_nrp;
 
             // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
             $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
-            // $fullPath = public_path($folderPath);
-
-            // // Buat folder jika belum ada
-            // if (!file_exists($fullPath)) {
-            //     mkdir($fullPath, 0755, true);
-            // }
-
-            // $files = [];
-            // foreach ($fileFields as $field) {
-            //     if ($request->hasFile($field)) {
-            //         // Ambil nama file asli dan ekstensi
-            //         $originalName = $request->file($field)->getClientOriginalName();
-            //         $extension = $request->file($field)->getClientOriginalExtension();
-
-            //         // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
-            //         $fieldName = str_replace('file_', '', $field);
-            //         $fileName = $fieldName . '.' . $extension;
-
-            //         // Pindahkan file ke folder yang sudah ditentukan
-            //         $request->file($field)->move($fullPath, $fileName);
-
-            //         // Simpan path relatif untuk database
-            //         $files[$field] = '/' . $folderPath . '/' . $fileName;
-            //     }
-            // }
 
             $files = [];
 
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
-
                     $file = $request->file($field);
-                    $extension = $file->getClientOriginalExtension();
 
-                    // nama file tanpa prefix file_
-                    $fieldName = str_replace('file_', '', $field);
-                    $fileName = $fieldName . '.' . $extension;
+                    // Untuk file_pas_foto yang sudah di-crop, gunakan nama yang konsisten
+                    if ($field === 'file_pas_foto') {
+                        $fileName = 'pas_foto.jpg'; // Nama konsisten untuk pas foto
+
+                        // Validasi khusus untuk pas foto
+                        if (!$file->isValid()) {
+                            throw ValidationException::withMessages([
+                                'file_pas_foto' => ['File pas foto tidak valid.']
+                            ]);
+                        }
+
+                        // Validasi ukuran maksimal 2MB (lebih longgar karena cropper menghasilkan JPG)
+                        if ($file->getSize() > 2048 * 1024) {
+                            throw ValidationException::withMessages([
+                                'file_pas_foto' => ['Pas foto maksimal 2MB.']
+                            ]);
+                        }
+
+                        // Validasi tipe file
+                        $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png'];
+                        if (!in_array($file->getMimeType(), $allowedMimes)) {
+                            throw ValidationException::withMessages([
+                                'file_pas_foto' => ['Pas foto harus berupa JPG, JPEG, atau PNG.']
+                            ]);
+                        }
+                    } else {
+                        // Untuk file lainnya, gunakan nama asli
+                        $extension = $file->getClientOriginalExtension();
+                        $fieldName = str_replace('file_', '', $field);
+                        $fileName = $fieldName . '.' . $extension;
+                    }
 
                     // PATH DI GOOGLE DRIVE
                     $drivePath = "{$folderPath}/{$fileName}";
 
-                    // UPLOAD LANGSUNG KE GOOGLE DRIVE
-                    Storage::disk('google')->put(
-                        $drivePath,
-                        file_get_contents($file)
-                    );
+                    try {
+                        // UPLOAD KE GOOGLE DRIVE
+                        Storage::disk('google')->put(
+                            $drivePath,
+                            file_get_contents($file)
+                        );
 
-                    // SIMPAN PATH DRIVE KE DATABASE
-                    $files[$field] = $drivePath;
+                        $files[$field] = $drivePath;
+                    } catch (\Exception $e) {
+                        throw ValidationException::withMessages([
+                            $field => ['Gagal mengunggah file: ' . $e->getMessage()]
+                        ]);
+                    }
                 }
             }
 
@@ -793,8 +799,8 @@ class PesertaController extends Controller
                 }
             }
 
-            $angkatan = $angkatan->nama_angkatan;
-            aktifitas("Menambahkan Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatan}", $peserta);
+            $angkatanNama = $angkatan->nama_angkatan;
+            aktifitas("Menambahkan Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatanNama}", $peserta);
 
             // 10. RESPONSE
             if ($request->ajax() || $request->wantsJson()) {
@@ -889,8 +895,8 @@ class PesertaController extends Controller
                     'ukuran_celana' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                     'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                     'kondisi_peserta' => 'nullable|string',
-                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024 ',
-                    'file_pas_foto' => 'nullable|file|mimes:jpg,png|max:1024 ',
+                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024',
+                    'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
                     'asal_instansi' => 'nullable|string|max:200',
                     'unit_kerja' => 'nullable|string|max:200',
                     'id_provinsi' => 'nullable',
@@ -902,21 +908,21 @@ class PesertaController extends Controller
                     'pangkat' => 'nullable|string|max:50',
                     'golongan_ruang' => 'nullable|string|max:50',
                     'eselon' => 'nullable|string|max:50',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_spmt' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_skp' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024 ',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
                     'nomor_sk_cpns' => 'nullable|string|max:100',
                     'nomor_sk_terakhir' => 'nullable|string|max:100',
                     'tanggal_sk_cpns' => 'nullable|date',
@@ -929,6 +935,7 @@ class PesertaController extends Controller
                     'has_mentor' => 'nullable|in:Ya,Tidak',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
                     'file' => 'nullable|file|mimes:pdf|max:1024',
+                    'judul' => 'nullable'
                 ],
                 [
                     'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
@@ -941,6 +948,8 @@ class PesertaController extends Controller
                     'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
                     'nama_lengkap.string'   => 'Nama lengkap harus berupa teks.',
                     'nama_lengkap.max'      => 'Nama lengkap maksimal 200 karakter.',
+                    'file_pas_foto.mimes' => 'Pas foto harus berupa file JPG, JPEG, atau PNG.',
+                    'file_pas_foto.max' => 'Pas foto maksimal 1MB.',
                 ]
             );
 
@@ -953,11 +962,11 @@ class PesertaController extends Controller
             if ($kode === 'PKN_TK_II') {
                 $additionalRules = [
                     'eselon' => 'nullable|string|max:50',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024 ',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
                 ];
             }
 
@@ -965,10 +974,10 @@ class PesertaController extends Controller
                 $additionalRules = [
                     'nomor_sk_cpns' => 'nullable|string|max:100',
                     'tanggal_sk_cpns' => 'nullable|date',
-                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_spmt' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_skp' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024 ',
+                    'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
                     'pangkat' => 'nullable|string|max:50',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
                     'nomor_rekening_mentor' => 'nullable|string|max:200',
@@ -981,12 +990,12 @@ class PesertaController extends Controller
                     'eselon' => 'nullable|string|max:50',
                     'tanggal_sk_jabatan' => 'nullable|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024 ',
-                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024 ',
+                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
                 ];
             }
@@ -1030,7 +1039,6 @@ class PesertaController extends Controller
                 'file_skp',
                 'file_persetujuan_mentor',
                 'file',
-                // 'biodata'
             ];
 
             // Ambil data untuk struktur folder
@@ -1042,78 +1050,73 @@ class PesertaController extends Controller
 
             // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
             $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
-            // $fullPath = public_path($folderPath);
-
-            // // Buat folder jika belum ada
-            // if (!file_exists($fullPath)) {
-            //     mkdir($fullPath, 0755, true);
-            // }
-
-            // $files = [];
-            // foreach ($fileFields as $field) {
-            //     if ($request->hasFile($field)) {
-            //         // Ambil ekstensi file
-            //         $extension = $request->file($field)->getClientOriginalExtension();
-
-            //         // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
-            //         $fieldName = str_replace('file_', '', $field);
-            //         $fileName = $fieldName . '.' . $extension;
-
-            //         // Pindahkan file ke folder yang sudah ditentukan
-            //         $request->file($field)->move($fullPath, $fileName);
-
-            //         // Simpan path relatif untuk database (DENGAN SLASH DI AWAL)
-            //         $files[$field] = '/' . $folderPath . '/' . $fileName;
-            //     } else {
-            //         // Untuk update, jika tidak ada file baru, pertahankan file lama
-            //         if ($field === 'file_ktp' && $peserta && $peserta->file_ktp) {
-            //             $files[$field] = $peserta->file_ktp;
-            //         } elseif ($field === 'file_pas_foto' && $peserta && $peserta->file_pas_foto) {
-            //             $files[$field] = $peserta->file_pas_foto;
-            //         } elseif (in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp']) && $kepegawaian) {
-            //             // Field dari kepegawaian
-            //             $dbField = $field;
-            //             if ($kepegawaian->$dbField) {
-            //                 $files[$field] = $kepegawaian->$dbField;
-            //             }
-            //         } elseif ($pendaftaran->$field) {
-            //             // Field dari pendaftaran
-            //             $files[$field] = $pendaftaran->$field;
-            //         }
-            //     }
-            // }
 
             $files = [];
 
             foreach ($fileFields as $field) {
-
                 // JIKA ADA FILE BARU
                 if ($request->hasFile($field)) {
-
                     $file = $request->file($field);
-                    $extension = $file->getClientOriginalExtension();
-                    $fieldName = str_replace('file_', '', $field);
-                    $fileName = $fieldName . '.' . $extension;
 
-                    // PATH TETAP (INI KUNCI OVERWRITE)
-                    $drivePath = "{$folderPath}/{$fileName}";
+                    // Untuk file_pas_foto yang sudah di-crop, gunakan nama yang konsisten
+                    if ($field === 'file_pas_foto') {
+                        $fileName = 'pas_foto.jpg'; // Nama konsisten untuk pas foto
 
-                    // OPTIONAL: hapus file lama (rapi)
-                    if (!empty($pendaftaran->$field)) {
-                        Storage::disk('google')->delete($pendaftaran->$field);
+                        // Validasi khusus untuk pas foto
+                        if (!$file->isValid()) {
+                            throw ValidationException::withMessages([
+                                'file_pas_foto' => ['File pas foto tidak valid.']
+                            ]);
+                        }
+
+                        // Validasi ukuran maksimal 2MB
+                        if ($file->getSize() > 2048 * 1024) {
+                            throw ValidationException::withMessages([
+                                'file_pas_foto' => ['Pas foto maksimal 2MB.']
+                            ]);
+                        }
+
+                        // Validasi tipe file
+                        $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png'];
+                        if (!in_array($file->getMimeType(), $allowedMimes)) {
+                            throw ValidationException::withMessages([
+                                'file_pas_foto' => ['Pas foto harus berupa JPG, JPEG, atau PNG.']
+                            ]);
+                        }
+                    } else {
+                        $extension = $file->getClientOriginalExtension();
+                        $fieldName = str_replace('file_', '', $field);
+                        $fileName = $fieldName . '.' . $extension;
                     }
 
-                    // UPLOAD → AUTO OVERWRITE
-                    Storage::disk('google')->put(
-                        $drivePath,
-                        file_get_contents($file)
-                    );
+                    // PATH TETAP
+                    $drivePath = "{$folderPath}/{$fileName}";
 
-                    $files[$field] = $drivePath;
+                    try {
+                        // OPTIONAL: hapus file lama (rapi)
+                        if ($field === 'file_pas_foto' && $peserta?->file_pas_foto) {
+                            Storage::disk('google')->delete($peserta->file_pas_foto);
+                        } elseif ($kepegawaian && isset($kepegawaian->$field)) {
+                            Storage::disk('google')->delete($kepegawaian->$field);
+                        } elseif ($pendaftaran->$field) {
+                            Storage::disk('google')->delete($pendaftaran->$field);
+                        }
+
+                        // UPLOAD → AUTO OVERWRITE
+                        Storage::disk('google')->put(
+                            $drivePath,
+                            file_get_contents($file)
+                        );
+
+                        $files[$field] = $drivePath;
+                    } catch (\Exception $e) {
+                        throw ValidationException::withMessages([
+                            $field => ['Gagal mengunggah file: ' . $e->getMessage()]
+                        ]);
+                    }
                 }
                 // JIKA TIDAK ADA FILE BARU → PAKAI FILE LAMA
                 else {
-
                     if ($field === 'file_ktp' && $peserta?->file_ktp) {
                         $files[$field] = $peserta->file_ktp;
                     } elseif ($field === 'file_pas_foto' && $peserta?->file_pas_foto) {
@@ -1125,7 +1128,6 @@ class PesertaController extends Controller
                     }
                 }
             }
-
 
             // 4. UPDATE PESERTA
             $pesertaData = [
@@ -1281,6 +1283,7 @@ class PesertaController extends Controller
                 }
             }
 
+            // 8. SIMPAN AKSI PERUBAHAN JIKA ADA
             if ($request->filled('judul')) {
                 AksiPerubahan::updateOrCreate(
                     ['id_pendaftar' => $pendaftaran->id],
@@ -1289,15 +1292,14 @@ class PesertaController extends Controller
                         'file'  => $files['file'] ?? optional(
                             AksiPerubahan::where('id_pendaftar', $pendaftaran->id)->first()
                         )->file,
-                        // 'biodata' => $request->biodata,
                     ]
                 );
             }
 
-            $angkatan = $angkatan->nama_angkatan;
-            aktifitas("Memperbarui Data Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatan}", $peserta);
+            $angkatanNama = $angkatan->nama_angkatan;
+            aktifitas("Memperbarui Data Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatanNama}", $peserta);
 
-            // 8. RESPONSE
+            // 9. RESPONSE
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,

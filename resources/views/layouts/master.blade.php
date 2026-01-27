@@ -148,6 +148,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     @stack('styles')
 </head>
 
@@ -157,6 +158,7 @@
     @yield('content')
 
     @include('partials.footer')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <script>
         

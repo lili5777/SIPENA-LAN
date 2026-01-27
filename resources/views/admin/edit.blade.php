@@ -1095,6 +1095,221 @@
                 color: var(--danger-color);
                 margin-left: 2px;
             }
+
+  /* Crop Container Styles */
+.crop-container {
+    margin-bottom: 1.5rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: white;
+    box-shadow: var(--shadow-md);
+}
+
+.crop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.crop-header h4 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-close-crop {
+    background: var(--gray-100);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-close-crop:hover {
+    background: var(--danger-color);
+    color: white;
+}
+
+.crop-preview-container {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.crop-preview-wrapper {
+    flex: 0 0 120px;
+}
+
+.crop-preview-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.crop-preview {
+    width: 120px;
+    height: 160px; /* 3:4 ratio */
+    overflow: hidden;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.crop-main-wrapper {
+    flex: 1;
+    min-height: 300px;
+    max-height: 400px;
+    overflow: hidden;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.crop-image {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.crop-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    margin-bottom: 1.5rem;
+}
+
+.btn-crop-action {
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--gray-300);
+    background: white;
+    border-radius: 8px;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.btn-crop-action:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.crop-action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-crop-primary, .btn-crop-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.btn-crop-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-crop-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn-crop-secondary {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.btn-crop-secondary:hover {
+    background: var(--gray-200);
+    transform: translateY(-2px);
+}
+
+/* File actions untuk foto yang sudah ada */
+.file-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.file-actions .btn-change-file {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .crop-preview-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .crop-preview-wrapper {
+        align-self: center;
+    }
+    
+    .crop-main-wrapper {
+        min-height: 250px;
+    }
+    
+    .crop-action-buttons {
+        flex-direction: column;
+    }
+    
+    .file-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .file-actions .btn-change-file {
+        width: 100%;
+        justify-content: center;
+    }
+}
         </style>
 @endsection
 
@@ -1470,7 +1685,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label required">Pendidikan Terakhir</label>
+                        <label class="form-label required">Pendidikan Terakhir (Sesuai SK)</label>
                         <select name="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') error @enderror"
                             required>
                             <option value="">-- Pilih Pendidikan --</option>
@@ -2059,6 +2274,187 @@
                 <!-- Pas Foto -->
                 <div class="form-group">
                     <label class="form-label required">Pas Foto</label>
+
+                    <!-- Container untuk crop (awalnya tersembunyi) -->
+                    <div class="crop-container" id="crop-container" style="display: none;">
+                        <div class="crop-header">
+                            <h4><i class="fas fa-crop-alt"></i> Crop Foto 3x4</h4>
+                            <button type="button" class="btn-close-crop" id="close-crop">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div class="crop-preview-container">
+                            <!-- Preview kecil -->
+                            <div class="crop-preview-wrapper">
+                                <div class="crop-preview-label">Preview 3x4</div>
+                                <div class="crop-preview" id="crop-preview"></div>
+                            </div>
+
+                            <!-- Area crop utama -->
+                            <div class="crop-main-wrapper">
+                                <img id="crop-image" class="crop-image" style="max-width: 100%;">
+                            </div>
+                        </div>
+
+                        <!-- Kontrol crop -->
+                        <div class="crop-controls">
+                            <button type="button" class="btn-crop-action" id="rotate-left" title="Rotate Left">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                            <button type="button" class="btn-crop-action" id="rotate-right" title="Rotate Right">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button type="button" class="btn-crop-action" id="zoom-in" title="Zoom In">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button type="button" class="btn-crop-action" id="zoom-out" title="Zoom Out">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button type="button" class="btn-crop-action" id="reset-crop" title="Reset">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+
+                        <!-- Tombol action crop -->
+                        <div class="crop-action-buttons">
+                            <button type="button" class="btn-crop-secondary" id="cancel-crop">
+                                <i class="fas fa-times"></i> Batal
+                            </button>
+                            <button type="button" class="btn-crop-primary" id="save-crop">
+                                <i class="fas fa-check"></i> Simpan Crop
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- File input untuk crop -->
+                    <div class="form-file" id="form-file-pasfoto">
+                        <input type="file" name="file_pas_foto_input" id="file_pas_foto_input"
+                            class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
+                        <label for="file_pas_foto_input" class="form-file-label" id="file-pas-foto-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div class="form-file-label-text">Klik untuk mengunggah pas foto</div>
+                            <div class="form-file-label-hint">JPG, JPEG, PNG (Maks. 1MB)</div>
+                            <div class="form-file-label-hint">Akan dicrop ke ukuran 3x4 cm</div>
+                        </label>
+
+                        <!-- Hidden input untuk hasil crop -->
+                        <input type="hidden" name="file_pas_foto" id="file_pas_foto_cropped"
+                            value="{{ old('file_pas_foto', $peserta->file_pas_foto) }}">
+
+                        <div class="form-file-name" id="file-pas-foto-info">
+                            @if($peserta->file_pas_foto)
+                                <div class="file-info">
+                                    <i class="fas fa-file-image"></i>
+                                    <div class="file-info-content">
+                                        <div class="file-name">{{ basename($peserta->file_pas_foto) }}</div>
+                                        <div class="file-size">File tersedia</div>
+                                    </div>
+                                    <div class="file-actions">
+                                        <button type="button" class="btn-change-file" id="crop-existing-photo">
+                                            <i class="fas fa-crop-alt"></i> Crop
+                                        </button>
+                                        <button type="button" class="btn-change-file" id="change-pas-foto">
+                                            <i class="fas fa-exchange-alt"></i> Ganti
+                                        </button>
+                                    </div>
+                                </div>
+                            @else
+                                <span class="no-file">Belum ada file diupload</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    @error('file_pas_foto')
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+                <!-- Ganti bagian pas foto menjadi: -->
+                {{-- <div class="form-group">
+                    <label class="form-label required">Pas Foto</label>
+
+                    <!-- Container untuk preview dan crop -->
+                    <div class="crop-container" id="crop-container" style="{{ $peserta->file_pas_foto ? 'display: none;' : 'display: block;' }}">
+                        <div class="crop-preview-container">
+                            <!-- Preview kecil -->
+                            <div class="crop-preview-wrapper">
+                                <div class="crop-preview-label">Preview 3x4</div>
+                                <div class="crop-preview" id="crop-preview"></div>
+                            </div>
+
+                            <!-- Area crop utama -->
+                            <div class="crop-main-wrapper">
+                                <img id="crop-image" class="crop-image" style="max-width: 100%; display: none;">
+                            </div>
+                        </div>
+
+                        <!-- Kontrol crop -->
+                        <div class="crop-controls">
+                            <button type="button" class="btn-crop-action" id="rotate-left" title="Rotate Left">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                            <button type="button" class="btn-crop-action" id="rotate-right" title="Rotate Right">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button type="button" class="btn-crop-action" id="zoom-in" title="Zoom In">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button type="button" class="btn-crop-action" id="zoom-out" title="Zoom Out">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button type="button" class="btn-crop-action" id="reset-crop" title="Reset">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- File input untuk crop -->
+                    <div class="form-file">
+                        <input type="file" name="file_pas_foto_input" id="file_pas_foto_input" 
+                            class="form-file-input @error('file_pas_foto') error @enderror" 
+                            accept=".jpg,.jpeg,.png" 
+                            {{ $peserta->file_pas_foto ? 'style=display:none;' : '' }}>
+                        <label for="file_pas_foto_input" class="form-file-label" id="file-pas-foto-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div class="form-file-label-text">Klik untuk mengunggah pas foto</div>
+                            <div class="form-file-label-hint">JPG, JPEG, PNG (Maks. 1MB)</div>
+                            <div class="form-file-label-hint">Akan dicrop ke ukuran 3x4 cm</div>
+                        </label>
+
+                        <!-- Hidden input untuk hasil crop -->
+                        <input type="hidden" name="file_pas_foto" id="file_pas_foto_cropped" 
+                            value="{{ old('file_pas_foto', $peserta->file_pas_foto) }}">
+
+                        <div class="form-file-name" id="file-pas-foto-info">
+                            @if($peserta->file_pas_foto)
+                                <div class="file-info">
+                                    <i class="fas fa-file-image"></i>
+                                    <div class="file-info-content">
+                                        <div class="file-name">{{ basename($peserta->file_pas_foto) }}</div>
+                                        <div class="file-size">File tersedia</div>
+                                    </div>
+                                    <button type="button" class="btn-change-file" id="change-pas-foto">
+                                        <i class="fas fa-exchange-alt"></i> Ganti
+                                    </button>
+                                </div>
+                            @else
+                                <span class="no-file">Belum ada file diupload</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    @error('file_pas_foto')
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div> --}}
+                {{-- <div class="form-group">
+                    <label class="form-label required">Pas Foto</label>
                     <div class="form-file">
                         <input type="file" name="file_pas_foto" id="file_pas_foto"
                             class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
@@ -2090,7 +2486,7 @@
                             {{ $message }}
                         </div>
                     @enderror
-                </div>
+                </div> --}}
 
                 @if($kepegawaian)
                     <div class="form-section-header">
@@ -2266,84 +2662,6 @@
         const validationFailed = @json($errors->any() ? true : false);
         const hasErrorsOnLoad = validationFailed;
 
-        // ===== AUTO-CAPITALIZATION FUNCTIONS =====
-            function setupAutoCapitalization() {
-                // Function to capitalize every word
-                function capitalizeWords(str) {
-                    return str.replace(/\b\w/g, function (char) {
-                        return char.toUpperCase();
-                    });
-                }
-
-                // Function for lowercase
-                function toLowerCase(str) {
-                    return str.toLowerCase();
-                }
-
-                // Function for uppercase
-                function toUpperCase(str) {
-                    return str.toUpperCase();
-                }
-
-                // Setup event listeners for capitalize class
-                document.querySelectorAll('.form-input.capitalize, .form-textarea.capitalize').forEach(function (input) {
-                    input.addEventListener('input', function (e) {
-                        if (this.value) {
-                            this.value = capitalizeWords(this.value);
-                        }
-                    });
-
-                    input.addEventListener('change', function (e) {
-                        if (this.value) {
-                            this.value = capitalizeWords(this.value);
-                        }
-                    });
-
-                    // Apply to existing values
-                    if (input.value) {
-                        input.value = capitalizeWords(input.value);
-                    }
-                });
-
-                // Setup event listeners for lowercase class
-                document.querySelectorAll('.form-input.lowercase').forEach(function (input) {
-                    input.addEventListener('input', function (e) {
-                        if (this.value) {
-                            this.value = toLowerCase(this.value);
-                        }
-                    });
-
-                    input.addEventListener('change', function (e) {
-                        if (this.value) {
-                            this.value = toLowerCase(this.value);
-                        }
-                    });
-
-                    if (input.value) {
-                        input.value = toLowerCase(input.value);
-                    }
-                });
-
-                // Setup event listeners for uppercase class
-                document.querySelectorAll('.form-input.uppercase').forEach(function (input) {
-                    input.addEventListener('input', function (e) {
-                        if (this.value) {
-                            this.value = toUpperCase(this.value);
-                        }
-                    });
-
-                    input.addEventListener('change', function (e) {
-                        if (this.value) {
-                            this.value = toUpperCase(this.value);
-                        }
-                    });
-
-                    if (input.value) {
-                        input.value = toUpperCase(input.value);
-                    }
-                });
-            }
-
         // ===== NOTIFICATION SYSTEM =====
         class NotificationSystem {
             constructor() {
@@ -2366,15 +2684,15 @@
                 };
 
                 notification.innerHTML = `
-                        <i class="fas ${iconMap[type]}"></i>
-                        <div class="notification-content">
-                            <div class="notification-title">${title}</div>
-                            <div class="notification-message">${message}</div>
-                        </div>
-                        <button type="button" class="notification-close" onclick="notificationSystem.remove(${id})">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
+                    <i class="fas ${iconMap[type]}"></i>
+                    <div class="notification-content">
+                        <div class="notification-title">${title}</div>
+                        <div class="notification-message">${message}</div>
+                    </div>
+                    <button type="button" class="notification-close" onclick="notificationSystem.remove(${id})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
 
                 this.container.appendChild(notification);
                 this.notifications.set(id, notification);
@@ -2448,7 +2766,7 @@
                 // File validation
                 if (field.type === 'file' && field.files.length > 0) {
                     const file = field.files[0];
-                    if (file.size > 1024 * 1024) { // 1MB
+                    if (file.size > 1024 * 1024) {
                         isValid = false;
                         errorMessage = 'Ukuran file maksimal 1MB';
                     }
@@ -2497,14 +2815,12 @@
             }
 
             updateErrorIndicators() {
-                // Update tab indicators
                 document.querySelectorAll('.form-tab.error').forEach(tab => {
                     if (!this.errorTabs.has(tab)) {
                         tab.classList.remove('error');
                     }
                 });
 
-                // Update progress
                 this.updateProgress();
             }
 
@@ -2544,7 +2860,6 @@
                 if (this.errorFields.size > 0) {
                     const firstError = Array.from(this.errorFields)[0];
 
-                    // Find and activate the tab containing the error
                     const tabContent = firstError.closest('.form-tab-content');
                     if (tabContent) {
                         const tabId = tabContent.id;
@@ -2554,7 +2869,6 @@
                         }
                     }
 
-                    // Scroll to error field with highlight
                     setTimeout(() => {
                         firstError.classList.add('error-field');
                         firstError.scrollIntoView({
@@ -2563,22 +2877,293 @@
                             inline: 'nearest'
                         });
 
-                        // Focus the field
                         if (firstError.tagName === 'INPUT' || firstError.tagName === 'SELECT' || firstError.tagName === 'TEXTAREA') {
                             firstError.focus();
                         }
 
-                        // Remove highlight after 3 seconds
                         setTimeout(() => {
                             firstError.classList.remove('error-field');
                         }, 3000);
                     }, 300);
 
-                    // Show notification
                     notificationSystem.show('error', 'Validasi Gagal',
                         `Terdapat ${this.errorFields.size} kesalahan yang perlu diperbaiki.`, 5000);
                 }
             }
+        }
+
+        // ===== CROPPER.JS IMPLEMENTATION =====
+        let cropper = null;
+
+        // Inisialisasi cropper
+        function initializeCropper(imageSrc) {
+            const imageElement = document.getElementById('crop-image');
+            if (!imageElement) return;
+
+            imageElement.src = imageSrc;
+
+            imageElement.onload = function () {
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                const aspectRatio = 3 / 4;
+
+                cropper = new Cropper(imageElement, {
+                    aspectRatio: aspectRatio,
+                    viewMode: 2,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    minCropBoxWidth: 100,
+                    minCropBoxHeight: 133,
+
+                    ready: function () {
+                        updatePreview();
+                    },
+
+                    crop: function (event) {
+                        updatePreview();
+                    }
+                });
+
+                setupCropControls();
+            };
+        }
+
+        // Update preview
+        function updatePreview() {
+            if (!cropper) return;
+
+            const preview = document.getElementById('crop-preview');
+            const canvas = cropper.getCroppedCanvas({
+                width: 120,
+                height: 160
+            });
+
+            if (canvas) {
+                preview.innerHTML = '';
+                preview.appendChild(canvas);
+            }
+        }
+
+        // Setup kontrol crop
+        function setupCropControls() {
+            document.getElementById('rotate-left')?.addEventListener('click', () => {
+                if (cropper) cropper.rotate(-90);
+            });
+
+            document.getElementById('rotate-right')?.addEventListener('click', () => {
+                if (cropper) cropper.rotate(90);
+            });
+
+            document.getElementById('zoom-in')?.addEventListener('click', () => {
+                if (cropper) cropper.zoom(0.1);
+            });
+
+            document.getElementById('zoom-out')?.addEventListener('click', () => {
+                if (cropper) cropper.zoom(-0.1);
+            });
+
+            document.getElementById('reset-crop')?.addEventListener('click', () => {
+                if (cropper) cropper.reset();
+            });
+        }
+
+        // Tampilkan modal crop
+        function showCropModal(imageSrc) {
+            const cropContainer = document.getElementById('crop-container');
+            const formFile = document.getElementById('form-file-pasfoto');
+
+            if (formFile) formFile.style.display = 'none';
+            if (cropContainer) {
+                cropContainer.style.display = 'block';
+                initializeCropper(imageSrc);
+
+                cropContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Sembunyikan modal crop
+        function hideCropModal() {
+            const cropContainer = document.getElementById('crop-container');
+            const formFile = document.getElementById('form-file-pasfoto');
+
+            if (cropContainer) {
+                cropContainer.style.display = 'none';
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+            }
+
+            if (formFile) formFile.style.display = 'block';
+        }
+
+        // Simpan hasil crop
+        function saveCroppedImage() {
+            if (!cropper) {
+                notificationSystem.show('error', 'Error', 'Cropper tidak terinisialisasi.', 3000);
+                return;
+            }
+
+            const canvas = cropper.getCroppedCanvas({
+                width: 354,
+                height: 472
+            });
+
+            if (!canvas) {
+                notificationSystem.show('error', 'Error', 'Gagal mendapatkan gambar yang dicrop.', 3000);
+                return;
+            }
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+            const hiddenInput = document.getElementById('file_pas_foto_cropped');
+
+            if (hiddenInput) {
+                hiddenInput.value = dataUrl;
+                updatePhotoPreview(dataUrl);
+                hideCropModal();
+
+                notificationSystem.show('success', 'Berhasil',
+                    'Foto berhasil dicrop. Klik "Simpan Perubahan" untuk menyimpan.', 3000);
+            }
+        }
+
+        // Update preview foto di form
+        function updatePhotoPreview(dataUrl) {
+            const fileInfo = document.getElementById('file-pas-foto-info');
+
+            if (!fileInfo) return;
+
+            fileInfo.innerHTML = `
+                <div class="file-info">
+                    <i class="fas fa-file-image"></i>
+                    <div class="file-info-content">
+                        <div class="file-name">Pas Foto 3x4 (Hasil Crop)</div>
+                        <div class="file-size">Siap disimpan</div>
+                    </div>
+                    <div class="file-actions">
+                        <button type="button" class="btn-change-file" id="crop-existing-photo">
+                            <i class="fas fa-crop-alt"></i> Crop Ulang
+                        </button>
+                        <button type="button" class="btn-change-file" id="change-pas-foto">
+                            <i class="fas fa-exchange-alt"></i> Ganti
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            attachFileActionListeners();
+        }
+
+        // Attach event listeners untuk action buttons
+        function attachFileActionListeners() {
+            // Tombol Crop untuk foto yang sudah ada
+            document.getElementById('crop-existing-photo')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                const hiddenInput = document.getElementById('file_pas_foto_cropped');
+                if (hiddenInput && hiddenInput.value) {
+                    showCropModal(hiddenInput.value);
+                } else {
+                    notificationSystem.show('info', 'Info', 'Foto akan dimuat untuk dicrop ulang...', 3000);
+                    document.getElementById('file_pas_foto_input').click();
+                }
+            });
+
+            // Tombol Ganti Foto
+            document.getElementById('change-pas-foto')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('file_pas_foto_cropped').value = '';
+                const fileInput = document.getElementById('file_pas_foto_input');
+                if (fileInput) {
+                    fileInput.value = '';
+                    const fileInfo = document.getElementById('file-pas-foto-info');
+                    if (fileInfo) {
+                        fileInfo.innerHTML = '<span class="no-file">Belum ada file diupload</span>';
+                    }
+                    const fileLabel = document.getElementById('file-pas-foto-label');
+                    if (fileLabel) fileLabel.style.display = 'flex';
+                    fileInput.click();
+                }
+            });
+        }
+
+        // ===== AUTO-CAPITALIZATION FUNCTIONS =====
+        function setupAutoCapitalization() {
+            function capitalizeWords(str) {
+                return str.replace(/\b\w/g, function (char) {
+                    return char.toUpperCase();
+                });
+            }
+
+            function toLowerCase(str) {
+                return str.toLowerCase();
+            }
+
+            function toUpperCase(str) {
+                return str.toUpperCase();
+            }
+
+            document.querySelectorAll('.form-input.capitalize, .form-textarea.capitalize').forEach(function (input) {
+                input.addEventListener('input', function (e) {
+                    if (this.value) {
+                        this.value = capitalizeWords(this.value);
+                    }
+                });
+
+                input.addEventListener('change', function (e) {
+                    if (this.value) {
+                        this.value = capitalizeWords(this.value);
+                    }
+                });
+
+                if (input.value) {
+                    input.value = capitalizeWords(input.value);
+                }
+            });
+
+            document.querySelectorAll('.form-input.lowercase').forEach(function (input) {
+                input.addEventListener('input', function (e) {
+                    if (this.value) {
+                        this.value = toLowerCase(this.value);
+                    }
+                });
+
+                input.addEventListener('change', function (e) {
+                    if (this.value) {
+                        this.value = toLowerCase(this.value);
+                    }
+                });
+
+                if (input.value) {
+                    input.value = toLowerCase(input.value);
+                }
+            });
+
+            document.querySelectorAll('.form-input.uppercase').forEach(function (input) {
+                input.addEventListener('input', function (e) {
+                    if (this.value) {
+                        this.value = toUpperCase(this.value);
+                    }
+                });
+
+                input.addEventListener('change', function (e) {
+                    if (this.value) {
+                        this.value = toUpperCase(this.value);
+                    }
+                });
+
+                if (input.value) {
+                    input.value = toUpperCase(input.value);
+                }
+            });
         }
 
         // ===== MAIN INITIALIZATION =====
@@ -2587,13 +3172,15 @@
             const submitBtn = document.getElementById('submitBtn');
             let formValidator;
 
+            // Setup awal
             setupAutoCapitalization();
+            attachFileActionListeners();
 
             // Initialize form validator
             if (editForm) {
                 formValidator = new FormValidator(editForm);
 
-                // Real-time validation for all fields
+                // Real-time validation
                 const formInputs = editForm.querySelectorAll('input, select, textarea');
                 formInputs.forEach(input => {
                     input.addEventListener('blur', function () {
@@ -2634,7 +3221,6 @@
                         activeContent.classList.add('active');
                     }
 
-                    // Smooth scroll to top of form
                     document.querySelector('.edit-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
             });
@@ -2645,7 +3231,7 @@
 
                 if (input.files && input.files[0]) {
                     const file = input.files[0];
-                    const fileSize = (file.size / 1024).toFixed(2); // KB
+                    const fileSize = (file.size / 1024).toFixed(2);
                     const fileName = file.name;
                     const fileExt = fileName.split('.').pop().toLowerCase();
 
@@ -2657,17 +3243,17 @@
                     }
 
                     fileInfo.innerHTML = `
-                            <div class="file-info">
-                                <i class="fas ${fileIcon}"></i>
-                                <div class="file-info-content">
-                                    <div class="file-name">${fileName}</div>
-                                    <div class="file-size">${fileSize} KB</div>
-                                </div>
-                                <button type="button" class="btn-change-file" data-target="${input.name}">
-                                    <i class="fas fa-exchange-alt"></i> Ganti
-                                </button>
+                        <div class="file-info">
+                            <i class="fas ${fileIcon}"></i>
+                            <div class="file-info-content">
+                                <div class="file-name">${fileName}</div>
+                                <div class="file-size">${fileSize} KB</div>
                             </div>
-                        `;
+                            <button type="button" class="btn-change-file" data-target="${input.name}">
+                                <i class="fas fa-exchange-alt"></i> Ganti
+                            </button>
+                        </div>
+                    `;
 
                     const changeBtn = fileInfo.querySelector('.btn-change-file');
                     if (changeBtn) {
@@ -2872,38 +3458,122 @@
                 }
             }
 
-            // ===== FORM SUBMISSION =====
-            editForm.addEventListener('submit', function (e) {
-                e.preventDefault();
+            // ===== CROPPER EVENT LISTENERS =====
+            // Event Listeners untuk file input pas foto
+            document.getElementById('file_pas_foto_input')?.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) return;
 
-                if (!formValidator.validateForm()) {
-                    formValidator.scrollToFirstError();
-                    return false;
+                // Validasi tipe file
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!validTypes.includes(file.type)) {
+                    notificationSystem.show('error', 'Format File Tidak Valid',
+                        'Hanya file JPG, JPEG, dan PNG yang diperbolehkan.', 5000);
+                    this.value = '';
+                    return;
                 }
 
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner"></span> Menyimpan...';
+                // Validasi ukuran file (max 1MB)
+                if (file.size > 1024 * 1024) {
+                    notificationSystem.show('error', 'Ukuran File Terlalu Besar',
+                        'Ukuran file maksimal 1MB.', 5000);
+                    this.value = '';
+                    return;
+                }
 
-                // Show saving notification
-                notificationSystem.show('info', 'Menyimpan Data', 'Mohon tunggu, data sedang disimpan...', 3000);
+                // Baca file sebagai data URL
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    // Tampilkan modal crop
+                    showCropModal(event.target.result);
 
-                // Submit form
-                setTimeout(() => {
-                    editForm.submit();
-                }, 500);
+                    // Sembunyikan file label
+                    const fileLabel = document.getElementById('file-pas-foto-label');
+                    if (fileLabel) fileLabel.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
             });
+
+            // Event Listeners untuk crop modal
+            document.getElementById('close-crop')?.addEventListener('click', hideCropModal);
+            document.getElementById('cancel-crop')?.addEventListener('click', hideCropModal);
+            document.getElementById('save-crop')?.addEventListener('click', saveCroppedImage);
+
+            // ===== FORM SUBMISSION HANDLER (DENGAN CROPPER SUPPORT) =====
+            if (editForm) {
+                const originalSubmitHandler = editForm.onsubmit;
+
+                editForm.onsubmit = function (e) {
+                    e.preventDefault();
+
+                    // Validasi form
+                    if (!formValidator.validateForm()) {
+                        formValidator.scrollToFirstError();
+                        return false;
+                    }
+
+                    // Cek jika ada data URL dari crop
+                    const hiddenInput = document.getElementById('file_pas_foto_cropped');
+                    if (hiddenInput && hiddenInput.value && hiddenInput.value.startsWith('data:')) {
+                        // Konversi data URL ke FormData
+                        const dataUrl = hiddenInput.value;
+
+                        fetch(dataUrl)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                // Buat FormData dari form
+                                const formData = new FormData(editForm);
+
+                                // Buat file dari blob
+                                const file = new File([blob], 'pas_foto_3x4.jpg', {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+
+                                // Hapus hidden input value dari FormData
+                                formData.delete('file_pas_foto_cropped');
+
+                                // Tambahkan file ke FormData
+                                formData.append('file_pas_foto', file);
+
+                                // Hapus file input original jika ada
+                                formData.delete('file_pas_foto_input');
+
+                                // Submit form dengan FormData
+                                submitFormWithData(formData);
+                            })
+                            .catch(error => {
+                                console.error('Error converting data URL:', error);
+                                notificationSystem.show('error', 'Error',
+                                    'Gagal memproses foto. Silakan coba lagi.', 5000);
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+                            });
+
+                        return false;
+                    }
+
+                    // Jika tidak ada data URL, lanjutkan dengan submit normal
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner"></span> Menyimpan...';
+
+                    notificationSystem.show('info', 'Menyimpan Data', 'Mohon tunggu, data sedang disimpan...', 3000);
+
+                    setTimeout(() => {
+                        editForm.submit();
+                    }, 500);
+                };
+            }
 
             // ===== AUTO-SCROLL TO ERRORS ON PAGE LOAD =====
             if (hasErrorsOnLoad) {
                 setTimeout(() => {
                     if (formValidator) {
-                        // Mark all tabs with errors
                         const errorFields = editForm.querySelectorAll('.error');
                         errorFields.forEach(field => {
                             formValidator.markErrorTab(field);
                         });
 
-                        // Scroll to first error
                         formValidator.scrollToFirstError();
                     }
                 }, 1000);
@@ -2916,7 +3586,6 @@
 
             // ===== ERROR SUMMARY CLICK HANDLER =====
             window.scrollToFieldError = function (errorText) {
-                // Find field that matches error text
                 const fields = editForm.querySelectorAll('input, select, textarea');
                 let targetField = null;
 
@@ -2982,5 +3651,62 @@
                 editForm.classList.add('submitted');
             });
         });
+
+        // ===== FUNGSI UNTUK SUBMIT FORM DENGAN FORMDATA =====
+        function submitFormWithData(formData) {
+                const submitBtn = document.getElementById('submitBtn');
+                if (!submitBtn) return;
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span> Menyimpan...';
+
+                notificationSystem.show('info', 'Menyimpan Data',
+                    'Mohon tunggu, data sedang disimpan...', 3000);
+
+                fetch(editForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                            return; // ⬅️ Hentikan eksekusi chain berikutnya
+                        } else if (response.ok) {
+                            return response.json();
+                        } else {
+                            return response.json().then(err => { throw err; });
+                        }
+                    })
+                    .then(data => {
+                        if (data && data.redirect) {
+                            // Jika ada redirect dalam response JSON
+                            window.location.href = data.redirect;
+                        } else if (data && data.message) {
+                            // Jika sukses TANPA redirect, tampilkan notifikasi sukses
+                            notificationSystem.show('success', 'Berhasil!',
+                                data.message || 'Data berhasil disimpan.', 5000);
+
+                            // Reset tombol setelah sukses
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+
+                            // Jika ada callback atau fungsi tambahan setelah sukses
+                            if (typeof onSaveSuccess === 'function') {
+                                onSaveSuccess(data);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        notificationSystem.show('error', 'Gagal Menyimpan',
+                            error.message || 'Terjadi kesalahan saat menyimpan data.', 5000);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+                    });
+            }
     </script>
 @endsection

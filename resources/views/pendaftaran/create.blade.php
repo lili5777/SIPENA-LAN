@@ -122,7 +122,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
                         <div class="step-navigation">
@@ -167,6 +166,8 @@
                             </button>
                         </div>
                     </div>
+
+                    
                 </form>
             </div>
         </div>
@@ -799,6 +800,64 @@
     color: var(--gray-color);
     font-style: italic;
 }
+
+/* Crop Container Styling */
+.crop-wrapper {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.crop-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.crop-controls .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* Preview styling */
+#crop-preview-container {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+#cropped-preview {
+    border-radius: 4px;
+}
+
+/* Hide file input when cropping */
+.hidden-input {
+    display: none;
+}
+
+/* Loading overlay */
+.crop-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.crop-loading i {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
     </style>
 @endpush
 
@@ -1054,6 +1113,275 @@
             // ============================================
             // FORM INTERACTIONS
             // ============================================
+
+            // ============================================
+            // CROP FOTO 3×4 IMPLEMENTATION
+            // ============================================
+
+            let cropper = null;
+            let originalImageFile = null;
+
+            // Setup crop functionality
+            function setupPhotoCropping() {
+                const fileInput = document.getElementById('file_pas_foto');
+                const uploadContainer = document.getElementById('upload-container');
+                const cropContainer = document.getElementById('crop-container');
+                const previewContainer = document.getElementById('crop-preview-container');
+                const cropImage = document.getElementById('crop-image');
+                const croppedPreview = document.getElementById('cropped-preview');
+                const cropDataInput = document.getElementById('crop_data');
+                const croppedInput = document.getElementById('file_pas_foto_cropped');
+                const changePhotoBtn = document.getElementById('change-photo');
+                const fileNameDisplay = document.getElementById('file-name-display');
+
+                // ============================================
+                // HANDLE FOTO YANG SUDAH ADA
+                // ============================================
+                const existingPhotoContainer = document.getElementById('existing-photo-container');
+                if (existingPhotoContainer) {
+                    const changeBtn = document.getElementById('btn-change-photo-existing');
+                    if (changeBtn) {
+                        changeBtn.addEventListener('click', function () {
+                            // Sembunyikan container foto lama
+                            existingPhotoContainer.style.display = 'none';
+
+                            // Tampilkan upload container
+                            if (uploadContainer) uploadContainer.style.display = 'block';
+
+                            // Reset semua input
+                            if (fileInput) fileInput.value = '';
+                            if (cropDataInput) cropDataInput.value = '';
+                            if (croppedInput) croppedInput.value = '';
+
+                            // Reset nama file
+                            if (fileNameDisplay) {
+                                fileNameDisplay.innerHTML = '<span class="no-file">Belum ada file dipilih</span>';
+                            }
+                        });
+                    }
+                }
+
+                // Event untuk file input utama
+                if (fileInput) {
+                    fileInput.addEventListener('change', function (e) {
+                        if (this.files && this.files[0]) {
+                            handleFileSelect(this.files[0]);
+                        }
+                    });
+                }
+
+                function handleFileSelect(file) {
+                    // Validasi file
+                    if (!file.type.match('image.*')) {
+                        showErrorMessage('File harus berupa gambar (JPG/PNG)');
+                        return;
+                    }
+
+                    if (file.size > 1 * 1024 * 1024) {
+                        showErrorMessage('Ukuran file maksimal 1MB');
+                        return;
+                    }
+
+                    // Simpan file asli (hanya untuk proses crop)
+                    originalImageFile = file;
+
+                    // Tampilkan nama file
+                    if (fileNameDisplay) {
+                        fileNameDisplay.innerHTML = `
+                <span style="color: var(--warning-color);">
+                    <i class="fas fa-crop-alt"></i> 
+                    ${file.name} (${formatFileSize(file.size)})
+                </span>
+            `;
+                    }
+
+                    // Baca file sebagai URL
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        // Sembunyikan upload container
+                        if (uploadContainer) uploadContainer.style.display = 'none';
+
+                        // Tampilkan crop container
+                        if (cropContainer) cropContainer.style.display = 'block';
+
+                        // Set image source
+                        if (cropImage) {
+                            cropImage.src = e.target.result;
+
+                            // Inisialisasi cropper setelah image loaded
+                            cropImage.onload = function () {
+                                initCropper();
+                            };
+                        }
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+
+                function initCropper() {
+                    // Hancurkan cropper lama jika ada
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    // Inisialisasi cropper baru dengan aspect ratio 3:4
+                    if (cropImage) {
+                        cropper = new Cropper(cropImage, {
+                            aspectRatio: 3 / 4,
+                            viewMode: 1,
+                            autoCropArea: 0.8,
+                            movable: true,
+                            rotatable: true,
+                            scalable: true,
+                            zoomable: true,
+                            zoomOnTouch: true,
+                            zoomOnWheel: true,
+                            cropBoxMovable: true,
+                            cropBoxResizable: true,
+                            toggleDragModeOnDblclick: false,
+                            minCropBoxWidth: 100,
+                            minCropBoxHeight: 133,
+                            ready: function () {
+                                console.log('Cropper siap digunakan');
+                            }
+                        });
+
+                        // Setup control buttons
+                        setupCropControls();
+                    }
+                }
+
+                function setupCropControls() {
+                    // Zoom in
+                    document.getElementById('crop-zoom-in').addEventListener('click', function () {
+                        cropper.zoom(0.1);
+                    });
+
+                    // Zoom out
+                    document.getElementById('crop-zoom-out').addEventListener('click', function () {
+                        cropper.zoom(-0.1);
+                    });
+
+                    // Rotate left
+                    document.getElementById('crop-rotate-left').addEventListener('click', function () {
+                        cropper.rotate(-45);
+                    });
+
+                    // Rotate right
+                    document.getElementById('crop-rotate-right').addEventListener('click', function () {
+                        cropper.rotate(45);
+                    });
+
+                    // Reset
+                    document.getElementById('crop-reset').addEventListener('click', function () {
+                        cropper.reset();
+                    });
+
+                    // Confirm crop
+                    document.getElementById('crop-confirm').addEventListener('click', function () {
+                        cropAndPreview();
+                    });
+
+                    // Cancel crop
+                    document.getElementById('crop-cancel').addEventListener('click', function () {
+                        cancelCrop();
+                    });
+                }
+
+                function cropAndPreview() {
+                    if (!cropper) {
+                        showErrorMessage('Cropper belum diinisialisasi');
+                        return;
+                    }
+
+                    // Dapatkan data crop
+                    const cropData = cropper.getData();
+                    if (cropDataInput) cropDataInput.value = JSON.stringify(cropData);
+
+                    // Buat canvas untuk hasil crop
+                    const canvas = cropper.getCroppedCanvas({
+                        width: 450,  // 3 × 150
+                        height: 600, // 4 × 150
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high'
+                    });
+
+                    // Konversi canvas ke base64 (LANGSUNG)
+                    const base64Image = canvas.toDataURL('image/jpeg', 0.95); // kualitas 95%
+
+                    // Set preview
+                    if (croppedPreview) croppedPreview.src = base64Image;
+
+                    // Sembunyikan crop container
+                    if (cropContainer) cropContainer.style.display = 'none';
+
+                    // Tampilkan preview container
+                    if (previewContainer) previewContainer.style.display = 'block';
+
+                    // Simpan base64 ke hidden input
+                    if (croppedInput) croppedInput.value = base64Image;
+
+                    // Clear file input (tidak perlu file asli)
+                    if (fileInput) fileInput.value = '';
+
+                    console.log('Foto berhasil di-crop, ukuran base64:', base64Image.length, 'bytes');
+                }
+
+                function cancelCrop() {
+                    // Hancurkan cropper
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+
+                    // Reset tampilan
+                    cropContainer.style.display = 'none';
+                    uploadContainer.style.display = 'block';
+                    previewContainer.style.display = 'none';
+
+                    // Reset input file
+                    fileInput.value = '';
+                    originalFileInput.value = '';
+                    cropDataInput.value = '';
+                    croppedInput.value = '';
+
+                    // Reset nama file
+                    fileNameDisplay.innerHTML = '<span class="no-file">Belum ada file dipilih</span>';
+                }
+
+                // Tombol ganti foto di preview
+                if (changePhotoBtn) {
+                    changePhotoBtn.addEventListener('click', function () {
+                        // Reset preview
+                        previewContainer.style.display = 'none';
+
+                        // Tampilkan upload container
+                        uploadContainer.style.display = 'block';
+
+                        // Reset input
+                        fileInput.value = '';
+                        cropDataInput.value = '';
+                        croppedInput.value = '';
+
+                        // Reset nama file
+                        fileNameDisplay.innerHTML = '<span class="no-file">Belum ada file dipilih</span>';
+                    });
+                }
+
+                // Fungsi konversi blob ke base64
+                function blobToBase64(blob) {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = function () {
+                            resolve(reader.result);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                }
+            }
+
             // Ganti fungsi loadProvinsi
             async function loadProvinsi() {
                 const provinsiSelect = document.querySelector('[name="id_provinsi"]');
@@ -1292,7 +1620,7 @@
                 setupAutoCapitalization();
 
                 setupPangkatAutoFill();
-
+                setupPhotoCropping();
 
                 // Setup mentor form jika ada
                 setupMentorForm();

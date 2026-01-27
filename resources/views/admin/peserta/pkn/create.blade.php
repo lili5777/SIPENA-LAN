@@ -356,7 +356,7 @@ $isPKN = $jenis === 'pkn';
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Pendidikan Terakhir</label>
+                                    <label class="form-label">Pendidikan Terakhir (Sesuai SK)</label>
                                     <select name="pendidikan_terakhir"
                                         class="form-select @error('pendidikan_terakhir') error @enderror">
                                         <option value="">Pilih</option>
@@ -961,13 +961,88 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                             @endif --}}
 
                             <!-- Pas Foto -->
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label class="form-label">Upload Pasfoto peserta berwarna</label>
                                 <div class="form-hint">Format JPG/PNG, maksimal 1MB</div>
                                 <div class="form-file">
                                     <input type="file" name="file_pas_foto" id="file_pas_foto"
                                         class="form-file-input @error('file_pas_foto') error @enderror"
                                         accept=".jpg,.jpeg,.png">
+                                    <label class="form-file-label" for="file_pas_foto">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 1MB)' }}</span>
+                                    </label>
+                                    <div class="form-file-name" id="filePasFotoName">
+                                        @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
+                                            File sudah ada: {{ basename($pesertaData->file_pas_foto) }}
+                                        @elseif(old('file_pas_foto'))
+                                            File sudah diupload sebelumnya
+                                        @else
+                                            Belum ada file dipilih
+                                        @endif
+                                    </div>
+                                </div>
+                                @error('file_pas_foto')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div> --}}
+                            <!-- Pas Foto -->
+                            <div class="form-group">
+                                <label class="form-label">Upload Pasfoto peserta berwarna</label>
+                                <div class="form-hint">Format JPG/PNG, maksimal 1MB. Ukuran rekomendasi: 3x4 cm</div>
+                                
+                                <!-- Cropper Preview Area -->
+                                <div class="cropper-preview-container" id="cropperPreviewContainer" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="cropper-wrapper">
+                                                <img id="imagePreview" src="" alt="Preview Image" style="max-width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="preview-wrapper">
+                                                <div class="preview-title">Preview Pasfoto</div>
+                                                <div class="preview-image-container">
+                                                    <div id="preview" style="width: 150px; height: 200px; overflow: hidden; margin: 0 auto;"></div>
+                                                </div>
+                                                <div class="preview-hint">Ukuran: 3x4 cm</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="cropper-controls mt-3">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="rotateLeft">
+                                            <i class="fas fa-undo"></i> Putar Kiri
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="rotateRight">
+                                            <i class="fas fa-redo"></i> Putar Kanan
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="zoomIn">
+                                            <i class="fas fa-search-plus"></i> Zoom In
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="zoomOut">
+                                            <i class="fas fa-search-minus"></i> Zoom Out
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="cancelCrop">
+                                            <i class="fas fa-times"></i> Batal
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-success" id="cropImage">
+                                            <i class="fas fa-crop"></i> Potong & Simpan
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden canvas for cropping -->
+                                <canvas id="croppedCanvas" style="display: none;"></canvas>
+                                
+                                <!-- Hidden input untuk menyimpan data cropped image -->
+                                <input type="hidden" name="cropped_image_data" id="croppedImageData">
+                                
+                                <!-- File Input (hidden, akan diaktifkan setelah crop) -->
+                                <div class="form-file" id="pasFotoUploadContainer">
+                                    <input type="file" name="file_pas_foto" id="file_pas_foto"
+                                        class="form-file-input @error('file_pas_foto') error @enderror"
+                                        accept=".jpg,.jpeg,.png" data-cropper="true">
                                     <label class="form-file-label" for="file_pas_foto">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 1MB)' }}</span>
@@ -1766,37 +1841,70 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 @section('scripts')
     <script>
         // ============================================
-            // REALTIME AUTO CAPITALIZATION (HURUF PERTAMA SAJA)
-            // ============================================
-            function setupRealtimeAutoCapitalization() {
-                // Field yang ingin auto capitalize huruf pertama setiap kata
-                const capitalizeFields = [
-                    'nama_lengkap',
-                    'nama_panggilan',
-                    'tempat_lahir',
-                    'nama_pasangan',
-                    'asal_instansi',
-                    'unit_kerja',
-                    'jabatan',
-                    'bidang_studi',
-                    'bidang_keahlian',
-                    'olahraga_hobi',
-                    'nama_mentor_baru',
-                    'jabatan_mentor_baru'
-                ];
+        // REALTIME AUTO CAPITALIZATION (HURUF PERTAMA SAJA)
+        // ============================================
+        function setupRealtimeAutoCapitalization() {
+            // Field yang ingin auto capitalize huruf pertama setiap kata
+            const capitalizeFields = [
+                'nama_lengkap',
+                'nama_panggilan',
+                'tempat_lahir',
+                'nama_pasangan',
+                'asal_instansi',
+                'unit_kerja',
+                'jabatan',
+                'bidang_studi',
+                'bidang_keahlian',
+                'olahraga_hobi',
+                'nama_mentor_baru',
+                'jabatan_mentor_baru'
+            ];
 
-                capitalizeFields.forEach(fieldName => {
-                    const input = document.querySelector(`[name="${fieldName}"]`);
-                    if (input) {
-                        input.addEventListener('input', function (e) {
-                            // Simpan posisi cursor
-                            const start = this.selectionStart;
-                            const end = this.selectionEnd;
+            capitalizeFields.forEach(fieldName => {
+                const input = document.querySelector(`[name="${fieldName}"]`);
+                if (input) {
+                    input.addEventListener('input', function (e) {
+                        // Simpan posisi cursor
+                        const start = this.selectionStart;
+                        const end = this.selectionEnd;
 
-                            // Ambil nilai saat ini
-                            const value = this.value;
+                        // Ambil nilai saat ini
+                        const value = this.value;
 
-                            // Kapitalisasi huruf pertama setiap kata
+                        // Kapitalisasi huruf pertama setiap kata
+                        let newValue = '';
+                        let capitalizeNext = true;
+
+                        for (let i = 0; i < value.length; i++) {
+                            const char = value[i];
+
+                            if (capitalizeNext && char.match(/[a-zA-Z]/)) {
+                                newValue += char.toUpperCase();
+                                capitalizeNext = false;
+                            } else {
+                                newValue += char;
+                            }
+
+                            // Setelah spasi, huruf berikutnya harus dikapital
+                            if (char === ' ' || char === '-' || char === "'") {
+                                capitalizeNext = true;
+                            }
+                        }
+
+                        // Update nilai jika ada perubahan
+                        if (value !== newValue) {
+                            this.value = newValue;
+
+                            // Kembalikan posisi cursor (ditambah 1 karena ada perubahan)
+                            const diff = newValue.length - value.length;
+                            this.setSelectionRange(start + diff, end + diff);
+                        }
+                    });
+
+                    // Format nilai yang sudah ada (edit mode)
+                    if (input.value) {
+                        setTimeout(() => {
+                            let value = input.value;
                             let newValue = '';
                             let capitalizeNext = true;
 
@@ -1810,84 +1918,272 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                     newValue += char;
                                 }
 
-                                // Setelah spasi, huruf berikutnya harus dikapital
                                 if (char === ' ' || char === '-' || char === "'") {
                                     capitalizeNext = true;
                                 }
                             }
 
-                            // Update nilai jika ada perubahan
                             if (value !== newValue) {
-                                this.value = newValue;
-
-                                // Kembalikan posisi cursor (ditambah 1 karena ada perubahan)
-                                const diff = newValue.length - value.length;
-                                this.setSelectionRange(start + diff, end + diff);
+                                input.value = newValue;
                             }
-                        });
-
-                        // Format nilai yang sudah ada (edit mode)
-                        if (input.value) {
-                            setTimeout(() => {
-                                let value = input.value;
-                                let newValue = '';
-                                let capitalizeNext = true;
-
-                                for (let i = 0; i < value.length; i++) {
-                                    const char = value[i];
-
-                                    if (capitalizeNext && char.match(/[a-zA-Z]/)) {
-                                        newValue += char.toUpperCase();
-                                        capitalizeNext = false;
-                                    } else {
-                                        newValue += char;
-                                    }
-
-                                    if (char === ' ' || char === '-' || char === "'") {
-                                        capitalizeNext = true;
-                                    }
-                                }
-
-                                if (value !== newValue) {
-                                    input.value = newValue;
-                                }
-                            }, 100);
-                        }
+                        }, 100);
                     }
-                });
+                }
+            });
 
-                // Email field - lowercase semua secara realtime
-                const emailFields = ['email_pribadi', 'email_kantor'];
-                emailFields.forEach(fieldName => {
-                    const input = document.querySelector(`[name="${fieldName}"]`);
-                    if (input) {
-                        input.addEventListener('input', function (e) {
-                            // Simpan posisi cursor
-                            const start = this.selectionStart;
-                            const end = this.selectionEnd;
+            // Email field - lowercase semua secara realtime
+            const emailFields = ['email_pribadi', 'email_kantor'];
+            emailFields.forEach(fieldName => {
+                const input = document.querySelector(`[name="${fieldName}"]`);
+                if (input) {
+                    input.addEventListener('input', function (e) {
+                        // Simpan posisi cursor
+                        const start = this.selectionStart;
+                        const end = this.selectionEnd;
 
-                            // Ubah ke lowercase
-                            const value = this.value;
-                            const lowercased = value.toLowerCase();
+                        // Ubah ke lowercase
+                        const value = this.value;
+                        const lowercased = value.toLowerCase();
 
-                            // Jika ada perubahan, update nilai
-                            if (value !== lowercased) {
-                                this.value = lowercased;
+                        // Jika ada perubahan, update nilai
+                        if (value !== lowercased) {
+                            this.value = lowercased;
 
-                                // Kembalikan posisi cursor
-                                this.setSelectionRange(start, end);
-                            }
-                        });
-
-                        // Format nilai yang sudah ada
-                        if (input.value) {
-                            setTimeout(() => {
-                                input.value = input.value.toLowerCase();
-                            }, 100);
+                            // Kembalikan posisi cursor
+                            this.setSelectionRange(start, end);
                         }
+                    });
+
+                    // Format nilai yang sudah ada
+                    if (input.value) {
+                        setTimeout(() => {
+                            input.value = input.value.toLowerCase();
+                        }, 100);
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // CROPPER FUNCTIONALITY
+        // ============================================
+        function initCropperFunctionality() {
+            let cropper = null;
+            let croppedBlob = null;
+            let originalFile = null;
+
+            // Elements
+            const fileInput = document.getElementById('file_pas_foto');
+            const cropperContainer = document.getElementById('cropperPreviewContainer');
+            const previewContainer = document.getElementById('preview');
+            const imagePreview = document.getElementById('imagePreview');
+            const fileDisplay = document.getElementById('filePasFotoName');
+            const croppedImageData = document.getElementById('croppedImageData');
+
+            // Control buttons
+            const rotateLeftBtn = document.getElementById('rotateLeft');
+            const rotateRightBtn = document.getElementById('rotateRight');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const cancelCropBtn = document.getElementById('cancelCrop');
+            const cropImageBtn = document.getElementById('cropImage');
+
+            // Aspect ratio untuk pasfoto 3:4
+            const ASPECT_RATIO = 3 / 4;
+
+            // Event listener untuk file input
+            if (fileInput) {
+                fileInput.addEventListener('change', handleFileSelect);
+            }
+
+            // Control buttons event listeners
+            if (rotateLeftBtn) rotateLeftBtn.addEventListener('click', rotateLeft);
+            if (rotateRightBtn) rotateRightBtn.addEventListener('click', rotateRight);
+            if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
+            if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
+            if (cancelCropBtn) cancelCropBtn.addEventListener('click', cancelCrop);
+            if (cropImageBtn) cropImageBtn.addEventListener('click', cropAndSave);
+
+            // Functions
+            function handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validasi file
+                if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                    alert('Hanya file JPG/PNG yang diperbolehkan');
+                    this.value = '';
+                    return;
+                }
+
+                if (file.size > 1024 * 1024) { // 1MB
+                    alert('Ukuran file maksimal 1MB');
+                    this.value = '';
+                    return;
+                }
+
+                originalFile = file;
+
+                // Baca file sebagai URL
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    // Tampilkan container cropper
+                    cropperContainer.style.display = 'block';
+
+                    // Set image source
+                    imagePreview.src = event.target.result;
+
+                    // Initialize cropper
+                    setTimeout(() => {
+                        initCropper();
+                    }, 100);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function initCropper() {
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                cropper = new Cropper(imagePreview, {
+                    aspectRatio: ASPECT_RATIO,
+                    viewMode: 2,
+                    preview: previewContainer,
+                    autoCropArea: 0.8,
+                    responsive: true,
+                    restore: true,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    ready: function () {
+                        this.cropper.setAspectRatio(ASPECT_RATIO);
                     }
                 });
             }
+
+            function rotateLeft() {
+                if (cropper) {
+                    cropper.rotate(-90);
+                }
+            }
+
+            function rotateRight() {
+                if (cropper) {
+                    cropper.rotate(90);
+                }
+            }
+
+            function zoomIn() {
+                if (cropper) {
+                    cropper.zoom(0.1);
+                }
+            }
+
+            function zoomOut() {
+                if (cropper) {
+                    cropper.zoom(-0.1);
+                }
+            }
+
+            function cancelCrop() {
+                // Reset everything
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+
+                cropperContainer.style.display = 'none';
+
+                // Show upload container again
+                document.getElementById('pasFotoUploadContainer').style.display = 'block';
+
+                // Reset file input
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+
+                croppedBlob = null;
+                if (croppedImageData) croppedImageData.value = '';
+
+                // Reset display
+                if (fileDisplay) {
+                    fileDisplay.textContent = 'Belum ada file dipilih';
+                }
+            }
+
+            function cropAndSave() {
+                if (!cropper) {
+                    alert('Silakan pilih gambar terlebih dahulu');
+                    return;
+                }
+
+                // Get cropped canvas dengan ukuran optimal untuk pasfoto
+                const canvas = cropper.getCroppedCanvas({
+                    width: 354,  // 3cm @ 300dpi ≈ 354 pixels
+                    height: 472, // 4cm @ 300dpi ≈ 472 pixels
+                    fillColor: '#fff',
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+
+                // Convert canvas to blob
+                canvas.toBlob(function (blob) {
+                    if (!blob) {
+                        alert('Gagal memproses gambar');
+                        return;
+                    }
+
+                    // Simpan blob untuk nanti diupload
+                    croppedBlob = blob;
+
+                    // Convert blob to base64 untuk hidden input
+                    const reader = new FileReader();
+                    reader.onloadend = function () {
+                        if (croppedImageData) {
+                            croppedImageData.value = reader.result;
+                        }
+
+                        // Update file display
+                        if (fileDisplay) {
+                            fileDisplay.textContent = 'Pasfoto siap diupload (' + formatBytes(blob.size) + ')';
+                        }
+
+                        // Hide cropper container
+                        cropperContainer.style.display = 'none';
+
+                        // Show upload container
+                        document.getElementById('pasFotoUploadContainer').style.display = 'block';
+
+                        // Clean up cropper
+                        if (cropper) {
+                            cropper.destroy();
+                            cropper = null;
+                        }
+                    };
+                    reader.readAsDataURL(blob);
+
+                }, 'image/jpeg', 0.9); // Quality: 0.9 (90%)
+            }
+
+            function formatBytes(bytes, decimals = 2) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            // Return functions that might be needed externally
+            return {
+                getCroppedBlob: () => croppedBlob,
+                hasCroppedImage: () => !!croppedBlob
+            };
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             // ============================================
@@ -1896,6 +2192,9 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             const isEdit = @json($isEdit);
             const jenis = @json($jenis);
             let selectedAngkatan = null;
+
+            // Initialize cropper
+            const cropperFunctions = initCropperFunctionality();
 
             // ============================================
             // VARIABLES & ELEMENTS
@@ -1967,10 +2266,10 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             const provinsiSelect = document.getElementById('id_provinsi');
             const kabupatenSelect = document.getElementById('id_kabupaten_kota');
 
-            // File input elements - semua file inputs
+            // File input elements - semua file inputs (kecuali file_pas_foto yang sudah ada cropper)
             const fileInputs = [
                 { input: document.getElementById('file_ktp'), display: document.getElementById('fileKtpName') },
-                { input: document.getElementById('file_pas_foto'), display: document.getElementById('filePasFotoName') },
+                { input: document.getElementById('file'), display: document.getElementById('filee') },
                 { input: document.getElementById('file_sk_jabatan'), display: document.getElementById('fileSkJabatanName') },
                 { input: document.getElementById('file_sk_pangkat'), display: document.getElementById('fileSkPangkatName') },
                 { input: document.getElementById('file_surat_kesediaan'), display: document.getElementById('fileSuratKesediaanName') },
@@ -1982,8 +2281,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                 { input: document.getElementById('file_surat_bebas_narkoba'), display: document.getElementById('fileSuratBebasNarkobaName') },
                 { input: document.getElementById('file_surat_pernyataan_administrasi'), display: document.getElementById('fileSuratPernyataanName') },
                 { input: document.getElementById('file_persetujuan_mentor'), display: document.getElementById('filePersetujuanMentorName') },
-                { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') },
-                { input: document.getElementById('file'), display: document.getElementById('filee') },
+                { input: document.getElementById('file_sertifikat_penghargaan'), display: document.getElementById('fileSertifikatName') }
             ].filter(item => item.input); // Hanya yang ada di DOM
 
             // ============================================
@@ -2383,7 +2681,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             backToStep3Btn.addEventListener('click', () => moveToStep(3));
 
             // ============================================
-            // FORM SUBMISSION HANDLER
+            // FORM SUBMISSION HANDLER (MODIFIED FOR CROPPER)
             // ============================================
             document.getElementById('pesertaForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
@@ -2453,6 +2751,25 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                     }
 
                     return false;
+                }
+
+                // Handle cropped image jika ada
+                const fileInput = document.getElementById('file_pas_foto');
+                if (cropperFunctions.hasCroppedImage()) {
+                    const croppedBlob = cropperFunctions.getCroppedBlob();
+
+                    // Create a new File from blob
+                    const croppedFile = new File([croppedBlob], 'pasfoto_cropped.jpg', {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+
+                    // Create a new DataTransfer object
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(croppedFile);
+
+                    // Replace the file input files
+                    fileInput.files = dataTransfer.files;
                 }
 
                 // Collect form data

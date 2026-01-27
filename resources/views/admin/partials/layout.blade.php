@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -576,6 +577,128 @@
         .dashboard-content {
             animation: fadeIn 0.6s ease-out;
         }
+
+        /* Cropper Styles */
+.cropper-preview-container {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.cropper-wrapper {
+    max-height: 400px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #e9ecef;
+}
+
+.preview-wrapper {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+}
+
+.preview-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.preview-image-container {
+    background: #f8f9fa;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.preview-hint {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.cropper-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cropper-controls .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.875rem;
+    padding: 6px 12px;
+}
+
+/* Cropper modal (jika ingin fullscreen) */
+.cropper-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.cropper-modal.active {
+    display: flex;
+}
+
+.cropper-modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 20px;
+}
+
+.cropper-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.cropper-modal-header h4 {
+    margin: 0;
+    color: #343a40;
+}
+
+.cropper-modal-body {
+    min-height: 400px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cropper-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .cropper-controls .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    .cropper-wrapper {
+        max-height: 300px;
+    }
+}
     </style>
     @yield('styles')
 </head>
@@ -593,6 +716,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <script>
         // Sidebar Toggle

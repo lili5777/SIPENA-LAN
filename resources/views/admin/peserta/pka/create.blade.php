@@ -356,7 +356,7 @@ $isPKN = $jenis === 'pkn';
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Pendidikan Terakhir</label>
+                                    <label class="form-label">Pendidikan Terakhir (Sesuai SK)</label>
                                     <select name="pendidikan_terakhir"
                                         class="form-select @error('pendidikan_terakhir') error @enderror">
                                         <option value="">Pilih</option>
@@ -992,13 +992,88 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                             @endif --}}
 
                             <!-- Pas Foto -->
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label class="form-label">Upload Pasfoto peserta berwarna</label>
                                 <div class="form-hint">Format JPG/PNG, maksimal 1MB</div>
                                 <div class="form-file">
                                     <input type="file" name="file_pas_foto" id="file_pas_foto"
                                         class="form-file-input @error('file_pas_foto') error @enderror"
                                         accept=".jpg,.jpeg,.png">
+                                    <label class="form-file-label" for="file_pas_foto">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 1MB)' }}</span>
+                                    </label>
+                                    <div class="form-file-name" id="filePasFotoName">
+                                        @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
+                                            File sudah ada: {{ basename($pesertaData->file_pas_foto) }}
+                                        @elseif(old('file_pas_foto'))
+                                            File sudah diupload sebelumnya
+                                        @else
+                                            Belum ada file dipilih
+                                        @endif
+                                    </div>
+                                </div>
+                                @error('file_pas_foto')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div> --}}
+                            <!-- Pas Foto -->
+                            <div class="form-group">
+                                <label class="form-label">Upload Pasfoto peserta berwarna</label>
+                                <div class="form-hint">Format JPG/PNG, maksimal 1MB. Ukuran rekomendasi: 3x4 cm</div>
+                                
+                                <!-- Cropper Preview Area -->
+                                <div class="cropper-preview-container" id="cropperPreviewContainer" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="cropper-wrapper">
+                                                <img id="imagePreview" src="" alt="Preview Image" style="max-width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="preview-wrapper">
+                                                <div class="preview-title">Preview Pasfoto</div>
+                                                <div class="preview-image-container">
+                                                    <div id="preview" style="width: 150px; height: 200px; overflow: hidden; margin: 0 auto;"></div>
+                                                </div>
+                                                <div class="preview-hint">Ukuran: 3x4 cm</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="cropper-controls mt-3">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="rotateLeft">
+                                            <i class="fas fa-undo"></i> Putar Kiri
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="rotateRight">
+                                            <i class="fas fa-redo"></i> Putar Kanan
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="zoomIn">
+                                            <i class="fas fa-search-plus"></i> Zoom In
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="zoomOut">
+                                            <i class="fas fa-search-minus"></i> Zoom Out
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="cancelCrop">
+                                            <i class="fas fa-times"></i> Batal
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-success" id="cropImage">
+                                            <i class="fas fa-crop"></i> Potong & Simpan
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden canvas for cropping -->
+                                <canvas id="croppedCanvas" style="display: none;"></canvas>
+                                
+                                <!-- Hidden input untuk menyimpan data cropped image -->
+                                <input type="hidden" name="cropped_image_data" id="croppedImageData">
+                                
+                                <!-- File Input (hidden, akan diaktifkan setelah crop) -->
+                                <div class="form-file" id="pasFotoUploadContainer">
+                                    <input type="file" name="file_pas_foto" id="file_pas_foto"
+                                        class="form-file-input @error('file_pas_foto') error @enderror"
+                                        accept=".jpg,.jpeg,.png" data-cropper="true">
                                     <label class="form-file-label" for="file_pas_foto">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 1MB)' }}</span>
@@ -1822,37 +1897,70 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 @section('scripts')
     <script>
         // ============================================
-            // REALTIME AUTO CAPITALIZATION (HURUF PERTAMA SAJA)
-            // ============================================
-            function setupRealtimeAutoCapitalization() {
-                // Field yang ingin auto capitalize huruf pertama setiap kata
-                const capitalizeFields = [
-                    'nama_lengkap',
-                    'nama_panggilan',
-                    'tempat_lahir',
-                    'nama_pasangan',
-                    'asal_instansi',
-                    'unit_kerja',
-                    'jabatan',
-                    'bidang_studi',
-                    'bidang_keahlian',
-                    'olahraga_hobi',
-                    'nama_mentor_baru',
-                    'jabatan_mentor_baru'
-                ];
+        // REALTIME AUTO CAPITALIZATION (HURUF PERTAMA SAJA)
+        // ============================================
+        function setupRealtimeAutoCapitalization() {
+            // Field yang ingin auto capitalize huruf pertama setiap kata
+            const capitalizeFields = [
+                'nama_lengkap',
+                'nama_panggilan',
+                'tempat_lahir',
+                'nama_pasangan',
+                'asal_instansi',
+                'unit_kerja',
+                'jabatan',
+                'bidang_studi',
+                'bidang_keahlian',
+                'olahraga_hobi',
+                'nama_mentor_baru',
+                'jabatan_mentor_baru'
+            ];
 
-                capitalizeFields.forEach(fieldName => {
-                    const input = document.querySelector(`[name="${fieldName}"]`);
-                    if (input) {
-                        input.addEventListener('input', function (e) {
-                            // Simpan posisi cursor
-                            const start = this.selectionStart;
-                            const end = this.selectionEnd;
+            capitalizeFields.forEach(fieldName => {
+                const input = document.querySelector(`[name="${fieldName}"]`);
+                if (input) {
+                    input.addEventListener('input', function (e) {
+                        // Simpan posisi cursor
+                        const start = this.selectionStart;
+                        const end = this.selectionEnd;
 
-                            // Ambil nilai saat ini
-                            const value = this.value;
+                        // Ambil nilai saat ini
+                        const value = this.value;
 
-                            // Kapitalisasi huruf pertama setiap kata
+                        // Kapitalisasi huruf pertama setiap kata
+                        let newValue = '';
+                        let capitalizeNext = true;
+
+                        for (let i = 0; i < value.length; i++) {
+                            const char = value[i];
+
+                            if (capitalizeNext && char.match(/[a-zA-Z]/)) {
+                                newValue += char.toUpperCase();
+                                capitalizeNext = false;
+                            } else {
+                                newValue += char;
+                            }
+
+                            // Setelah spasi, huruf berikutnya harus dikapital
+                            if (char === ' ' || char === '-' || char === "'") {
+                                capitalizeNext = true;
+                            }
+                        }
+
+                        // Update nilai jika ada perubahan
+                        if (value !== newValue) {
+                            this.value = newValue;
+
+                            // Kembalikan posisi cursor (ditambah 1 karena ada perubahan)
+                            const diff = newValue.length - value.length;
+                            this.setSelectionRange(start + diff, end + diff);
+                        }
+                    });
+
+                    // Format nilai yang sudah ada (edit mode)
+                    if (input.value) {
+                        setTimeout(() => {
+                            let value = input.value;
                             let newValue = '';
                             let capitalizeNext = true;
 
@@ -1866,84 +1974,310 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                     newValue += char;
                                 }
 
-                                // Setelah spasi, huruf berikutnya harus dikapital
                                 if (char === ' ' || char === '-' || char === "'") {
                                     capitalizeNext = true;
                                 }
                             }
 
-                            // Update nilai jika ada perubahan
                             if (value !== newValue) {
-                                this.value = newValue;
-
-                                // Kembalikan posisi cursor (ditambah 1 karena ada perubahan)
-                                const diff = newValue.length - value.length;
-                                this.setSelectionRange(start + diff, end + diff);
+                                input.value = newValue;
                             }
-                        });
-
-                        // Format nilai yang sudah ada (edit mode)
-                        if (input.value) {
-                            setTimeout(() => {
-                                let value = input.value;
-                                let newValue = '';
-                                let capitalizeNext = true;
-
-                                for (let i = 0; i < value.length; i++) {
-                                    const char = value[i];
-
-                                    if (capitalizeNext && char.match(/[a-zA-Z]/)) {
-                                        newValue += char.toUpperCase();
-                                        capitalizeNext = false;
-                                    } else {
-                                        newValue += char;
-                                    }
-
-                                    if (char === ' ' || char === '-' || char === "'") {
-                                        capitalizeNext = true;
-                                    }
-                                }
-
-                                if (value !== newValue) {
-                                    input.value = newValue;
-                                }
-                            }, 100);
-                        }
+                        }, 100);
                     }
-                });
+                }
+            });
 
-                // Email field - lowercase semua secara realtime
-                const emailFields = ['email_pribadi', 'email_kantor'];
-                emailFields.forEach(fieldName => {
-                    const input = document.querySelector(`[name="${fieldName}"]`);
-                    if (input) {
-                        input.addEventListener('input', function (e) {
-                            // Simpan posisi cursor
-                            const start = this.selectionStart;
-                            const end = this.selectionEnd;
+            // Email field - lowercase semua secara realtime
+            const emailFields = ['email_pribadi', 'email_kantor'];
+            emailFields.forEach(fieldName => {
+                const input = document.querySelector(`[name="${fieldName}"]`);
+                if (input) {
+                    input.addEventListener('input', function (e) {
+                        // Simpan posisi cursor
+                        const start = this.selectionStart;
+                        const end = this.selectionEnd;
 
-                            // Ubah ke lowercase
-                            const value = this.value;
-                            const lowercased = value.toLowerCase();
+                        // Ubah ke lowercase
+                        const value = this.value;
+                        const lowercased = value.toLowerCase();
 
-                            // Jika ada perubahan, update nilai
-                            if (value !== lowercased) {
-                                this.value = lowercased;
+                        // Jika ada perubahan, update nilai
+                        if (value !== lowercased) {
+                            this.value = lowercased;
 
-                                // Kembalikan posisi cursor
-                                this.setSelectionRange(start, end);
-                            }
-                        });
-
-                        // Format nilai yang sudah ada
-                        if (input.value) {
-                            setTimeout(() => {
-                                input.value = input.value.toLowerCase();
-                            }, 100);
+                            // Kembalikan posisi cursor
+                            this.setSelectionRange(start, end);
                         }
+                    });
+
+                    // Format nilai yang sudah ada
+                    if (input.value) {
+                        setTimeout(() => {
+                            input.value = input.value.toLowerCase();
+                        }, 100);
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // CROPPER FUNCTIONALITY
+        // ============================================
+        function initCropperFunctionality() {
+            let cropper = null;
+            let croppedBlob = null;
+
+            // Elements dari HTML Anda
+            const fileInput = document.getElementById('file_pas_foto');
+            const cropperContainer = document.querySelector('.cropper-preview-container');
+            const previewContainer = document.getElementById('preview');
+            const imagePreview = document.getElementById('imagePreview');
+            const fileDisplay = document.getElementById('filePasFotoName');
+            const croppedImageData = document.getElementById('croppedImageData');
+            const croppedCanvas = document.getElementById('croppedCanvas');
+
+            // Control buttons dari HTML Anda
+            const rotateLeftBtn = document.getElementById('rotateLeft');
+            const rotateRightBtn = document.getElementById('rotateRight');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const cancelCropBtn = document.getElementById('cancelCrop');
+            const cropImageBtn = document.getElementById('cropImage');
+
+            // Pas foto yang sudah ada (untuk edit mode)
+            const existingPhoto = @json($isEdit && $pesertaData && $pesertaData->file_pas_foto ? asset($pesertaData->file_pas_foto) : null);
+
+            // Aspect ratio untuk pasfoto 3:4
+            const ASPECT_RATIO = 3 / 4;
+
+            // Event listener untuk file input
+            if (fileInput) {
+                fileInput.addEventListener('change', handleFileSelect);
+            }
+
+            // Control buttons event listeners
+            if (rotateLeftBtn) rotateLeftBtn.addEventListener('click', rotateLeft);
+            if (rotateRightBtn) rotateRightBtn.addEventListener('click', rotateRight);
+            if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
+            if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
+            if (cancelCropBtn) cancelCropBtn.addEventListener('click', cancelCrop);
+            if (cropImageBtn) cropImageBtn.addEventListener('click', cropAndSave);
+
+            // Functions
+            function handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validasi file
+                if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                    alert('Hanya file JPG/PNG yang diperbolehkan');
+                    this.value = '';
+                    return;
+                }
+
+                if (file.size > 1024 * 1024) { // 1MB
+                    alert('Ukuran file maksimal 1MB');
+                    this.value = '';
+                    return;
+                }
+
+                // Baca file sebagai URL
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Tampilkan container cropper
+                    if (cropperContainer) {
+                        cropperContainer.style.display = 'block';
+                    }
+
+                    // Set image source
+                    if (imagePreview) {
+                        imagePreview.src = event.target.result;
+                    }
+
+                    // Initialize cropper
+                    setTimeout(() => {
+                        initCropper();
+                    }, 100);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function initCropper() {
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                if (!imagePreview || !imagePreview.src) return;
+
+                cropper = new Cropper(imagePreview, {
+                    aspectRatio: ASPECT_RATIO,
+                    viewMode: 2,
+                    preview: previewContainer,
+                    autoCropArea: 0.8,
+                    responsive: true,
+                    restore: true,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    ready: function() {
+                        this.cropper.setAspectRatio(ASPECT_RATIO);
                     }
                 });
             }
+
+            function rotateLeft() {
+                if (cropper) {
+                    cropper.rotate(-90);
+                }
+            }
+
+            function rotateRight() {
+                if (cropper) {
+                    cropper.rotate(90);
+                }
+            }
+
+            function zoomIn() {
+                if (cropper) {
+                    cropper.zoom(0.1);
+                }
+            }
+
+            function zoomOut() {
+                if (cropper) {
+                    cropper.zoom(-0.1);
+                }
+            }
+
+            function cancelCrop() {
+                // Reset everything
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+
+                if (cropperContainer) {
+                    cropperContainer.style.display = 'none';
+                }
+
+                // Reset file input
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+
+                croppedBlob = null;
+                if (croppedImageData) croppedImageData.value = '';
+
+                // Reset display
+                if (fileDisplay) {
+                    if (existingPhoto) {
+                        fileDisplay.textContent = 'File sudah ada: ' + existingPhoto.split('/').pop();
+                    } else {
+                        fileDisplay.textContent = 'Belum ada file dipilih';
+                    }
+                }
+            }
+
+            function cropAndSave() {
+                if (!cropper) {
+                    alert('Silakan pilih gambar terlebih dahulu');
+                    return;
+                }
+
+                // Get cropped canvas dengan ukuran optimal untuk pasfoto
+                const canvas = cropper.getCroppedCanvas({
+                    width: 354,  // 3cm @ 300dpi ≈ 354 pixels
+                    height: 472, // 4cm @ 300dpi ≈ 472 pixels
+                    fillColor: '#fff',
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+
+                // Simpan canvas ke hidden canvas untuk referensi
+                if (croppedCanvas) {
+                    const ctx = croppedCanvas.getContext('2d');
+                    croppedCanvas.width = canvas.width;
+                    croppedCanvas.height = canvas.height;
+                    ctx.drawImage(canvas, 0, 0);
+                }
+
+                // Convert canvas to blob
+                canvas.toBlob(function(blob) {
+                    if (!blob) {
+                        alert('Gagal memproses gambar');
+                        return;
+                    }
+
+                    // Simpan blob untuk nanti diupload
+                    croppedBlob = blob;
+
+                    // Convert blob to base64 untuk hidden input
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                        if (croppedImageData) {
+                            croppedImageData.value = reader.result;
+                        }
+
+                        // Update file display
+                        if (fileDisplay) {
+                            fileDisplay.textContent = 'Pasfoto siap diupload (' + formatBytes(blob.size) + ')';
+                        }
+
+                        // Hide cropper container
+                        if (cropperContainer) {
+                            cropperContainer.style.display = 'none';
+                        }
+
+                        // Clean up cropper
+                        if (cropper) {
+                            cropper.destroy();
+                            cropper = null;
+                        }
+
+                        // Tambahkan kelas untuk menunjukkan file sudah dipilih
+                        if (fileInput) {
+                            fileInput.classList.add('has-cropped-image');
+                        }
+                    };
+                    reader.readAsDataURL(blob);
+
+                }, 'image/jpeg', 0.9); // Quality: 0.9 (90%)
+            }
+
+            function formatBytes(bytes, decimals = 2) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            // Fungsi untuk menangani foto yang sudah ada di edit mode
+            function handleExistingPhoto() {
+                if (existingPhoto) {
+                    // Jika ada foto yang sudah ada, kita bisa tambahkan tombol edit
+                    // atau secara otomatis memuatnya ke cropper
+                    // Untuk sekarang, kita hanya update display
+                    if (fileDisplay) {
+                        fileDisplay.textContent = 'File sudah ada: ' + existingPhoto.split('/').pop();
+                    }
+                }
+            }
+
+            // Initialize existing photo jika ada
+            handleExistingPhoto();
+
+            // Return functions that might be needed externally
+            return {
+                getCroppedBlob: () => croppedBlob,
+                hasCroppedImage: () => !!croppedBlob,
+                getCroppedCanvas: () => croppedCanvas
+            };
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             // ============================================
@@ -1952,6 +2286,9 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             const isEdit = @json($isEdit);
             const jenis = @json($jenis);
             let selectedAngkatan = null;
+
+            // Initialize cropper
+            const cropperFunctions = initCropperFunctionality();
 
             // ============================================
             // VARIABLES & ELEMENTS
@@ -2023,11 +2360,10 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             const provinsiSelect = document.getElementById('id_provinsi');
             const kabupatenSelect = document.getElementById('id_kabupaten_kota');
 
-            // File input elements - semua file inputs
+            // File input elements - semua file inputs (kecuali file_pas_foto yang sudah ada cropper)
             const fileInputs = [
                 { input: document.getElementById('file_ktp'), display: document.getElementById('fileKtpName') },
                 { input: document.getElementById('file'), display: document.getElementById('filee') },
-                { input: document.getElementById('file_pas_foto'), display: document.getElementById('filePasFotoName') },
                 { input: document.getElementById('file_sk_jabatan'), display: document.getElementById('fileSkJabatanName') },
                 { input: document.getElementById('file_sk_pangkat'), display: document.getElementById('fileSkPangkatName') },
                 { input: document.getElementById('file_surat_kesediaan'), display: document.getElementById('fileSuratKesediaanName') },
@@ -2063,7 +2399,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             // ============================================
             if (isEdit) {
                 // Auto-enable next button pada step 1
-                nextToStep2Btn.disabled = false;
+                if (nextToStep2Btn) nextToStep2Btn.disabled = false;
 
                 // Load kabupaten saat halaman pertama kali dibuka (edit mode)
                 setTimeout(() => {
@@ -2073,7 +2409,9 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 
                     // Auto skip ke step 2 untuk edit mode
                     setTimeout(() => {
-                        moveToStep(1);
+                        if (step1Content && step2Content) {
+                            moveToStep(1);
+                        }
                     }, 800);
                 }, 500);
 
@@ -2131,46 +2469,54 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             // ============================================
             // STEP 1: ANGKATAN SELECTION
             // ============================================
-            angkatanSelect.addEventListener('change', function () {
-                if (!this.value) {
-                    nextToStep2Btn.disabled = true;
-                    angkatanInfo.style.display = 'none';
-                    return;
-                }
+            if (angkatanSelect) {
+                angkatanSelect.addEventListener('change', function () {
+                    if (!this.value) {
+                        if (nextToStep2Btn) nextToStep2Btn.disabled = true;
+                        if (angkatanInfo) angkatanInfo.style.display = 'none';
+                        return;
+                    }
 
-                const selectedOption = this.options[this.selectedIndex];
-                selectedAngkatan = {
-                    id: this.value,
-                    nama: selectedOption.dataset.nama,
-                    tahun: selectedOption.dataset.tahun,
-                    kuota: selectedOption.dataset.kuota,
-                    status: selectedOption.dataset.status
-                };
+                    const selectedOption = this.options[this.selectedIndex];
+                    selectedAngkatan = {
+                        id: this.value,
+                        nama: selectedOption.dataset.nama,
+                        tahun: selectedOption.dataset.tahun,
+                        kuota: selectedOption.dataset.kuota,
+                        status: selectedOption.dataset.status
+                    };
 
-                // Update UI
-                currentAngkatanName.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
-                currentAngkatanName2.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
-                currentAngkatanName3.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                    // Update UI
+                    if (currentAngkatanName) currentAngkatanName.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                    if (currentAngkatanName2) currentAngkatanName2.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                    if (currentAngkatanName3) currentAngkatanName3.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
 
-                // Show angkatan info
-                document.getElementById('info-nama-angkatan').textContent = selectedAngkatan.nama;
-                document.getElementById('info-tahun-angkatan').textContent = selectedAngkatan.tahun;
-                document.getElementById('info-kuota-angkatan').textContent = selectedAngkatan.kuota;
+                    // Show angkatan info
+                    const infoNama = document.getElementById('info-nama-angkatan');
+                    const infoTahun = document.getElementById('info-tahun-angkatan');
+                    const infoKuota = document.getElementById('info-kuota-angkatan');
+                    const statusBadge = document.getElementById('info-status-angkatan');
 
-                const statusBadge = document.getElementById('info-status-angkatan');
-                statusBadge.textContent = selectedAngkatan.status;
-                statusBadge.className = 'info-badge';
-                if (selectedAngkatan.status === 'Aktif' || selectedAngkatan.status === 'Dibuka') {
-                    statusBadge.style.background = 'var(--success-color)';
-                } else if (selectedAngkatan.status === 'Penuh') {
-                    statusBadge.style.background = 'var(--danger-color)';
-                } else {
-                    statusBadge.style.background = 'var(--warning-color)';
-                }
+                    if (infoNama) infoNama.textContent = selectedAngkatan.nama;
+                    if (infoTahun) infoTahun.textContent = selectedAngkatan.tahun;
+                    if (infoKuota) infoKuota.textContent = selectedAngkatan.kuota;
 
-                angkatanInfo.style.display = 'block';
-                nextToStep2Btn.disabled = false;
-            });
+                    if (statusBadge) {
+                        statusBadge.textContent = selectedAngkatan.status;
+                        statusBadge.className = 'info-badge';
+                        if (selectedAngkatan.status === 'Aktif' || selectedAngkatan.status === 'Dibuka') {
+                            statusBadge.style.background = 'var(--success-color)';
+                        } else if (selectedAngkatan.status === 'Penuh') {
+                            statusBadge.style.background = 'var(--danger-color)';
+                        } else {
+                            statusBadge.style.background = 'var(--warning-color)';
+                        }
+                    }
+
+                    if (angkatanInfo) angkatanInfo.style.display = 'block';
+                    if (nextToStep2Btn) nextToStep2Btn.disabled = false;
+                });
+            }
 
             // ============================================
             // STEP 3: MENTOR HANDLERS
@@ -2178,35 +2524,37 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             if (sudahAdaMentorSelect) {
                 sudahAdaMentorSelect.addEventListener('change', function () {
                     if (this.value === 'Ya') {
-                        mentorContainer.style.display = 'block';
+                        if (mentorContainer) mentorContainer.style.display = 'block';
                     } else {
-                        mentorContainer.style.display = 'none';
+                        if (mentorContainer) mentorContainer.style.display = 'none';
                         // Reset mentor forms
-                        mentorModeSelect.value = '';
-                        selectMentorForm.style.display = 'none';
-                        addMentorForm.style.display = 'none';
-                        mentorSelect.value = '';
+                        if (mentorModeSelect) mentorModeSelect.value = '';
+                        if (selectMentorForm) selectMentorForm.style.display = 'none';
+                        if (addMentorForm) addMentorForm.style.display = 'none';
+                        if (mentorSelect) mentorSelect.value = '';
                         resetMentorFields();
                     }
                 });
 
-                mentorModeSelect.addEventListener('change', function () {
-                    if (this.value === 'pilih') {
-                        selectMentorForm.style.display = 'block';
-                        addMentorForm.style.display = 'none';
-                        // Load mentors if not loaded
-                        if (mentorSelect && mentorSelect.options.length <= 1) {
-                            loadMentors();
+                if (mentorModeSelect) {
+                    mentorModeSelect.addEventListener('change', function () {
+                        if (this.value === 'pilih') {
+                            if (selectMentorForm) selectMentorForm.style.display = 'block';
+                            if (addMentorForm) addMentorForm.style.display = 'none';
+                            // Load mentors if not loaded
+                            if (mentorSelect && mentorSelect.options.length <= 1) {
+                                loadMentors();
+                            }
+                        } else if (this.value === 'tambah') {
+                            if (selectMentorForm) selectMentorForm.style.display = 'none';
+                            if (addMentorForm) addMentorForm.style.display = 'block';
+                            resetMentorFields();
+                        } else {
+                            if (selectMentorForm) selectMentorForm.style.display = 'none';
+                            if (addMentorForm) addMentorForm.style.display = 'none';
                         }
-                    } else if (this.value === 'tambah') {
-                        selectMentorForm.style.display = 'none';
-                        addMentorForm.style.display = 'block';
-                        resetMentorFields();
-                    } else {
-                        selectMentorForm.style.display = 'none';
-                        addMentorForm.style.display = 'none';
-                    }
-                });
+                    });
+                }
 
                 if (mentorSelect) {
                     mentorSelect.addEventListener('change', function () {
@@ -2292,47 +2640,55 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                     const provinsiId = this.value;
 
                     if (!provinsiId) {
-                        kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>';
-                        kabupatenSelect.disabled = true;
+                        if (kabupatenSelect) {
+                            kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota (Pilih Provinsi Dahulu)</option>';
+                            kabupatenSelect.disabled = true;
+                        }
                         return;
                     }
 
-                    kabupatenSelect.innerHTML = '<option value="">Memuat kabupaten/kota...</option>';
-                    kabupatenSelect.disabled = true;
+                    if (kabupatenSelect) {
+                        kabupatenSelect.innerHTML = '<option value="">Memuat kabupaten/kota...</option>';
+                        kabupatenSelect.disabled = true;
+                    }
 
                     try {
                         // Filter kabupaten dari data yang sudah ada (dikirim dari controller)
                         const allKabupaten = @json($kabupatenList);
                         const filteredKabupaten = allKabupaten.filter(kab => kab.province_id == provinsiId);
 
-                        kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-                        kabupatenSelect.disabled = false;
+                        if (kabupatenSelect) {
+                            kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+                            kabupatenSelect.disabled = false;
 
-                        if (filteredKabupaten.length > 0) {
-                            filteredKabupaten.forEach(kabupaten => {
-                                const option = document.createElement('option');
-                                option.value = kabupaten.id;
-                                option.textContent = kabupaten.name;
-                                kabupatenSelect.appendChild(option);
-                            });
+                            if (filteredKabupaten.length > 0) {
+                                filteredKabupaten.forEach(kabupaten => {
+                                    const option = document.createElement('option');
+                                    option.value = kabupaten.id;
+                                    option.textContent = kabupaten.name;
+                                    kabupatenSelect.appendChild(option);
+                                });
 
-                            // Set nilai untuk edit mode
-                            const currentKabupatenId = @json($isEdit && $kepegawaianData ? $kepegawaianData->id_kabupaten_kota : null);
-                            if (currentKabupatenId) {
-                                kabupatenSelect.value = currentKabupatenId;
+                                // Set nilai untuk edit mode
+                                const currentKabupatenId = @json($isEdit && $kepegawaianData ? $kepegawaianData->id_kabupaten_kota : null);
+                                if (currentKabupatenId) {
+                                    kabupatenSelect.value = currentKabupatenId;
+                                }
+
+                                // Set old value jika ada dari validation
+                                if (window.oldValues && window.oldValues.id_kabupaten_kota) {
+                                    kabupatenSelect.value = window.oldValues.id_kabupaten_kota;
+                                }
+                            } else {
+                                kabupatenSelect.innerHTML = '<option value="">Tidak ada data kabupaten</option>';
                             }
-
-                            // Set old value jika ada dari validation
-                            if (window.oldValues && window.oldValues.id_kabupaten_kota) {
-                                kabupatenSelect.value = window.oldValues.id_kabupaten_kota;
-                            }
-                        } else {
-                            kabupatenSelect.innerHTML = '<option value="">Tidak ada data kabupaten</option>';
                         }
                     } catch (error) {
                         console.error('Error filtering kabupaten:', error);
-                        kabupatenSelect.innerHTML = '<option value="">Error loading data</option>';
-                        kabupatenSelect.disabled = false;
+                        if (kabupatenSelect) {
+                            kabupatenSelect.innerHTML = '<option value="">Error loading data</option>';
+                            kabupatenSelect.disabled = false;
+                        }
                     }
                 });
 
@@ -2364,298 +2720,333 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             // ============================================
             function moveToStep(step) {
                 // Update indicators
-                [step1Indicator, step2Indicator, step3Indicator, step4Indicator].forEach(indicator => {
-                    indicator.classList.remove('active');
-                });
-                document.getElementById(`step${step}`).classList.add('active');
+                if (step1Indicator && step2Indicator && step3Indicator && step4Indicator) {
+                    [step1Indicator, step2Indicator, step3Indicator, step4Indicator].forEach(indicator => {
+                        indicator.classList.remove('active');
+                    });
+                    const currentStepIndicator = document.getElementById(`step${step}`);
+                    if (currentStepIndicator) currentStepIndicator.classList.add('active');
+                }
 
                 // Update content
-                [step1Content, step2Content, step3Content, step4Content].forEach(content => {
-                    content.classList.remove('active');
-                });
-                document.getElementById(`step${step}-content`).classList.add('active');
+                if (step1Content && step2Content && step3Content && step4Content) {
+                    [step1Content, step2Content, step3Content, step4Content].forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    const currentStepContent = document.getElementById(`step${step}-content`);
+                    if (currentStepContent) currentStepContent.classList.add('active');
+                }
 
                 // Scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
             // Navigation event listeners
-            nextToStep2Btn.addEventListener('click', () => {
-                if (angkatanSelect.value) {
-                    // Update current angkatan name
-                    const selectedOption = angkatanSelect.options[angkatanSelect.selectedIndex];
-                    if (selectedOption) {
-                        const nama = selectedOption.dataset.nama || '';
-                        const tahun = selectedOption.dataset.tahun || '';
-                        currentAngkatanName.textContent = `${nama} (${tahun})`;
-                        currentAngkatanName2.textContent = `${nama} (${tahun})`;
-                        currentAngkatanName3.textContent = `${nama} (${tahun})`;
+            if (nextToStep2Btn) {
+                nextToStep2Btn.addEventListener('click', () => {
+                    if (angkatanSelect && angkatanSelect.value) {
+                        // Update current angkatan name
+                        const selectedOption = angkatanSelect.options[angkatanSelect.selectedIndex];
+                        if (selectedOption) {
+                            const nama = selectedOption.dataset.nama || '';
+                            const tahun = selectedOption.dataset.tahun || '';
+                            if (currentAngkatanName) currentAngkatanName.textContent = `${nama} (${tahun})`;
+                            if (currentAngkatanName2) currentAngkatanName2.textContent = `${nama} (${tahun})`;
+                            if (currentAngkatanName3) currentAngkatanName3.textContent = `${nama} (${tahun})`;
+                        }
+                        moveToStep(2);
                     }
-                    moveToStep(2);
-                }
-            });
+                });
+            }
 
-            nextToStep3Btn.addEventListener('click', () => {
-                // Untuk step 2, hanya validasi NIP saja
-                const nipField = document.querySelector('input[name="nip_nrp"]');
-                if (nipField && !nipField.value.trim()) {
-                    nipField.classList.add('error');
-                    nipField.focus();
-                    nipField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (nextToStep3Btn) {
+                nextToStep3Btn.addEventListener('click', () => {
+                    // Untuk step 2, hanya validasi NIP saja
+                    const nipField = document.querySelector('input[name="nip_nrp"]');
+                    if (nipField && !nipField.value.trim()) {
+                        nipField.classList.add('error');
+                        nipField.focus();
+                        nipField.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-                    // Show notification
-                    const notification = document.createElement('div');
-                    notification.className = 'notification error';
-                    notification.innerHTML = `
-                        <div class="notification-content">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>NIP/NRP wajib diisi</span>
-                        </div>
-                    `;
-                    document.body.appendChild(notification);
+                        // Show notification
+                        const notification = document.createElement('div');
+                        notification.className = 'notification error';
+                        notification.innerHTML = `
+                            <div class="notification-content">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>NIP/NRP wajib diisi</span>
+                            </div>
+                        `;
+                        document.body.appendChild(notification);
 
-                    setTimeout(() => {
-                        notification.classList.add('show');
-                    }, 10);
-
-                    setTimeout(() => {
-                        notification.classList.remove('show');
                         setTimeout(() => {
-                            notification.remove();
-                        }, 300);
-                    }, 3000);
-                    return;
-                }
+                            notification.classList.add('show');
+                        }, 10);
 
-                moveToStep(3);
-            });
+                        setTimeout(() => {
+                            notification.classList.remove('show');
+                            setTimeout(() => {
+                                notification.remove();
+                            }, 300);
+                        }, 3000);
+                        return;
+                    }
 
-            nextToStep4Btn.addEventListener('click', () => {
-                moveToStep(4);
-            });
+                    moveToStep(3);
+                });
+            }
 
-            backToStep1Btn.addEventListener('click', () => moveToStep(1));
-            backToStep2Btn.addEventListener('click', () => moveToStep(2));
-            backToStep3Btn.addEventListener('click', () => moveToStep(3));
+            if (nextToStep4Btn) {
+                nextToStep4Btn.addEventListener('click', () => {
+                    moveToStep(4);
+                });
+            }
+
+            if (backToStep1Btn) backToStep1Btn.addEventListener('click', () => moveToStep(1));
+            if (backToStep2Btn) backToStep2Btn.addEventListener('click', () => moveToStep(2));
+            if (backToStep3Btn) backToStep3Btn.addEventListener('click', () => moveToStep(3));
 
             // ============================================
-            // FORM SUBMISSION HANDLER
+            // FORM SUBMISSION HANDLER (MODIFIED FOR CROPPER)
             // ============================================
-            document.getElementById('pesertaForm').addEventListener('submit', async function (e) {
-                e.preventDefault();
+            const form = document.getElementById('pesertaForm');
+            if (form) {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
 
-                const submitBtn = document.getElementById('submit-form');
-                const originalText = submitBtn.innerHTML;
+                    const submitBtn = document.getElementById('submit-form');
+                    const originalText = submitBtn.innerHTML;
 
-                // Show loading state
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (isEdit ? 'Mengupdate...' : 'Menyimpan...');
-                submitBtn.disabled = true;
+                    // Show loading state
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (isEdit ? 'Mengupdate...' : 'Menyimpan...');
+                    submitBtn.disabled = true;
 
-                // Validasi minimal: NIP dan Angkatan
-                const nipField = document.querySelector('input[name="nip_nrp"]');
-                const angkatanField = document.querySelector('select[name="id_angkatan"]');
+                    // Validasi minimal: NIP dan Angkatan
+                    const nipField = document.querySelector('input[name="nip_nrp"]');
+                    const angkatanField = document.querySelector('select[name="id_angkatan"]');
 
-                let hasError = false;
+                    let hasError = false;
 
-                // Clear previous client-side errors
-                document.querySelectorAll('.client-error').forEach(el => el.remove());
+                    // Clear previous client-side errors
+                    document.querySelectorAll('.client-error').forEach(el => el.remove());
 
-                // Validasi NIP
-                if (!nipField.value.trim()) {
-                    hasError = true;
-                    nipField.classList.add('error');
+                    // Validasi NIP
+                    if (nipField && !nipField.value.trim()) {
+                        hasError = true;
+                        nipField.classList.add('error');
 
-                    const formGroup = nipField.closest('.form-group');
-                    if (formGroup) {
-                        const errorMsg = document.createElement('small');
-                        errorMsg.className = 'text-danger client-error';
-                        errorMsg.textContent = 'NIP/NRP wajib diisi';
-                        formGroup.appendChild(errorMsg);
-                    }
-                }
-
-                // Validasi Angkatan
-                if (!angkatanField.value) {
-                    hasError = true;
-                    angkatanField.classList.add('error');
-
-                    const formGroup = angkatanField.closest('.form-group');
-                    if (formGroup) {
-                        const errorMsg = document.createElement('small');
-                        errorMsg.className = 'text-danger client-error';
-                        errorMsg.textContent = 'Angkatan wajib dipilih';
-                        formGroup.appendChild(errorMsg);
-                    }
-                }
-
-                if (hasError) {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-
-                    // Scroll ke error pertama
-                    const firstError = document.querySelector('.error');
-                    if (firstError) {
-                        // Determine which step has the error
-                        if (firstError.closest('#step1-content')) {
-                            moveToStep(1);
-                        } else if (firstError.closest('#step2-content')) {
-                            moveToStep(2);
+                        const formGroup = nipField.closest('.form-group');
+                        if (formGroup) {
+                            const errorMsg = document.createElement('small');
+                            errorMsg.className = 'text-danger client-error';
+                            errorMsg.textContent = 'NIP/NRP wajib diisi';
+                            formGroup.appendChild(errorMsg);
                         }
-
-                        firstError.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
                     }
 
-                    return false;
-                }
+                    // Validasi Angkatan
+                    if (angkatanField && !angkatanField.value) {
+                        hasError = true;
+                        angkatanField.classList.add('error');
 
-                // Collect form data
-                const formData = new FormData(this);
-
-                // Add CSRF token
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                try {
-                    const response = await fetch(this.action, {
-                        method: this.method,
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
+                        const formGroup = angkatanField.closest('.form-group');
+                        if (formGroup) {
+                            const errorMsg = document.createElement('small');
+                            errorMsg.className = 'text-danger client-error';
+                            errorMsg.textContent = 'Angkatan wajib dipilih';
+                            formGroup.appendChild(errorMsg);
                         }
-                    });
+                    }
 
-                    const data = await response.json();
-
-                    if (data.success) {
-                        showSuccessMessage(isEdit ? 'Peserta berhasil diperbarui!' : 'Peserta berhasil ditambahkan!');
-
-                        // Redirect sesuai jenis
-                        setTimeout(() => {
-                            const jenis = "{{ $jenis }}";
-                            const redirectUrl = data.redirect_url || `/peserta/${jenis}`;
-                            window.location.href = redirectUrl;
-                        }, 1500);
-
-                    } else {
+                    if (hasError) {
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
 
-                        // Clear previous errors
-                        document.querySelectorAll('.server-error').forEach(el => el.remove());
-                        document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+                        // Scroll ke error pertama
+                        const firstError = document.querySelector('.error');
+                        if (firstError) {
+                            // Determine which step has the error
+                            if (firstError.closest('#step1-content')) {
+                                moveToStep(1);
+                            } else if (firstError.closest('#step2-content')) {
+                                moveToStep(2);
+                            }
 
-                        // Clear file label error styles
-                        document.querySelectorAll('.form-file-label').forEach(label => {
-                            label.style.borderColor = '';
-                            label.style.background = '';
+                            firstError.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                        }
+
+                        return false;
+                    }
+
+                    // Handle cropped image jika ada
+                    const fileInput = document.getElementById('file_pas_foto');
+                    if (cropperFunctions && cropperFunctions.hasCroppedImage()) {
+                        const croppedBlob = cropperFunctions.getCroppedBlob();
+
+                        // Create a new File from blob
+                        const croppedFile = new File([croppedBlob], 'pasfoto_cropped.jpg', {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
                         });
 
-                        // Display new errors
-                        if (data.errors) {
+                        // Create a new DataTransfer object
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(croppedFile);
 
-                            if (data.errors.id_angkatan) {
-                                moveToStep(1);
+                        // Replace the file input files
+                        if (fileInput) {
+                            fileInput.files = dataTransfer.files;
+                        }
+                    }
 
-                                // Tampilkan error di field angkatan
-                                const angkatanField = document.querySelector('[name="id_angkatan"]');
-                                if (angkatanField) {
-                                    angkatanField.classList.add('error');
+                    // Collect form data
+                    const formData = new FormData(this);
 
-                                    const formGroup = angkatanField.closest('.form-group');
-                                    if (formGroup) {
-                                        const errorMsg = document.createElement('small');
-                                        errorMsg.className = 'text-danger server-error';
-                                        errorMsg.textContent = data.errors.id_angkatan[0];
-                                        formGroup.appendChild(errorMsg);
+                    // Add CSRF token
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                    if (!csrfToken) return;
+
+                    try {
+                        const response = await fetch(this.action, {
+                            method: this.method,
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showSuccessMessage(isEdit ? 'Peserta berhasil diperbarui!' : 'Peserta berhasil ditambahkan!');
+
+                            // Redirect sesuai jenis
+                            setTimeout(() => {
+                                const redirectUrl = data.redirect_url || `/peserta/${jenis}`;
+                                window.location.href = redirectUrl;
+                            }, 1500);
+
+                        } else {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+
+                            // Clear previous errors
+                            document.querySelectorAll('.server-error').forEach(el => el.remove());
+                            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+                            // Clear file label error styles
+                            document.querySelectorAll('.form-file-label').forEach(label => {
+                                label.style.borderColor = '';
+                                label.style.background = '';
+                            });
+
+                            // Display new errors
+                            if (data.errors) {
+                                if (data.errors.id_angkatan) {
+                                    moveToStep(1);
+
+                                    // Tampilkan error di field angkatan
+                                    const angkatanField = document.querySelector('[name="id_angkatan"]');
+                                    if (angkatanField) {
+                                        angkatanField.classList.add('error');
+
+                                        const formGroup = angkatanField.closest('.form-group');
+                                        if (formGroup) {
+                                            const errorMsg = document.createElement('small');
+                                            errorMsg.className = 'text-danger server-error';
+                                            errorMsg.textContent = data.errors.id_angkatan[0];
+                                            formGroup.appendChild(errorMsg);
+                                        }
+
+                                        // Scroll ke field angkatan
+                                        setTimeout(() => {
+                                            angkatanField.scrollIntoView({
+                                                behavior: 'smooth',
+                                                block: 'center'
+                                            });
+                                        }, 300);
                                     }
 
-                                    // Scroll ke field angkatan
+                                    // Tampilkan notifikasi error
+                                    showErrorMessage(data.errors.id_angkatan[0]);
+
+                                    return; // Stop di sini, jangan lanjut ke loop biasa
+                                }
+
+                                Object.keys(data.errors).forEach(field => {
+                                    let input = document.querySelector(`[name="${field}"]`);
+
+                                    // Jika tidak ketemu, coba dengan nama field yang berbeda
+                                    if (!input) {
+                                        input = document.querySelector(`[name="${field}[]"]`);
+                                    }
+
+                                    if (!input) {
+                                        input = document.querySelector(`#${field}`);
+                                    }
+
+                                    if (input) {
+                                        input.classList.add('error');
+
+                                        // Untuk file inputs, juga highlight label
+                                        if (input.type === 'file') {
+                                            const fileLabel = input.closest('.form-file')?.querySelector('.form-file-label');
+                                            if (fileLabel) {
+                                                fileLabel.style.borderColor = 'var(--danger-color)';
+                                                fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
+                                            }
+                                        }
+
+                                        // Cari form group
+                                        let formGroup = input.closest('.form-group');
+                                        if (!formGroup) {
+                                            formGroup = input.closest('.checkbox-group') ||
+                                                input.closest('.form-check') ||
+                                                input.parentElement;
+                                        }
+
+                                        if (formGroup) {
+                                            // Hapus error message sebelumnya
+                                            const existingError = formGroup.querySelector('.server-error');
+                                            if (existingError) existingError.remove();
+
+                                            // Tambahkan error message baru
+                                            const errorMsg = document.createElement('small');
+                                            errorMsg.className = 'text-danger server-error';
+                                            errorMsg.textContent = data.errors[field][0];
+                                            formGroup.appendChild(errorMsg);
+                                        }
+                                    }
+                                });
+
+                                // Scroll ke error pertama
+                                const firstError = document.querySelector('.error');
+                                if (firstError) {
                                     setTimeout(() => {
-                                        angkatanField.scrollIntoView({
+                                        firstError.scrollIntoView({
                                             behavior: 'smooth',
                                             block: 'center'
                                         });
                                     }, 300);
                                 }
-
-                                // Tampilkan notifikasi error
-                                showErrorMessage(data.errors.id_angkatan[0]);
-
-                                return; // Stop di sini, jangan lanjut ke loop biasa
+                            } else if (data.message) {
+                                showErrorMessage(data.message);
                             }
-
-                            Object.keys(data.errors).forEach(field => {
-                                let input = document.querySelector(`[name="${field}"]`);
-
-                                // Jika tidak ketemu, coba dengan nama field yang berbeda
-                                if (!input) {
-                                    input = document.querySelector(`[name="${field}[]"]`);
-                                }
-
-                                if (!input) {
-                                    input = document.querySelector(`#${field}`);
-                                }
-
-                                if (input) {
-                                    input.classList.add('error');
-
-                                    // Untuk file inputs, juga highlight label
-                                    if (input.type === 'file') {
-                                        const fileLabel = input.closest('.form-file')?.querySelector('.form-file-label');
-                                        if (fileLabel) {
-                                            fileLabel.style.borderColor = 'var(--danger-color)';
-                                            fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
-                                        }
-                                    }
-
-                                    // Cari form group
-                                    let formGroup = input.closest('.form-group');
-                                    if (!formGroup) {
-                                        formGroup = input.closest('.checkbox-group') ||
-                                            input.closest('.form-check') ||
-                                            input.parentElement;
-                                    }
-
-                                    if (formGroup) {
-                                        // Hapus error message sebelumnya
-                                        const existingError = formGroup.querySelector('.server-error');
-                                        if (existingError) existingError.remove();
-
-                                        // Tambahkan error message baru
-                                        const errorMsg = document.createElement('small');
-                                        errorMsg.className = 'text-danger server-error';
-                                        errorMsg.textContent = data.errors[field][0];
-                                        formGroup.appendChild(errorMsg);
-                                    }
-                                }
-                            });
-
-                            // Scroll ke error pertama
-                            const firstError = document.querySelector('.error');
-                            if (firstError) {
-                                setTimeout(() => {
-                                    firstError.scrollIntoView({
-                                        behavior: 'smooth',
-                                        block: 'center'
-                                    });
-                                }, 300);
-                            }
-                        } else if (data.message) {
-                            showErrorMessage(data.message);
                         }
-                    }
 
-                } catch (error) {
-                    console.error('AJAX Error:', error);
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                    showErrorMessage('Terjadi kesalahan jaringan. Silakan coba lagi.');
-                }
-            });
+                    } catch (error) {
+                        console.error('AJAX Error:', error);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        showErrorMessage('Terjadi kesalahan jaringan. Silakan coba lagi.');
+                    }
+                });
+            }
 
             // ============================================
             // HELPER FUNCTIONS
@@ -2812,7 +3203,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             });
 
             // Initialize angkatan change if value exists
-            if (angkatanSelect.value) {
+            if (angkatanSelect && angkatanSelect.value) {
                 angkatanSelect.dispatchEvent(new Event('change'));
             }
 

@@ -173,7 +173,9 @@ class PendaftaranController extends Controller
                 'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
                 'kondisi_peserta' => 'nullable|string',
                 'file_ktp' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1024',
-                'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
+                // 'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
+                'file_pas_foto_cropped' => 'nullable|string', // Base64 dari hasil crop // File asli sebelum crop
+                'crop_data' => 'nullable|string', // Data crop JSON
                 'asal_instansi' => 'required|string|max:200',
                 'unit_kerja' => 'nullable|string|max:200',
                 'id_provinsi' => 'required',
@@ -239,8 +241,9 @@ class PendaftaranController extends Controller
                 'perokok.in' => 'Status perokok tidak valid',
                 'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
                 'file_ktp.max' => 'Ukuran file KTP maksimal 1MB',
-                'file_pas_foto.mimes' => 'File pas foto harus berformat JPG, JPEG, atau PNG',
-                'file_pas_foto.max' => 'Ukuran file pas foto maksimal 1MB',
+                // 'file_pas_foto.mimes' => 'File pas foto harus berformat JPG, JPEG, atau PNG',
+                // 'file_pas_foto.max' => 'Ukuran file pas foto maksimal 1MB',
+                'file_pas_foto_cropped.max' => 'Ukuran foto hasil crop terlalu besar',
                 'asal_instansi.required' => 'Asal instansi wajib diisi',
                 'id_provinsi.required' => 'Provinsi wajib dipilih',
                 'alamat_kantor.required' => 'Alamat kantor wajib diisi',
@@ -286,6 +289,17 @@ class PendaftaranController extends Controller
                 throw ValidationException::withMessages([
                     'general' => ['Data tidak valid. Peserta tidak terdaftar pada pelatihan ini.']
                 ]);
+            }
+
+            // Validasi ukuran base64 foto hasil crop
+            if ($request->filled('file_pas_foto_cropped')) {
+                // Base64 string biasanya sekitar 30% lebih besar dari file asli
+                $base64Length = strlen($request->file_pas_foto_cropped);
+                if ($base64Length > 2_000_000) { // ~1.5MB file asli
+                    throw ValidationException::withMessages([
+                        'file_pas_foto_cropped' => 'Ukuran foto hasil crop terlalu besar. Maksimal 1.5MB.'
+                    ]);
+                }
             }
 
             // 3. VALIDASI BERDASARKAN JENIS PELATIHAN
@@ -362,6 +376,14 @@ class PendaftaranController extends Controller
                 ];
             }
 
+            // Validasi khusus untuk foto pas (cropped atau original)
+            if (!$peserta->file_pas_foto) {
+                // Jika tidak ada file pas foto di database, wajib upload
+                $additionalRules['file_pas_foto_cropped'] = 'required_without:file_pas_foto_original|string';
+
+                $additionalMessages['file_pas_foto_cropped.required_without'] = 'Foto pas 3×4 wajib diupload (setelah proses crop)';
+            }
+
             if ($kode === 'LATSAR') {
                 $additionalRules = [
                     'nomor_sk_cpns' => 'required|string|max:100',
@@ -387,6 +409,8 @@ class PendaftaranController extends Controller
                 if (!$peserta->file_ktp) {
                     $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
                 }
+
+                
 
 
                 $additionalMessages = [
@@ -613,7 +637,74 @@ class PendaftaranController extends Controller
 
             $files = [];
 
+            // ============================================
+            // PROSES KHUSUS UNTUK FOTO PAS CROPPED
+            // ============================================
+            if ($request->filled('file_pas_foto_cropped')) {
+                try {
+                    $base64Image = $request->file_pas_foto_cropped;
+
+                    // Validasi base64
+                    if (!preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $base64Image)) {
+                        throw ValidationException::withMessages([
+                            'file_pas_foto_cropped' => 'Format gambar tidak didukung. Gunakan JPG, JPEG, atau PNG.'
+                        ]);
+                    }
+
+                    // Decode base64
+                    $imageData = base64_decode(preg_replace('/^data:image\/\w+;base64,/', '', $base64Image));
+
+                    if ($imageData === false) {
+                        throw ValidationException::withMessages([
+                            'file_pas_foto_cropped' => 'Gagal mendecode gambar base64.'
+                        ]);
+                    }
+
+                    // Validasi ukuran (base64 biasanya 30% lebih besar)
+                    if (strlen($imageData) > 1_500_000) { // ~1.1MB file asli
+                        throw ValidationException::withMessages([
+                            'file_pas_foto_cropped' => 'Ukuran foto terlalu besar. Maksimal 1.1MB setelah crop.'
+                        ]);
+                    }
+
+                    // Buat folder jika belum ada
+                    if (!$folderPath) {
+                        $folderPath = "Berkas/{$tahun}/default/{$request->nip_nrp}";
+                    }
+
+                    // Buat nama file
+                    $fileName = 'pas_foto_3x4_' . time() . '.jpg';
+                    $drivePath = "{$folderPath}/{$fileName}";
+
+                    // Hapus file lama jika ada
+                    $this->deleteOldFile($peserta, $pendaftaran, $kepegawaian, 'file_pas_foto');
+
+                    // Upload ke Google Drive
+                    Storage::disk('google')->put($drivePath, $imageData);
+
+                    $files['file_pas_foto'] = $drivePath;
+
+                    // Log::info('Foto crop berhasil diupload ke: ' . $drivePath);
+                    // Log::info('Ukuran file: ' . strlen($imageData) . ' bytes');
+                } catch (\Exception $e) {
+                    // Log::error('Error processing cropped photo: ' . $e->getMessage());
+                    throw ValidationException::withMessages([
+                        'file_pas_foto_cropped' => 'Gagal memproses foto: ' . $e->getMessage()
+                    ]);
+                }
+            }
+            // Jika tidak ada foto baru diupload, tapi wajib ada foto untuk LATSAR
+            elseif ($kode === 'LATSAR' && !$peserta->file_pas_foto) {
+                throw ValidationException::withMessages([
+                    'file_pas_foto_cropped' => 'Foto pas 3×4 wajib diupload untuk pelatihan LATSAR'
+                ]);
+            }
+
             foreach ($fileFields as $field) {
+                if ($field === 'file_pas_foto') {
+                    continue; // Sudah diproses di atas
+                }
+
                 if ($request->hasFile($field)) {
                     try {
 

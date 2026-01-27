@@ -410,7 +410,7 @@
 
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label required">Pendidikan Terakhir</label>
+        <label class="form-label required">Pendidikan Terakhir (Sesuai SK CPNS)</label>
         <select name="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') error @enderror" required>
             <option value="">Pilih</option>
             <option value="SMU" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'SMU' ? 'selected' : '' }}>SMU</option>
@@ -776,7 +776,7 @@
 </div>
 
 <!-- Pas Foto peserta -->
-<div class="form-group">
+{{-- <div class="form-group">
     <label class="form-label required">Unggah Pas Foto peserta (untuk digunakan di name tag peserta)</label>
     <div class="form-file">
         <input type="file" name="file_pas_foto" class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
@@ -799,6 +799,157 @@
         </div>
     </div>
     @error('file_pas_foto')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div> --}}
+
+<!-- Pas Foto peserta dengan cropping (HANYA CROP) -->
+<div class="form-group">
+    <label class="form-label required">Unggah Pas Foto peserta (3×4)</label>
+
+    @if(isset($peserta['file_pas_foto']) && $peserta['file_pas_foto'])
+        <!-- Tampilkan foto yang sudah ada -->
+        <div id="existing-photo-container" style="margin: 15px 0;">
+            <p><strong>Foto yang sudah diupload:</strong></p>
+            <div style="width: 150px; height: 200px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 10px;">
+                <img src="{{ Storage::disk('google')->url($peserta['file_pas_foto']) }}"
+                    style="width: 100%; height: 100%; object-fit: cover;"
+                    onerror="this.src='https://via.placeholder.com/150x200?text=Foto+Tidak+Ditemukan'">
+            </div>
+            <button type="button" id="btn-change-photo-existing" class="btn btn-secondary btn-sm">
+                <i class="fas fa-exchange-alt"></i> Ganti Foto
+            </button>
+        </div>
+
+        <!-- Container untuk cropping (tersembunyi awalnya) -->
+        <div id="crop-container" style="display: none;">
+            <div class="crop-wrapper" style="max-width: 600px; margin: 15px auto;">
+                <img id="crop-image" style="max-width: 100%;">
+            </div>
+
+            <div class="crop-controls" style="margin-top: 15px; text-align: center;">
+                <button type="button" id="crop-zoom-in" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button type="button" id="crop-zoom-out" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button type="button" id="crop-rotate-left" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button type="button" id="crop-rotate-right" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button type="button" id="crop-reset" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-sync"></i> Reset
+                </button>
+                <button type="button" id="crop-confirm" class="btn btn-sm btn-success">
+                    <i class="fas fa-check"></i> Potong Foto
+                </button>
+                <button type="button" id="crop-cancel" class="btn btn-sm btn-danger">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview hasil crop -->
+        <div id="crop-preview-container" style="margin: 15px 0; display: none;">
+            <p><strong>Preview Foto 3×4:</strong></p>
+            <div id="crop-preview" style="width: 150px; height: 200px; border: 1px solid #ddd; overflow: hidden;">
+                <img id="cropped-preview" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <button type="button" id="change-photo" class="btn btn-sm btn-secondary" style="margin-top: 10px;">
+                <i class="fas fa-exchange-alt"></i> Ganti Foto
+            </button>
+        </div>
+
+        <!-- Input hidden untuk data crop -->
+        <input type="hidden" name="file_pas_foto_cropped" id="file_pas_foto_cropped">
+        <input type="hidden" name="crop_data" id="crop_data">
+
+        <!-- UI upload awal (tersembunyi) -->
+        <div class="form-file" id="upload-container" style="display: none;">
+            <input type="file" name="file_pas_foto" id="file_pas_foto"
+                class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
+            <label class="form-file-label" for="file_pas_foto">
+                <i class="fas fa-cloud-upload-alt"></i><br>
+                Klik untuk mengunggah file JPG/PNG (maks. 1MB)<br>
+                <small style="font-size: 0.85em; color: #666;">Foto akan dipotong ke ukuran 3×4</small>
+            </label>
+            <div class="form-file-name" id="file-name-display">
+                <span class="no-file">Belum ada file dipilih</span>
+            </div>
+        </div>
+
+    @else
+        <!-- Tampilkan upload container jika belum ada foto -->
+
+        <!-- Container untuk cropping -->
+        <div id="crop-container" style="display: none;">
+            <div class="crop-wrapper" style="max-width: 600px; margin: 15px auto;">
+                <img id="crop-image" style="max-width: 100%;">
+            </div>
+
+            <div class="crop-controls" style="margin-top: 15px; text-align: center;">
+                <button type="button" id="crop-zoom-in" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button type="button" id="crop-zoom-out" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button type="button" id="crop-rotate-left" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button type="button" id="crop-rotate-right" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button type="button" id="crop-reset" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-sync"></i> Reset
+                </button>
+                <button type="button" id="crop-confirm" class="btn btn-sm btn-success">
+                    <i class="fas fa-check"></i> Potong Foto
+                </button>
+                <button type="button" id="crop-cancel" class="btn btn-sm btn-danger">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview hasil crop -->
+        <div id="crop-preview-container" style="margin: 15px 0; display: none;">
+            <p><strong>Preview Foto 3×4:</strong></p>
+            <div id="crop-preview" style="width: 150px; height: 200px; border: 1px solid #ddd; overflow: hidden;">
+                <img id="cropped-preview" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <button type="button" id="change-photo" class="btn btn-sm btn-secondary" style="margin-top: 10px;">
+                <i class="fas fa-exchange-alt"></i> Ganti Foto
+            </button>
+        </div>
+
+        <!-- Input hidden untuk data crop (HANYA INI YANG DIBUTUHKAN) -->
+        <input type="hidden" name="file_pas_foto_cropped" id="file_pas_foto_cropped">
+        <input type="hidden" name="crop_data" id="crop_data">
+
+        <!-- UI upload awal -->
+        <div class="form-file" id="upload-container">
+            <input type="file" name="file_pas_foto" id="file_pas_foto"
+                class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
+            <label class="form-file-label" for="file_pas_foto">
+                <i class="fas fa-cloud-upload-alt"></i><br>
+                Klik untuk mengunggah file JPG/PNG (maks. 1MB)<br>
+                <small style="font-size: 0.85em; color: #666;">Foto akan dipotong ke ukuran 3×4</small>
+            </label>
+            <div class="form-file-name" id="file-name-display">
+                <span class="no-file">Belum ada file dipilih</span>
+            </div>
+        </div>
+
+    @endif
+
+    @error('file_pas_foto')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+    @error('file_pas_foto_cropped')
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>
