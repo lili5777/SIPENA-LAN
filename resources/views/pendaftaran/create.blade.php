@@ -8,7 +8,8 @@
         <div class="container">
             <div class="form-hero-content animate">
                 <h1 class="form-hero-title">Form Pembaruan Data Peserta Pelatihan</h1>
-                <p class="form-hero-text">Perbarui data diri Anda untuk mengikuti program pelatihan profesional. Isi formulir dengan data yang lengkap dan valid.</p>
+                <p class="form-hero-text">Perbarui data diri Anda untuk mengikuti program pelatihan profesional. Isi
+                    formulir dengan data yang lengkap dan valid.</p>
                 <div class="progress-indicator">
                     <div class="progress-step active" id="step1">
                         <div class="step-number">1</div>
@@ -31,7 +32,8 @@
     <section class="form-section" id="form-section">
         <div class="container">
             <div class="form-wrapper animate">
-                <form action="{{ route('pendaftaran.updateData') }}" method="POST" enctype="multipart/form-data" id="pendaftaranForm">
+                <form action="{{ route('pendaftaran.updateData') }}" method="POST" enctype="multipart/form-data"
+                    id="pendaftaranForm">
                     @csrf
 
                     <!-- Step 1: Pilih Pelatihan -->
@@ -43,33 +45,36 @@
 
                         <div class="training-options">
                             @foreach($jenisPelatihan as $pelatihan)
-                            <div class="training-card" data-id="{{ $pelatihan->id }}" data-kode="{{ $pelatihan->kode_pelatihan }}">
-                                <div class="training-icon">
-                                    @if($pelatihan->kode_pelatihan == 'PKN_TK_II')
-                                        <i class="fas fa-user-tie"></i>
-                                    @elseif($pelatihan->kode_pelatihan == 'LATSAR')
-                                        <i class="fas fa-user-graduate"></i>
-                                    @elseif($pelatihan->kode_pelatihan == 'PKA')
-                                        <i class="fas fa-chalkboard-teacher"></i>
-                                    @elseif($pelatihan->kode_pelatihan == 'PKP')
-                                        <i class="fas fa-user-shield"></i>
-                                    @endif
+                                <div class="training-card" data-id="{{ $pelatihan->id }}"
+                                    data-kode="{{ $pelatihan->kode_pelatihan }}">
+                                    <div class="training-icon">
+                                        @if($pelatihan->kode_pelatihan == 'PKN_TK_II')
+                                            <i class="fas fa-user-tie"></i>
+                                        @elseif($pelatihan->kode_pelatihan == 'LATSAR')
+                                            <i class="fas fa-user-graduate"></i>
+                                        @elseif($pelatihan->kode_pelatihan == 'PKA')
+                                            <i class="fas fa-chalkboard-teacher"></i>
+                                        @elseif($pelatihan->kode_pelatihan == 'PKP')
+                                            <i class="fas fa-user-shield"></i>
+                                        @endif
+                                    </div>
+                                    <h3 class="training-name">{{ $pelatihan->nama_pelatihan }}</h3>
+                                    <p class="training-code">{{ $pelatihan->kode_pelatihan }}</p>
+                                    <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
                                 </div>
-                                <h3 class="training-name">{{ $pelatihan->nama_pelatihan }}</h3>
-                                <p class="training-code">{{ $pelatihan->kode_pelatihan }}</p>
-                                <button type="button" class="training-select-btn">Pilih Pelatihan Ini</button>
-                            </div>
                             @endforeach
                         </div>
 
-                        <input type="hidden" name="id_jenis_pelatihan" id="id_jenis_pelatihan" value="{{ old('id_jenis_pelatihan', '') }}">
+                        <input type="hidden" name="id_jenis_pelatihan" id="id_jenis_pelatihan"
+                            value="{{ old('id_jenis_pelatihan', '') }}">
                     </div>
 
                     <!-- Step 2: Verifikasi NIP/NRP -->
                     <div class="form-step" id="step2-content">
                         <div class="step-header">
                             <h2 class="step-title">Verifikasi NIP/NRP</h2>
-                            <p class="step-description">Masukkan NIP/NRP Anda untuk verifikasi dan akses form pembaruan data</p>
+                            <p class="step-description">Masukkan NIP/NRP Anda untuk verifikasi dan akses form pembaruan data
+                            </p>
                             <div class="selected-training">
                                 <i class="fas fa-check-circle"></i>
                                 <span id="selected-training-name"></span>
@@ -79,9 +84,9 @@
                         <div class="angkatan-container">
                             <div class="form-group">
                                 <label for="nip_nrp" class="form-label required">NIP/NRP </label>
-                                <input type="text" name="nip_nrp" id="nip_nrp" 
-                                    class="form-input @error('nip_nrp') error @enderror"
-                                    placeholder="Masukkan NIP/NRP Anda" required>
+                                <input type="text" name="nip_nrp" id="nip_nrp"
+                                    class="form-input @error('nip_nrp') error @enderror" placeholder="Masukkan NIP/NRP Anda"
+                                    required>
                                 @error('nip_nrp')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -100,14 +105,14 @@
                                         <div class="info-item" id="verification-success" style="display: none;">
                                             <span class="info-label">Status:</span>
                                             <span class="info-value text-success">
-                                                <i class="fas fa-check-circle"></i> 
+                                                <i class="fas fa-check-circle"></i>
                                                 <span id="success-message"></span>
                                             </span>
                                         </div>
                                         <div class="info-item" id="verification-error" style="display: none;">
                                             {{-- <span class="info-label">Status:</span> --}}
                                             <span class="info-value text-danger">
-                                                <i class="fas fa-exclamation-circle"></i> 
+                                                <i class="fas fa-exclamation-circle"></i>
                                                 <span id="error-message"></span>
                                             </span>
                                         </div>
@@ -122,6 +127,7 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
 
                         <div class="step-navigation">
@@ -161,708 +167,852 @@
                             <button type="button" class="btn btn-secondary" id="back-to-step2">
                                 <i class="fas fa-arrow-left"></i> Kembali
                             </button>
-                            <button type="submit" class="btn btn-success" id="submit-form">
-                                <i class="fas fa-save"></i> Simpan Perubahan
-                            </button>
+                            <button type="submit" class="btn btn-success" id="submit-form"data-submitting-text="<i class='fas fa-spinner fa-spin'></i> Menyimpan...">
+                                    <i class="fas fa-save"></i> Simpan Perubahan
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    
-                </form>
+
+                    </form>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 @endsection
 
 @push('styles')
-    <style>
-        /* CSS UTAMA YANG SUDAH ADA */
-        :root {
-            --primary-color: #1a3a6c;
-            --secondary-color: #2c5282;
-            --accent-color: #4299e1;
-            --success-color: #48bb78;
-            --warning-color: #ed8936;
-            --danger-color: #f56565;
-            --light-color: #f7fafc;
-            --dark-color: #2d3748;
-            --gray-color: #718096;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        /* Hero Section */
-        .form-hero {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 60px 0;
-            margin-bottom: 40px;
-        }
-
-        .form-hero-content {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .form-hero-title {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .form-hero-text {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-bottom: 40px;
-            line-height: 1.6;
-        }
-
-        .progress-indicator {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 40px;
-        }
-
-        .progress-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            opacity: 0.5;
-            transition: var(--transition);
-        }
-
-        .progress-step.active {
-            opacity: 1;
-        }
-
-        .step-number {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            border: 2px solid transparent;
-        }
-
-        .progress-step.active .step-number {
-            background-color: var(--accent-color);
-            border-color: white;
-        }
-
-        .step-label {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        /* Form Section */
-        .form-section {
-            padding: 40px 0 80px 0;
-        }
-
-        .form-wrapper {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .form-step {
-            padding: 40px;
-            display: none;
-        }
-
-        .form-step.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+        <style>
+            /* CSS UTAMA YANG SUDAH ADA */
+            :root {
+                --primary-color: #1a3a6c;
+                --secondary-color: #2c5282;
+                --accent-color: #4299e1;
+                --success-color: #48bb78;
+                --warning-color: #ed8936;
+                --danger-color: #f56565;
+                --light-color: #f7fafc;
+                --dark-color: #2d3748;
+                --gray-color: #718096;
+                --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                --transition: all 0.3s ease;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
 
-        .step-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .step-title {
-            font-size: 1.8rem;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .step-description {
-            color: var(--gray-color);
-            margin-bottom: 20px;
-        }
-
-        /* Training Cards */
-        .training-options {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .training-card {
-            background: var(--light-color);
-            border-radius: 10px;
-            padding: 25px;
-            text-align: center;
-            transition: var(--transition);
-            border: 2px solid transparent;
-            cursor: pointer;
-        }
-
-        .training-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border-color: var(--accent-color);
-        }
-
-        .training-card.selected {
-            border-color: var(--success-color);
-            background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(66, 153, 225, 0.1));
-        }
-
-        .training-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        .training-name {
-            font-size: 1.2rem;
-            color: var(--dark-color);
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .training-code {
-            font-size: 0.9rem;
-            color: var(--gray-color);
-            margin-bottom: 20px;
-        }
-
-        .training-select-btn {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            width: 100%;
-        }
-
-        .training-select-btn:hover {
-            background: var(--secondary-color);
-        }
-
-        .selected-training {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(72, 187, 120, 0.1);
-            color: var(--success-color);
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin-top: 15px;
-            font-weight: 500;
-        }
-
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark-color);
-        }
-
-        .form-label.required::after {
-            content: " *";
-            color: var(--danger-color);
-        }
-
-        .form-select,
-        .form-input,
-        .form-textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: var(--transition);
-            background: white;
-        }
-
-        .form-select.error,
-        .form-input.error,
-        .form-textarea.error {
-            border-color: var(--danger-color) !important;
-            box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1) !important;
-        }
-
-        .form-select:focus,
-        .form-input:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-        }
-
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-hint {
-            font-size: 0.85rem;
-            color: var(--gray-color);
-            margin-top: 5px;
-        }
-
-        .form-file {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .form-file-input {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .form-file-label {
-            display: block;
-            padding: 15px;
-            background: var(--light-color);
-            border: 2px dashed #cbd5e0;
-            border-radius: 6px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .form-file-label:hover {
-            border-color: var(--accent-color);
-            background: rgba(66, 153, 225, 0.05);
-        }
-
-        .form-file-name {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: var(--gray-color);
-        }
-
-        /* Error Styling */
-        .text-danger {
-            color: var(--danger-color) !important;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            display: block;
-        }
-
-        /* Angkatan Info */
-        .angkatan-info {
-            margin-top: 30px;
-        }
-
-        .info-card {
-            background: linear-gradient(135deg, #f7fafc, #edf2f7);
-            border-radius: 10px;
-            padding: 20px;
-            border-left: 4px solid var(--accent-color);
-        }
-
-        .info-card h4 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .info-details {
-            display: grid;
-            gap: 10px;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .info-label {
-            font-weight: 500;
-            color: var(--dark-color);
-        }
-
-        .info-value {
-            color: var(--gray-color);
-        }
-
-        .text-success {
-            color: var(--success-color) !important;
-        }
-
-        .text-danger {
-            color: var(--danger-color) !important;
-        }
-
-        /* Selected Info */
-        .selected-info {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .selected-info .info-badge {
-            background: var(--primary-color);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: white;
-        }
-
-        /* Dynamic Form Container */
-        .dynamic-form-container {
-            margin-top: 30px;
-        }
-
-        .form-section-header {
-            font-size: 1.4rem;
-            color: var(--primary-color);
-            margin: 40px 0 20px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e2e8f0;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-section-header:first-child {
-            margin-top: 0;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
-
-        .checkbox-group label {
-            margin: 0;
-            font-weight: normal;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--accent-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary:disabled {
-            background: #cbd5e0;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: #e2e8f0;
-            color: var(--dark-color);
-        }
-
-        .btn-secondary:hover {
-            background: #cbd5e0;
-        }
-
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #38a169;
-            transform: translateY(-2px);
-        }
-
-        .step-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e2e8f0;
-        }
-
-        /* Alert Styles */
-        .alert {
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            border-left: 4px solid;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .alert-info {
-            background-color: rgba(66, 153, 225, 0.1);
-            border-color: var(--accent-color);
-            color: var(--secondary-color);
-        }
-
-        .alert i {
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        /* Verification Result */
-        .verification-result {
-            margin-top: 20px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
+            /* Hero Section */
             .form-hero {
-                padding: 40px 0;
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                color: white;
+                padding: 60px 0;
+                margin-bottom: 40px;
+            }
+
+            .form-hero-content {
+                text-align: center;
+                max-width: 800px;
+                margin: 0 auto;
             }
 
             .form-hero-title {
-                font-size: 2rem;
+                font-size: 2.5rem;
+                margin-bottom: 15px;
+                font-weight: 700;
+            }
+
+            .form-hero-text {
+                font-size: 1.1rem;
+                opacity: 0.9;
+                margin-bottom: 40px;
+                line-height: 1.6;
             }
 
             .progress-indicator {
-                gap: 20px;
+                display: flex;
+                justify-content: center;
+                gap: 40px;
+                margin-top: 40px;
             }
 
             .progress-step {
-                gap: 5px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                opacity: 0.5;
+                transition: var(--transition);
+            }
+
+            .progress-step.active {
+                opacity: 1;
+            }
+
+            .step-number {
+                width: 40px;
+                height: 40px;
+                background-color: rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                border: 2px solid transparent;
+            }
+
+            .progress-step.active .step-number {
+                background-color: var(--accent-color);
+                border-color: white;
             }
 
             .step-label {
-                font-size: 0.8rem;
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            /* Form Section */
+            .form-section {
+                padding: 40px 0 80px 0;
+            }
+
+            .form-wrapper {
+                max-width: 1000px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 12px;
+                box-shadow: var(--shadow);
+                overflow: hidden;
             }
 
             .form-step {
-                padding: 20px;
+                padding: 40px;
+                display: none;
+            }
+
+            .form-step.active {
+                display: block;
+                animation: fadeIn 0.5s ease;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .step-header {
+                text-align: center;
+                margin-bottom: 40px;
             }
 
             .step-title {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
+                color: var(--primary-color);
+                margin-bottom: 10px;
+                font-weight: 600;
             }
 
+            .step-description {
+                color: var(--gray-color);
+                margin-bottom: 20px;
+            }
+
+            /* Training Cards */
             .training-options {
-                grid-template-columns: 1fr;
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+                margin-top: 30px;
             }
 
-            .form-row {
-                grid-template-columns: 1fr;
+            .training-card {
+                background: var(--light-color);
+                border-radius: 10px;
+                padding: 25px;
+                text-align: center;
+                transition: var(--transition);
+                border: 2px solid transparent;
+                cursor: pointer;
             }
 
-            .step-navigation {
-                flex-direction: column;
+            .training-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                border-color: var(--accent-color);
+            }
+
+            .training-card.selected {
+                border-color: var(--success-color);
+                background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(66, 153, 225, 0.1));
+            }
+
+            .training-icon {
+                font-size: 2.5rem;
+                color: var(--primary-color);
+                margin-bottom: 15px;
+            }
+
+            .training-name {
+                font-size: 1.2rem;
+                color: var(--dark-color);
+                margin-bottom: 5px;
+                font-weight: 600;
+            }
+
+            .training-code {
+                font-size: 0.9rem;
+                color: var(--gray-color);
+                margin-bottom: 20px;
+            }
+
+            .training-select-btn {
+                background: var(--accent-color);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: var(--transition);
+                width: 100%;
+            }
+
+            .training-select-btn:hover {
+                background: var(--secondary-color);
+            }
+
+            .selected-training {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                background: rgba(72, 187, 120, 0.1);
+                color: var(--success-color);
+                padding: 10px 20px;
+                border-radius: 5px;
+                margin-top: 15px;
+                font-weight: 500;
+            }
+
+            /* Form Elements */
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                color: var(--dark-color);
+            }
+
+            .form-label.required::after {
+                content: " *";
+                color: var(--danger-color);
+            }
+
+            .form-select,
+            .form-input,
+            .form-textarea {
+                width: 100%;
+                padding: 10px 12px;
+                border: 2px solid #e2e8f0;
+                border-radius: 6px;
+                font-size: 1rem;
+                transition: var(--transition);
+                background: white;
+            }
+
+            .form-select.error,
+            .form-input.error,
+            .form-textarea.error {
+                border-color: var(--danger-color) !important;
+                box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1) !important;
+            }
+
+            .form-select:focus,
+            .form-input:focus,
+            .form-textarea:focus {
+                outline: none;
+                border-color: var(--accent-color);
+                box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+            }
+
+            .form-textarea {
+                min-height: 100px;
+                resize: vertical;
+            }
+
+            .form-hint {
+                font-size: 0.85rem;
+                color: var(--gray-color);
+                margin-top: 5px;
+            }
+
+            .form-file {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .form-file-input {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                cursor: pointer;
+            }
+
+            .form-file-label {
+                display: block;
+                padding: 15px;
+                background: var(--light-color);
+                border: 2px dashed #cbd5e0;
+                border-radius: 6px;
+                text-align: center;
+                cursor: pointer;
+                transition: var(--transition);
+            }
+
+            .form-file-label:hover {
+                border-color: var(--accent-color);
+                background: rgba(66, 153, 225, 0.05);
+            }
+
+            .form-file-name {
+                margin-top: 10px;
+                font-size: 0.9rem;
+                color: var(--gray-color);
+            }
+
+            /* Error Styling */
+            .text-danger {
+                color: var(--danger-color) !important;
+                font-size: 0.85rem;
+                margin-top: 5px;
+                display: block;
+            }
+
+            /* Angkatan Info */
+            .angkatan-info {
+                margin-top: 30px;
+            }
+
+            .info-card {
+                background: linear-gradient(135deg, #f7fafc, #edf2f7);
+                border-radius: 10px;
+                padding: 20px;
+                border-left: 4px solid var(--accent-color);
+            }
+
+            .info-card h4 {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: var(--primary-color);
+                margin-bottom: 15px;
+                font-size: 1.1rem;
+            }
+
+            .info-details {
+                display: grid;
                 gap: 10px;
             }
 
-            .step-navigation .btn {
-                width: 100%;
-            }
-
-            .selected-info {
-                flex-direction: column;
+            .info-item {
+                display: flex;
+                justify-content: space-between;
                 align-items: center;
             }
 
-            .info-item {
-                flex-direction: column;
+            .info-label {
+                font-weight: 500;
+                color: var(--dark-color);
+            }
+
+            .info-value {
+                color: var(--gray-color);
+            }
+
+            .text-success {
+                color: var(--success-color) !important;
+            }
+
+            .text-danger {
+                color: var(--danger-color) !important;
+            }
+
+            /* Selected Info */
+            .selected-info {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                margin-top: 20px;
+                flex-wrap: wrap;
+            }
+
+            .selected-info .info-badge {
+                background: var(--primary-color);
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: white;
+            }
+
+            /* Dynamic Form Container */
+            .dynamic-form-container {
+                margin-top: 30px;
+            }
+
+            .form-section-header {
+                font-size: 1.4rem;
+                color: var(--primary-color);
+                margin: 40px 0 20px 0;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #e2e8f0;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .form-section-header:first-child {
+                margin-top: 0;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+
+            .checkbox-group {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .checkbox-group input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+            }
+
+            .checkbox-group label {
+                margin: 0;
+                font-weight: normal;
+            }
+
+            /* Buttons */
+            .btn {
+                padding: 12px 25px;
+                border: none;
+                border-radius: 6px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: var(--transition);
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .btn-primary {
+                background: var(--accent-color);
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: var(--secondary-color);
+                transform: translateY(-2px);
+            }
+
+            .btn-primary:disabled {
+                background: #cbd5e0;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .btn-secondary {
+                background: #e2e8f0;
+                color: var(--dark-color);
+            }
+
+            .btn-secondary:hover {
+                background: #cbd5e0;
+            }
+
+            .btn-success {
+                background: var(--success-color);
+                color: white;
+            }
+
+            .btn-success:hover {
+                background: #38a169;
+                transform: translateY(-2px);
+            }
+
+            .step-navigation {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 2px solid #e2e8f0;
+            }
+
+            /* Alert Styles */
+            .alert {
+                padding: 15px;
+                border-radius: 6px;
+                margin-bottom: 20px;
+                border-left: 4px solid;
+                display: flex;
                 align-items: flex-start;
-                gap: 5px;
+                gap: 10px;
             }
 
-            .info-label, .info-value {
-                width: 100%;
+            .alert-info {
+                background-color: rgba(66, 153, 225, 0.1);
+                border-color: var(--accent-color);
+                color: var(--secondary-color);
             }
+
+            .alert i {
+                font-size: 1.2rem;
+                flex-shrink: 0;
+            }
+
+            /* Verification Result */
+            .verification-result {
+                margin-top: 20px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .form-hero {
+                    padding: 40px 0;
+                }
+
+                .form-hero-title {
+                    font-size: 2rem;
+                }
+
+                .progress-indicator {
+                    gap: 20px;
+                }
+
+                .progress-step {
+                    gap: 5px;
+                }
+
+                .step-label {
+                    font-size: 0.8rem;
+                }
+
+                .form-step {
+                    padding: 20px;
+                }
+
+                .step-title {
+                    font-size: 1.5rem;
+                }
+
+                .training-options {
+                    grid-template-columns: 1fr;
+                }
+
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .step-navigation {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .step-navigation .btn {
+                    width: 100%;
+                }
+
+                .selected-info {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .info-item {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 5px;
+                }
+
+                .info-label, .info-value {
+                    width: 100%;
+                }
+            }
+
+            /* CSS untuk input yang disabled */
+            .form-input:disabled {
+                background-color: #f7fafc;
+                cursor: not-allowed;
+                opacity: 0.7;
+            }
+
+            /* Styling untuk form-hint tambahan */
+            .form-hint {
+                font-size: 0.85rem;
+                color: var(--gray-color);
+                margin-top: 5px;
+                display: block;
+            }
+            /* File Upload Styling */
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        background: rgba(72, 187, 120, 0.1);
+        border-radius: 4px;
+        margin-top: 5px;
+    }
+
+    .file-info i {
+        font-size: 1rem;
+    }
+
+    .btn-change-file {
+        background: none;
+        border: 1px solid var(--accent-color);
+        color: var(--accent-color);
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-change-file:hover {
+        background: var(--accent-color);
+        color: white;
+    }
+
+    .no-file {
+        color: var(--gray-color);
+        font-style: italic;
+    }
+
+    /* Crop Container Styling */
+    .crop-wrapper {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .crop-controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .crop-controls .btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Preview styling */
+    #crop-preview-container {
+        text-align: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    #cropped-preview {
+        border-radius: 4px;
+    }
+
+    /* Hide file input when cropping */
+    .hidden-input {
+        display: none;
+    }
+
+    /* Loading overlay */
+    .crop-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .crop-loading i {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    /* ============================================
+       LOADING OVERLAY STYLES
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .loading-content {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        border: 2px solid var(--accent-color);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(66, 153, 225, 0.4);
         }
-
-        /* CSS untuk input yang disabled */
-        .form-input:disabled {
-            background-color: #f7fafc;
-            cursor: not-allowed;
-            opacity: 0.7;
+        70% {
+            box-shadow: 0 0 0 20px rgba(66, 153, 225, 0);
         }
-
-        /* Styling untuk form-hint tambahan */
-        .form-hint {
-            font-size: 0.85rem;
-            color: var(--gray-color);
-            margin-top: 5px;
-            display: block;
+        100% {
+            box-shadow: 0 0 0 0 rgba(66, 153, 225, 0);
         }
-        /* File Upload Styling */
-.file-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px;
-    background: rgba(72, 187, 120, 0.1);
-    border-radius: 4px;
-    margin-top: 5px;
-}
+    }
 
-.file-info i {
-    font-size: 1rem;
-}
+    .loading-spinner {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
 
-.btn-change-file {
-    background: none;
-    border: 1px solid var(--accent-color);
-    color: var(--accent-color);
-    padding: 4px 8px;
-    border-radius: 3px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
+    .loading-spinner i {
+        animation: spin 1s linear infinite;
+    }
 
-.btn-change-file:hover {
-    background: var(--accent-color);
-    color: white;
-}
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 
-.no-file {
-    color: var(--gray-color);
-    font-style: italic;
-}
+    .loading-message h4 {
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
 
-/* Crop Container Styling */
-.crop-wrapper {
-    background: #f8f9fa;
-    border: 2px dashed #dee2e6;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
+    .loading-message p {
+        color: var(--gray-color);
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
 
-.crop-controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+    .loading-detail {
+        background: rgba(245, 158, 11, 0.1);
+        border-left: 3px solid var(--warning-color);
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin-top: 20px;
+        font-size: 0.9rem;
+        text-align: left;
+    }
 
-.crop-controls .btn {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-}
+    .loading-detail i {
+        color: var(--warning-color);
+        margin-right: 8px;
+    }
 
-/* Preview styling */
-#crop-preview-container {
-    text-align: center;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #dee2e6;
-}
+    /* Disable all form inputs during submission */
+    .submitting * {
+        pointer-events: none !important;
+    }
 
-#cropped-preview {
-    border-radius: 4px;
-}
+    .submitting .form-input:disabled,
+    .submitting .form-select:disabled {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+    }
 
-/* Hide file input when cropping */
-.hidden-input {
-    display: none;
-}
+    /* Progress indicator untuk upload */
+    .upload-progress {
+        margin-top: 20px;
+        width: 100%;
+    }
 
-/* Loading overlay */
-.crop-loading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
+    .progress-bar {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
 
-.crop-loading i {
-    font-size: 2rem;
-    color: var(--primary-color);
-}
-    </style>
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        font-size: 0.85rem;
+        color: var(--gray-color);
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .time-estimate {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 6px;
+        padding: 8px 15px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #7c2d12;
+        font-size: 0.9rem;
+    }
+
+    .time-estimate i {
+        color: #d97706;
+    }
+        </style>
 @endpush
 
+
 @push('scripts')
-    <script>
+        <script>
         document.addEventListener('DOMContentLoaded', function () {
             // ============================================
             // VARIABLES & ELEMENTS
@@ -1188,11 +1338,11 @@
                     // Tampilkan nama file
                     if (fileNameDisplay) {
                         fileNameDisplay.innerHTML = `
-                <span style="color: var(--warning-color);">
-                    <i class="fas fa-crop-alt"></i> 
-                    ${file.name} (${formatFileSize(file.size)})
-                </span>
-            `;
+                            <span style="color: var(--warning-color);">
+                                <i class="fas fa-crop-alt"></i> 
+                                ${file.name} (${formatFileSize(file.size)})
+                            </span>
+                        `;
                     }
 
                     // Baca file sebagai URL
@@ -1368,18 +1518,6 @@
                         fileNameDisplay.innerHTML = '<span class="no-file">Belum ada file dipilih</span>';
                     });
                 }
-
-                // Fungsi konversi blob ke base64
-                function blobToBase64(blob) {
-                    return new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = function () {
-                            resolve(reader.result);
-                        };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                }
             }
 
             // Ganti fungsi loadProvinsi
@@ -1461,6 +1599,7 @@
                     showErrorMessage('Gagal memuat data kabupaten/kota');
                 }
             }
+
             // ============================================
             // KAPITALISASI OTOMATIS - FIXED VERSION
             // ============================================
@@ -1709,189 +1848,55 @@
                 }
             }
 
-            // Fungsi untuk format ukuran file
-            function formatFileSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            // ============================================
+            // LOADING OVERLAY FUNCTIONS
+            // ============================================
+            function showLoadingOverlay(message = 'Menyimpan data perubahan. Mohon tunggu...') {
+                // Hapus overlay sebelumnya jika ada
+                hideLoadingOverlay();
+
+                // Buat overlay
+                const overlay = document.createElement('div');
+                overlay.id = 'loading-overlay';
+                overlay.className = 'loading-overlay';
+                overlay.innerHTML = `
+                    <div class="loading-content">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                        <div class="loading-message">
+                            <h4><i class="fas fa-clock"></i> Proses Sedang Berjalan</h4>
+                            <p>${message}</p>
+                            <p class="loading-detail">
+                                <i class="fas fa-info-circle"></i>
+                                Proses ini mungkin memakan waktu beberapa menit. 
+                                <strong>Jangan tutup atau refresh halaman ini.</strong>
+                            </p>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(overlay);
+                document.body.style.overflow = 'hidden'; // Mencegah scroll
             }
 
-            // Validasi ukuran file realtime
-            document.addEventListener('change', function (e) {
-                if (e.target.matches('input[type="file"]')) {
-                    const fileInput = e.target;
-                    const file = fileInput.files[0];
-
-                    if (!file) return;
-
-                    const maxSize = 1 * 1024 * 1024; // 1MB dalam bytes
-                    const fileSize = file.size;
-                    const fileName = file.name;
-                    const fileNameDisplay = fileInput.closest('.form-file')?.querySelector('.form-file-name');
-                    const formGroup = fileInput.closest('.form-group');
-
-                    // Remove previous error messages
-                    const existingError = formGroup?.querySelector('.file-size-error');
-                    if (existingError) {
-                        existingError.remove();
-                    }
-
-                    // Remove error styling
-                    fileInput.classList.remove('error');
-                    const fileLabel = fileInput.closest('.form-file')?.querySelector('.form-file-label');
-                    if (fileLabel) {
-                        fileLabel.style.borderColor = '';
-                        fileLabel.style.background = '';
-                    }
-
-                    // Check file size
-                    if (fileSize > maxSize) {
-                        // File terlalu besar
-                        fileInput.value = ''; // Clear input
-                        fileInput.classList.add('error');
-
-                        if (fileLabel) {
-                            fileLabel.style.borderColor = 'var(--danger-color)';
-                            fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
-                        }
-
-                        // Update file name display
-                        if (fileNameDisplay) {
-                            fileNameDisplay.innerHTML = `
-                    <span class="no-file text-danger">
-                        <i class="fas fa-exclamation-triangle"></i> 
-                        File terlalu besar (${formatFileSize(fileSize)})
-                    </span>
-                `;
-                        }
-
-                        // Add error message
-                        if (formGroup) {
-                            const errorMsg = document.createElement('small');
-                            errorMsg.className = 'text-danger file-size-error';
-                            errorMsg.innerHTML = `
-                    <i class="fas fa-exclamation-circle"></i> 
-                    Ukuran file "${fileName}" (${formatFileSize(fileSize)}) melebihi batas maksimal 1 MB
-                `;
-                            formGroup.appendChild(errorMsg);
-                        }
-
-                        // Show notification
-                        showErrorMessage(`File "${fileName}" terlalu besar! Ukuran maksimal 1 MB. Ukuran file Anda: ${formatFileSize(fileSize)}`);
-
-                    } else {
-                        // File valid
-                        if (fileNameDisplay) {
-                            fileNameDisplay.innerHTML = `
-                    <span style="color: var(--success-color);">
-                        <i class="fas fa-check-circle"></i> 
-                        ${fileName} (${formatFileSize(fileSize)})
-                    </span>
-                `;
-                        }
-
-                        if (fileLabel) {
-                            fileLabel.style.borderColor = 'var(--success-color)';
-                            fileLabel.style.background = 'rgba(72, 187, 120, 0.05)';
-                        }
+            function updateLoadingMessage(newMessage) {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    const messageElement = overlay.querySelector('.loading-message p');
+                    if (messageElement) {
+                        messageElement.textContent = newMessage;
                     }
                 }
-            });
+            }
 
-            // Validasi sebelum submit
-            document.getElementById('pendaftaranForm').addEventListener('submit', function (e) {
-                const fileInputs = this.querySelectorAll('input[type="file"]');
-                let hasOversizedFile = false;
-                const maxSize = 1 * 1024 * 1024; // 1MB
-
-                fileInputs.forEach(input => {
-                    if (input.files.length > 0) {
-                        const file = input.files[0];
-                        if (file.size > maxSize) {
-                            hasOversizedFile = true;
-
-                            // Highlight error
-                            input.classList.add('error');
-                            const fileLabel = input.closest('.form-file')?.querySelector('.form-file-label');
-                            if (fileLabel) {
-                                fileLabel.style.borderColor = 'var(--danger-color)';
-                                fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
-                            }
-
-                            // Show error message
-                            const formGroup = input.closest('.form-group');
-                            if (formGroup) {
-                                const existingError = formGroup.querySelector('.file-size-error');
-                                if (!existingError) {
-                                    const errorMsg = document.createElement('small');
-                                    errorMsg.className = 'text-danger file-size-error';
-                                    errorMsg.innerHTML = `
-                            <i class="fas fa-exclamation-circle"></i> 
-                            Ukuran file (${formatFileSize(file.size)}) melebihi batas maksimal 1 MB
-                        `;
-                                    formGroup.appendChild(errorMsg);
-                                }
-                            }
-                        }
-                    }
-                });
-
-                if (hasOversizedFile) {
-                    e.preventDefault();
-                    showErrorMessage('Ada file yang melebihi ukuran maksimal 1 MB. Silakan periksa kembali file yang Anda upload.');
-
-                    // Scroll to first error
-                    const firstError = this.querySelector('.file-size-error');
-                    if (firstError) {
-                        firstError.closest('.form-group').scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                    }
-
-                    return false;
+            function hideLoadingOverlay() {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.remove();
                 }
-            });
-
-            // Handler untuk tombol "Ganti File"
-            document.addEventListener('click', function (e) {
-                if (e.target.matches('.btn-change-file') || e.target.closest('.btn-change-file')) {
-                    const btn = e.target.closest('.btn-change-file');
-                    const targetName = btn.getAttribute('data-target');
-                    const fileInput = document.querySelector(`input[name="${targetName}"]`);
-
-                    if (fileInput) {
-                        // Reset file input
-                        fileInput.value = '';
-
-                        // Update UI
-                        const fileNameDisplay = fileInput.closest('.form-file')?.querySelector('.form-file-name');
-                        if (fileNameDisplay) {
-                            fileNameDisplay.innerHTML = '<span class="no-file">Belum ada file dipilih</span>';
-                        }
-
-                        // Remove error styling
-                        fileInput.classList.remove('error');
-                        const fileLabel = fileInput.closest('.form-file')?.querySelector('.form-file-label');
-                        if (fileLabel) {
-                            fileLabel.style.borderColor = '';
-                            fileLabel.style.background = '';
-                        }
-
-                        // Remove error message
-                        const formGroup = fileInput.closest('.form-group');
-                        const errorMsg = formGroup?.querySelector('.file-size-error');
-                        if (errorMsg) {
-                            errorMsg.remove();
-                        }
-
-                        // Trigger file input click
-                        fileInput.click();
-                    }
-                }
-            });
+                document.body.style.overflow = ''; // Kembalikan scroll
+            }
 
             // ============================================
             // FUNGSI UNTUK AUTO-FILL PANGKAT
@@ -1955,17 +1960,100 @@
             }
 
             // ============================================
-            // FORM SUBMISSION
+            // FUNGSI HELPER
+            // ============================================
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            }
+
+            function showVerificationError(message) {
+                errorMessage.textContent = message;
+                verificationError.style.display = 'flex';
+                verificationSuccess.style.display = 'none';
+                verificationDetails.style.display = 'none';
+                verificationAnggaran.style.display = 'none';
+                verificationResult.style.display = 'block';
+            }
+
+            // ============================================
+            // NOTIFICATION FUNCTIONS
+            // ============================================
+            function showSuccessMessage(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification success';
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            function showErrorMessage(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification error';
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 5000);
+            }
+
+            // ============================================
+            // FORM SUBMISSION - FIXED VERSION
             // ============================================
             document.getElementById('pendaftaranForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
 
+                // Validasi apakah form sudah dalam proses submit
+                if (this.classList.contains('submitting')) {
+                    console.log('Form sedang dalam proses submit, mohon tunggu...');
+                    return false;
+                }
+
+                // Tandai form sedang dalam proses submit
+                this.classList.add('submitting');
+
                 const submitBtn = document.getElementById('submit-form');
                 const originalText = submitBtn.innerHTML;
 
-                // Show loading state
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+                // Show loading state dengan pesan lebih jelas
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan Perubahan...';
                 submitBtn.disabled = true;
+
+                // Tampilkan overlay loading dengan pesan
+                showLoadingOverlay('Menyimpan data perubahan. Proses ini mungkin memakan waktu beberapa menit. Mohon tidak menutup halaman ini.');
 
                 // Validasi client-side
                 const requiredFields = this.querySelectorAll('[required]');
@@ -1974,7 +2062,7 @@
                 document.querySelectorAll('.client-error').forEach(el => el.remove());
 
                 requiredFields.forEach(field => {
-                    if (!field.value && field.type !== 'file') {
+                    if (!field.value && field.type !== 'file' && !field.disabled) {
                         hasEmptyRequired = true;
                         field.classList.add('error');
 
@@ -1989,8 +2077,11 @@
                 });
 
                 if (hasEmptyRequired) {
+                    // Reset submit state
+                    this.classList.remove('submitting');
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
+                    hideLoadingOverlay();
 
                     const firstError = document.querySelector('.error');
                     if (firstError) {
@@ -2000,6 +2091,55 @@
                         });
                     }
 
+                    showErrorMessage('Mohon lengkapi semua field yang wajib diisi.');
+                    return false;
+                }
+
+                // Validasi khusus untuk file upload
+                const fileInputs = this.querySelectorAll('input[type="file"]');
+                let hasOversizedFile = false;
+                const maxSize = 1 * 1024 * 1024; // 1MB
+
+                fileInputs.forEach(input => {
+                    if (input.files.length > 0) {
+                        const file = input.files[0];
+                        if (file.size > maxSize) {
+                            hasOversizedFile = true;
+                            input.classList.add('error');
+
+                            const formGroup = input.closest('.form-group');
+                            if (formGroup) {
+                                const existingError = formGroup.querySelector('.file-size-error');
+                                if (!existingError) {
+                                    const errorMsg = document.createElement('small');
+                                    errorMsg.className = 'text-danger file-size-error';
+                                    errorMsg.innerHTML = `
+                                        <i class="fas fa-exclamation-circle"></i> 
+                                        Ukuran file (${formatFileSize(file.size)}) melebihi batas maksimal 1 MB
+                                    `;
+                                    formGroup.appendChild(errorMsg);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                if (hasOversizedFile) {
+                    // Reset submit state
+                    this.classList.remove('submitting');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    hideLoadingOverlay();
+
+                    const firstError = this.querySelector('.file-size-error');
+                    if (firstError) {
+                        firstError.closest('.form-group').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+
+                    showErrorMessage('Ada file yang melebihi ukuran maksimal 1 MB. Silakan periksa kembali file yang Anda upload.');
                     return false;
                 }
 
@@ -2014,13 +2154,21 @@
                     formData.append('pendaftaran_id', pendaftaranData.id);
                 }
 
+                // Add additional flag untuk tracking
+                formData.append('is_update', 'true');
+
                 // Add CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                 try {
+                    // Set timeout yang lebih lama untuk proses upload
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 menit timeout
+
                     const response = await fetch(this.action, {
                         method: 'POST',
                         body: formData,
+                        signal: controller.signal,
                         headers: {
                             'X-CSRF-TOKEN': csrfToken,
                             'X-Requested-With': 'XMLHttpRequest',
@@ -2028,17 +2176,33 @@
                         }
                     });
 
+                    clearTimeout(timeoutId);
+
                     const data = await response.json();
 
+                    // Reset submit state
+                    this.classList.remove('submitting');
+
                     if (data.success) {
-                        showSuccessMessage('Data berhasil diperbarui!');
-                        const urlWithId = data.redirect_url + '?id=' + data.pendaftaran_id;
+                        // Update pesan loading
+                        updateLoadingMessage('Data berhasil disimpan! Mengarahkan ke halaman detail...');
 
                         setTimeout(() => {
-                            window.location.href = urlWithId;
+                            hideLoadingOverlay();
+                            showSuccessMessage('Data berhasil diperbarui!');
+
+                            const urlWithId = data.redirect_url + '?id=' + data.pendaftaran_id;
+
+                            // Delay sedikit sebelum redirect
+                            setTimeout(() => {
+                                window.location.href = urlWithId;
+                            }, 1000);
+
                         }, 1500);
 
                     } else {
+                        // Reset UI
+                        hideLoadingOverlay();
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
 
@@ -2103,74 +2267,197 @@
                     }
 
                 } catch (error) {
-                    console.error('AJAX Error:', error);
+                    // Reset submit state
+                    this.classList.remove('submitting');
+                    hideLoadingOverlay();
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
-                    showErrorMessage('Terjadi kesalahan jaringan. Silakan coba lagi.');
+
+                    if (error.name === 'AbortError') {
+                        showErrorMessage('Proses upload terlalu lama. Silakan coba lagi dengan file yang lebih kecil atau koneksi yang lebih stabil.');
+                    } else {
+                        console.error('AJAX Error:', error);
+                        showErrorMessage('Terjadi kesalahan jaringan. Silakan coba lagi.');
+                    }
                 }
             });
 
             // ============================================
-            // HELPER FUNCTIONS
+            // PREVENT PAGE REFRESH/CLOSE DURING SUBMISSION
             // ============================================
-            function showVerificationError(message) {
-                errorMessage.textContent = message;
-                verificationError.style.display = 'flex';
-                verificationSuccess.style.display = 'none';
-                verificationDetails.style.display = 'none';
-                verificationAnggaran.style.display = 'none';
-                verificationResult.style.display = 'block';
-            }
+            window.addEventListener('beforeunload', function (e) {
+                const form = document.getElementById('pendaftaranForm');
+                if (form && form.classList.contains('submitting')) {
+                    e.preventDefault();
+                    e.returnValue = 'Data sedang disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?';
+                    return 'Data sedang disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?';
+                }
+            });
 
-            function showSuccessMessage(message) {
-                const notification = document.createElement('div');
-                notification.className = 'notification success';
-                notification.innerHTML = `
-                    <div class="notification-content">
-                        <i class="fas fa-check-circle"></i>
-                        <span>${message}</span>
-                    </div>
-                `;
+            // ============================================
+            // CLEAR ERRORS ON INPUT
+            // ============================================
+            document.addEventListener('input', function (e) {
+                if (e.target.matches('input, select, textarea')) {
+                    e.target.classList.remove('error');
+                    const formGroup = e.target.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = formGroup.querySelector('.server-error, .client-error');
+                        if (errorMsg) errorMsg.remove();
+                    }
 
-                document.body.appendChild(notification);
+                    if (e.target.type === 'file') {
+                        const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = '';
+                            fileLabel.style.background = '';
+                        }
+                    }
+                }
+            });
 
-                setTimeout(() => {
-                    notification.classList.add('show');
-                }, 10);
+            document.addEventListener('change', function (e) {
+                if (e.target.matches('input[type="file"]')) {
+                    e.target.classList.remove('error');
+                    const formGroup = e.target.closest('.form-group');
+                    if (formGroup) {
+                        const errorMsg = formGroup.querySelector('.server-error, .client-error');
+                        if (errorMsg) errorMsg.remove();
+                    }
 
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                    setTimeout(() => {
-                        notification.remove();
-                    }, 300);
-                }, 3000);
-            }
+                    const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
+                    if (fileLabel) {
+                        fileLabel.style.borderColor = '';
+                        fileLabel.style.background = '';
+                    }
+                }
+            });
 
-            function showErrorMessage(message) {
-                const notification = document.createElement('div');
-                notification.className = 'notification error';
-                notification.innerHTML = `
-                    <div class="notification-content">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span>${message}</span>
-                    </div>
-                `;
+            // ============================================
+            // FILE VALIDATION
+            // ============================================
+            document.addEventListener('change', function (e) {
+                if (e.target.matches('input[type="file"]')) {
+                    const fileInput = e.target;
+                    const file = fileInput.files[0];
 
-                document.body.appendChild(notification);
+                    if (!file) return;
 
-                setTimeout(() => {
-                    notification.classList.add('show');
-                }, 10);
+                    const maxSize = 1 * 1024 * 1024; // 1MB dalam bytes
+                    const fileSize = file.size;
+                    const fileName = file.name;
+                    const fileNameDisplay = fileInput.closest('.form-file')?.querySelector('.form-file-name');
+                    const formGroup = fileInput.closest('.form-group');
 
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                    setTimeout(() => {
-                        notification.remove();
-                    }, 300);
-                }, 5000);
-            }
+                    // Remove previous error messages
+                    const existingError = formGroup?.querySelector('.file-size-error');
+                    if (existingError) {
+                        existingError.remove();
+                    }
 
-            // Add notification styles
+                    // Remove error styling
+                    fileInput.classList.remove('error');
+                    const fileLabel = fileInput.closest('.form-file')?.querySelector('.form-file-label');
+                    if (fileLabel) {
+                        fileLabel.style.borderColor = '';
+                        fileLabel.style.background = '';
+                    }
+
+                    // Check file size
+                    if (fileSize > maxSize) {
+                        // File terlalu besar
+                        fileInput.value = ''; // Clear input
+                        fileInput.classList.add('error');
+
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = 'var(--danger-color)';
+                            fileLabel.style.background = 'rgba(245, 101, 101, 0.05)';
+                        }
+
+                        // Update file name display
+                        if (fileNameDisplay) {
+                            fileNameDisplay.innerHTML = `
+                                <span class="no-file text-danger">
+                                    <i class="fas fa-exclamation-triangle"></i> 
+                                    File terlalu besar (${formatFileSize(fileSize)})
+                                </span>
+                            `;
+                        }
+
+                        // Add error message
+                        if (formGroup) {
+                            const errorMsg = document.createElement('small');
+                            errorMsg.className = 'text-danger file-size-error';
+                            errorMsg.innerHTML = `
+                                <i class="fas fa-exclamation-circle"></i> 
+                                Ukuran file "${fileName}" (${formatFileSize(fileSize)}) melebihi batas maksimal 1 MB
+                            `;
+                            formGroup.appendChild(errorMsg);
+                        }
+
+                        // Show notification
+                        showErrorMessage(`File "${fileName}" terlalu besar! Ukuran maksimal 1 MB. Ukuran file Anda: ${formatFileSize(fileSize)}`);
+
+                    } else {
+                        // File valid
+                        if (fileNameDisplay) {
+                            fileNameDisplay.innerHTML = `
+                                <span style="color: var(--success-color);">
+                                    <i class="fas fa-check-circle"></i> 
+                                    ${fileName} (${formatFileSize(fileSize)})
+                                </span>
+                            `;
+                        }
+
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = 'var(--success-color)';
+                            fileLabel.style.background = 'rgba(72, 187, 120, 0.05)';
+                        }
+                    }
+                }
+            });
+
+            // Handler untuk tombol "Ganti File"
+            document.addEventListener('click', function (e) {
+                if (e.target.matches('.btn-change-file') || e.target.closest('.btn-change-file')) {
+                    const btn = e.target.closest('.btn-change-file');
+                    const targetName = btn.getAttribute('data-target');
+                    const fileInput = document.querySelector(`input[name="${targetName}"]`);
+
+                    if (fileInput) {
+                        // Reset file input
+                        fileInput.value = '';
+
+                        // Update UI
+                        const fileNameDisplay = fileInput.closest('.form-file')?.querySelector('.form-file-name');
+                        if (fileNameDisplay) {
+                            fileNameDisplay.innerHTML = '<span class="no-file">Belum ada file dipilih</span>';
+                        }
+
+                        // Remove error styling
+                        fileInput.classList.remove('error');
+                        const fileLabel = fileInput.closest('.form-file')?.querySelector('.form-file-label');
+                        if (fileLabel) {
+                            fileLabel.style.borderColor = '';
+                            fileLabel.style.background = '';
+                        }
+
+                        // Remove error message
+                        const formGroup = fileInput.closest('.form-group');
+                        const errorMsg = formGroup?.querySelector('.file-size-error');
+                        if (errorMsg) {
+                            errorMsg.remove();
+                        }
+
+                        // Trigger file input click
+                        fileInput.click();
+                    }
+                }
+            });
+
+            // ============================================
+            // ADD NOTIFICATION STYLES
+            // ============================================
             const notificationStyles = `
                 .notification {
                     position: fixed;
@@ -2221,48 +2508,22 @@
                     flex: 1;
                     font-size: 0.95rem;
                 }
+
+                /* Disable all form inputs during submission */
+                .submitting * {
+                    pointer-events: none !important;
+                }
+
+                .submitting .form-input:disabled,
+                .submitting .form-select:disabled {
+                    background-color: #f8f9fa;
+                    opacity: 0.7;
+                }
             `;
 
             const styleSheet = document.createElement("style");
             styleSheet.textContent = notificationStyles;
             document.head.appendChild(styleSheet);
-
-            // Clear errors on input
-            document.addEventListener('input', function (e) {
-                if (e.target.matches('input, select, textarea')) {
-                    e.target.classList.remove('error');
-                    const formGroup = e.target.closest('.form-group');
-                    if (formGroup) {
-                        const errorMsg = formGroup.querySelector('.server-error, .client-error');
-                        if (errorMsg) errorMsg.remove();
-                    }
-
-                    if (e.target.type === 'file') {
-                        const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
-                        if (fileLabel) {
-                            fileLabel.style.borderColor = '';
-                            fileLabel.style.background = '';
-                        }
-                    }
-                }
-            });
-
-            document.addEventListener('change', function (e) {
-                if (e.target.matches('input[type="file"]')) {
-                    e.target.classList.remove('error');
-                    const formGroup = e.target.closest('.form-group');
-                    if (formGroup) {
-                        const errorMsg = formGroup.querySelector('.server-error, .client-error');
-                        if (errorMsg) errorMsg.remove();
-                    }
-
-                    const fileLabel = e.target.closest('.form-file')?.querySelector('.form-file-label');
-                    if (fileLabel) {
-                        fileLabel.style.borderColor = '';
-                        fileLabel.style.background = '';
-                    }
-                }
-            });
         });
     </script>
 @endpush

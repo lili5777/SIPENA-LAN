@@ -72,11 +72,15 @@
 
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label required">Email Pribadi</label>
+        <label class="form-label required">
+            Email Pribadi (Aktif)
+        </label>
         <input type="email" name="email_pribadi" class="form-input lowercase @error('email_pribadi') error @enderror"
             value="{{ $peserta['email_pribadi'] ?? old('email_pribadi') }}" required
             placeholder="Contoh: muhammad.ali@example.com">
-        <small class="form-hint">Huruf akan otomatis kecil</small>
+        <small class="form-hint">
+            Wajib email aktif! Akun dan link Grup WhatsApp akan dikirim melalui email ini.
+        </small>
         @error('email_pribadi')
             <small class="text-danger">{{ $message }}</small>
         @enderror

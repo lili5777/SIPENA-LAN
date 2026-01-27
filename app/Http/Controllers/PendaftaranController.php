@@ -459,8 +459,9 @@ class PendaftaranController extends Controller
                     'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
                     'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
                     'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
-
+                    // HAPUS validasi untuk file_pas_foto dan ganti dengan file_pas_foto_cropped
+                    'file_pas_foto_cropped' => 'nullable|string',
+                    'crop_data' => 'nullable|string',
                 ];
 
                 if (!$pendaftaran->file_surat_kesediaan) {
@@ -469,9 +470,12 @@ class PendaftaranController extends Controller
                 if (!$peserta->file_ktp) {
                     $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
                 }
+
+                // PERUBAHAN DI SINI: Ganti validasi file_pas_foto menjadi file_pas_foto_cropped
                 if (!$peserta->file_pas_foto) {
-                    $additionalRules['file_pas_foto'] = 'required|file|mimes:jpg,jpeg,png|max:1024';
+                    $additionalRules['file_pas_foto_cropped'] = 'required|string';
                 }
+
                 if (!$kepegawaian->file_sk_jabatan) {
                     $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:1024';
                 }
@@ -558,11 +562,9 @@ class PendaftaranController extends Controller
                     'file_persetujuan_mentor.mimes' => 'File Persetujuan Mentor harus berformat PDF',
                     'file_persetujuan_mentor.max' => 'Ukuran file Persetujuan Mentor maksimal 1MB',
 
-                    // Validasi untuk file pas foto
-                    'file_pas_foto.required' => 'File Pas Foto wajib diunggah ',
-                    'file_pas_foto.file' => 'File Pas Foto harus berupa file',
-                    'file_pas_foto.mimes' => 'File Pas Foto harus berformat JPG, JPEG, atau PNG',
-                    'file_pas_foto.max' => 'Ukuran file Pas Foto maksimal 1MB',
+                    // Validasi untuk file pas foto CROPPED (PERUBAHAN DI SINI)
+                    'file_pas_foto_cropped.required' => 'Foto pas 3×4 wajib diunggah ',
+                    'file_pas_foto_cropped.string' => 'Foto pas harus berupa string base64 yang valid',
                 ];
             }
 
