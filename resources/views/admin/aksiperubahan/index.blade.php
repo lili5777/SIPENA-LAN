@@ -726,20 +726,14 @@
                         </div>
                     @endif
 
-                    @if($aksiPerubahan->kategori_aksatika)
+                    @if(!empty($aksiPerubahan?->kategori_aksatika))
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-tags"></i>
                                 Kategori Aksatika
                             </span>
                             <span class="data-value">
-                                @if($aksiPerubahan->kategori_aksatika == 'pilihan1')
-                                    Pilihan 1
-                                @elseif($aksiPerubahan->kategori_aksatika == 'pilihan2')
-                                    Pilihan 2
-                                @else
-                                    {{ $aksiPerubahan->kategori_aksatika }}
-                                @endif
+                                {{ $aksiPerubahan->kategori_aksatika }}
                             </span>
                         </div>
                     @endif
@@ -875,15 +869,36 @@
                         rows="5"></textarea>
                 </div>
 
+                @php
+                    $kategoriOptions = [
+                        'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
+                        'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
+                        'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
+                        'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
+                        'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
+                        'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
+                        'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
+                        'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
+                    ];
+
+                    $selectedKategori = old('kategori_aksatika', $aksiPerubahan->kategori_aksatika ?? '');
+                @endphp
+
                 <!-- Row 1: Kategori dan File (2 kolom) -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Kategori Aksatika</label>
-                        <select name="kategori_aksatika" class="form-control">
+                        <select name="kategori_aksatika" class="form-control @error('kategori_aksatika') is-invalid @enderror">
                             <option value="">-- Pilih Kategori --</option>
-                            <option value="pilihan1">Pilihan 1</option>
-                            <option value="pilihan2">Pilihan 2</option>
+                            @foreach($kategoriOptions as $opt)
+                                <option value="{{ $opt }}" {{ $selectedKategori === $opt ? 'selected' : '' }}>
+                                    {{ $opt }}
+                                </option>
+                            @endforeach
                         </select>
+                        @error('kategori_aksatika')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="form-group">
@@ -1074,12 +1089,7 @@
                         </div>
                     </div>
 
-                    <!-- Catatan - Full Width -->
-                    {{-- <div class="form-group">
-                        <label class="form-label">Catatan (Opsional)</label>
-                        <textarea name="catatan" class="form-control" placeholder="Masukkan catatan tambahan jika diperlukan"
-                            rows="3"></textarea>
-                    </div> --}}
+
 
                     <button type="submit" class="btn-submit" id="btnSubmitPengajuan">
                         <span class="btn-text">

@@ -23,7 +23,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Validation\Rule;
 
 class PesertaController extends Controller
 {
@@ -870,6 +870,17 @@ class PesertaController extends Controller
             $peserta = $pendaftaran->peserta;
             $kepegawaian = $peserta->kepegawaianPeserta;
 
+            $kategoriOptions = [
+                'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
+                'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
+                'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
+                'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
+                'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
+                'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
+                'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
+                'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
+            ];
+
             // 1. VALIDASI INPUT UMUM (HANYA angkatan, nip_nrp, nama_lengkap YANG REQUIRED)
             $validated = $request->validate(
                 [
@@ -940,7 +951,7 @@ class PesertaController extends Controller
                     'judul' => 'nullable',
                     'file' => 'nullable|file|mimes:pdf|max:5024',  // validasi file proyek
                     'lembar_pengesahan' => 'nullable|file|mimes:pdf|max:1024',  // validasi file lembar pengesahan
-                    'kategori_aksatika' => 'nullable|in:pilihan1,pilihan2',
+                    'kategori_aksatika' => ['nullable', Rule::in($kategoriOptions)],
                     'link_video'  => 'nullable|string|max:200',
                     'link_laporan_majalah'  => 'nullable|string|max:200',
                 ],

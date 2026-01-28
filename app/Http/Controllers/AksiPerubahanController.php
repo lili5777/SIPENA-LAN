@@ -7,6 +7,7 @@ use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AksiPerubahanController extends Controller
 {
@@ -37,10 +38,21 @@ class AksiPerubahanController extends Controller
 
     public function store(Request $request)
     {
+        $kategoriOptions = [
+            'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
+            'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
+            'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
+            'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
+            'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
+            'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
+            'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
+            'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
+        ];
+
         $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:255',
             'abstrak' => 'nullable|string',
-            'kategori_aksatika' => 'nullable|in:pilihan1,pilihan2',
+            'kategori_aksatika' => ['nullable', Rule::in($kategoriOptions)],
             'file' => 'nullable|file|mimes:pdf|max:5120',
             'link_video' => 'nullable|max:500',
             'link_laporan_majalah' => 'nullable|max:500',
@@ -90,10 +102,21 @@ class AksiPerubahanController extends Controller
 
     public function update(Request $request, $id)
     {
+        $kategoriOptions = [
+            'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
+            'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
+            'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
+            'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
+            'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
+            'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
+            'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
+            'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
+        ];
+
         $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:255',
             'abstrak' => 'nullable|string',
-            'kategori_aksatika' => 'nullable|in:pilihan1,pilihan2',
+            'kategori_aksatika' => ['nullable', Rule::in($kategoriOptions)],
             'file' => 'nullable|file|mimes:pdf|max:5120',
             'link_video' => 'nullable|url|max:500',
             'link_laporan_majalah' => 'nullable|url|max:500',
