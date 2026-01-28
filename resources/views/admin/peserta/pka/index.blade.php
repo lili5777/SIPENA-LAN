@@ -949,162 +949,203 @@
                     });
                 }
 
-                // Load Aksi Perubahan Content
+                // Load Aksi Perubahan Content (1 data saja)
 function loadAksiContent(data) {
-    const content = document.getElementById('aksiContent');
-    content.innerHTML = generateAksiHTML(data);
+  const content = document.getElementById('aksiContent');
+  content.innerHTML = generateAksiHTML(data);
 
-    // Add event listeners for document viewer
-    content.querySelectorAll('.view-aksi-document').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            const path = this.getAttribute('data-path');
-            const title = this.getAttribute('data-title');
-            if (path) {
-                window.open(`/preview-drive?path=${encodeURIComponent(path)}`, '_blank');
-            }
-        });
+  // Viewer untuk file (dokumen + lembar pengesahan)
+  content.querySelectorAll('.view-aksi-document').forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      const path = this.getAttribute('data-path');
+      if (path) {
+        window.open(`/preview-drive?path=${encodeURIComponent(path)}`, '_blank');
+      }
     });
+  });
 }
 
-// Generate Aksi Perubahan HTML
+// helper: ambil nama file dari path drive
+function fileNameFromPath(path) {
+  if (!path) return '';
+  const clean = path.split('?')[0];
+  return clean.split('/').pop() || 'file.pdf';
+}
+
+// helper: pastikan link punya http/https
+function normalizeUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}
+
+// Generate Aksi Perubahan HTML (tanpa perulangan)
 function generateAksiHTML(data) {
-    const aksiList = data.aksi_perubahan || [];
-    
-    if (aksiList.length === 0) {
-        return `
-            <div class="aksi-content text-center py-5">
-                <div class="empty-state">
-                    <div class="empty-state-icon mb-4">
-                        <i class="fas fa-lightbulb fa-4x" style="color: #e9ecef;"></i>
-                    </div>
-                    <h4 class="text-muted mb-3">Belum Ada Aksi Perubahan</h4>
-                    <p class="text-muted mb-4">Peserta ini belum mengirimkan aksi perubahan</p>
-                </div>
-            </div>
-        `;
-    }
+  // support kalau backend ngirim array atau object
+  const aksi = Array.isArray(data.aksi_perubahan)
+    ? (data.aksi_perubahan[0] || null)
+    : (data.aksi_perubahan || null);
 
+  if (!aksi) {
     return `
-        <div class="aksi-container">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold mb-0 d-flex align-items-center">
-                    <div class="icon-wrapper bg-warning bg-opacity-10 p-2 rounded-3 me-3">
-                        <i class="fas fa-lightbulb text-warning"></i>
-                    </div>
-                    <span>Aksi Perubahan</span>
-                </h5>
-                <div class="text-muted small">
-                    <i class="fas fa-list-check me-1"></i>
-                    ${aksiList.length} aksi perubahan
-                </div>
-            </div>
-
-            <!-- List Aksi Perubahan -->
-            <div class="row g-4">
-                ${aksiList.map((aksi, index) => aksiCard(aksi, index + 1)).join('')}
-            </div>
+      <div class="aksi-content text-center py-5">
+        <div class="empty-state">
+          <div class="empty-state-icon mb-4">
+            <i class="fas fa-lightbulb fa-4x" style="color: #e9ecef;"></i>
+          </div>
+          <h4 class="text-muted mb-3">Belum Ada Aksi Perubahan</h4>
+          <p class="text-muted mb-4">Peserta ini belum mengirimkan aksi perubahan</p>
         </div>
+      </div>
     `;
+  }
+
+  return `
+    <div class="aksi-container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0 d-flex align-items-center">
+          <div class="icon-wrapper bg-warning bg-opacity-10 p-2 rounded-3 me-3">
+            <i class="fas fa-lightbulb text-warning"></i>
+          </div>
+          <span>Aksi Perubahan</span>
+        </h5>
+      </div>
+
+      <div class="row g-4">
+        ${aksiCard(aksi)}
+      </div>
+    </div>
+  `;
 }
 
-// Aksi Card Component
-function aksiCard(aksi, index) {
-    const kategoriMap = {
-        'inovasi': { color: 'success', icon: 'fa-bolt', text: 'Inovasi' },
-        'improvement': { color: 'info', icon: 'fa-chart-line', text: 'Improvement' },
-        'problem_solving': { color: 'primary', icon: 'fa-puzzle-piece', text: 'Problem Solving' }
-    };
+// Card tunggal (tanpa index/perulangan)
+function aksiCard(aksi) {
+  // sesuaikan dengan dropdown kamu: pilihan1/pilihan2
+  const kategoriMap = {
+    'pilihan1': { color: 'success', icon: 'fa-bolt', text: 'Pilihan 1' },
+    'pilihan2': { color: 'info', icon: 'fa-tag', text: 'Pilihan 2' }
+  };
 
-    const kategori = kategoriMap[aksi.kategori_aksatika] || { color: 'secondary', icon: 'fa-question', text: aksi.kategori_aksatika };
+  const kategori = kategoriMap[aksi.kategori_aksatika] || {
+    color: 'secondary',
+    icon: 'fa-question',
+    text: aksi.kategori_aksatika || '-'
+  };
 
-    return `
-        <div class="col-xl-6 col-lg-12">
-            <div class="aksi-card card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="badge-number me-3">
-                            <span class="badge bg-primary rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                ${index}
-                            </span>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-2 text-dark">${aksi.judul || 'Aksi Perubahan'}</h6>
-                            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                                <span class="badge bg-${kategori.color} bg-opacity-10 text-${kategori.color}">
-                                    <i class="fas ${kategori.icon} me-1"></i>${kategori.text}
-                                </span>
-                            </div>
-                            ${aksi.abstrak ? `
-                                <div class="abstrak-section mb-3">
-                                    <label class="text-muted small">Abstrak</label>
-                                    <p class="mb-0 text-dark" style="line-height: 1.5;">
-                                        ${aksi.abstrak}
-                                    </p>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    <!-- Dokumen dan Link -->
-                    <div class="row g-2">
-                        ${aksi.file ? `
-                            <div class="col-md-6">
-                                <div class="dokumen-item d-flex align-items-center p-2 border rounded">
-                                    <div class="dokumen-icon bg-primary bg-opacity-10 rounded p-2 me-2">
-                                        <i class="fas fa-file-pdf text-primary"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <small class="text-muted d-block">Dokumen Aksi Perubahan</small>
-                                        <small class="fw-semibold">file_aksi.pdf</small>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-outline-primary view-aksi-document" 
-                                            data-path="${aksi.file}" data-title="Dokumen Aksi Perubahan">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        ` : ''}
-                        
-                        ${aksi.link_video ? `
-                            <div class="col-md-6">
-                                <div class="link-item d-flex align-items-center p-2 border rounded">
-                                    <div class="link-icon bg-danger bg-opacity-10 rounded p-2 me-2">
-                                        <i class="fab fa-youtube text-danger"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <small class="text-muted d-block">Video Presentasi</small>
-                                        <small class="fw-semibold">Link YouTube</small>
-                                    </div>
-                                    <a href="${aksi.link_video}" target="_blank" class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        ` : ''}
-                        
-                        ${aksi.link_laporan_majalah ? `
-                            <div class="col-md-6">
-                                <div class="link-item d-flex align-items-center p-2 border rounded">
-                                    <div class="link-icon bg-info bg-opacity-10 rounded p-2 me-2">
-                                        <i class="fas fa-newspaper text-info"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <small class="text-muted d-block">Laporan Majalah</small>
-                                        <small class="fw-semibold">Link Artikel</small>
-                                    </div>
-                                    <a href="${aksi.link_laporan_majalah}" target="_blank" class="btn btn-sm btn-outline-info">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
+  const videoUrl = normalizeUrl(aksi.link_video);
+  const majalahUrl = normalizeUrl(aksi.link_laporan_majalah);
+
+  return `
+    <div class="col-xl-6 col-lg-12">
+      <div class="aksi-card card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+
+          <div class="d-flex align-items-start mb-3">
+            <div class="badge-number me-3">
+              <span class="badge bg-primary rounded-circle p-2"
+                style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                1
+              </span>
             </div>
+
+            <div class="flex-grow-1">
+              <h6 class="fw-bold mb-2 text-dark">${aksi.judul || 'Aksi Perubahan'}</h6>
+
+              <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                <span class="badge bg-${kategori.color} bg-opacity-10 text-${kategori.color}">
+                  <i class="fas ${kategori.icon} me-1"></i>${kategori.text}
+                </span>
+              </div>
+
+              ${aksi.abstrak ? `
+                <div class="abstrak-section mb-3">
+                  <label class="text-muted small">Abstrak</label>
+                  <p class="mb-0 text-dark" style="line-height: 1.5;">
+                    ${aksi.abstrak}
+                  </p>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Dokumen dan Link -->
+          <div class="row g-2">
+            ${aksi.file ? `
+              <div class="col-md-6">
+                <div class="dokumen-item d-flex align-items-center p-2 border rounded">
+                  <div class="dokumen-icon bg-primary bg-opacity-10 rounded p-2 me-2">
+                    <i class="fas fa-file-pdf text-primary"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <small class="text-muted d-block">Laporan Lengkap</small>
+                    <small class="fw-semibold">${fileNameFromPath(aksi.file)}</small>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-primary view-aksi-document"
+                          data-path="${aksi.file}" data-title="Laporan Lengkap">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            ` : ''}
+
+            ${aksi.lembar_pengesahan ? `
+              <div class="col-md-6">
+                <div class="dokumen-item d-flex align-items-center p-2 border rounded">
+                  <div class="dokumen-icon bg-success bg-opacity-10 rounded p-2 me-2">
+                    <i class="fas fa-file-signature text-success"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <small class="text-muted d-block">Lembar Pengesahan</small>
+                    <small class="fw-semibold">${fileNameFromPath(aksi.lembar_pengesahan)}</small>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-success view-aksi-document"
+                          data-path="${aksi.lembar_pengesahan}" data-title="Lembar Pengesahan">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            ` : ''}
+
+            ${videoUrl ? `
+              <div class="col-md-6">
+                <div class="link-item d-flex align-items-center p-2 border rounded">
+                  <div class="link-icon bg-danger bg-opacity-10 rounded p-2 me-2">
+                    <i class="fab fa-youtube text-danger"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <small class="text-muted d-block">Video Presentasi</small>
+                    <small class="fw-semibold">Buka Link</small>
+                  </div>
+                  <a href="${videoUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </div>
+              </div>
+            ` : ''}
+
+            ${majalahUrl ? `
+              <div class="col-md-6">
+                <div class="link-item d-flex align-items-center p-2 border rounded">
+                  <div class="link-icon bg-info bg-opacity-10 rounded p-2 me-2">
+                    <i class="fas fa-newspaper text-info"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <small class="text-muted d-block">Laporan Majalah</small>
+                    <small class="fw-semibold">Buka Link</small>
+                  </div>
+                  <a href="${majalahUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
         </div>
-    `;
+      </div>
+    </div>
+  `;
 }
 
                 // Load Mentor Content

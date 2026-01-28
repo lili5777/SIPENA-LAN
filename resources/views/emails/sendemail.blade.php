@@ -230,23 +230,35 @@
                     <span style="font-size: 1.2em; margin-right: 10px;">🔐</span>
                     Informasi Login Anda
                 </h2>
-
+            
                 <div class="info-item">
                     <div class="info-label">Email:</div>
                     <div class="info-value">{{ $data['email'] }}</div>
                 </div>
-
+            
                 <div class="info-item">
                     <div class="info-label">Password:</div>
-                    <div class="info-value">{{ $data['password'] }}</div>
+                    <div class="info-value">
+                        <!-- Menampilkan password dengan peringatan -->
+                        <span style="color: red; font-weight: bold;">Password Anda: {{ $data['password'] }}</span>
+                        <br>
+                        <span style="color: red;">Perhatian: Anda diminta untuk mengganti password Anda segera demi keamanan akun
+                            Anda.</span>
+                    </div>
                 </div>
-
+            
                 <div style="text-align: center;">
-                    <a href="#" class="cta-button">Login ke Akun Anda</a>
-                    <p style="color: #718096; font-size: 14px;">Klik tombol di atas untuk langsung menuju halaman login</p>
+                    <!-- Tombol untuk mengganti password -->
+                    <a href="https://simpel.pw/admin/akun" class="cta-button"
+                        style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                        Ganti Password
+                    </a>
+                    <p style="color: #718096; font-size: 14px;">Klik tombol di atas untuk mengganti password Anda dan memastikan
+                        keamanan akun Anda.</p>
                 </div>
-                
+            
             </div>
+
 
             <div class="info-card">
                 <h2>

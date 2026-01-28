@@ -1,11 +1,11 @@
 @extends('layouts.master')
 
-@section('title', 'SIPENA - Sistem Informasi Profesional')
+@section('title', 'SIMPEL - Sistem Informasi Profesional')
 
 @section('content')
     <!-- Banner -->
     <section class="banner" id="home">
-        <img src="https://www.sipena.info/images/gedung.png" alt="Gedung SIPENA" class="banner-img">
+        <img src="https://www.sipena.info/images/gedung.png" alt="Gedung SIMPEL" class="banner-img">
         <div class="banner-overlay">
             <div class="container">
                 <div class="banner-content animate">
@@ -37,7 +37,7 @@
                             <i class="far fa-calendar-alt"></i> 15 Oktober 2023
                         </div>
                         <h3 class="news-title">Seminar Nasional Teknologi Informasi 2023</h3>
-                        <p class="news-text">SIPENA mengadakan seminar nasional tentang perkembangan teknologi informasi
+                        <p class="news-text">SIMPEL mengadakan seminar nasional tentang perkembangan teknologi informasi
                             terkini dengan menghadirkan pembicara dari berbagai institusi ternama.</p>
                         <a href="#" class="news-link">Baca Selengkapnya <i class="fas fa-arrow-right"></i></a>
                     </div>
@@ -66,8 +66,8 @@
                         <div class="news-date">
                             <i class="far fa-calendar-alt"></i> 5 Oktober 2023
                         </div>
-                        <h3 class="news-title">Rilis Publikasi Terbaru SIPENA</h3>
-                        <p class="news-text">SIPENA telah merilis publikasi terbaru tentang perkembangan sistem
+                        <h3 class="news-title">Rilis Publikasi Terbaru SIMPEL</h3>
+                        <p class="news-text">SIMPEL telah merilis publikasi terbaru tentang perkembangan sistem
                             informasi di Indonesia tahun 2023 yang dapat diakses secara gratis.</p>
                         <a href="#" class="news-link">Baca Selengkapnya <i class="fas fa-arrow-right"></i></a>
                     </div>

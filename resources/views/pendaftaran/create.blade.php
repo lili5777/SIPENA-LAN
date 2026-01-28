@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'SIPENA - Form Pembaruan Data Peserta')
+@section('title', 'SIMPEL - Form Pembaruan Data Peserta')
 
 @section('content')
     <!-- Hero Section -->

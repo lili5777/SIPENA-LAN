@@ -3,7 +3,7 @@
     <div class="container">
         <nav class="navbar">
             <a href="#home" class="logo">
-                <img src="https://www.sipena.info/images/skmp1.png" alt="Logo SIPENA" class="logo-img">
+                <img src="https://www.sipena.info/images/skmp1.png" alt="Logo SIMPEL" class="logo-img">
             </a>
 
             <button class="mobile-menu-btn" id="mobileMenuBtn">

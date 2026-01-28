@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Publikasi & Kinerja - SIPENA')
+@section('title', 'Publikasi & Kinerja - SIMPEL')
 
 @section('content')
     <!-- Hero Section -->

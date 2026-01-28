@@ -33,18 +33,18 @@
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-phone contact-icon"></i>
-                        <span>(0411) 490101</span>
+                        <span>-</span>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-envelope contact-icon"></i>
-                        <span>info@sipena.co.id</span>
+                        <span>latbang.puslatbangkmp@gmail.com</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="copyright">
-            <p>&copy; {{ date('Y') }} SIPENA. Hak Cipta Dilindungi.</p>
+            <p>&copy; {{ date('Y') }} SIMPEL. Hak Cipta Dilindungi.</p>
         </div>
     </div>
 </footer>

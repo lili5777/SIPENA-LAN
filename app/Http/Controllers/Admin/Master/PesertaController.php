@@ -480,7 +480,6 @@ class PesertaController extends Controller
                     'npwp_mentor' => 'nullable|string|max:50',
                     'has_mentor' => 'nullable|in:Ya,Tidak',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
-                    'judul' => 'nullable'
                 ],
                 [
                     'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
@@ -594,7 +593,9 @@ class PesertaController extends Controller
                 'file_sk_cpns',
                 'file_spmt',
                 'file_skp',
-                'file_persetujuan_mentor'
+                'file_persetujuan_mentor',
+                'file',
+                'lembar_pengesahan'
             ];
 
             // Ambil data untuk struktur folder
@@ -936,8 +937,12 @@ class PesertaController extends Controller
                     'npwp_mentor' => 'nullable|string|max:50',
                     'has_mentor' => 'nullable|in:Ya,Tidak',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
-                    'file' => 'nullable|file|mimes:pdf|max:1024',
-                    'judul' => 'nullable'
+                    'judul' => 'nullable',
+                    'file' => 'nullable|file|mimes:pdf|max:5024',  // validasi file proyek
+                    'lembar_pengesahan' => 'nullable|file|mimes:pdf|max:1024',  // validasi file lembar pengesahan
+                    'kategori_aksatika' => 'nullable|in:pilihan1,pilihan2',
+                    'link_video'  => 'nullable|string|max:200',
+                    'link_laporan_majalah'  => 'nullable|string|max:200',
                 ],
                 [
                     'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
@@ -1041,6 +1046,7 @@ class PesertaController extends Controller
                 'file_skp',
                 'file_persetujuan_mentor',
                 'file',
+                'lembar_pengesahan'
             ];
 
             // Ambil data untuk struktur folder
@@ -1291,12 +1297,16 @@ class PesertaController extends Controller
                     ['id_pendaftar' => $pendaftaran->id],
                     [
                         'judul' => $request->judul,
-                        'file'  => $files['file'] ?? optional(
-                            AksiPerubahan::where('id_pendaftar', $pendaftaran->id)->first()
-                        )->file,
+                        'file' => $files['file'] ?? null,
+                        'lembar_pengesahan' => $files['lembar_pengesahan'] ?? null,
+                        'kategori_aksatika' => $request->kategori_aksatika ?? null,
+                        'link_video' => $request->link_video ?? null,  // Menyimpan link video
+                        'link_laporan_majalah' => $request->link_laporan_majalah ?? null,  // Menyimpan link laporan majalah
                     ]
                 );
             }
+
+
 
             $angkatanNama = $angkatan->nama_angkatan;
             aktifitas("Memperbarui Data Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatanNama}", $peserta);

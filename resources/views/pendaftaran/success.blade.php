@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'SIPENA - Pendaftaran Berhasil')
+@section('title', 'SIMPEL - Pendaftaran Berhasil')
 
 @section('content')
         <section class="success-hero">
@@ -54,6 +54,8 @@
                         <ul>
                             <li>Proses verifikasi membutuhkan waktu 3-5 hari kerja</li>
                             <li>Pastikan email dan nomor HP yang didaftarkan aktif</li>
+                            <li>Mohon cek email Anda secara berkala, termasuk folder <b>Spam/Junk</b>, untuk memastikan tidak ada pesan yang
+                                terlewat</li>
                         </ul>
                     </div>
                 </div>

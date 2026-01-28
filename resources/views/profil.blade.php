@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Profil - SIPENA')
+@section('title', 'Profil - SIMPEL')
 
 @section('content')
     <!-- Hero Section -->
@@ -11,7 +11,7 @@
                     <h1 class="hero-title">Profil Organisasi</h1>
                     <p class="hero-subtitle">PUSJAR SKMP - Menggerakkan Transformasi Digital Pemerintahan Menuju Indonesia
                         Maju</p>
-                    
+
                 </div>
             </div>
         </div>
@@ -157,16 +157,16 @@
                 <div class="leadership-card">
                     <div class="card-floating-bg"></div>
                     <div class="leadership-photo">
-                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                        <img src="{{ asset('gambar/kapus.png') }}"
                             alt="Dr. Ahmad Wijaya">
                         <div class="photo-border"></div>
                     </div>
                     <div class="leadership-info">
-                        <h3 class="leader-name">Dr. Ahmad Wijaya, M.Si.</h3>
-                        <p class="leader-position">Kepala PUSJAR SKMP</p>
+                        <h3 class="leader-name">Dr. Muhammad Aswad, M.Si</h3>
+                        <p class="leader-position">Kepala Pusat PUSJAR SKMP</p>
                         <div class="leader-nip">
                             <span>NIP:</span>
-                            <strong>19651215 199003 1 001</strong>
+                            <strong>19670206 199303 1 001</strong>
                         </div>
                     </div>
                 </div>
@@ -175,16 +175,16 @@
                 <div class="leadership-card">
                     <div class="card-floating-bg"></div>
                     <div class="leadership-photo">
-                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                        <img src=""
                             alt="Drs. Budi Santoso">
                         <div class="photo-border"></div>
                     </div>
                     <div class="leadership-info">
-                        <h3 class="leader-name">Drs. Budi Santoso, M.M.</h3>
+                        <h3 class="leader-name">Pejabat 2</h3>
                         <p class="leader-position">Wakil Kepala Bidang SDM</p>
                         <div class="leader-nip">
                             <span>NIP:</span>
-                            <strong>19700320 199203 1 002</strong>
+                            <strong>1xxxxxxxxxx</strong>
                         </div>
                     </div>
                 </div>
@@ -193,16 +193,16 @@
                 <div class="leadership-card">
                     <div class="card-floating-bg"></div>
                     <div class="leadership-photo">
-                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                        <img src=""
                             alt="Ir. Siti Nurhaliza">
                         <div class="photo-border"></div>
                     </div>
                     <div class="leadership-info">
-                        <h3 class="leader-name">Ir. Siti Nurhaliza, M.T.</h3>
+                        <h3 class="leader-name">Pejabat 3</h3>
                         <p class="leader-position">Kepala Bidang Inovasi</p>
                         <div class="leader-nip">
                             <span>NIP:</span>
-                            <strong>19750812 199803 2 003</strong>
+                            <strong>1xxxxxxxxxxxxx</strong>
                         </div>
                     </div>
                 </div>

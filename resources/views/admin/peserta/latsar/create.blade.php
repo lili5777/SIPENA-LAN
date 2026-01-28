@@ -650,7 +650,8 @@ $isPKN = $jenis === 'pkn';
                                 <div class="form-section-header">
                                     <i class="fas fa-lightbulb"></i>Projek Aksi Perubahan
                                 </div>
-                                
+
+                                <!-- Judul -->
                                 <div class="form-group">
                                     <label class="form-label">Judul</label>
                                     <input type="text" name="judul"
@@ -662,8 +663,9 @@ $isPKN = $jenis === 'pkn';
                                     @enderror
                                 </div>
 
+                                <!-- Upload Hasil Projek (File PDF) -->
                                 <div class="form-group">
-                                    <label class="form-label">Upload Hasil Projek</label>
+                                    <label class="form-label">Upload Laporan Lengkap</label>
                                     <div class="form-hint">Format PDF, maksimal 1MB</div>
                                     <div class="form-file">
                                         <input type="file" name="file" id="file"
@@ -685,7 +687,71 @@ $isPKN = $jenis === 'pkn';
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
+                                <!-- Upload Lembar Pengesahan (File) -->
+                                <div class="form-group">
+                                    <label class="form-label">Upload Lembar Pengesahan</label>
+                                    <div class="form-hint">Format PDF, maksimal 1MB</div>
+                                    <div class="form-file">
+                                        <input type="file" name="lembar_pengesahan" id="lembar_pengesahan"
+                                            class="form-file-input @error('lembar_pengesahan') error @enderror"
+                                            accept=".pdf">
+                                        <label class="form-file-label" for="lembar_pengesahan">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span>{{ $isEdit && $aksiPerubahan && $aksiPerubahan->lembar_pengesahan ? 'Ganti Lembar Pengesahan' : 'Klik untuk mengunggah lembar pengesahan' }}</span>
+                                        </label>
+                                        <div class="form-file-name" id="lembar_pengesahan_name">
+                                            @if ($isEdit && $aksiPerubahan && $aksiPerubahan->lembar_pengesahan)
+                                                Lembar Pengesahan sudah ada: {{ basename($aksiPerubahan->lembar_pengesahan) }}
+                                            @else
+                                                Belum ada file dipilih
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @error('lembar_pengesahan')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <!-- Kategori Aksatika (Dropdown) -->
+                                <div class="form-group">
+                                    <label class="form-label">Kategori Aksatika</label>
+                                    <select name="kategori_aksatika" class="form-input @error('kategori_aksatika') error @enderror">
+                                        <option value="">Pilih Kategori</option>
+                                        <option value="pilihan1" {{ old('kategori_aksatika', optional($aksiPerubahan)->kategori_aksatika) == 'pilihan1' ? 'selected' : '' }}>Pilihan 1</option>
+                                        <option value="pilihan2" {{ old('kategori_aksatika', optional($aksiPerubahan)->kategori_aksatika) == 'pilihan2' ? 'selected' : '' }}>Pilihan 2</option>
+                                    </select>
+                                    @error('kategori_aksatika')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <!-- Link Video -->
+                                <div class="form-group">
+                                    <label class="form-label">Link Video</label>
+                                    <input type="url" name="link_video" 
+                                        class="form-input @error('link_video') error @enderror"
+                                        value="{{ old('link_video', optional($aksiPerubahan)->link_video) }}"
+                                        placeholder="Masukkan link video">
+                                    @error('link_video')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <!-- Link Laporan Majalah -->
+                                <div class="form-group">
+                                    <label class="form-label">Link Laporan Majalah</label>
+                                    <input type="url" name="link_laporan_majalah"
+                                        class="form-input @error('link_laporan_majalah') error @enderror"
+                                        value="{{ old('link_laporan_majalah', optional($aksiPerubahan)->link_laporan_majalah) }}"
+                                        placeholder="Masukkan link laporan majalah">
+                                    @error('link_laporan_majalah')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
                             @endif
+
+
 
                             <!-- Data Mentor -->
                             <div class="form-section-header">
@@ -2213,6 +2279,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             const fileInputs = [
                 { input: document.getElementById('file_ktp'), display: document.getElementById('fileKtpName') },
                 { input: document.getElementById('file'), display: document.getElementById('filee') },
+                { input: document.getElementById('lembar_pengesahan'), display: document.getElementById('lembar_pengesahan_name') },
                 { input: document.getElementById('file_sk_jabatan'), display: document.getElementById('fileSkJabatanName') },
                 { input: document.getElementById('file_sk_pangkat'), display: document.getElementById('fileSkPangkatName') },
                 { input: document.getElementById('file_surat_kesediaan'), display: document.getElementById('fileSuratKesediaanName') },
