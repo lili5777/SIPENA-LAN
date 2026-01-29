@@ -145,79 +145,97 @@ class PesertaController extends Controller
             'catatan_verifikasi' => 'nullable|string|max:500'
         ]);
 
-        $pendaftaran = Pendaftaran::findOrFail($id);
-        $role = Role::where('name', 'user')->first();
-        $peserta = $pendaftaran->peserta;
+        try {
+            return DB::transaction(function () use ($request, $id) {
 
-        // 🔒 VALIDASI LINK GB WA DI ANGKATAN
-        if (empty($pendaftaran->angkatan->link_gb_wa)) {
+                // Lock row pendaftaran agar tidak diproses bersamaan
+                $pendaftaran = Pendaftaran::with(['peserta', 'angkatan', 'jenisPelatihan'])
+                    ->lockForUpdate()
+                    ->findOrFail($id);
+
+                $peserta = $pendaftaran->peserta;
+
+                // 🔒 Validasi link grup WA (tetap seperti punyamu)
+                if (empty($pendaftaran->angkatan->link_gb_wa)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Link Grup WhatsApp angkatan belum diisi. Silakan lengkapi terlebih dahulu.'
+                    ], 422);
+                }
+
+                // Jika status jadi Diterima
+                if ($request->status_pendaftaran === 'Diterima') {
+
+                    // ✅ Kalau peserta sudah punya NDH, jangan generate ulang
+                    if (empty($peserta->ndh)) {
+
+                        // Ambil max NDH untuk jenis pelatihan + angkatan yang sama secara aman (lock)
+                        // Pakai join + max langsung (lebih ringan daripada ->get()->max('peserta.ndh')
+                        $lastNdh = Pendaftaran::query()
+                            ->where('pendaftaran.id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan)
+                            ->where('pendaftaran.id_angkatan', $pendaftaran->id_angkatan)
+                            ->join('peserta', 'peserta.id', '=', 'pendaftaran.id_peserta')
+                            ->lockForUpdate()
+                            ->max('peserta.ndh');
+
+                        $ndhBaru = $lastNdh ? ((int)$lastNdh + 1) : 1;
+
+                        // Simpan NDH
+                        $peserta->update([
+                            'ndh' => $ndhBaru
+                        ]);
+                    }
+
+                    // Buat/update akun user + kirim email hanya jika belum ada user / atau kamu memang mau selalu kirim ulang
+                    $role = Role::where('name', 'user')->firstOrFail();
+
+                    // password baru (untuk email)
+                    $passwordAsli = Str::random(8);
+
+                    $user = User::updateOrCreate(
+                        ['peserta_id' => $peserta->id],
+                        [
+                            'name'     => $peserta->nama_lengkap,
+                            'email'    => $peserta->email_pribadi,
+                            'password' => bcrypt($passwordAsli),
+                            'role_id'  => $role->id,
+                        ]
+                    );
+
+                    $dataEmail = [
+                        'name'       => $user->name,
+                        'email'      => $user->email,
+                        'password'   => $passwordAsli,
+                        'link_gb_wa' => $pendaftaran->angkatan->link_gb_wa,
+                    ];
+
+                    Mail::to($user->email)->send(new SendEmail($dataEmail));
+                }
+
+                // Update status pendaftaran (tetap)
+                $pendaftaran->update([
+                    'status_pendaftaran' => $request->status_pendaftaran,
+                    'catatan_verifikasi' => $request->catatan_verifikasi,
+                    'tanggal_verifikasi' => now()
+                ]);
+
+                // Log aktivitas (tetap)
+                $jenisPelatihan = $pendaftaran->jenisPelatihan->nama_pelatihan ?? '-';
+                $angkatan = $pendaftaran->angkatan->nama_angkatan ?? '-';
+                aktifitas("Mengubah Status Pendaftaran {$jenisPelatihan} - {$angkatan}", $peserta);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Status pendaftaran berhasil diperbarui'
+                ]);
+            });
+        } catch (\Throwable $e) {
+            // Kalau ada error (misal deadlock / email error), tangani dengan aman
             return response()->json([
                 'success' => false,
-                'message' => 'Link Grup WhatsApp angkatan belum diisi. Silakan lengkapi terlebih dahulu.'
-            ], 422);
+                'message' => 'Terjadi kesalahan saat memperbarui status: ' . $e->getMessage()
+            ], 500);
         }
-
-        if ($request->status_pendaftaran == 'Diterima') {
-
-            $lastNdh = Pendaftaran::where('id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan)
-                ->where('id_angkatan', $pendaftaran->id_angkatan)
-                ->whereHas('peserta', function ($q) {
-                    $q->whereNotNull('ndh');
-                })
-                ->with('peserta')
-                ->get()
-                ->max('peserta.ndh');
-
-            $ndhBaru = $lastNdh ? $lastNdh + 1 : 1;
-
-            // update NDH peserta
-            $peserta->update([
-                'ndh' => $ndhBaru
-            ]);
-
-
-            // password asli (untuk email)
-            $passwordAsli = Str::random(8);
-
-            // simpan user
-            $user = User::updateOrCreate(
-                ['peserta_id' => $pendaftaran->peserta->id],
-                [
-                    'name'     => $pendaftaran->peserta->nama_lengkap,
-                    'email'    => $pendaftaran->peserta->email_pribadi,
-                    'password' => bcrypt($passwordAsli),
-                    'role_id'  => $role->id,
-                ]
-            );
-
-            // update pesrta
-
-            // data email
-            $data = [
-                'name'     => $user->name,
-                'email'    => $user->email,
-                'password' => $passwordAsli,
-                'link_gb_wa' => $pendaftaran->angkatan->link_gb_wa,
-            ];
-
-            // kirim email ke peserta
-            Mail::to($user->email)->send(new SendEmail($data));
-        }
-
-        $pendaftaran->update([
-            'status_pendaftaran' => $request->status_pendaftaran,
-            'catatan_verifikasi' => $request->catatan_verifikasi,
-            'tanggal_verifikasi' => now()
-        ]);
-
-        $jenisPelatihan = $pendaftaran->jenisPelatihan->nama_pelatihan;
-        $angkatan = $pendaftaran->angkatan->nama_angkatan;
-        aktifitas("Mengubah Status Pendaftaran {$jenisPelatihan} - {$angkatan}", $peserta);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Status pendaftaran berhasil diperbarui'
-        ]);
     }
 
 
@@ -475,6 +493,7 @@ class PesertaController extends Controller
                     'tanggal_sk_jabatan' => 'nullable|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
                     'nama_mentor' => 'nullable|string|max:200',
+                    'nip_mentor' => 'nullable|string|max:200',
                     'jabatan_mentor' => 'nullable|string|max:200',
                     'nomor_rekening_mentor' => 'nullable|string|max:200',
                     'npwp_mentor' => 'nullable|string|max:50',
@@ -564,6 +583,7 @@ class PesertaController extends Controller
                     $additionalRules['id_mentor'] = 'nullable|exists:mentor,id';
                 } elseif ($request->mentor_mode === 'tambah') {
                     $additionalRules['nama_mentor_baru'] = 'nullable|string|max:200';
+                    $additionalRules['nip_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['jabatan_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
@@ -783,6 +803,7 @@ class PesertaController extends Controller
                     if ($request->nama_mentor_baru && $request->jabatan_mentor_baru) {
                         $mentor = Mentor::create([
                             'nama_mentor' => $request->nama_mentor_baru,
+                            'nip_mentor' => $request->nip_mentor_baru,
                             'jabatan_mentor' => $request->jabatan_mentor_baru,
                             'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                             'npwp_mentor' => $request->npwp_mentor_baru,
@@ -943,6 +964,7 @@ class PesertaController extends Controller
                     'tanggal_sk_jabatan' => 'nullable|date',
                     'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
                     'nama_mentor' => 'nullable|string|max:200',
+                    'nip_mentor' => 'nullable|string|max:200',
                     'jabatan_mentor' => 'nullable|string|max:200',
                     'nomor_rekening_mentor' => 'nullable|string|max:200',
                     'npwp_mentor' => 'nullable|string|max:50',
@@ -1026,6 +1048,7 @@ class PesertaController extends Controller
                     $additionalRules['id_mentor'] = 'nullable|exists:mentor,id';
                 } elseif ($request->mentor_mode === 'tambah') {
                     $additionalRules['nama_mentor_baru'] = 'nullable|string|max:200';
+                    $additionalRules['nip_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['jabatan_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
@@ -1270,6 +1293,7 @@ class PesertaController extends Controller
                     if ($request->nama_mentor_baru && $request->jabatan_mentor_baru) {
                         $mentor = Mentor::create([
                             'nama_mentor' => $request->nama_mentor_baru,
+                            'nip_mentor' => $request->nip_mentor_baru,
                             'jabatan_mentor' => $request->jabatan_mentor_baru,
                             'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                             'npwp_mentor' => $request->npwp_mentor_baru,
@@ -1365,27 +1389,38 @@ class PesertaController extends Controller
     public function destroy($jenis, $id)
     {
         try {
-            DB::transaction(function () use ($jenis, $id) {
+            // kalau kamu pakai MySQL dan ingin benar-benar aman dari race condition,
+            // transaksi ini sudah cukup untuk konsistensi
+            $result = DB::transaction(function () use ($jenis, $id) {
 
                 // =========================
                 // 1. AMBIL DATA PENDAFTARAN
                 // =========================
                 $jenisData = $this->getJenisData($jenis);
 
+                // ⚠️ UBAH findOrFail -> find (supaya idempotent, tidak error kalau sudah terhapus)
                 $pendaftaran = Pendaftaran::with([
                     'peserta',
                     'peserta.kepegawaianPeserta',
                     'pesertaMentor',
                     'angkatan',
                     'jenisPelatihan',
-                ])->lockForUpdate()->findOrFail($id);
+                ])->lockForUpdate()->find($id);
 
-                if ($pendaftaran->id_jenis_pelatihan != $jenisData['id']) {
+                // ✅ Kalau sudah tidak ada (mungkin request kedua / sudah terhapus), anggap sukses
+                if (!$pendaftaran) {
+                    return [
+                        'already_deleted' => true,
+                        'jenis' => $jenis,
+                    ];
+                }
+
+                if ((int)$pendaftaran->id_jenis_pelatihan !== (int)$jenisData['id']) {
                     abort(404, 'Data tidak ditemukan');
                 }
 
-                $peserta = $pendaftaran->peserta;
-                $angkatan = $pendaftaran->angkatan;
+                $peserta       = $pendaftaran->peserta;
+                $angkatan      = $pendaftaran->angkatan;
                 $jenisPelatihan = $pendaftaran->jenisPelatihan;
 
                 // =========================
@@ -1431,19 +1466,31 @@ class PesertaController extends Controller
                 // =========================
                 // 3. HAPUS FILE (SETELAH COMMIT)
                 // =========================
-                DB::afterCommit(function () use ($filesToDelete, $peserta, $angkatan, $jenisPelatihan) {
+                // simpan data folder path sebelum delete model (biar tidak hilang)
+                $folderPath = null;
+                if ($peserta) {
+                    $folderPath = "Berkas/" . date('Y') . "/" .
+                        str_replace(' ', '_', $jenisPelatihan->kode_pelatihan) . "/" .
+                        str_replace(' ', '_', $angkatan->nama_angkatan) . "/" .
+                        $peserta->nip_nrp;
+                }
 
+                DB::afterCommit(function () use ($filesToDelete, $folderPath) {
                     foreach (array_filter($filesToDelete) as $file) {
-                        Storage::disk('google')->delete($file);
+                        try {
+                            Storage::disk('google')->delete($file);
+                        } catch (\Throwable $e) {
+                            // tidak usah bikin transaksi gagal karena gagal delete file
+                            \Log::warning('Gagal delete file google drive', ['file' => $file, 'err' => $e->getMessage()]);
+                        }
                     }
 
-                    if ($peserta) {
-                        $folderPath = "Berkas/" . date('Y') . "/" .
-                            str_replace(' ', '_', $jenisPelatihan->kode_pelatihan) . "/" .
-                            str_replace(' ', '_', $angkatan->nama_angkatan) . "/" .
-                            $peserta->nip_nrp;
-
-                        Storage::disk('google')->deleteDirectory($folderPath);
+                    if ($folderPath) {
+                        try {
+                            Storage::disk('google')->deleteDirectory($folderPath);
+                        } catch (\Throwable $e) {
+                            \Log::warning('Gagal delete folder google drive', ['folder' => $folderPath, 'err' => $e->getMessage()]);
+                        }
                     }
                 });
 
@@ -1456,32 +1503,39 @@ class PesertaController extends Controller
                     $peserta->kepegawaianPeserta->delete();
                 }
 
+                // simpan id peserta untuk cek pendaftaran lain setelah delete
+                $pesertaId = $peserta ? $peserta->id : null;
+
+                // hapus pendaftaran
                 $pendaftaran->delete();
 
                 // =========================
                 // 5. RAPINKAN NDH (AMAN)
                 // =========================
-                $pesertaBerNDH = Peserta::whereHas('pendaftaran', function ($q) use ($angkatan) {
-                    $q->where('id_angkatan', $angkatan->id);
-                })
-                    ->whereNotNull('ndh')
-                    ->orderBy('ndh')
-                    ->lockForUpdate()
-                    ->get();
+                if ($angkatan) {
+                    $pesertaBerNDH = Peserta::whereHas('pendaftaran', function ($q) use ($angkatan) {
+                        $q->where('id_angkatan', $angkatan->id);
+                    })
+                        ->whereNotNull('ndh')
+                        ->orderBy('ndh')
+                        ->lockForUpdate()
+                        ->get();
 
-                $no = 1;
-                foreach ($pesertaBerNDH as $p) {
-                    $p->update(['ndh' => $no++]);
+                    $no = 1;
+                    foreach ($pesertaBerNDH as $p) {
+                        $p->update(['ndh' => $no++]);
+                    }
                 }
+
                 // =========================
-                // 6. HAPUS PESERTA & USER
+                // 6. HAPUS PESERTA & USER (JIKA TIDAK PUNYA PENDAFTARAN LAIN)
                 // =========================
-                if ($peserta) {
-                    $jumlahPendaftaran = Pendaftaran::where('id_peserta', $peserta->id)->count();
+                if ($pesertaId) {
+                    $jumlahPendaftaran = Pendaftaran::where('id_peserta', $pesertaId)->count();
 
                     if ($jumlahPendaftaran === 0) {
-                        User::where('peserta_id', $peserta->id)->delete();
-                        $peserta->delete();
+                        User::where('peserta_id', $pesertaId)->delete();
+                        Peserta::where('id', $pesertaId)->delete();
                     }
                 }
 
@@ -1492,21 +1546,34 @@ class PesertaController extends Controller
                     "Menghapus Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatan->nama_angkatan}",
                     $peserta
                 );
+
+                return [
+                    'already_deleted' => false,
+                    'jenis' => $jenis,
+                ];
             });
 
             // =========================
             // 8. RESPONSE
             // =========================
+            // kalau sudah terhapus sebelumnya, tetap balikin sukses
             if (request()->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Data peserta berhasil dihapus & NDH dirapikan'
+                    'message' => $result['already_deleted']
+                        ? 'Data sudah tidak ada (mungkin sudah terhapus sebelumnya).'
+                        : 'Data peserta berhasil dihapus & NDH dirapikan'
                 ]);
             }
 
             return redirect()
-                ->route('peserta.index', ['jenis' => $jenis])
-                ->with('success', 'Data peserta berhasil dihapus & NDH dirapikan');
+                ->route('peserta.index', ['jenis' => $result['jenis']])
+                ->with(
+                    'success',
+                    $result['already_deleted']
+                        ? 'Data sudah tidak ada (mungkin sudah terhapus sebelumnya).'
+                        : 'Data peserta berhasil dihapus & NDH dirapikan'
+                );
         } catch (\Throwable $e) {
 
             if (request()->ajax()) {

@@ -684,6 +684,7 @@ $selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') :
                                             <option value="">Pilih Mentor...</option>
                                             @foreach($mentorList as $mentor)
                                                 <option value="{{ $mentor->id }}" data-nama="{{ $mentor->nama_mentor }}"
+                                                    data-nip="{{ $mentor->nip_mentor }}"
                                                     data-jabatan="{{ $mentor->jabatan_mentor }}"
                                                     data-nomor-rekening="{{ $mentor->nomor_rekening }}"
                                                     data-npwp="{{ $mentor->npwp_mentor }}" {{ ($selectedMentorId == $mentor->id) || old('id_mentor') == $mentor->id ? 'selected' : '' }}>
@@ -704,6 +705,16 @@ $selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') :
                                                 value="{{ $mentorData && $mentorData->mentor ? $mentorData->mentor->nama_mentor : old('nama_mentor') }}"
                                                 readonly>
                                             @error('nama_mentor')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">NIP Mentor</label>
+                                            <input type="text" name="nip_mentor" id="nip_mentor_select"
+                                                class="form-input @error('nip_mentor') error @enderror"
+                                                value="{{ $mentorData && $mentorData->mentor ? $mentorData->mentor->nip_mentor : old('nip_mentor') }}"
+                                                readonly>
+                                            @error('nip_mentor')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
@@ -765,6 +776,15 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                                 class="form-input @error('nama_mentor_baru') error @enderror"
                                                 value="{{ $mentorBaruNama }}" placeholder="Masukkan nama mentor">
                                             @error('nama_mentor_baru')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">NIP Mentor</label>
+                                            <input type="text" name="nip_mentor_baru" id="nip_mentor_baru"
+                                                class="form-input @error('nip_mentor_baru') error @enderror"
+                                                value="{{ old('nip_mentor_baru') }}" placeholder="Masukkan NIP mentor">
+                                            @error('nip_mentor_baru')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
@@ -873,18 +893,18 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                 </div>
 
                                 @php
-                                    $kategoriOptions = [
-                                        'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
-                                        'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
-                                        'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
-                                        'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
-                                        'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
-                                        'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
-                                        'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
-                                        'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
-                                    ];
+    $kategoriOptions = [
+        'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
+        'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
+        'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
+        'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
+        'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
+        'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
+        'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
+        'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
+    ];
 
-                                    $selectedKategori = old('kategori_aksatika', optional($aksiPerubahan)->kategori_aksatika);
+    $selectedKategori = old('kategori_aksatika', optional($aksiPerubahan)->kategori_aksatika);
                                 @endphp
 
                                 <div class="form-group">
@@ -2342,6 +2362,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             const addMentorForm = document.getElementById('add-mentor-form');
             const mentorSelect = document.getElementById('id_mentor');
             const namaMentorSelect = document.getElementById('nama_mentor_select');
+            const nipMentorSelect = document.getElementById('nip_mentor_select');
             const jabatanMentorSelect = document.getElementById('jabatan_mentor_select');
             const nomorRekeningMentorSelect = document.getElementById('nomor_rekening_mentor_select');
             const npwpMentorSelect = document.getElementById('npwp_mentor_select');
@@ -2542,6 +2563,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 
                             // Populate fields with mentor data
                             if (namaMentorSelect) namaMentorSelect.value = selectedOption.dataset.nama || '';
+                            if (nipMentorSelect) nipMentorSelect.value = selectedOption.dataset.nip || '';
                             if (jabatanMentorSelect) jabatanMentorSelect.value = selectedOption.dataset.jabatan || '';
                             if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = selectedOption.dataset.nomorRekening || '';
                             if (npwpMentorSelect) npwpMentorSelect.value = selectedOption.dataset.npwp || '';
@@ -2565,6 +2587,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 
             function resetMentorFields() {
                 if (namaMentorSelect) namaMentorSelect.value = '';
+                if (nipMentorSelect) nipMentorSelect.value = '';
                 if (jabatanMentorSelect) jabatanMentorSelect.value = '';
                 if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = '';
                 if (npwpMentorSelect) npwpMentorSelect.value = '';
@@ -2590,6 +2613,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 
                         // Store mentor data in dataset
                         option.dataset.nama = mentor.nama_mentor;
+                        option.dataset.nip = mentor.nip_mentor;
                         option.dataset.jabatan = mentor.jabatan_mentor;
                         option.dataset.nomorRekening = mentor.nomor_rekening_mentor || mentor.nomor_rekening || '';
                         option.dataset.npwp = mentor.npwp_mentor || mentor.npwp || '';

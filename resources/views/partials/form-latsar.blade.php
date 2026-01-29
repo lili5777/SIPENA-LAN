@@ -510,6 +510,15 @@
                 @enderror
             </div>
             <div class="form-group">
+                <label class="form-label required">NIP Mentor</label>
+                <input type="text" name="nip_mentor" id="nip_mentor_select"
+                    class="form-input @error('nip_mentor') error @enderror"
+                    value="{{ $peserta['nip_mentor'] ?? old('nip_mentor') }}" readonly>
+                @error('nip_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
                 <label class="form-label required">Jabatan Mentor</label>
                 <input type="text" name="jabatan_mentor" id="jabatan_mentor_select"
                     class="form-input capitalize @error('jabatan_mentor') error @enderror"
@@ -560,6 +569,16 @@
                     placeholder="Contoh: Dr. Ahmad Supriyadi, M.Si.">
                 <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
                 @error('nama_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label required">NIP Mentor</label>
+                <input type="text" name="nip_mentor_baru" id="nip_mentor_baru"
+                    class="form-input @error('nip_mentor_baru') error @enderror"
+                    value="{{ $peserta['nip_mentor_baru'] ?? old('nip_mentor_baru') }}"
+                    placeholder="Contoh: 19651231 198903 1 001">
+                @error('nip_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
             </div>

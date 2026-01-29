@@ -27,6 +27,7 @@ class MentorController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nama_mentor', 'like', "%{$search}%")
+                    ->orWhere('nip_mentor', 'like', "%{$search}%")
                     ->orWhere('email_mentor', 'like', "%{$search}%")
                     ->orWhere('nomor_hp_mentor', 'like', "%{$search}%")
                     ->orWhere('jabatan_mentor', 'like', "%{$search}%");
@@ -71,6 +72,7 @@ class MentorController extends Controller
     {
         $request->validate([
             'nama_mentor' => 'required|string|max:200',
+            'nip_mentor' => 'nullable|string|max:200',
             'jabatan_mentor' => 'nullable|string|max:200',
             'nomor_rekening' => 'nullable|string|max:200',
             'npwp_mentor' => 'nullable|string|max:50',
@@ -80,6 +82,7 @@ class MentorController extends Controller
         ], [
             'nama_mentor.required' => 'Nama mentor wajib diisi.',
             'nama_mentor.max' => 'Nama mentor maksimal 200 karakter.',
+            'nip_mentor.max' => 'NIP mentor maksimal 200 karakter.',
             'jabatan_mentor.max' => 'Jabatan mentor maksimal 200 karakter.',
             'nomor_rekening.max' => 'Nomor rekening maksimal 200 karakter.',
             'npwp_mentor.max' => 'NPWP mentor maksimal 50 karakter.',
@@ -96,6 +99,7 @@ class MentorController extends Controller
 
             $mentor=Mentor::create([
                         'nama_mentor' => $request->nama_mentor,
+                        'nip_mentor' => $request->nip_mentor,
                         'jabatan_mentor' => $request->jabatan_mentor,
                         'nomor_rekening' => $request->nomor_rekening,
                         'npwp_mentor' => $request->npwp_mentor,
@@ -140,6 +144,7 @@ class MentorController extends Controller
 
         $request->validate([
             'nama_mentor' => 'required|string|max:200',
+            'nip_mentor' => 'nullable|string|max:200',
             'jabatan_mentor' => 'nullable|string|max:200',
             'nomor_rekening' => 'nullable|string|max:200',
             'npwp_mentor' => 'nullable|string|max:50',
@@ -149,6 +154,7 @@ class MentorController extends Controller
         ], [
             'nama_mentor.required' => 'Nama mentor wajib diisi.',
             'nama_mentor.max' => 'Nama mentor maksimal 200 karakter.',
+            'nip_mentor.max' => 'NIP mentor maksimal 200 karakter.',
             'jabatan_mentor.max' => 'Jabatan mentor maksimal 200 karakter.',
             'nomor_rekening.max' => 'Nomor rekening maksimal 200 karakter.',
             'npwp_mentor.max' => 'NPWP mentor maksimal 50 karakter.',
@@ -165,6 +171,7 @@ class MentorController extends Controller
 
             $mentor->update([
                 'nama_mentor' => $request->nama_mentor,
+                'nip_mentor' => $request->nip_mentor,
                 'jabatan_mentor' => $request->jabatan_mentor,
                 'nomor_rekening' => $request->nomor_rekening,
                 'npwp_mentor' => $request->npwp_mentor,

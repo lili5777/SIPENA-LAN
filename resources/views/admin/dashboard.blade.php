@@ -1880,6 +1880,13 @@
                             </div>
                             <div class="data-item">
                                 <span class="data-label">
+                                    <i class="fas fa-id-badge"></i>
+                                    NIP Mentor
+                                </span>
+                                <span class="data-value">{{ $mentorData->nip_mentor ?? 'Belum diisi' }}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">
                                     <i class="fas fa-briefcase"></i>
                                     Jabatan Mentor
                                 </span>

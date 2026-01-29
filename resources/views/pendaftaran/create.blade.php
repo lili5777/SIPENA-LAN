@@ -1804,6 +1804,33 @@
                         }
                     });
                 }
+
+                // Auto-fill field saat pilih mentor
+                if (mentorDropdown) {
+                    mentorDropdown.addEventListener('change', function () {
+                        const selectedOption = this.options[this.selectedIndex];
+                        const payload = selectedOption.dataset.mentor;
+
+                        if (!payload) {
+                            // kalau pilih "Pilih Mentor..."
+                            document.getElementById('nama_mentor_select').value = '';
+                            document.getElementById('nip_mentor_select').value = '';
+                            document.getElementById('jabatan_mentor_select').value = '';
+                            document.getElementById('nomor_rekening_mentor_select').value = '';
+                            document.getElementById('npwp_mentor_select').value = '';
+                            return;
+                        }
+
+                        const mentor = JSON.parse(payload);
+
+                        document.getElementById('nama_mentor_select').value = mentor.nama_mentor || '';
+                        document.getElementById('nip_mentor_select').value = mentor.nip_mentor || '';
+                        document.getElementById('jabatan_mentor_select').value = mentor.jabatan_mentor || '';
+                        document.getElementById('nomor_rekening_mentor_select').value = mentor.nomor_rekening_mentor || '';
+                        document.getElementById('npwp_mentor_select').value = mentor.npwp_mentor || '';
+                    });
+                }
+
             }
 
             async function loadMentors() {
@@ -1826,6 +1853,7 @@
                         option.textContent = `${mentor.nama_mentor} - ${mentor.jabatan_mentor}`;
                         option.dataset.mentor = JSON.stringify({
                             nama_mentor: mentor.nama_mentor,
+                            nip_mentor: mentor.nip_mentor,              
                             jabatan_mentor: mentor.jabatan_mentor,
                             nomor_rekening_mentor: mentor.nomor_rekening,
                             npwp_mentor: mentor.npwp_mentor

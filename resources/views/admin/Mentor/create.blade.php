@@ -101,6 +101,21 @@
                             </small>
                         </div>
 
+                        <!-- NIP Mentor -->
+                        <div class="mb-4">
+                            <label for="nip_mentor" class="form-label fw-semibold">
+                                <i class="fas fa-id-card me-1 text-primary"></i>
+                                NIP Mentor
+                            </label>
+                            <input type="text" class="form-control @error('nip_mentor') is-invalid @enderror"
+                                id="nip_mentor" name="nip_mentor"
+                                value="{{ old('nip_mentor', $isEdit ? $mentor->nip_mentor : '') }}"
+                                placeholder="Masukkan NIP mentor (jika ada)">
+                            @error('nip_mentor')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <!-- Jabatan Mentor -->
                         <div class="mb-4">
                             <label for="jabatan_mentor" class="form-label fw-semibold">

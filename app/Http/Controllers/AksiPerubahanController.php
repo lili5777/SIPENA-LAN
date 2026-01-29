@@ -183,9 +183,6 @@ class AksiPerubahanController extends Controller
             ->with(['jenisPelatihan', 'angkatan', 'peserta'])
             ->first();
 
-        if ($aksiPerubahan->id_pendaftar !== $pendaftaran->id) {
-            return back()->with('error', 'Anda tidak memiliki akses untuk mengupload dokumen ini.');
-        }
 
         // Hapus file lama jika ada
         if ($aksiPerubahan->lembar_pengesahan && Storage::disk('google')->exists($aksiPerubahan->lembar_pengesahan)) {

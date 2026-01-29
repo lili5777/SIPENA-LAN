@@ -107,6 +107,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'UKURAN CELANA TAKTIKAL',
             'MEROKOK/TIDAK MEROKOK',
             'NAMA MENTOR',
+            'NIP MENTOR',
             'JABATAN MENTOR',
             'NOMOR REKENING MENTOR',
             'NPWP MENTOR',
@@ -165,6 +166,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             $peserta->ukuran_celana ?? '-',
             $peserta->perokok ? 'MEROKOK' : 'TIDAK MEROKOK',
             $mentor->nama_mentor ?? '-',
+            $mentor->nip_mentor ?? '-',
             $mentor->jabatan_mentor ?? '-',
             $mentor->nomor_rekening ?? '-',
             $mentor->npwp_mentor ?? '-',
@@ -180,6 +182,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'R' => NumberFormat::FORMAT_TEXT, // Kolom Nomor SK Jabatan
             'W' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP/WA Peserta (kolom W)
             'Y' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Telepon Instansi
+            'AN' => NumberFormat::FORMAT_TEXT,
             'AL' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Rekening Mentor
             'AM' => NumberFormat::FORMAT_TEXT, // Kolom NPWP Mentor
             'AO' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP Mentor
@@ -221,7 +224,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
                 $highestColumn = $sheet->getHighestColumn();
 
                 // KUNCI UTAMA: Format kolom-kolom yang berisi angka panjang sebagai TEXT
-                $textColumns = ['E', 'R', 'W', 'Y', 'AL', 'AM', 'AO'];
+                $textColumns = ['E', 'R', 'W', 'Y', 'AN', 'AL', 'AM', 'AO'];
 
                 foreach ($textColumns as $col) {
                     // Set format code '@' untuk TEXT

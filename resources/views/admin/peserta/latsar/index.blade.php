@@ -217,40 +217,40 @@
                         <tbody>
                             @forelse($pendaftaran as $index => $daftar)
                                                                                                                                                 @php
-                                $peserta = $daftar->peserta;
-                                $kepegawaian = $peserta->kepegawaianPeserta;
-                                $mentor = $daftar->pesertaMentor->first()?->mentor ?? null;
+    $peserta = $daftar->peserta;
+    $kepegawaian = $peserta->kepegawaianPeserta;
+    $mentor = $daftar->pesertaMentor->first()?->mentor ?? null;
 
-                                // Mapping status untuk ikon dan warna
-                                $statusConfig = [
-                                    'Menunggu Verifikasi' => [
-                                        'color' => 'status-warning',
-                                        'icon' => 'fa-clock',
-                                        'text' => 'Menunggu Verifikasi'
-                                    ],
-                                    'Diterima' => [
-                                        'color' => 'status-info',
-                                        'icon' => 'fa-check-circle',
-                                        'text' => 'Diterima'
-                                    ],
-                                    'Ditolak' => [
-                                        'color' => 'status-danger',
-                                        'icon' => 'fa-times-circle',
-                                        'text' => 'Ditolak'
-                                    ],
-                                    'Lulus' => [
-                                        'color' => 'status-success',
-                                        'icon' => 'fa-graduation-cap',
-                                        'text' => 'Lulus'
-                                    ]
-                                ];
+    // Mapping status untuk ikon dan warna
+    $statusConfig = [
+        'Menunggu Verifikasi' => [
+            'color' => 'status-warning',
+            'icon' => 'fa-clock',
+            'text' => 'Menunggu Verifikasi'
+        ],
+        'Diterima' => [
+            'color' => 'status-info',
+            'icon' => 'fa-check-circle',
+            'text' => 'Diterima'
+        ],
+        'Ditolak' => [
+            'color' => 'status-danger',
+            'icon' => 'fa-times-circle',
+            'text' => 'Ditolak'
+        ],
+        'Lulus' => [
+            'color' => 'status-success',
+            'icon' => 'fa-graduation-cap',
+            'text' => 'Lulus'
+        ]
+    ];
 
-                                $currentStatus = $daftar->status_pendaftaran;
-                                $statusData = $statusConfig[$currentStatus] ?? [
-                                    'color' => 'status-secondary',
-                                    'icon' => 'fa-question-circle',
-                                    'text' => $currentStatus
-                                ];
+    $currentStatus = $daftar->status_pendaftaran;
+    $statusData = $statusConfig[$currentStatus] ?? [
+        'color' => 'status-secondary',
+        'icon' => 'fa-question-circle',
+        'text' => $currentStatus
+    ];
                                                                                                                                                 @endphp
                                                                                                                                                 <tr class="peserta-row" data-peserta-id="{{ $daftar->id }}">
                                                                                                                                                     <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
@@ -624,7 +624,7 @@
                 <form id="deleteForm" method="POST" class="d-inline">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger px-4 btn-lift">
+                    <button type="submit" id="deleteSubmitBtn" class="btn btn-danger px-4 btn-lift">
                         <i class="fas fa-trash-alt me-2"></i> Hapus
                     </button>
                 </form>
@@ -804,21 +804,32 @@
                     });
                 });
 
-                // Delete Peserta
+               // Delete Peserta
                 const deleteForm = document.getElementById('deleteForm');
                 const deletePesertaName = document.getElementById('deletePesertaName');
+                const deleteSubmitBtn = document.getElementById('deleteSubmitBtn');
 
                 document.querySelectorAll('.delete-peserta').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const pesertaId = this.getAttribute('data-id');
-                        const pesertaName = this.getAttribute('data-name');
-                        const jenis = this.getAttribute('data-jenis');
+                button.addEventListener('click', function () {
+                    const pesertaId = this.getAttribute('data-id');
+                    const pesertaName = this.getAttribute('data-name');
+                    const jenis = this.getAttribute('data-jenis');
 
-                        deletePesertaName.textContent = pesertaName;
-                        deleteForm.action = `/peserta/${jenis}/${pesertaId}`;
-                        deleteModal.show();
-                    });
+                    deletePesertaName.textContent = pesertaName;
+                    deleteForm.action = `/peserta/${jenis}/${pesertaId}`;
+                    deleteModal.show();
                 });
+                });
+
+                // ✅ disable tombol saat submit supaya tidak double submit
+                if (deleteForm && deleteSubmitBtn) {
+                deleteForm.addEventListener('submit', function () {
+                    deleteSubmitBtn.disabled = true;
+                    deleteSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menghapus...';
+                });
+                }
+
+                
 
                 // Status Form Submission dengan loading indicator
                 statusForm.addEventListener('submit', async function (e) {
@@ -1637,6 +1648,12 @@ function aksiCard(aksi) {
                                         <div class="col-md-8">
                                             <h4 class="fw-bold text-primary mb-2">${mentor.nama_mentor}</h4>
                                             <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="text-muted small">NIP/NRP</label>
+                                                        <p class="fw-semibold mb-0">${mentor.nip_mentor || '-'}</p>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6">
                                                     <div class="info-item">
                                                         <label class="text-muted small">NPWP</label>

@@ -195,11 +195,12 @@
                         <tr class="table-light">
                             <th width="5%" class="ps-4">No</th>
                             <th width="20%">Nama Mentor</th>
+                            <th width="15%">NIP</th>
                             <th width="15%">Jabatan</th>
                             <th width="15%">Kontak</th>
                             <th width="15%">Informasi Keuangan</th>
                             <th width="10%">Jumlah Peserta</th>
-                            <th width="10%">Status</th>
+                            {{-- <th width="10%">Status</th> --}}
                             <th width="10%" class="text-center pe-4">Aksi</th>
                         </tr>
                     </thead>
@@ -246,6 +247,12 @@
                                             </div>
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <p class="mb-0 fw-semibold">
+                                        <i class="fas fa-id-badge me-1"></i>
+                                        {{ $item->nip_mentor ?? '-' }}
+                                    </p>
                                 </td>
                                 <td>
                                     <p class="mb-0 fw-semibold">
@@ -296,12 +303,12 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td>
+                                {{-- <td>
                                     <span class="badge custom-badge {{ $statusData['color'] }} mentor-status">
                                         <i class="fas {{ $statusData['icon'] }} me-1"></i>
                                         {{ $statusData['text'] }}
                                     </span>
-                                </td>
+                                </td> --}}
                                 <td class="text-center pe-4">
                                     <div class="btn-group" role="group">
                                         <a href="{{ route('mentor.edit', $item->id) }}" 

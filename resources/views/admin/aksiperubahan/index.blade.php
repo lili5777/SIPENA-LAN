@@ -1,7 +1,19 @@
+@php
+    $kodePelatihan = $pendaftaran?->jenisPelatihan?->kode_pelatihan;
+
+    $labelPerubahan = match ($kodePelatihan) {
+        'PKN_TK_II' => 'Proyek Perubahan',
+        'LATSAR' => 'Aktualisasi',
+        'PKA', 'PKP' => 'Aksi Perubahan',
+        default => 'Aksi Perubahan',
+    };
+@endphp
+
 @extends('admin.partials.layout')
 
-@section('title', 'Aksi Perubahan - LAN Pusjar SKMP')
-@section('page-title', 'Aksi Perubahan')
+@section('title', $labelPerubahan.' - LAN Pusjar SKMP')
+@section('page-title', $labelPerubahan)
+
 
 @section('styles')
     <style>
@@ -641,8 +653,8 @@
     <!-- Welcome Card -->
     <div class="welcome-card">
         <div class="welcome-header">
-            <h2>Aksi Perubahan 🎯</h2>
-            <p>Dokumentasi Aksi Perubahan Pelatihan Anda</p>
+            <h2>{{ $labelPerubahan }} 🎯</h2>
+            <p>Dokumentasi {{ $labelPerubahan }} Pelatihan Anda</p>
             @if($pendaftaran)
                 <p><i class="fas fa-graduation-cap me-2"></i>{{ $pendaftaran->jenisPelatihan->nama_pelatihan ?? '' }} -
                     {{ $pendaftaran->angkatan->nama_angkatan ?? '' }}
@@ -671,9 +683,9 @@
             <div class="no-data-icon">
                 <i class="fas fa-lock"></i>
             </div>
-            <h4>Aksi Perubahan Belum Dibuka</h4>
+            <h4>{{ $labelPerubahan }} Belum Dibuka</h4>
             <p>
-                Pengisian Aksi Perubahan belum dibuka oleh penyelenggara pelatihan.
+                Pengisian {{ $labelPerubahan }} belum dibuka oleh penyelenggara pelatihan.
                 <br>
                 Silakan menunggu informasi selanjutnya.
             </p>
@@ -693,7 +705,7 @@
                 <div class="section-header">
                     <div class="section-title">
                         <i class="fas fa-project-diagram"></i>
-                        <span>Detail Aksi Perubahan</span>
+                        <span>Detail {{ $labelPerubahan }}</span>
                     </div>
                     <div style="display: flex; gap: 0.75rem;">
                         <button onclick="openEditModal()" class="btn-edit">
@@ -711,7 +723,7 @@
                     <div class="data-item">
                         <span class="data-label">
                             <i class="fas fa-heading"></i>
-                            Judul Aksi Perubahan
+                            Judul {{ $labelPerubahan }}
                         </span>
                         <span class="data-value">{{ $aksiPerubahan->judul ?? '-' }}</span>
                     </div>
@@ -742,7 +754,7 @@
                         <div class="data-item">
                             <span class="data-label">
                                 <i class="fas fa-file-pdf"></i>
-                                Dokumen Aksi Perubahan
+                                Dokumen {{ $labelPerubahan }}
                             </span>
                             <div class="file-preview">
                                 <div class="file-icon">
@@ -750,7 +762,7 @@
                                 </div>
                                 <div class="file-info">
                                     <div class="file-name">{{ basename($aksiPerubahan->file) }}</div>
-                                    <div class="file-size">Dokumen Aksi Perubahan</div>
+                                    <div class="file-size">Dokumen {{ $labelPerubahan }}</div>
                                 </div>
                                 <a href="{{ Storage::disk('google')->url($aksiPerubahan->file) }}" target="_blank" class="btn-icon"
                                     title="Lihat Dokumen">
@@ -830,11 +842,11 @@
                 <div class="no-data-icon">
                     <i class="fas fa-project-diagram"></i>
                 </div>
-                <h4>Belum Ada Aksi Perubahan</h4>
-                <p>Silakan tambahkan Aksi Perubahan untuk pelatihan Anda</p>
+                <h4>Belum Ada {{ $labelPerubahan }}</h4>
+                <p>Silakan tambahkan {{ $labelPerubahan }} untuk pelatihan Anda</p>
                 <button onclick="openAddModal()" class="btn-add-primary">
                     <i class="fas fa-plus-circle"></i>
-                    Tambah Aksi Perubahan
+                    Tambah {{ $labelPerubahan }}
                 </button>
             </div>
         @endif
@@ -848,7 +860,7 @@
             <div class="modal-header">
                 <div class="modal-title">
                     <i class="fas fa-plus-circle"></i>
-                    Tambah Aksi Perubahan
+                    Tambah {{ $labelPerubahan }}
                 </div>
                 <button class="close" onclick="closeAddModal()">&times;</button>
             </div>
@@ -857,31 +869,31 @@
 
                 <!-- Judul - Full Width -->
                 <div class="form-group full-width">
-                    <label class="form-label">Judul Aksi Perubahan *</label>
+                    <label class="form-label">Judul {{ $labelPerubahan }} *</label>
                     <input type="text" name="judul" class="form-control" required
-                        placeholder="Masukkan judul aksi perubahan">
+                        placeholder="Masukkan judul {{ $labelPerubahan }}">
                 </div>
 
                 <!-- Abstrak - Full Width -->
                 <div class="form-group full-width">
                     <label class="form-label">Abstrak</label>
-                    <textarea name="abstrak" class="form-control" placeholder="Masukkan abstrak aksi perubahan (opsional)"
+                    <textarea name="abstrak" class="form-control" placeholder="Masukkan abstrak {{ $labelPerubahan }} (opsional)"
                         rows="5"></textarea>
                 </div>
 
                 @php
-                    $kategoriOptions = [
-                        'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
-                        'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
-                        'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
-                        'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
-                        'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
-                        'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
-                        'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
-                        'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
-                    ];
+$kategoriOptions = [
+    'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
+    'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
+    'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
+    'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
+    'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
+    'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
+    'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
+    'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
+];
 
-                    $selectedKategori = old('kategori_aksatika', $aksiPerubahan->kategori_aksatika ?? '');
+$selectedKategori = old('kategori_aksatika', $aksiPerubahan->kategori_aksatika ?? '');
                 @endphp
 
                 <!-- Row 1: Kategori dan File (2 kolom) -->
@@ -902,7 +914,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Dokumen Aksi Perubahan (PDF - Max 5MB)</label>
+                        <label class="form-label">Dokumen {{ $labelPerubahan }} (PDF - Max 5MB)</label>
                         <input type="file" name="file" class="form-control" accept=".pdf">
                         <div class="form-hint">
                             <i class="fas fa-info-circle"></i>
@@ -935,7 +947,7 @@
 
                 <button type="submit" class="btn-submit" id="btnSubmitAdd">
                     <span class="btn-text">
-                        <i class="fas fa-save"></i> Simpan Aksi Perubahan
+                        <i class="fas fa-save"></i> Simpan {{ $labelPerubahan }}
                     </span>
                     <span class="spinner-wrapper" style="display: none;">
                         <span class="spinner"></span>
@@ -953,7 +965,7 @@
                 <div class="modal-header">
                     <div class="modal-title">
                         <i class="fas fa-edit"></i>
-                        Edit Aksi Perubahan
+                        Edit {{ $labelPerubahan }}
                     </div>
                     <button class="close" onclick="closeEditModal()">&times;</button>
                 </div>
@@ -964,15 +976,15 @@
 
                     <!-- Judul - Full Width -->
                     <div class="form-group full-width">
-                        <label class="form-label">Judul Aksi Perubahan *</label>
+                        <label class="form-label">Judul {{ $labelPerubahan }} *</label>
                         <input type="text" name="judul" class="form-control" required value="{{ $aksiPerubahan->judul }}"
-                            placeholder="Masukkan judul aksi perubahan">
+                            placeholder="Masukkan judul {{ $labelPerubahan }}">
                     </div>
 
                     <!-- Abstrak - Full Width -->
                     <div class="form-group full-width">
                         <label class="form-label">Abstrak</label>
-                        <textarea name="abstrak" class="form-control" placeholder="Masukkan abstrak aksi perubahan (opsional)"
+                        <textarea name="abstrak" class="form-control" placeholder="Masukkan abstrak {{ $labelPerubahan }} (opsional)"
                             rows="5">{{ $aksiPerubahan->abstrak }}</textarea>
                     </div>
 
@@ -990,7 +1002,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Dokumen Aksi Perubahan</label>
+                            <label class="form-label">Dokumen {{ $labelPerubahan }}</label>
                             @if($aksiPerubahan->file)
                                 <div class="file-preview mb-2">
                                     <div class="file-icon">
@@ -1027,7 +1039,7 @@
 
                     <button type="submit" class="btn-submit" id="btnSubmitEdit">
                         <span class="btn-text">
-                            <i class="fas fa-save"></i> Update Aksi Perubahan
+                            <i class="fas fa-save"></i> Update {{ $labelPerubahan }}
                         </span>
                         <span class="spinner-wrapper" style="display: none;">
                             <span class="spinner"></span>
@@ -1060,7 +1072,7 @@
 
                     <!-- Judul Aksi Perubahan - Full Width -->
                     <div class="form-group">
-                        <label class="form-label">Judul Aksi Perubahan</label>
+                        <label class="form-label">Judul {{ $labelPerubahan }}</label>
                         <input type="text" class="form-control" value="{{ $aksiPerubahan->judul }}" readonly>
                     </div>
 

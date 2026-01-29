@@ -236,6 +236,7 @@ class AdminController extends Controller
 
                 // Mentor
                 'nama_mentor' => 'nullable|string|max:200',
+                'nip_mentor' => 'nullable|string|max:200',
                 'jabatan_mentor' => 'nullable|string|max:200',
                 'nomor_rekening_mentor' => 'nullable|string|max:200',
                 'npwp_mentor' => 'nullable|string|max:50',
@@ -243,6 +244,7 @@ class AdminController extends Controller
                 'mentor_mode' => 'nullable|in:pilih,tambah',
                 'id_mentor' => 'nullable|exists:mentor,id',
                 'nama_mentor_baru' => 'nullable|string|max:200',
+                'nip_mentor_baru' => 'nullable|string|max:200',
                 'jabatan_mentor_baru' => 'nullable|string|max:200',
                 'nomor_rekening_mentor_baru' => 'nullable|string|max:200',
                 'npwp_mentor_baru' => 'nullable|string|max:50',
@@ -413,8 +415,10 @@ class AdminController extends Controller
                         $additionalMessages['id_mentor.required'] = 'Pilih mentor dari daftar';
                     } elseif ($request->mentor_mode === 'tambah') {
                         $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
+                        $additionalRules['nip_mentor_baru'] = 'nullable|string|max:200';
                         $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
                         $additionalMessages['nama_mentor_baru.required'] = 'Nama mentor baru wajib diisi';
+                        $additionalMessages['nip_mentor_baru.max'] = 'NIP mentor baru maksimal 200 karakter.';
                         $additionalMessages['jabatan_mentor_baru.required'] = 'Jabatan mentor baru wajib diisi';
                     }
                 }
@@ -652,6 +656,7 @@ class AdminController extends Controller
                 } elseif ($request->mentor_mode === 'tambah') {
                     $mentor = Mentor::create([
                         'nama_mentor' => $request->nama_mentor_baru,
+                        'nip_mentor' => $request->nip_mentor_baru,
                         'jabatan_mentor' => $request->jabatan_mentor_baru,
                         'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                         'npwp_mentor' => $request->npwp_mentor_baru,

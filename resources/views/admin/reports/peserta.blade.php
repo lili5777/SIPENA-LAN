@@ -522,6 +522,10 @@
                         <span class="data-value">{{ $mentor->nama_mentor ?? '-' }}</span>
                     </div>
                     <div class="data-item">
+                        <span class="data-label">NIP Mentor:</span>
+                        <span class="data-value">{{ $mentor->nip_mentor ?? '-' }}</span>
+                    </div>
+                    <div class="data-item">
                         <span class="data-label">Jabatan Mentor:</span>
                         <span class="data-value">{{ $mentor->jabatan_mentor ?? '-' }}</span>
                     </div>

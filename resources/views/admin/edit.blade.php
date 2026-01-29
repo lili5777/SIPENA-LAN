@@ -2087,6 +2087,7 @@
                                         <option value="">-- Pilih Mentor --</option>
                                         @foreach($mentorList as $mentor)
                                             <option value="{{ $mentor->id }}" data-nama="{{ $mentor->nama_mentor }}"
+                                                data-nip="{{ $mentor->nip_mentor }}"
                                                 data-jabatan="{{ $mentor->jabatan_mentor }}"
                                                 data-rekening="{{ $mentor->nomor_rekening }}" data-npwp="{{ $mentor->npwp_mentor }}" {{ old('id_mentor', $pendaftaranTerbaru->id_mentor) == $mentor->id ? 'selected' : '' }}>
                                                 {{ $mentor->nama_mentor }} - {{ $mentor->jabatan_mentor }}
@@ -2106,6 +2107,11 @@
                                         <label class="form-label">Nama Mentor</label>
                                         <input type="text" name="nama_mentor" id="nama_mentor_select" class="form-input capitalize" readonly
                                             value="{{ old('nama_mentor', $pendaftaranTerbaru->mentor->nama_mentor ?? '') }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">NIP Mentor</label>
+                                        <input type="text" name="nip_mentor" id="nip_mentor_select" class="form-input" readonly
+                                            value="{{ old('nip_mentor', $pendaftaranTerbaru->mentor->nip_mentor ?? '') }}">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Jabatan Mentor</label>
@@ -2151,6 +2157,19 @@
                                         value="{{ old('nama_mentor_baru', $pendaftaranTerbaru->mentor->nama_mentor ?? '') }}"
                                         placeholder="Contoh: Dr. Ahmad Supriyadi, M.Si.">
                                     @error('nama_mentor_baru')
+                                        <div class="error-message">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">NIP Mentor</label>
+                                    <input type="text" name="nip_mentor_baru" id="nip_mentor_baru"
+                                        class="form-input @error('nip_mentor_baru') error @enderror"
+                                        value="{{ old('nip_mentor_baru', $pendaftaranTerbaru->mentor->nip_mentor ?? '') }}"
+                                        placeholder="Contoh: 196504151987031001">
+                                    @error('nip_mentor_baru')
                                         <div class="error-message">
                                             <i class="fas fa-exclamation-circle"></i>
                                             {{ $message }}
@@ -3442,11 +3461,13 @@
 
                     if (selectedOption.dataset.nama) {
                         document.getElementById('nama_mentor_select').value = selectedOption.dataset.nama;
+                        document.getElementById('nip_mentor_select').value = selectedOption.dataset.nip;
                         document.getElementById('jabatan_mentor_select').value = selectedOption.dataset.jabatan;
                         document.getElementById('nomor_rekening_mentor_select').value = selectedOption.dataset.rekening || '';
                         document.getElementById('npwp_mentor_select').value = selectedOption.dataset.npwp || '';
                     } else {
                         document.getElementById('nama_mentor_select').value = '';
+                        document.getElementById('nip_mentor_select').value = '';
                         document.getElementById('jabatan_mentor_select').value = '';
                         document.getElementById('nomor_rekening_mentor_select').value = '';
                         document.getElementById('npwp_mentor_select').value = '';

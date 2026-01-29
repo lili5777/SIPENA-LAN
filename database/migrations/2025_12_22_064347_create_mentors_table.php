@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('mentor', function (Blueprint $table) {
             $table->id('id');
             $table->string('nama_mentor', 200);
+            $table->string('nip_mentor', 200)->nullable();
             $table->string('jabatan_mentor', 200)->nullable();
             $table->string('nomor_rekening', 200)->nullable();
             $table->string('npwp_mentor', 50)->nullable();

@@ -1,3 +1,24 @@
+@php
+$user = auth()->user();
+$kodePelatihan = null;
+
+// Ambil kode pelatihan terakhir user (1 query)
+if ($user->role->name === 'user' && $user->peserta) {
+    $kodePelatihan = \App\Models\Pendaftaran::query()
+        ->where('pendaftaran.id_peserta', $user->peserta->id)
+        ->join('jenis_pelatihan', 'pendaftaran.id_jenis_pelatihan', '=', 'jenis_pelatihan.id')
+        ->orderByDesc('pendaftaran.tanggal_daftar')  // jika sering null, ganti id desc (lihat catatan)
+        ->value('jenis_pelatihan.kode_pelatihan');
+}
+
+// Mapping label menu
+$labelMenu = match ($kodePelatihan) {
+    'PKN_TK_II' => 'Proyek Perubahan',
+    'LATSAR' => 'Aktualisasi',
+    'PKA', 'PKP' => 'Aksi Perubahan',
+    default => null,
+};
+@endphp
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
@@ -19,11 +40,11 @@
             </a>
         </div>
 
-        @if (auth()->user()->role->name == "user")
+        @if ($user->role->name === 'user' && $labelMenu)
             <div class="menu-item">
                 <a href="{{ route('aksiperubahan.index') }}" class="menu-link">
                     <i class="fas fa-project-diagram menu-icon"></i>
-                    <span class="menu-text">Aksi Perubahan</span>
+                    <span class="menu-text">{{ $labelMenu }}</span>
                 </a>
             </div>
         @endif

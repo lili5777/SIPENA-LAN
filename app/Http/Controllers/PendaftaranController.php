@@ -208,6 +208,7 @@ class PendaftaranController extends Controller
                 'tanggal_sk_jabatan' => 'nullable|date',
                 'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
                 'nama_mentor' => 'nullable|string|max:200',
+                'nip_mentor' => 'nullable|string|max:200',
                 'jabatan_mentor' => 'nullable|string|max:200',
                 'nomor_rekening_mentor' => 'nullable|string|max:200',
                 'npwp_mentor' => 'nullable|string|max:50',
@@ -216,6 +217,7 @@ class PendaftaranController extends Controller
                 'mentor_mode' => 'nullable|in:pilih,tambah',
                 'id_mentor' => 'nullable|exists:mentor,id',
                 'nama_mentor_baru' => 'nullable|string|max:200',
+                'nip_mentor_baru' => 'nullable|string|max:200',
                 'jabatan_mentor_baru' => 'nullable|string|max:200',
                 'nomor_rekening_mentor_baru' => 'nullable|string|max:200',
                 'npwp_mentor_baru' => 'nullable|string|max:50',
@@ -486,7 +488,7 @@ class PendaftaranController extends Controller
                     $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:1024';
                 }
                 if (!$pendaftaran->file_surat_tugas) {
-                    $additionalRules['file_surat_tugas'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalRules['file_surat_tugas'] = 'nullable|file|mimes:pdf|max:1024';
                 }
 
                 $additionalMessages = [
@@ -542,7 +544,6 @@ class PendaftaranController extends Controller
                     'file_pakta_integritas.max' => 'Ukuran file Pakta Integritas maksimal 1MB',
 
                     // Validasi untuk file surat tugas
-                    'file_surat_tugas.required' => 'File Surat Tugas wajib diunggah untuk pelatihan ' . $kode,
                     'file_surat_tugas.file' => 'File Surat Tugas harus berupa file',
                     'file_surat_tugas.mimes' => 'File Surat Tugas harus berformat PDF',
                     'file_surat_tugas.max' => 'Ukuran file Surat Tugas maksimal 1MB',
@@ -579,8 +580,10 @@ class PendaftaranController extends Controller
                     $additionalMessages['id_mentor.required'] = 'Pilih mentor dari daftar';
                 } elseif ($request->mentor_mode === 'tambah') {
                     $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
+                    $additionalRules['nip_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
                     $additionalMessages['nama_mentor_baru.required'] = 'Nama mentor baru wajib diisi';
+                    $additionalMessages['nip_mentor_baru.max'] = 'NIP mentor baru maksimal 200 karakter.';
                     $additionalMessages['jabatan_mentor_baru.required'] = 'Jabatan mentor baru wajib diisi';
                 }
             }
@@ -902,6 +905,7 @@ class PendaftaranController extends Controller
                 } elseif ($request->mentor_mode === 'tambah') {
                     $mentor = Mentor::create([
                         'nama_mentor' => $request->nama_mentor_baru,
+                        'nip_mentor' => $request->nip_mentor_baru,
                         'jabatan_mentor' => $request->jabatan_mentor_baru,
                         'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                         'npwp_mentor' => $request->npwp_mentor_baru,

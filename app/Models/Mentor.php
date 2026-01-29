@@ -15,6 +15,7 @@ class Mentor extends Model
 
     protected $fillable = [
         'nama_mentor',
+        'nip_mentor',
         'jabatan_mentor',
         'nomor_rekening',
         'npwp_mentor',
