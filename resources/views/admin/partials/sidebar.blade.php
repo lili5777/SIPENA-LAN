@@ -77,6 +77,22 @@ $labelMenu = match ($kodePelatihan) {
                             <a href="{{ route('admin.import.peserta') }}" class="submenu-link">
                                 <i class="fas fa-file-invoice me-2"></i> Import Peserta
                             </a>
+
+                            <a href="{{ route('visi-misi.index') }}" class="submenu-link">
+                                <i class="fas fa-bullseye me-2"></i> Visi & Misi
+                            </a>
+
+                            <a href="#" class="submenu-link">
+                                <i class="fas fa-users me-2"></i> Pejabat
+                            </a>
+
+                            <a href="#" class="submenu-link">
+                                <i class="fas fa-newspaper me-2"></i> Berita
+                            </a>
+
+                            <a href="#" class="submenu-link">
+                                <i class="fas fa-address-book me-2"></i> Kontak
+                            </a>
                         </div>
                     </div>
 
@@ -198,9 +214,7 @@ $labelMenu = match ($kodePelatihan) {
                                 {{-- <a href="#" class="submenu-link">
                                     <i class="fas fa-sliders-h me-2"></i> Konfigurasi Sistem
                                 </a> --}}
-                                <a href="{{ route('visi-misi.index') }}" class="submenu-link">
-                                    <i class="fas fa-bullseye me-2"></i> Visi & Misi
-                                </a>
+                                
                             </div>
                         </div>
                     @endif
