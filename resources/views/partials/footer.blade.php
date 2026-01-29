@@ -7,19 +7,38 @@
                 <p class="footer-text">Sistem Informasi Profesional yang berkomitmen untuk menyediakan layanan
                     informasi dan publikasi berkualitas tinggi dengan teknologi terkini.</p>
                 <div class="social-icons">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    @if(!empty($kontak?->fb))
+                        <a href="{{ $kontak->fb }}" class="social-icon" target="_blank" rel="noopener">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    @endif
+                
+                    @if(!empty($kontak?->twitter))
+                        <a href="{{ $kontak->twitter }}" class="social-icon" target="_blank" rel="noopener">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    @endif
+                
+                    @if(!empty($kontak?->ig))
+                        <a href="{{ $kontak->ig }}" class="social-icon" target="_blank" rel="noopener">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    @endif
+                
+                    @if(!empty($kontak?->linkedin))
+                        <a href="{{ $kontak->linkedin }}" class="social-icon" target="_blank" rel="noopener">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    @endif
                 </div>
             </div>
 
             <div class="footer-links-container">
                 <h4 class="footer-title">Tautan Cepat</h4>
                 <ul class="footer-links">
-                    <li><a href="#home"><i class="fas fa-chevron-right"></i> Beranda</a></li>
-                    <li><a href="#profile"><i class="fas fa-chevron-right"></i> Profil</a></li>
-                    <li><a href="#publication"><i class="fas fa-chevron-right"></i> Publikasi</a></li>
+                    <li><a href="{{ route('home') }}"><i class="fas fa-chevron-right"></i> Beranda</a></li>
+                    <li><a href="{{ route('profil') }}"><i class="fas fa-chevron-right"></i> Profil</a></li>
+                    <li><a href="{{ route('publikasi') }}"><i class="fas fa-chevron-right"></i> Publikasi</a></li>
                     <li><a href="#contact"><i class="fas fa-chevron-right"></i> Kontak</a></li>
                 </ul>
             </div>
@@ -29,15 +48,34 @@
                 <div class="contact-info">
                     <div class="contact-item">
                         <i class="fas fa-map-marker-alt contact-icon"></i>
-                        <span>Jl. Raya Baruga, No 48 Antang, Kota Makassar</span>
+                        <span>{{ $kontak?->alamat ?? '-' }}</span>
                     </div>
+                    
                     <div class="contact-item">
                         <i class="fas fa-phone contact-icon"></i>
-                        <span>-</span>
+                        @if(!empty($kontak?->nomor_hp))
+                            <span>
+                                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $kontak->nomor_hp) }}"
+                                    style="color: inherit; text-decoration: none;">
+                                    {{ $kontak->nomor_hp }}
+                                </a>
+                            </span>
+                        @else
+                            <span>-</span>
+                        @endif
                     </div>
+                    
                     <div class="contact-item">
                         <i class="fas fa-envelope contact-icon"></i>
-                        <span>latbang.puslatbangkmp@gmail.com</span>
+                        @if(!empty($kontak?->email))
+                            <span>
+                                <a href="mailto:{{ $kontak->email }}" style="color: inherit; text-decoration: none;">
+                                    {{ $kontak->email }}
+                                </a>
+                            </span>
+                        @else
+                            <span>-</span>
+                        @endif
                     </div>
                 </div>
             </div>

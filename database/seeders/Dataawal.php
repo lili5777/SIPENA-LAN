@@ -71,7 +71,7 @@ class Dataawal extends Seeder
 
         // Buat PICPESERTA
         PicPeserta::create([
-            'user_id' => 3, // ID user PIC
+            'user_id' => 2, // ID user PIC
             'jenispelatihan_id' => 2, // Sesuaikan dengan jenis pelatihan yang ada
             'angkatan_id' => 2, // Sesuaikan dengan angkatan yang ada
         ]);

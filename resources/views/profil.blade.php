@@ -36,9 +36,7 @@
                     </div>
                     <div class="visi-text">
                         <blockquote>
-                            "Sebagai Institusi Pembelajar Berkelas Dunia yang Mampu menjadi Penggerak Utama dalam mewujudkan
-                            World Class Government Untuk Mendukung Visi Indonesia Maju yang berdaulat, Mandiri, dan
-                            berkepribadian berlandaskan gotong royong."
+                            "{{ $visi->visi }}"
                         </blockquote>
                         <div class="visi-tagline">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -47,7 +45,7 @@
                                 <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
                                 <path d="M2 2l7.586 7.586" />
                             </svg>
-                            Membangun Indonesia yang Berdaulat dan Mandiri
+                            {{ $visi->ctt }}
                         </div>
                     </div>
                 </div>
@@ -64,83 +62,24 @@
             </div>
 
             <div class="misi-grid">
-                <!-- Misi 1 -->
-                <div class="misi-card" data-aos="fade-up">
-                    <div class="misi-number">01</div>
-                    <div class="misi-content">
-                        <h3 class="misi-title">SDM Aparatur Unggul</h3>
-                        <p class="misi-description">
-                            Mewujudkan SDM Aparatur unggul melalui kebijakan, pembinaan, dan penyelenggaraan pengembangan
-                            kompetensi yang berstandar internasional.
-                        </p>
-                    </div>
-                    <div class="misi-hover">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
-                    </div>
-                </div>
+                @foreach ($misis as $index => $misi)
+                    <div class="misi-card" data-aos="fade-up" @if($index > 0) data-aos-delay="{{ $index * 100 }}" @endif>
 
-                <!-- Misi 2 -->
-                <div class="misi-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="misi-number">02</div>
-                    <div class="misi-content">
-                        <h3 class="misi-title">Kebijakan Berkualitas</h3>
-                        <p class="misi-description">
-                            Mewujudkan Kebijakan Administrasi Negara yang berkualitas melalui kajian kebijakan berbasis
-                            evidence dan penyediaan analis kebijakan yang kompeten.
-                        </p>
-                    </div>
-                    <div class="misi-hover">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M12 20h9" />
-                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                        </svg>
-                    </div>
-                </div>
+                        <div class="misi-number">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</div>
 
-                <!-- Misi 3 -->
-                <div class="misi-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="misi-number">03</div>
-                    <div class="misi-content">
-                        <h3 class="misi-title">Inovasi Administrasi</h3>
-                        <p class="misi-description">
-                            Mewujudkan Inovasi Administrasi Negara yang berkualitas melalui pengembangan model inovasi serta
-                            penguatan kapasitas dan budaya inovasi.
-                        </p>
-                    </div>
-                    <div class="misi-hover">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                        </svg>
-                    </div>
-                </div>
+                        <div class="misi-content">
+                            <h3 class="misi-title">{{ $misi->ctt }}</h3>
+                            <p class="misi-description">{{ $misi->isi }}</p>
+                        </div>
 
-                <!-- Misi 4 -->
-                <div class="misi-card" data-aos="fade-up" data-aos-delay="300">
-                    <div class="misi-number">04</div>
-                    <div class="misi-content">
-                        <h3 class="misi-title">Organisasi Pembelajar</h3>
-                        <p class="misi-description">
-                            Mewujudkan organisasi pembelajar berkinerja tinggi melalui dukungan pelayanan yang berkualitas
-                            dan berbasis elektronik.
-                        </p>
+                        <div class="misi-hover">
+                            @includeIf('partials.icons.' . $misi->icon)
+                        </div>
+
                     </div>
-                    <div class="misi-hover">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                        </svg>
-                    </div>
-                </div>
+                @endforeach
             </div>
+
         </div>
     </section>
 
@@ -153,61 +92,31 @@
             </div>
 
             <div class="leadership-grid">
-                <!-- Pejabat 1 -->
-                <div class="leadership-card">
-                    <div class="card-floating-bg"></div>
-                    <div class="leadership-photo">
-                        <img src="{{ asset('gambar/kapus.png') }}"
-                            alt="Dr. Ahmad Wijaya">
-                        <div class="photo-border"></div>
-                    </div>
-                    <div class="leadership-info">
-                        <h3 class="leader-name">Dr. Muhammad Aswad, M.Si</h3>
-                        <p class="leader-position">Kepala Pusat PUSJAR SKMP</p>
-                        <div class="leader-nip">
-                            <span>NIP:</span>
-                            <strong>19670206 199303 1 001</strong>
+                @foreach ($pejabat as $p)
+                    <div class="leadership-card">
+                        <div class="card-floating-bg"></div>
+
+                        <div class="leadership-photo">
+                            <img src="{{ $p->foto_pejabat ? asset('gambar/' . $p->foto_pejabat) : asset('gambar/default.png') }}"
+                                alt="{{ $p->nama_pejabat }}">
+                            <div class="photo-border"></div>
+                        </div>
+
+                        <div class="leadership-info">
+                            <h3 class="leader-name">{{ $p->nama_pejabat }}</h3>
+                            <p class="leader-position">{{ $p->jabatan_pejabat }}</p>
+
+                            @if(!empty($p->nip_pejabat))
+                                <div class="leader-nip">
+                                    <span>NIP:</span>
+                                    <strong>{{ $p->nip_pejabat }}</strong>
+                                </div>
+                            @endif
                         </div>
                     </div>
-                </div>
-
-                <!-- Pejabat 2 -->
-                <div class="leadership-card">
-                    <div class="card-floating-bg"></div>
-                    <div class="leadership-photo">
-                        <img src=""
-                            alt="Drs. Budi Santoso">
-                        <div class="photo-border"></div>
-                    </div>
-                    <div class="leadership-info">
-                        <h3 class="leader-name">Pejabat 2</h3>
-                        <p class="leader-position">Wakil Kepala Bidang SDM</p>
-                        <div class="leader-nip">
-                            <span>NIP:</span>
-                            <strong>1xxxxxxxxxx</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pejabat 3 -->
-                <div class="leadership-card">
-                    <div class="card-floating-bg"></div>
-                    <div class="leadership-photo">
-                        <img src=""
-                            alt="Ir. Siti Nurhaliza">
-                        <div class="photo-border"></div>
-                    </div>
-                    <div class="leadership-info">
-                        <h3 class="leader-name">Pejabat 3</h3>
-                        <p class="leader-position">Kepala Bidang Inovasi</p>
-                        <div class="leader-nip">
-                            <span>NIP:</span>
-                            <strong>1xxxxxxxxxxxxx</strong>
-                        </div>
-                    </div>
-                </div>
-
+                @endforeach
             </div>
+
         </div>
     </section>
 @endsection

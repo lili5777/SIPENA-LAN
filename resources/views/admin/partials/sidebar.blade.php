@@ -198,6 +198,9 @@ $labelMenu = match ($kodePelatihan) {
                                 {{-- <a href="#" class="submenu-link">
                                     <i class="fas fa-sliders-h me-2"></i> Konfigurasi Sistem
                                 </a> --}}
+                                <a href="{{ route('visi-misi.index') }}" class="submenu-link">
+                                    <i class="fas fa-bullseye me-2"></i> Visi & Misi
+                                </a>
                             </div>
                         </div>
                     @endif

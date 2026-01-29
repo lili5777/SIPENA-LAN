@@ -71,11 +71,19 @@ class RolePermissionSeeder extends Seeder
         $adminRole->permissions()->sync($allPermissions->pluck('id')->toArray());
 
         // hubungkan role pic dengan permission kecuali role dan user
-        $picPermissions = Permission::where('name', 'not like', 'role.%')->where('name', 'not like', 'user.%')->get();
+        $picPermissions = Permission::where('name', 'not like', 'role.%')
+            ->where('name', 'not like', 'user.%')
+            ->whereNotIn('name', ['angkatan.create', 'angkatan.delete'])
+            ->get();
+
         $picRole->permissions()->sync($picPermissions->pluck('id')->toArray());
 
+
         // hubungkan role user dengan permission read saja
-        $readPermissions = Permission::where('name', 'like', '%.read')->get();
+        $readPermissions = Permission::where('name', 'like', '%.read')
+            ->where('name', '!=', 'aktifitas.read')
+            ->get();
+
         $userRole->permissions()->sync($readPermissions->pluck('id')->toArray());
 
         // Buat user Admin
@@ -87,12 +95,12 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         // Buat user biasa
-        User::create([
-            'name' => 'Ali',
-            'email' => 'ali@example.com',
-            'password' => bcrypt('222'),
-            'role_id' => $userRole->id
-        ]);
+        // User::create([
+        //     'name' => 'Ali',
+        //     'email' => 'ali@example.com',
+        //     'password' => bcrypt('222'),
+        //     'role_id' => $userRole->id
+        // ]);
 
         // Buat user PIC
         User::create([

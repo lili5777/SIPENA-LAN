@@ -4,10 +4,12 @@ use App\Http\Controllers\Admin\Angkatan\AngkatanController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Admin\Master\PesertaController;
 use App\Http\Controllers\Admin\Mentor\MentorController;
+use App\Http\Controllers\Admin\VisiMisiController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AksiPerubahanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UploadController;
@@ -36,9 +38,9 @@ Route::post('/upload', [UploadController::class, 'store'])->name('upload.store')
 
 
 // Route Landing Page
-Route::get('/', function () {return view('welcome');})->name('home');
-Route::get('/profil', function () {return view('profil');})->name('profil');
-Route::get('/publikasi', function () {return view('publikasi');})->name('publikasi');
+Route::get('/', [LandingController::class, 'index'])->name('home');
+Route::get('/profil', [LandingController::class, 'profil'])->name('profil');
+Route::get('/publikasi', [LandingController::class, 'publikasi'])->name('publikasi');
 
 
 // Route Proses Pendaftaran
@@ -222,6 +224,21 @@ Route::middleware('auth')->group(function () {
     // Route untuk AJAX - HARUS tanpa parameter {jenis} atau dengan optional parameter
     Route::post('/peserta/get-peserta-angkatan', [PesertaController::class, 'getPesertaAngkatan'])
         ->name('peserta.get-peserta-angkatan');
+
+    // Visi Misi Routes
+    Route::prefix('visi-misi')->name('visi-misi.')->group(function () {
+        Route::get('/', [VisiMisiController::class, 'index'])->name('index');
+        Route::get('/visi/create', [VisiMisiController::class, 'createVisi'])->name('visi.create');
+        Route::post('/visi', [VisiMisiController::class, 'storeVisi'])->name('visi.store');
+        Route::get('/visi/edit', [VisiMisiController::class, 'editVisi'])->name('visi.edit');
+        Route::put('/visi/{visi}', [VisiMisiController::class, 'updateVisi'])->name('visi.update');
+
+        Route::get('/misi/create', [VisiMisiController::class, 'createMisi'])->name('misi.create');
+        Route::post('/misi', [VisiMisiController::class, 'storeMisi'])->name('misi.store');
+        Route::get('/misi/{misi}/edit', [VisiMisiController::class, 'editMisi'])->name('misi.edit');
+        Route::put('/misi/{misi}', [VisiMisiController::class, 'updateMisi'])->name('misi.update');
+        Route::delete('/misi/{misi}', [VisiMisiController::class, 'destroyMisi'])->name('misi.destroy');
+    });
 
     
 });
