@@ -27,52 +27,48 @@
                 <div class="section-divider"></div>
             </div>
 
-            <div class="news-grid">
-                <!-- Berita 1 -->
-                <div class="news-card animate">
-                    <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                        alt="Seminar Teknologi" class="news-img">
-                    <div class="news-content">
-                        <div class="news-date">
-                            <i class="far fa-calendar-alt"></i> 15 Oktober 2023
+            @if($beritas->count() > 0)
+                <div class="news-grid">
+                    @foreach($beritas as $berita)
+                        <div class="news-card animate">
+                            @if($berita->foto)
+                                <img src="{{ asset('gambar/' . $berita->foto) }}" alt="{{ $berita->judul }}" class="news-img"
+                                    onerror="this.src='https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80'">
+                            @else
+                                <img src="{{ asset('gambar/thum.png') }}"
+                                    alt="{{ $berita->judul }}" class="news-img">
+                            @endif
+                            <div class="news-content">
+                                <div class="news-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    {{ $berita->created_at->format('d F Y') }}
+                                </div>
+                                <h3 class="news-title">{{ $berita->judul }}</h3>
+                                <p class="news-text">
+                                    {{ Str::limit(strip_tags($berita->isi), 150) }}
+                                </p>
+                                <a href="{{ route('berita.detail', $berita->id) }}" class="news-link">
+                                    Baca Selengkapnya <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
                         </div>
-                        <h3 class="news-title">Seminar Nasional Teknologi Informasi 2023</h3>
-                        <p class="news-text">SIMPEL mengadakan seminar nasional tentang perkembangan teknologi informasi
-                            terkini dengan menghadirkan pembicara dari berbagai institusi ternama.</p>
-                        <a href="#" class="news-link">Baca Selengkapnya <i class="fas fa-arrow-right"></i></a>
-                    </div>
+                    @endforeach
                 </div>
 
-                <!-- Berita 2 -->
-                <div class="news-card animate">
-                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                        alt="Pelatihan Digital" class="news-img">
-                    <div class="news-content">
-                        <div class="news-date">
-                            <i class="far fa-calendar-alt"></i> 10 Oktober 2023
+                <!-- Pagination -->
+                @if($beritas->hasPages())
+                    <div class="pagination-container animate" style="margin-top: 40px;">
+                        <div class="pagination">
+                            {{ $beritas->links('pagination::bootstrap-4') }}
                         </div>
-                        <h3 class="news-title">Pelatihan Digitalisasi Sistem Informasi</h3>
-                        <p class="news-text">Program pelatihan intensif untuk meningkatkan kompetensi di bidang sistem
-                            informasi dan transformasi digital bagi profesional.</p>
-                        <a href="#" class="news-link">Baca Selengkapnya <i class="fas fa-arrow-right"></i></a>
                     </div>
+                @endif
+            @else
+                <div class="no-news animate">
+                    <i class="far fa-newspaper" style="font-size: 3rem; color: var(--gray-color); margin-bottom: 20px;"></i>
+                    <h3 style="color: var(--gray-color);">Belum ada berita tersedia</h3>
                 </div>
-
-                <!-- Berita 3 -->
-                <div class="news-card animate">
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                        alt="Rilis Publikasi" class="news-img">
-                    <div class="news-content">
-                        <div class="news-date">
-                            <i class="far fa-calendar-alt"></i> 5 Oktober 2023
-                        </div>
-                        <h3 class="news-title">Rilis Publikasi Terbaru SIMPEL</h3>
-                        <p class="news-text">SIMPEL telah merilis publikasi terbaru tentang perkembangan sistem
-                            informasi di Indonesia tahun 2023 yang dapat diakses secara gratis.</p>
-                        <a href="#" class="news-link">Baca Selengkapnya <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
+            @endif
         </div>
     </section>
 @endsection
@@ -176,6 +172,7 @@
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: var(--transition);
+            cursor: pointer;
         }
 
         .news-card:hover {
@@ -212,11 +209,13 @@
             color: var(--primary-color);
             margin-bottom: 10px;
             font-weight: 600;
+            line-height: 1.4;
         }
 
         .news-text {
             color: var(--dark-color);
             margin-bottom: 15px;
+            line-height: 1.6;
         }
 
         .news-link {
@@ -233,6 +232,68 @@
             gap: 10px;
             color: var(--secondary-color);
         }
+
+        /* Pagination Styles */
+        .pagination-container {
+            text-align: center;
+        }
+
+        .pagination {
+            display: inline-flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 5px;
+        }
+
+        .pagination .page-item {
+            margin: 0;
+        }
+
+        .pagination .page-link {
+            color: var(--primary-color);
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #ccc;
+            pointer-events: none;
+        }
+
+        .no-news {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        /* Responsive pagination */
+        @media (max-width: 576px) {
+            .pagination {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .pagination .page-link {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 @endpush
 
@@ -246,14 +307,12 @@
                 const originalText = this.innerHTML;
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
                 this.style.pointerEvents = 'none';
-                
+
                 if (this.getAttribute('href') === '{{ route('pendaftaran.create') }}') {
                     return; // Biarkan smooth scroll bekerja
                 }
 
                 e.preventDefault();
-
-
 
                 // Reset after 1.5 seconds
                 setTimeout(() => {
@@ -263,13 +322,22 @@
             });
         }
 
-        // Add interactive effect to news cards on click
+        // Add click event to news cards
         document.querySelectorAll('.news-card').forEach(card => {
             card.addEventListener('click', function () {
-                this.style.transform = 'scale(0.98)';
-                setTimeout(() => {
-                    this.style.transform = 'translateY(-10px)';
-                }, 150);
+                const link = this.querySelector('.news-link');
+                if (link) {
+                    window.location.href = link.getAttribute('href');
+                }
+            });
+
+            // Add interactive effect on hover
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-10px)';
+            });
+
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0)';
             });
         });
     </script>

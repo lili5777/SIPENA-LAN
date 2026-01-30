@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Berita;
 use App\Models\Misi;
 use App\Models\Pejabat;
 use App\Models\Visi;
@@ -14,7 +15,17 @@ class LandingController extends Controller
 
     public function index()
     {
-        return view('welcome');
+        $beritas = Berita::latest()
+            ->paginate(9); // Tampilkan 9 berita per halaman
+
+        return view('welcome', compact('beritas'));
+    }
+
+    public function showBerita($id)
+    {
+        $berita = Berita::findOrFail($id);
+
+        return view('detail', compact('berita'));
     }
 
     public function profil()

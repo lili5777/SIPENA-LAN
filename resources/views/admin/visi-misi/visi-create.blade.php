@@ -1,6 +1,6 @@
 @extends('admin.partials.layout')
 
-@section('title', 'Tambah Visi - Sistem Inventori Obat')
+@section('title', 'Tambah Visi - SIMPEL')
 
 @section('content')
     <!-- Page Header -->

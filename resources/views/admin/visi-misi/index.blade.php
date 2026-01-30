@@ -1,6 +1,6 @@
 @extends('admin.partials.layout')
 
-@section('title', 'Visi & Misi - Sistem Inventori Obat')
+@section('title', 'Visi & Misi - SIMPEL')
 
 @section('content')
     <!-- Page Header with Animation -->

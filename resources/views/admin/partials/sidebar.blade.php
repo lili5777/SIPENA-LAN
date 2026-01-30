@@ -74,23 +74,21 @@ $labelMenu = match ($kodePelatihan) {
                                 <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
                             </a>
                             @endif
-                            <a href="{{ route('admin.import.peserta') }}" class="submenu-link">
-                                <i class="fas fa-file-invoice me-2"></i> Import Peserta
-                            </a>
+                            
 
                             <a href="{{ route('visi-misi.index') }}" class="submenu-link">
                                 <i class="fas fa-bullseye me-2"></i> Visi & Misi
                             </a>
 
-                            <a href="#" class="submenu-link">
+                            <a href="{{ route('pejabat.index') }}" class="submenu-link">
                                 <i class="fas fa-users me-2"></i> Pejabat
                             </a>
 
-                            <a href="#" class="submenu-link">
+                            <a href="{{ route('berita.index') }}" class="submenu-link">
                                 <i class="fas fa-newspaper me-2"></i> Berita
                             </a>
 
-                            <a href="#" class="submenu-link">
+                            <a href="{{ route('kontak.index') }}" class="submenu-link">
                                 <i class="fas fa-address-book me-2"></i> Kontak
                             </a>
                         </div>
@@ -170,6 +168,9 @@ $labelMenu = match ($kodePelatihan) {
                             <i class="fas fa-chevron-right menu-arrow"></i>
                         </a>
                         <div class="submenu">
+                            <a href="{{ route('admin.import.peserta') }}" class="submenu-link">
+                                <i class="fas fa-file-invoice me-2"></i> Import Peserta
+                            </a>
                             <a href="{{ route('admin.export.datapeserta') }}" class="submenu-link">
                                 <i class="fas fa-chart-bar me-2"></i> Data Peserta
                             </a>
@@ -182,9 +183,9 @@ $labelMenu = match ($kodePelatihan) {
                             <a href="{{ route('export.foto') }}" class="submenu-link">
                                 <i class="fas fa-user-tie me-2"></i> Export Foto
                             </a>
-                            <a href="{{ route('admin.export.sertifikat.view') }}" class="submenu-link">
+                            {{-- <a href="{{ route('admin.export.sertifikat.view') }}" class="submenu-link">
                                 <i class="fas fa-user-tie me-2"></i> Export Sertifikat
-                            </a>
+                            </a> --}}
                             {{-- <a href="" class="submenu-link">
                                 <i class="fas fa-clipboard-list me-2"></i> Evaluasi Program
                             </a> --}}

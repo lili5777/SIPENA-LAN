@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             VisiMisiSeeder::class,
             PejabatSeeder::class,
             KontakSeeder::class,
+            BeritaSeeder::class,
             Dataawal::class
         ]);
     }

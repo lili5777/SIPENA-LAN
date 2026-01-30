@@ -1,6 +1,6 @@
 @extends('admin.partials.layout')
 
-@section('title', 'Edit Misi - Sistem Inventori Obat')
+@section('title', 'Edit Misi - SIMPEL')
 
 @section('content')
     <!-- Page Header -->

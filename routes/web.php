@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\Angkatan\AngkatanController;
+use App\Http\Controllers\Admin\BeritaController;
+use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Admin\Master\PesertaController;
 use App\Http\Controllers\Admin\Mentor\MentorController;
+use App\Http\Controllers\Admin\PejabatController;
 use App\Http\Controllers\Admin\VisiMisiController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AksiPerubahanController;
@@ -39,6 +42,7 @@ Route::post('/upload', [UploadController::class, 'store'])->name('upload.store')
 
 // Route Landing Page
 Route::get('/', [LandingController::class, 'index'])->name('home');
+Route::get('/berita-simpel/{id}', [LandingController::class, 'showBerita'])->name('berita.detail');
 Route::get('/profil', [LandingController::class, 'profil'])->name('profil');
 Route::get('/publikasi', [LandingController::class, 'publikasi'])->name('publikasi');
 
@@ -239,6 +243,25 @@ Route::middleware('auth')->group(function () {
         Route::put('/misi/{misi}', [VisiMisiController::class, 'updateMisi'])->name('misi.update');
         Route::delete('/misi/{misi}', [VisiMisiController::class, 'destroyMisi'])->name('misi.destroy');
     });
+
+    // Route untuk Kontak
+    Route::prefix('kontak')->name('kontak.')->group(function () {
+        Route::get('/', [KontakController::class, 'index'])->name('index');
+        Route::get('/form', [KontakController::class, 'createOrEdit'])->name('form');
+        Route::post('/store', [KontakController::class, 'store'])->name('store');
+    });
+
+    // Route untuk Pejabat
+    Route::resource('pejabat', PejabatController::class);
+    Route::post('pejabat/update-positions', [PejabatController::class, 'updatePositions'])->name('pejabat.updatePositions');
+    Route::get('berita', [BeritaController::class, 'index'])->name('berita.index');
+    Route::get('berita/create', [BeritaController::class, 'create'])->name('berita.create');
+    Route::post('berita', [BeritaController::class, 'store'])->name('berita.store');
+    Route::get('berita/{id}', [BeritaController::class, 'show'])->name('berita.show');
+    Route::get('berita/{id}/edit', [BeritaController::class, 'edit'])->name('berita.edit');
+    Route::put('berita/{id}', [BeritaController::class, 'update'])->name('berita.update');
+    Route::delete('berita/{id}', [BeritaController::class, 'destroy'])->name('berita.destroy');
+    Route::post('berita/upload-image', [BeritaController::class, 'uploadImage'])->name('berita.uploadImage');
 
     
 });
