@@ -134,19 +134,34 @@
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <form id="filterForm" method="GET" class="row g-2">
-                            <div class="col-md-8">
+                            <div class="col-md-4">
                                 <label class="form-label small fw-semibold text-muted mb-1">
-                                    <i class="fas fa-filter me-1"></i> Filter Angkatan
+                                    <i class="fas fa-filter me-1"></i> Angkatan
                                 </label>
                                 <select name="angkatan" class="form-select">
                                     <option value="">Semua Angkatan</option>
                                     @foreach($angkatanList as $angkatan)
-                                        <option value="{{ $angkatan->id }}" {{ request('angkatan') == $angkatan->id ? 'selected' : '' }}>
-                                            {{ $angkatan->nama_angkatan }} - {{ $angkatan->tahun }}
+                                        <option value="{{ $angkatan->id }}"
+                                            {{ request('angkatan') == $angkatan->id ? 'selected' : '' }}>
+                                            {{ $angkatan->nama_angkatan }} - {{ $angkatan->tahun }} 
+                                            @if(!empty($angkatan->wilayah))
+                                                ({{ $angkatan->wilayah }})
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted mb-1">
+                                    <i class="fas fa-tags me-1"></i> Kategori
+                                </label>
+                                <select name="kategori" class="form-select">
+                                    <option value="">Semua Kategori</option>
+                                    <option value="PNBP" {{ request('kategori') == 'PNBP' ? 'selected' : '' }}>PNBP</option>
+                                    <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>Fasilitasi</option>
+                                </select>
+                            </div>
+
                             <div class="col-md-4 align-self-end">
                                 <button type="submit" class="btn btn-filter-primary w-100">
                                     <i class="fas fa-search me-1"></i> Filter
@@ -285,8 +300,23 @@
                                                                                                                                                     <td class="d-none d-md-table-cell">
                                                                                                                                                         <p class="mb-0 text-muted peserta-angkatan">
                                                                                                                                                             {{ $daftar->angkatan->nama_angkatan ?? '-' }}
+
                                                                                                                                                             @if($daftar->angkatan && $daftar->angkatan->tahun)
-                                                                                                                                                                <br><small class="text-muted">({{ $daftar->angkatan->tahun }})</small>
+                                                                                                                                                                <br>
+                                                                                                                                                                <small class="text-muted">
+                                                                                                                                                                    ({{ $daftar->angkatan->tahun }})
+                                                                                                                                                                </small>
+                                                                                                                                                            @endif
+
+                                                                                                                                                            @if(
+                                                                                                                                                                $daftar->angkatan &&
+                                                                                                                                                                $daftar->angkatan->kategori === 'FASILITASI' &&
+                                                                                                                                                                !empty($daftar->angkatan->wilayah)
+                                                                                                                                                            )
+                                                                                                                                                                <br>
+                                                                                                                                                                <small class="text-muted">
+                                                                                                                                                                    Wilayah: {{ $daftar->angkatan->wilayah }}
+                                                                                                                                                                </small>
                                                                                                                                                             @endif
                                                                                                                                                         </p>
                                                                                                                                                     </td>

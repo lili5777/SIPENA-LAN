@@ -134,37 +134,53 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <form id="filterForm" method="GET" class="row g-2">
-                        <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-muted mb-1">
-                                <i class="fas fa-filter me-1"></i> Filter Tahun
-                            </label>
-                            <select name="tahun" class="form-select">
-                                <option value="">Semua Tahun</option>
-                                @foreach($years as $year)
-                                    <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
-                                        {{ $year }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-muted mb-1">
-                                <i class="fas fa-filter me-1"></i> Filter Status
-                            </label>
-                            <select name="status" class="form-select">
-                                <option value="">Semua Status</option>
-                                <option value="Dibuka" {{ request('status') == 'Dibuka' ? 'selected' : '' }}>Dibuka</option>
-                                <option value="Berlangsung" {{ request('status') == 'Berlangsung' ? 'selected' : '' }}>Berlangsung</option>
-                                <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                                <option value="Ditutup" {{ request('status') == 'Ditutup' ? 'selected' : '' }}>Ditutup</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 align-self-end">
-                            <button type="submit" class="btn btn-filter-primary w-100">
-                                <i class="fas fa-search me-1"></i> Filter
-                            </button>
-                        </div>
-                    </form>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted mb-1">
+                            <i class="fas fa-filter me-1"></i> Filter Tahun
+                        </label>
+                        <select name="tahun" class="form-select">
+                            <option value="">Semua Tahun</option>
+                            @foreach($years as $year)
+                                <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
+                                    {{ $year }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted mb-1">
+                            <i class="fas fa-filter me-1"></i> Filter Kategori
+                        </label>
+                        <select name="kategori" class="form-select">
+                            <option value="">Semua Kategori</option>
+                            <option value="PNBP" {{ request('kategori') == 'PNBP' ? 'selected' : '' }}>PNBP</option>
+                            <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>
+                                Fasilitasi
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted mb-1">
+                            <i class="fas fa-filter me-1"></i> Filter Status
+                        </label>
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="Dibuka" {{ request('status') == 'Dibuka' ? 'selected' : '' }}>Dibuka</option>
+                            <option value="Berlangsung" {{ request('status') == 'Berlangsung' ? 'selected' : '' }}>Berlangsung</option>
+                            <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                            <option value="Ditutup" {{ request('status') == 'Ditutup' ? 'selected' : '' }}>Ditutup</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-filter-primary w-100">
+                            <i class="fas fa-search me-1"></i> Filter
+                        </button>
+                    </div>
+                </form>
+
                 </div>
                 <div class="col-md-6">
                     <div class="d-flex justify-content-md-end align-items-center mt-3 mt-md-0">
@@ -283,7 +299,15 @@
                                                             <p class="mb-0 fw-semibold angkatan-jenis">
                                                                 <i class="fas fa-graduation-cap me-1"></i>
                                                                 {{ $item->jenisPelatihan->nama_pelatihan ?? '-' }}
+                                                                ({{ $item->kategori ?? '-' }})
                                                             </p>
+
+                                                            @if ($item->kategori === 'FASILITASI')
+                                                                <small class="text-muted d-block">
+                                                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                                                    Wilayah: {{ $item->wilayah ?? '-' }}
+                                                                </small>
+                                                            @endif
                                                         </td>
                                                         <td>
                                                             <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
@@ -372,7 +396,7 @@
                                         </div>
                                         <h5 class="text-muted mb-2">Belum ada angkatan</h5>
                                         <p class="text-muted mb-4">Tidak ada angkatan yang terdaftar</p>
-                                        @if (auth()->user()->role()->name == 'admin')
+                                        @if (auth()->user()->role->name === 'admin')
                                         <a href="{{ route('angkatan.create') }}" class="btn btn-primary">
                                             <i class="fas fa-plus me-1"></i> Tambah Angkatan
                                         </a>

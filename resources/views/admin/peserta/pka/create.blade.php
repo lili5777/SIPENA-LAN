@@ -89,8 +89,7 @@ $isPKN = $jenis === 'pkn';
                                 <span id="selected-training-name">{{ $jenisNama }}</span>
                             </div>
                         </div>
-
-                        <div class="angkatan-container">
+                         <div class="angkatan-container">
                             <div class="form-group">
                                 <label for="id_angkatan" class="form-label required">Angkatan *</label>
                                 <select name="id_angkatan" id="id_angkatan"
@@ -98,9 +97,9 @@ $isPKN = $jenis === 'pkn';
                                     <option value="">Pilih Angkatan</option>
                                     @foreach($angkatanList as $angkatan)
                                         <option value="{{ $angkatan->id }}" data-nama="{{ $angkatan->nama_angkatan }}"
-                                            data-tahun="{{ $angkatan->tahun }}" data-kuota="{{ $angkatan->kuota }}"
-                                            data-status="{{ $angkatan->status_angkatan }}" {{ ($isEdit && $pendaftaran->id_angkatan == $angkatan->id) || old('id_angkatan') == $angkatan->id ? 'selected' : '' }}>
-                                            {{ $angkatan->nama_angkatan }} ({{ $angkatan->tahun }})
+                                            data-tahun="{{ $angkatan->tahun }}" data-kuota="{{ $angkatan->kuota }}" data-wilayah="{{ $angkatan->wilayah }}"
+                                            data-status="{{ $angkatan->status_angkatan }}" data-kategori="{{ $angkatan->kategori }}" {{ ($isEdit && $pendaftaran->id_angkatan == $angkatan->id) || old('id_angkatan') == $angkatan->id ? 'selected' : '' }}>
+                                            {{ $angkatan->nama_angkatan }} {{ $angkatan->tahun }} - {{ $angkatan->kategori }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -120,6 +119,14 @@ $isPKN = $jenis === 'pkn';
                                         <div class="info-item">
                                             <span class="info-label">Tahun:</span>
                                             <span class="info-value" id="info-tahun-angkatan"></span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Kategori:</span>
+                                            <span class="info-value" id="info-kategori-angkatan"></span>
+                                        </div>
+                                        <div class="info-item" id="info-wilayah-wrapper" style="display:none;">
+                                            <span class="info-label">Wilayah:</span>
+                                            <span class="info-value" id="info-wilayah-angkatan"></span>
                                         </div>
                                         <div class="info-item">
                                             <span class="info-label">Kuota:</span>
@@ -2577,10 +2584,11 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             // STEP 1: ANGKATAN SELECTION
             // ============================================
             if (angkatanSelect) {
+                const wilayahWrapper = document.getElementById('info-wilayah-wrapper');
                 angkatanSelect.addEventListener('change', function () {
                     if (!this.value) {
-                        if (nextToStep2Btn) nextToStep2Btn.disabled = true;
-                        if (angkatanInfo) angkatanInfo.style.display = 'none';
+                        nextToStep2Btn.disabled = true;
+                        angkatanInfo.style.display = 'none';
                         return;
                     }
 
@@ -2590,38 +2598,42 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                         nama: selectedOption.dataset.nama,
                         tahun: selectedOption.dataset.tahun,
                         kuota: selectedOption.dataset.kuota,
+                        kategori: selectedOption.dataset.kategori,
+                        wilayah: selectedOption.dataset.wilayah,
                         status: selectedOption.dataset.status
                     };
 
                     // Update UI
-                    if (currentAngkatanName) currentAngkatanName.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
-                    if (currentAngkatanName2) currentAngkatanName2.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
-                    if (currentAngkatanName3) currentAngkatanName3.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                    currentAngkatanName.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                    currentAngkatanName2.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
+                    currentAngkatanName3.textContent = `${selectedAngkatan.nama} (${selectedAngkatan.tahun})`;
 
                     // Show angkatan info
-                    const infoNama = document.getElementById('info-nama-angkatan');
-                    const infoTahun = document.getElementById('info-tahun-angkatan');
-                    const infoKuota = document.getElementById('info-kuota-angkatan');
-                    const statusBadge = document.getElementById('info-status-angkatan');
+                    document.getElementById('info-nama-angkatan').textContent = selectedAngkatan.nama;
+                    document.getElementById('info-tahun-angkatan').textContent = selectedAngkatan.tahun;
+                    document.getElementById('info-kategori-angkatan').textContent = selectedAngkatan.kategori;
+                    document.getElementById('info-kuota-angkatan').textContent = selectedAngkatan.kuota;
 
-                    if (infoNama) infoNama.textContent = selectedAngkatan.nama;
-                    if (infoTahun) infoTahun.textContent = selectedAngkatan.tahun;
-                    if (infoKuota) infoKuota.textContent = selectedAngkatan.kuota;
-
-                    if (statusBadge) {
-                        statusBadge.textContent = selectedAngkatan.status;
-                        statusBadge.className = 'info-badge';
-                        if (selectedAngkatan.status === 'Aktif' || selectedAngkatan.status === 'Dibuka') {
-                            statusBadge.style.background = 'var(--success-color)';
-                        } else if (selectedAngkatan.status === 'Penuh') {
-                            statusBadge.style.background = 'var(--danger-color)';
-                        } else {
-                            statusBadge.style.background = 'var(--warning-color)';
-                        }
+                    if (selectedAngkatan.wilayah) {
+                        document.getElementById('info-wilayah-angkatan').textContent = selectedAngkatan.wilayah;
+                        wilayahWrapper.style.display = 'flex';
+                    } else {
+                        wilayahWrapper.style.display = 'none';
                     }
 
-                    if (angkatanInfo) angkatanInfo.style.display = 'block';
-                    if (nextToStep2Btn) nextToStep2Btn.disabled = false;
+                    const statusBadge = document.getElementById('info-status-angkatan');
+                    statusBadge.textContent = selectedAngkatan.status;
+                    statusBadge.className = 'info-badge';
+                    if (selectedAngkatan.status === 'Aktif' || selectedAngkatan.status === 'Dibuka') {
+                        statusBadge.style.background = 'var(--success-color)';
+                    } else if (selectedAngkatan.status === 'Penuh') {
+                        statusBadge.style.background = 'var(--danger-color)';
+                    } else {
+                        statusBadge.style.background = 'var(--warning-color)';
+                    }
+
+                    angkatanInfo.style.display = 'block';
+                    nextToStep2Btn.disabled = false;
                 });
             }
 

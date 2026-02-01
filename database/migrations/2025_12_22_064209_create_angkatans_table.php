@@ -20,6 +20,8 @@ return new class extends Migration
             $table->boolean('kunci_edit')->default(false);
             $table->boolean('kunci_judul')->default(false);
             $table->string('link_gb_wa', 100)->nullable();
+            $table->string('kategori',50)->nullable();
+            $table->string('wilayah')->nullable();
             $table->timestamp('dibuat_pada')->useCurrent();
             $table->index(['id_jenis_pelatihan', 'status_angkatan'], 'idx_jenis_status');
             $table->index('status_angkatan', 'idx_angkatan_status');

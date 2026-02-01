@@ -34,9 +34,15 @@ class AngkatanController extends Controller
             $query->where('status_angkatan', $request->status);
         }
 
-        $angkatan = $query->orderBy('tahun', 'desc')
-            ->orderBy('nama_angkatan', 'asc')
-            ->get();
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        $angkatan = $query
+        ->orderBy('id', 'desc')
+        ->get();
+
+
 
         // Get unique years for filter dropdown
         $years = Angkatan::select('tahun')
@@ -76,7 +82,9 @@ class AngkatanController extends Controller
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'kuota' => 'nullable|integer|min:1',
             'status_angkatan' => 'required|in:Dibuka,Diutup,Berlangsung,Selesai',
-            'link_gb_wa' => 'nullable|string|max:100'
+            'link_gb_wa' => 'nullable|string|max:100',
+            'kategori' => 'required|in:PNBP,FASILITASI',
+            'wilayah'  => 'nullable|string|max:255',
         ], [
             'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
             'id_jenis_pelatihan.exists' => 'Jenis pelatihan tidak valid.',
@@ -98,16 +106,29 @@ class AngkatanController extends Controller
 
         try {
 
-            $exists = Angkatan::where('nama_angkatan', $request->nama_angkatan)
+            $query = Angkatan::where('nama_angkatan', $request->nama_angkatan)
                 ->where('tahun', $request->tahun)
                 ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
-                ->exists();
+                ->where('kategori', $request->kategori);
+
+            if ($request->kategori === 'PNBP') {
+                // PNBP: tidak boleh duplikat sama sekali
+                $exists = $query->exists();
+            } else {
+                // FASILITASI: boleh asal wilayah beda
+                $exists = $query
+                    ->where('wilayah', $request->wilayah)
+                    ->exists();
+            }
 
             if ($exists) {
                 return back()
-                    ->withErrors(['nama_angkatan' => 'Angkatan dengan nama dan tahun ini sudah ada'])
+                    ->withErrors([
+                        'nama_angkatan' => 'Angkatan dengan nama, jenis pelatihan, dan tahun ini sudah ada.'
+                    ])
                     ->withInput();
             }
+
 
             DB::beginTransaction();
 
@@ -122,6 +143,8 @@ class AngkatanController extends Controller
                 'kunci_edit' => $request->kunci_edit,
                 'kunci_judul' => $request->kunci_judul,
                 'link_gb_wa' => $request->link_gb_wa,
+                'kategori' => $request->kategori,
+                'wilayah'  => $request->kategori === 'FASILITASI' ? $request->wilayah : null,
                 'dibuat_pada' => now()
             ]);
 
@@ -170,7 +193,9 @@ class AngkatanController extends Controller
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'kuota' => 'nullable|integer|min:1',
             'status_angkatan' => 'required|in:Dibuka,Diutup,Berlangsung,Selesai',
-            'link_gb_wa' => 'nullable|string|max:100'
+            'link_gb_wa' => 'nullable|string|max:100',
+            'kategori' => 'required|in:PNBP,FASILITASI',
+            'wilayah'  => 'nullable|string|max:255',
         ], [
             'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
             'id_jenis_pelatihan.exists' => 'Jenis pelatihan tidak valid.',
@@ -191,19 +216,28 @@ class AngkatanController extends Controller
         ]);
 
         try {
-            $exists = Angkatan::where('nama_angkatan', $request->nama_angkatan)
+            $query = Angkatan::where('nama_angkatan', $request->nama_angkatan)
                 ->where('tahun', $request->tahun)
-                ->where('id_jenis_pelatihan',$request->id_jenis_pelatihan)
-                ->where('id', '!=', $angkatan->id) 
-                ->exists();
+                ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan)
+                ->where('kategori', $request->kategori)
+                ->where('id', '!=', $angkatan->id);
+
+            if ($request->kategori === 'PNBP') {
+                $exists = $query->exists();
+            } else {
+                $exists = $query
+                    ->where('wilayah', $request->wilayah)
+                    ->exists();
+            }
 
             if ($exists) {
                 return back()
                     ->withErrors([
-                        'nama_angkatan' => 'Angkatan dengan nama dan tahun ini sudah ada.'
+                        'nama_angkatan' => 'Data angkatan duplikat berdasarkan aturan kategori.'
                     ])
                     ->withInput();
             }
+
 
             DB::beginTransaction();
 
@@ -218,6 +252,9 @@ class AngkatanController extends Controller
                 'kunci_edit'=>$request->kunci_edit,
                 'kunci_judul' => $request->kunci_judul,
                 'link_gb_wa' => $request->link_gb_wa,
+                'kategori' => $request->kategori,
+                'wilayah'  => $request->kategori === 'FASILITASI' ? $request->wilayah : null,
+
             ]);
 
             DB::commit();

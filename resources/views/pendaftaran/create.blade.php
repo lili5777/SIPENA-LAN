@@ -1134,14 +1134,14 @@
                         // Update UI
                         currentNipNrp.textContent = verifiedPeserta.nip_nrp;
                         currentAngkatanName.textContent = pendaftaranData.angkatan ? 
-                            `${pendaftaranData.angkatan.nama_angkatan} (${pendaftaranData.angkatan.tahun})` : 
+                            `${pendaftaranData.angkatan.nama_angkatan} (${pendaftaranData.angkatan.tahun}) (${pendaftaranData.angkatan.kategori})` : 
                             'Angkatan tidak tersedia';
 
                         // Show verification details
                         successMessage.textContent = data.message;
                         detailNama.textContent = verifiedPeserta.nama_lengkap;
                         detailAngkatan.textContent = pendaftaranData.angkatan ? 
-                            `${pendaftaranData.angkatan.nama_angkatan} (${pendaftaranData.angkatan.tahun})` : 
+                            `${pendaftaranData.angkatan.nama_angkatan} ${pendaftaranData.angkatan.tahun} (${pendaftaranData.angkatan.kategori})` : 
                             'Tidak tersedia';
 
                         verificationSuccess.style.display = 'flex';

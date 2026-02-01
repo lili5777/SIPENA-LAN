@@ -129,6 +129,28 @@
                             </small>
                         </div>
 
+                        <!-- Wilayah -->
+                        <div class="mb-4" id="wilayah-wrapper">
+                            <label for="wilayah" class="form-label fw-semibold">
+                                <i class="fas fa-map-marker-alt me-1 text-primary"></i>
+                                Wilayah
+                            </label>
+                            <input type="text" 
+                                class="form-control @error('wilayah') is-invalid @enderror" 
+                                id="wilayah" 
+                                name="wilayah"
+                                value="{{ old('wilayah', $isEdit ? $angkatan->wilayah : '') }}"
+                                placeholder="Contoh: Kabupaten X, Provinsi Y">
+                            @error('wilayah')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Masukkan nama wilayah yang sesuai
+                            </small>
+                        </div>
+
+
                         <!-- Tahun -->
                         <div class="mb-4">
                             <label for="tahun" class="form-label fw-semibold">
@@ -176,6 +198,32 @@
                             <small class="text-muted mt-1 d-block">
                                 <i class="fas fa-info-circle me-1"></i>
                                 Jumlah maksimal peserta yang dapat diterima (kosongkan untuk tidak terbatas)
+                            </small>
+                        </div>
+
+                        <!-- kategori -->
+                        <div class="mb-4">
+                            <label for="kategori" class="form-label fw-semibold">
+                                <i class="fas fa-tag me-1 text-primary"></i>
+                                Kategori <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select @error('kategori') is-invalid @enderror" 
+                                    id="kategori" 
+                                    name="kategori"
+                                    required>
+                                <option value="PNBP" {{ old('kategori', $isEdit ? $angkatan->kategori : 'PNBP') == 'PNBP' ? 'selected' : '' }}>
+                                    PNBP
+                                </option>
+                                <option value="FASILITASI" {{ old('kategori', $isEdit ? $angkatan->kategori : '') == 'FASILITASI' ? 'selected' : '' }}>
+                                    FASILITASI
+                                </option>
+                            </select>
+                            @error('kategori')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Kategori angkatan
                             </small>
                         </div>
 
@@ -408,6 +456,23 @@
             const form = document.getElementById('angkatanForm');
             const validationSummary = document.getElementById('validationSummary');
             const validationErrors = document.getElementById('validationErrors');
+            const kategori = document.getElementById('kategori');
+            const wilayahWrapper = document.getElementById('wilayah-wrapper');
+            const wilayahInput = document.getElementById('wilayah');
+
+            function toggleWilayah() {
+                if (kategori.value === 'FASILITASI') {
+                    wilayahWrapper.style.display = 'block';
+                    wilayahInput.required = true;
+                } else {
+                    wilayahWrapper.style.display = 'none';
+                    wilayahInput.required = false;
+                    wilayahInput.value = '';
+                }
+            }
+
+            toggleWilayah();
+            kategori.addEventListener('change', toggleWilayah);
             
             // Auto-hide alerts
             const alerts = document.querySelectorAll('.alert');

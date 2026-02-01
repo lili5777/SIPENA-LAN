@@ -47,7 +47,7 @@ class PesertaController extends Controller
     }
 
 
-    public function index(Request $request, $jenis)
+   public function index(Request $request, $jenis)
     {
         $jenisData = $this->getJenisData($jenis);
         $jenisPelatihanId = $jenisData['id'];
@@ -60,16 +60,22 @@ class PesertaController extends Controller
             ->unique()
             ->toArray();
 
-        // Filter angkatan
+        // =====================
+        // LIST ANGKATAN (FILTER DROPDOWN)
+        // =====================
         $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId);
 
         if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
             $angkatanQuery->whereIn('id', $picAngkatanIds);
         }
 
-        $angkatanList = $angkatanQuery->orderBy('tahun', 'desc')->get();
+        $angkatanList = $angkatanQuery
+            ->orderBy('tahun', 'desc')
+            ->get();
 
-        // Query pendaftaran
+        // =====================
+        // QUERY PENDAFTARAN
+        // =====================
         $pendaftaranQuery = Pendaftaran::with([
             'peserta',
             'peserta.kepegawaianPeserta',
@@ -80,18 +86,27 @@ class PesertaController extends Controller
             ->whereNotNull('id_angkatan')
             ->where('id_angkatan', '!=', 0);
 
-        // Filter berdasarkan akses PIC
+        // Filter akses PIC
         if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
             $pendaftaranQuery->whereIn('id_angkatan', $picAngkatanIds);
         }
 
-        // Filter dropdown
-        if ($request->filled('angkatan') && $request->angkatan != '' && $request->angkatan != 'semua') {
+        // Filter angkatan
+        if ($request->filled('angkatan')) {
             $pendaftaranQuery->where('id_angkatan', $request->angkatan);
         }
 
-        // $pendaftaran = $pendaftaranQuery->latest('tanggal_daftar')->get();
-        $pendaftaran = $pendaftaranQuery->orderBy('id', 'asc')->get();
+        // ✅ Filter kategori (PNBP / FASILITASI)
+        if ($request->filled('kategori')) {
+            $pendaftaranQuery->whereHas('angkatan', function ($q) use ($request) {
+                $q->where('kategori', $request->kategori);
+            });
+        }
+
+        $pendaftaran = $pendaftaranQuery
+            ->orderBy('id', 'asc')
+            ->get();
+
         $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
 
         return view("admin.peserta.{$jenis}.index", compact(
@@ -101,6 +116,7 @@ class PesertaController extends Controller
             'jenis'
         ));
     }
+
 
     /**
      * Get peserta detail for modal.

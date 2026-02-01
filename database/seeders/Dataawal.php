@@ -57,16 +57,27 @@ class Dataawal extends Seeder
         $jenisPelatihan = JenisPelatihan::all();
 
         foreach ($jenisPelatihan as $jp) {
+
+            // Tentukan kategori
+            $kategori = $jp->kode_pelatihan === 'LATSAR'
+                ? 'FASILITASI'
+                : 'PNBP';
+
             Angkatan::create([
                 'id_jenis_pelatihan' => $jp->id,
-                'nama_angkatan' => 'Angkatan I',
-                'tahun' => 2026,
-                'tanggal_mulai' => '2025-01-01',
-                'tanggal_selesai' => '2025-03-31',
-                'kuota' => 50,
-                'status_angkatan' => 'Dibuka',
-            ]);
+                'nama_angkatan'     => 'Angkatan I',
+                'tahun'             => 2026,
+                'tanggal_mulai'     => '2025-01-01',
+                'tanggal_selesai'   => '2025-03-31',
+                'kuota'             => 50,
+                'status_angkatan'   => 'Dibuka',
+                'kategori'          => $kategori,
 
+                // wilayah hanya diisi kalau FASILITASI
+                'wilayah'           => $kategori === 'FASILITASI'
+                                        ? 'Sulawesi Selatan'
+                                        : null,
+            ]);
         }
 
         // Buat PICPESERTA

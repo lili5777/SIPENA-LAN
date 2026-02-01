@@ -98,9 +98,9 @@ $isPKN = $jenis === 'pkn';
                                     <option value="">Pilih Angkatan</option>
                                     @foreach($angkatanList as $angkatan)
                                         <option value="{{ $angkatan->id }}" data-nama="{{ $angkatan->nama_angkatan }}"
-                                            data-tahun="{{ $angkatan->tahun }}" data-kuota="{{ $angkatan->kuota }}"
-                                            data-status="{{ $angkatan->status_angkatan }}" {{ ($isEdit && $pendaftaran->id_angkatan == $angkatan->id) || old('id_angkatan') == $angkatan->id ? 'selected' : '' }}>
-                                            {{ $angkatan->nama_angkatan }} ({{ $angkatan->tahun }})
+                                            data-tahun="{{ $angkatan->tahun }}" data-kuota="{{ $angkatan->kuota }}" data-wilayah="{{ $angkatan->wilayah }}"
+                                            data-status="{{ $angkatan->status_angkatan }}" data-kategori="{{ $angkatan->kategori }}" {{ ($isEdit && $pendaftaran->id_angkatan == $angkatan->id) || old('id_angkatan') == $angkatan->id ? 'selected' : '' }}>
+                                            {{ $angkatan->nama_angkatan }} {{ $angkatan->tahun }} - {{ $angkatan->kategori }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -120,6 +120,14 @@ $isPKN = $jenis === 'pkn';
                                         <div class="info-item">
                                             <span class="info-label">Tahun:</span>
                                             <span class="info-value" id="info-tahun-angkatan"></span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Kategori:</span>
+                                            <span class="info-value" id="info-kategori-angkatan"></span>
+                                        </div>
+                                        <div class="info-item" id="info-wilayah-wrapper" style="display:none;">
+                                            <span class="info-label">Wilayah:</span>
+                                            <span class="info-value" id="info-wilayah-angkatan"></span>
                                         </div>
                                         <div class="info-item">
                                             <span class="info-label">Kuota:</span>
@@ -2534,6 +2542,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             // ============================================
             // STEP 1: ANGKATAN SELECTION
             // ============================================
+            const wilayahWrapper = document.getElementById('info-wilayah-wrapper');
             angkatanSelect.addEventListener('change', function () {
                 if (!this.value) {
                     nextToStep2Btn.disabled = true;
@@ -2547,6 +2556,8 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                     nama: selectedOption.dataset.nama,
                     tahun: selectedOption.dataset.tahun,
                     kuota: selectedOption.dataset.kuota,
+                    kategori: selectedOption.dataset.kategori,
+                    wilayah: selectedOption.dataset.wilayah,
                     status: selectedOption.dataset.status
                 };
 
@@ -2558,7 +2569,15 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                 // Show angkatan info
                 document.getElementById('info-nama-angkatan').textContent = selectedAngkatan.nama;
                 document.getElementById('info-tahun-angkatan').textContent = selectedAngkatan.tahun;
+                document.getElementById('info-kategori-angkatan').textContent = selectedAngkatan.kategori;
                 document.getElementById('info-kuota-angkatan').textContent = selectedAngkatan.kuota;
+
+                if (selectedAngkatan.wilayah) {
+                    document.getElementById('info-wilayah-angkatan').textContent = selectedAngkatan.wilayah;
+                    wilayahWrapper.style.display = 'flex';
+                } else {
+                    wilayahWrapper.style.display = 'none';
+                }
 
                 const statusBadge = document.getElementById('info-status-angkatan');
                 statusBadge.textContent = selectedAngkatan.status;
