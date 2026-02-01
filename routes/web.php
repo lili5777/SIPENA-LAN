@@ -292,3 +292,4 @@ Route::get('/proxy/regencies/{code}', function ($code) {
 });
 
 
+// made by ali
