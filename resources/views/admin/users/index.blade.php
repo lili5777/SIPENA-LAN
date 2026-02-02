@@ -407,7 +407,7 @@
                                                                         <div
                                                                             class="d-flex align-items-center justify-content-between">
                                                                             <div class="flex-grow-1">
-                                                                                <div class="fw-medium">{{ $ang->nama_angkatan }}
+                                                                                <div class="fw-medium">{{ $ang->nama_angkatan }} ({{ $ang->kategori }})
                                                                                 </div>
                                                                                 <div class="d-flex align-items-center mt-1">
                                                                                     <small class="text-muted me-2">Tahun
@@ -422,7 +422,7 @@
                                                                             </div>
                                                                             <div class="text-end ms-2">
                                                                                 <small class="text-muted d-block">
-                                                                                    {{ $ang->jenisPelatihan->nama_pelatihan ?? 'Tidak diketahui' }}
+                                                                                    {{ $ang->wilayah ?? '-' }}
                                                                                 </small>
                                                                             </div>
                                                                         </div>
