@@ -51,6 +51,8 @@ class ExportController extends Controller
         $jenisPelatihan = $request->jenis_pelatihan;
         $angkatan       = $request->angkatan;
         $tahun          = $request->tahun;
+        $kategori       = $request->kategori;
+        $wilayah        = $request->wilayah;
 
         // =========================
         // 2️⃣ Validasi template
@@ -64,7 +66,7 @@ class ExportController extends Controller
         }
 
         // =========================
-        // 3️⃣ QUERY UTAMA (SATU KALI)
+        // 3️⃣ QUERY UTAMA
         // =========================
         $query = Pendaftaran::with([
             'peserta',
@@ -98,6 +100,31 @@ class ExportController extends Controller
         }
 
         // =========================
+        // 🔥 FILTER KATEGORI & WILAYAH (OPSIONAL)
+        // =========================
+        if ($kategori === 'PNBP') {
+            $query->whereHas('angkatan', function ($q) {
+                $q->where('kategori', 'PNBP');
+            });
+        } elseif ($kategori === 'FASILITASI') {
+            $query->whereHas('angkatan', function ($q) use ($wilayah) {
+                $q->where('kategori', 'FASILITASI');
+                if ($wilayah && trim($wilayah) !== '') {
+                    // Gunakan LIKE untuk partial match
+                    $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+                }
+            });
+        } else if ($kategori === 'SEMUA') {
+            // Jika kategori SEMUA, kita tetap bisa filter wilayah jika dipilih
+            if ($wilayah && trim($wilayah) !== '') {
+                $query->whereHas('angkatan', function ($q) use ($wilayah) {
+                    // Gunakan LIKE untuk partial match
+                    $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+                });
+            }
+        }
+
+        // =========================
         // 🔥 VALIDASI DATA KOSONG (GLOBAL)
         // =========================
         if (!$query->exists()) {
@@ -117,6 +144,8 @@ class ExportController extends Controller
         if ($jenisPelatihan) $fileNameParts[] = strtoupper(str_replace(' ', '_', $jenisPelatihan));
         if ($angkatan)       $fileNameParts[] = strtoupper(str_replace(' ', '_', $angkatan));
         if ($tahun)          $fileNameParts[] = $tahun;
+        if ($kategori && $kategori !== 'SEMUA') $fileNameParts[] = $kategori;
+        if ($wilayah)        $fileNameParts[] = strtoupper(str_replace(' ', '_', $wilayah));
 
         $fileNameParts[] = now()->format('Ymd_His');
         $fileName = implode('_', $fileNameParts) . '.xlsx';
@@ -195,7 +224,7 @@ class ExportController extends Controller
         aktifitas('Mengekspor Data Peserta - Template Form Registrasi');
 
         return Excel::download(
-            new DataPeserta($jenisPelatihan, $angkatan, $tahun),
+            new DataPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
             $fileName
         );
     }
@@ -209,6 +238,8 @@ class ExportController extends Controller
         $jenisPelatihan = request('jenis_pelatihan');
         $angkatan = request('angkatan');
         $tahun = request('tahun');
+        $kategori = request('kategori');
+        $wilayah = request('wilayah');
 
         // Buat nama file berdasarkan filter yang dipilih
         $fileNameParts = ['KOMPOSISI'];
@@ -237,7 +268,7 @@ class ExportController extends Controller
 
         // Kirim parameter filter ke export class
         return Excel::download(
-            new KomposisiPeserta($jenisPelatihan, $angkatan, $tahun),
+            new KomposisiPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
             $fileName
         );
     }
@@ -251,6 +282,8 @@ class ExportController extends Controller
         $jenisPelatihan = $request->jenis_pelatihan;
         $angkatan = $request->angkatan;
         $tahun = $request->tahun;
+        $kategori = $request->kategori;
+        $wilayah = $request->wilayah;
 
         // Query data peserta dengan filter
         $query = Pendaftaran::with([
@@ -277,6 +310,28 @@ class ExportController extends Controller
             $query->whereHas('angkatan', function ($q) use ($tahun) {
                 $q->where('tahun', $tahun);
             });
+        }
+
+        if ($kategori === 'PNBP') {
+            $query->whereHas('angkatan', function ($q) {
+                $q->where('kategori', 'PNBP');
+            });
+        } elseif ($kategori === 'FASILITASI') {
+            $query->whereHas('angkatan', function ($q) use ($wilayah) {
+                $q->where('kategori', 'FASILITASI');
+                if ($wilayah && trim($wilayah) !== '') {
+                    // Gunakan LIKE untuk partial match
+                    $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+                }
+            });
+        } else if ($kategori === 'SEMUA') {
+            // Jika kategori SEMUA, kita tetap bisa filter wilayah jika dipilih
+            if ($wilayah && trim($wilayah) !== '') {
+                $query->whereHas('angkatan', function ($q) use ($wilayah) {
+                    // Gunakan LIKE untuk partial match
+                    $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+                });
+            }
         }
 
         $pendaftaranList = $query->get();
@@ -352,6 +407,8 @@ class ExportController extends Controller
                 'jenis_pelatihan' => 'nullable|string',
                 'angkatan' => 'nullable|string',
                 'tahun' => 'nullable|integer',
+                'kategori' => 'nullable|string',
+                'wilayah' => 'nullable|string',
             ]);
 
             // Query untuk mendapatkan peserta berdasarkan filter
@@ -373,6 +430,21 @@ class ExportController extends Controller
                 $query->whereHas('angkatan', function ($q) use ($validated) {
                     $q->where('tahun', $validated['tahun']);
                 });
+            }
+
+            if (!empty($validated['kategori'])) {
+                if ($validated['kategori'] === 'PNBP') {
+                    $query->whereHas('angkatan', function ($q) {
+                        $q->where('kategori', 'PNBP');
+                    });
+                } elseif ($validated['kategori'] === 'FASILITASI') {
+                    $query->whereHas('angkatan', function ($q) use ($validated) {
+                        $q->where('kategori', 'FASILITASI');
+                        if (!empty($validated['wilayah'])) {
+                            $q->where('wilayah', 'like', '%' . trim($validated['wilayah']) . '%');
+                        }
+                    });
+                }
             }
 
             // Ambil data peserta
@@ -509,6 +581,21 @@ class ExportController extends Controller
                 $query->whereHas('angkatan', function ($q) use ($request) {
                     $q->where('tahun', $request->tahun);
                 });
+            }
+
+            if ($request->filled('kategori')) {
+                if ($request->kategori === 'PNBP') {
+                    $query->whereHas('angkatan', function ($q) {
+                        $q->where('kategori', 'PNBP');
+                    });
+                } elseif ($request->kategori === 'FASILITASI') {
+                    $query->whereHas('angkatan', function ($q) use ($request) {
+                        $q->where('kategori', 'FASILITASI');
+                        if ($request->filled('wilayah')) {
+                            $q->where('wilayah', 'like', '%' . trim($request->wilayah) . '%');
+                        }
+                    });
+                }
             }
 
             $totalPeserta = $query->count();

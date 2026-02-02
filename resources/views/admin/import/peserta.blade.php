@@ -508,6 +508,23 @@
                             </tr>
                             <tr>
                                 <td>4</td>
+                                <td>KATEGORI</td>
+                                <td>Text (PNBP / FASILITASI)</td>
+                                <td>PNBP</td>
+                                <td><span class="required">Wajib</span></td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>WILAYAH</td>
+                                <td>Text (contoh: Jawa Barat, DKI Jakarta, Sumatera Utara)</td>
+                                <td>Jawa Barat</td>
+                                <td>
+                                    <span class="required">Wajib jika FASILITASI</span><br>
+                                    <span class="optional">Opsional jika PNBP</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
                                 <td>NIP_NRP</td>
                                 <td>Angka/Teks (18-21 digit)</td>
                                 <td>198001012011011001</td>

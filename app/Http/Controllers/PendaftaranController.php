@@ -617,7 +617,6 @@ class PendaftaranController extends Controller
             // Ambil data untuk struktur folder
             $tahun = date('Y');
             $folderPath = null;
-            $fullPath = null;
 
             // Ambil data angkatan dari pendaftaran
             $angkatan = null;
@@ -625,19 +624,25 @@ class PendaftaranController extends Controller
                 $angkatan = $pendaftaran->angkatan;
             }
 
+            // Ambil kategori dan wilayah
+            $kategori = $pendaftaran->angkatan->kategori ?? 'PNBP';
+            $wilayah = $pendaftaran->angkatan->wilayah ?? null;
+
             if ($jenisPelatihan && $angkatan) {
+                $kategoriFolder = strtoupper($kategori);
                 $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
                 $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
                 $nip = $request->nip_nrp;
 
-                // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
-                $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
-                // $fullPath = public_path($folderPath);
-
-                // // Buat folder jika belum ada
-                // if (!file_exists($fullPath)) {
-                //     mkdir($fullPath, 0755, true);
-                // }
+                // Buat struktur folder berdasarkan kategori
+                if (strtoupper($kategori) === 'FASILITASI') {
+                    // Struktur untuk Fasilitasi: Berkas/Fasilitasi/Tahun/JenisPelatihan/Angkatan/Wilayah/NIP
+                    $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
+                    $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$wilayahFolder}/{$nip}";
+                } else {
+                    // Struktur untuk PNBP: Berkas/PNBP/Tahun/JenisPelatihan/Angkatan/NIP
+                    $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+                }
             }
 
             $files = [];
@@ -674,7 +679,12 @@ class PendaftaranController extends Controller
 
                     // Buat folder jika belum ada
                     if (!$folderPath) {
-                        $folderPath = "Berkas/{$tahun}/default/{$request->nip_nrp}";
+                        if (strtoupper($kategori) === 'FASILITASI') {
+                            $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
+                            $folderPath = "Berkas/FASILITASI/{$tahun}/default/{$wilayahFolder}/{$request->nip_nrp}";
+                        } else {
+                            $folderPath = "Berkas/PNBP/{$tahun}/default/{$request->nip_nrp}";
+                        }
                     }
 
                     // Buat nama file
@@ -712,9 +722,14 @@ class PendaftaranController extends Controller
 
                 if ($request->hasFile($field)) {
                     try {
-
+                        
                         if (!$folderPath) {
-                            $folderPath = "Berkas/{$tahun}/default/{$request->nip_nrp}";
+                            if (strtoupper($kategori) === 'FASILITASI') {
+                                $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
+                                $folderPath = "Berkas/FASILITASI/{$tahun}/default/{$wilayahFolder}/{$request->nip_nrp}";
+                            } else {
+                                $folderPath = "Berkas/PNBP/{$tahun}/default/{$request->nip_nrp}";
+                            }
                         }
 
                         $extension = $request->file($field)->getClientOriginalExtension();
@@ -743,43 +758,6 @@ class PendaftaranController extends Controller
                 }
             }
 
-
-            // $files = [];
-            // foreach ($fileFields as $field) {
-            //     if ($request->hasFile($field)) {
-            //         try {
-            //             // Jika tidak ada data lengkap untuk struktur folder, gunakan folder default
-            //             if (!$fullPath) {
-            //                 $folderPath = "Berkas/{$tahun}/default/{$request->nip_nrp}";
-            //                 $fullPath = public_path($folderPath);
-
-            //                 if (!file_exists($fullPath)) {
-            //                     mkdir($fullPath, 0755, true);
-            //                 }
-            //             }
-
-            //             // Ambil ekstensi file
-            //             $extension = $request->file($field)->getClientOriginalExtension();
-
-            //             // Buat nama file yang lebih deskriptif (hilangkan prefix 'file_')
-            //             $fieldName = str_replace('file_', '', $field);
-            //             $fileName = $fieldName . '.' . $extension;
-
-            //             // Pindahkan file ke folder yang sudah ditentukan
-            //             $request->file($field)->move($fullPath, $fileName);
-
-            //             // Simpan path relatif untuk database (DENGAN SLASH DI AWAL)
-            //             $files[$field] = '/' . $folderPath . '/' . $fileName;
-
-            //             // Hapus file lama jika ada
-            //             $this->deleteOldFile($peserta, $pendaftaran, $kepegawaian, $field);
-            //         } catch (\Exception $e) {
-            //             throw ValidationException::withMessages([
-            //                 $field => ['Gagal mengupload file: ' . $e->getMessage()]
-            //             ]);
-            //         }
-            //     }
-            // }
 
             // 5. UPDATE DATA PESERTA
             $pesertaUpdateData = [

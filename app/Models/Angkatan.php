@@ -20,7 +20,7 @@ class Angkatan extends Model
         'tanggal_selesai',
         'kuota',
         'status_angkatan',
-        'dibuat_pada', // tambahkan ini
+        'dibuat_pada',
         'kunci_edit',
         'kunci_judul',
         'link_gb_wa',

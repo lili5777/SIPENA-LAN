@@ -219,8 +219,20 @@ class AksiPerubahanController extends Controller
             $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan ?? 'angkatan');
             $nip = $pendaftaran->peserta->nip_nrp ?? 'unknown';
 
-            // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
-            $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            // Ambil kategori dan wilayah dari angkatan
+            $kategori = $angkatan->kategori ?? 'PNBP';
+            $wilayah = $angkatan->wilayah ?? null;
+            $kategoriFolder = strtoupper($kategori);
+
+            // Buat struktur folder berdasarkan kategori
+            if (strtoupper($kategori) === 'FASILITASI') {
+                // Struktur untuk Fasilitasi: Berkas/Fasilitasi/Tahun/JenisPelatihan/Angkatan/Wilayah/NIP
+                $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
+                $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$wilayahFolder}/{$nip}";
+            } else {
+                // Struktur untuk PNBP: Berkas/PNBP/Tahun/JenisPelatihan/Angkatan/NIP
+                $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            }
 
             // Gunakan extension dari file jika tidak ditentukan
             if (!$extension) {
@@ -274,4 +286,5 @@ class AksiPerubahanController extends Controller
 
         return back()->with('success', 'Aksi Perubahan berhasil dihapus!');
     }
+    
 }

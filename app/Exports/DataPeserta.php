@@ -23,12 +23,16 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
     protected $jenisPelatihan;
     protected $angkatan;
     protected $tahun;
+    protected $kategori;
+    protected $wilayah;
 
-    public function __construct($jenisPelatihan = null, $angkatan = null, $tahun = null)
+    public function __construct($jenisPelatihan = null, $angkatan = null, $tahun = null, $kategori = null, $wilayah = null)
     {
         $this->jenisPelatihan = $jenisPelatihan;
         $this->angkatan = $angkatan;
         $this->tahun = $tahun;
+        $this->kategori = $kategori;
+        $this->wilayah = $wilayah;
     }
 
     public function collection()
@@ -62,6 +66,31 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             });
         }
 
+        // =========================
+        // 🔥 FILTER KATEGORI & WILAYAH (OPSIONAL)
+        // =========================
+        if ($this->kategori && $this->kategori !== 'SEMUA') {
+            if ($this->kategori === 'PNBP') {
+                $query->whereHas('angkatan', function ($q) {
+                    $q->where('kategori', 'PNBP');
+                });
+            } elseif ($this->kategori === 'FASILITASI') {
+                $query->whereHas('angkatan', function ($q) {
+                    $q->where('kategori', 'FASILITASI');
+                    if ($this->wilayah && trim($this->wilayah) !== '') {
+                        $q->where('wilayah', 'like', '%' . trim($this->wilayah) . '%');
+                    }
+                });
+            }
+        } else {
+            // Jika kategori SEMUA atau kosong, filter wilayah saja jika dipilih
+            if ($this->wilayah && trim($this->wilayah) !== '') {
+                $query->whereHas('angkatan', function ($q) {
+                    $q->where('wilayah', 'like', '%' . trim($this->wilayah) . '%');
+                });
+            }
+        }
+
         return $query->get();
     }
 
@@ -85,7 +114,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'PROVINSI',
             'KABUPATEN/KOTA',
             'JABATAN',
-            'NOMOR SK CPND',
+            'NOMOR SK CPNS',
             'TANGGAL SK CPNS',
             'NOMOR SK TERAKHIR',
             'TANGGAL SK JABATAN',

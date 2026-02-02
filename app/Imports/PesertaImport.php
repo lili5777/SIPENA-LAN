@@ -12,7 +12,6 @@ use App\Models\Kabupaten;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
@@ -25,12 +24,11 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
     protected int $successCount = 0;
     protected int $failedCount = 0;
     protected int $duplicateCount = 0;
-    // protected array $errors = [];
+    protected array $importErrors = []; // GANTI NAMA DARI $errors MENJADI $importErrors
 
     public function collection(Collection $rows)
     {
         foreach ($rows->toArray() as $index => $rawRow) {
-
             $rowNumber = $index + 2;
             $row = collect($this->normalizeData($rawRow));
 
@@ -41,7 +39,6 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
 
             DB::beginTransaction();
             try {
-
                 // ================= VALIDASI WAJIB =================
                 if (!$this->validateRequiredFields($row, $rowNumber)) {
                     $this->failedCount++;
@@ -49,36 +46,60 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
                     continue;
                 }
 
-                // ================= JENIS PELATIHAN =================
+                // ================= VALIDASI KATEGORI =================
+                $kategori = strtoupper(trim($row['kategori']));
+                $validKategori = ['PNBP', 'FASILITASI'];
+                
+                if (!in_array($kategori, $validKategori)) {
+                    $this->importErrors[] = "Baris {$rowNumber}: Kategori '{$row['kategori']}' tidak valid. Harus PNBP atau FASILITASI"; // GANTI
+                    $this->failedCount++;
+                    DB::rollBack();
+                    continue;
+                }
+
+                // ================= VALIDASI WILAYAH =================
+                if ($kategori === 'FASILITASI' && empty($row['wilayah'])) {
+                    $this->importErrors[] = "Baris {$rowNumber}: Wilayah wajib diisi jika kategori FASILITASI"; // GANTI
+                    $this->failedCount++;
+                    DB::rollBack();
+                    continue;
+                }
+
+                // ================= CEK JENIS PELATIHAN =================
                 $jenisPelatihan = JenisPelatihan::where('nama_pelatihan', trim($row['jenis_pelatihan']))
                     ->orWhere('kode_pelatihan', trim($row['jenis_pelatihan']))
                     ->first();
 
                 if (!$jenisPelatihan) {
-                    $this->errors[] = "Baris {$rowNumber}: Jenis pelatihan '{$row['jenis_pelatihan']}' tidak ditemukan";
+                    $this->importErrors[] = "Baris {$rowNumber}: Jenis pelatihan '{$row['jenis_pelatihan']}' tidak ditemukan"; // GANTI
                     $this->failedCount++;
                     DB::rollBack();
                     continue;
                 }
 
-                // ================= ANGKATAN (STRICT) =================
-                $angkatan = Angkatan::where([
+                // ================= CEK/CREATE ANGKATAN DENGAN KATEGORI & WILAYAH =================
+                $angkatanData = [
                     'id_jenis_pelatihan' => $jenisPelatihan->id,
                     'tahun' => trim($row['tahun_angkatan']),
                     'nama_angkatan' => trim($row['angkatan']),
-                ])->first();
+                    'kategori' => $kategori,
+                    'wilayah' => !empty($row['wilayah']) ? trim($row['wilayah']) : null,
+                ];
 
+                // Cek apakah angkatan sudah ada dengan data yang sama
+                $angkatan = Angkatan::where($angkatanData)->first();
+
+                // Jika belum ada, buat baru dengan kuota default
                 if (!$angkatan) {
-                    $this->errors[] =
-                        "Baris {$rowNumber}: Angkatan '{$row['angkatan']}' tahun {$row['tahun_angkatan']} untuk pelatihan '{$jenisPelatihan->nama_pelatihan}' TIDAK DITEMUKAN";
-                    $this->failedCount++;
-                    DB::rollBack();
-                    continue;
+                    $angkatan = Angkatan::create(array_merge($angkatanData, [
+                        'kuota' => 100, // Default kuota
+                        'status' => 'Aktif',
+                    ]));
                 }
 
                 // ================= CEK KUOTA =================
                 if (Pendaftaran::where('id_angkatan', $angkatan->id)->count() >= $angkatan->kuota) {
-                    $this->errors[] = "Baris {$rowNumber}: Kuota angkatan '{$angkatan->nama_angkatan}' penuh";
+                    $this->importErrors[] = "Baris {$rowNumber}: Kuota angkatan '{$angkatan->nama_angkatan}' penuh"; // GANTI
                     $this->failedCount++;
                     DB::rollBack();
                     continue;
@@ -88,20 +109,21 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
                 $peserta = Peserta::where('nip_nrp', $row['nip_nrp'])->first();
 
                 if ($peserta) {
+                    // Cek apakah sudah terdaftar di angkatan yang sama
                     $exists = Pendaftaran::where([
                         'id_peserta' => $peserta->id,
-                        'id_jenis_pelatihan' => $jenisPelatihan->id,
                         'id_angkatan' => $angkatan->id,
                     ])->exists();
 
                     if ($exists) {
-                        $this->errors[] = "Baris {$rowNumber}: NIP '{$row['nip_nrp']}' sudah terdaftar";
+                        $this->importErrors[] = "Baris {$rowNumber}: NIP '{$row['nip_nrp']}' sudah terdaftar di angkatan ini"; // GANTI
                         $this->duplicateCount++;
                         DB::rollBack();
                         continue;
                     }
                 }
 
+                // Buat atau update data peserta (TANPA kategori dan wilayah di peserta)
                 $peserta = Peserta::updateOrCreate(
                     ['nip_nrp' => $row['nip_nrp']],
                     [
@@ -174,7 +196,7 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
                 $this->successCount++;
             } catch (\Throwable $e) {
                 DB::rollBack();
-                $this->errors[] = "Baris {$rowNumber}: {$e->getMessage()}";
+                $this->importErrors[] = "Baris {$rowNumber}: {$e->getMessage()}"; // GANTI
                 $this->failedCount++;
                 Log::error("IMPORT ERROR ROW {$rowNumber}", ['error' => $e->getMessage()]);
             }
@@ -201,15 +223,24 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
     // ================= VALIDASI =================
     protected function validateRequiredFields(Collection &$row, int $rowNumber): bool
     {
-        $required = ['jenis_pelatihan', 'angkatan', 'tahun_angkatan', 'nip_nrp', 'nama_lengkap', 'jenis_kelamin'];
+        $required = [
+            'jenis_pelatihan', 
+            'angkatan', 
+            'tahun_angkatan', 
+            'kategori', // WAJIB
+            'nip_nrp', 
+            'nama_lengkap', 
+            'jenis_kelamin'
+        ];
 
         foreach ($required as $field) {
             if (empty($row[$field])) {
-                $this->errors[] = "Baris {$rowNumber}: Field {$field} wajib diisi";
+                $this->importErrors[] = "Baris {$rowNumber}: Field {$field} wajib diisi"; // GANTI
                 return false;
             }
         }
 
+        // ================= VALIDASI JENIS KELAMIN =================
         $jk = strtolower(trim($row['jenis_kelamin']));
 
         $mapping = [
@@ -223,14 +254,13 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
         ];
 
         if (!array_key_exists($jk, $mapping)) {
-            $this->errors[] =
-                "Baris {$rowNumber}: Jenis kelamin '{$row['jenis_kelamin']}' tidak valid";
+            $this->importErrors[] = "Baris {$rowNumber}: Jenis kelamin '{$row['jenis_kelamin']}' tidak valid"; // GANTI
             return false;
         }
 
         $row['jenis_kelamin'] = $mapping[$jk];
 
-        // ================= AGAMA =================
+        // ================= VALIDASI AGAMA =================
         if (!empty($row['agama'])) {
             $agama = strtolower(trim($row['agama']));
 
@@ -248,8 +278,7 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
             ];
 
             if (!array_key_exists($agama, $agamaMap)) {
-                $this->errors[] =
-                    "Baris {$rowNumber}: Agama '{$row['agama']}' tidak dikenali";
+                $this->importErrors[] = "Baris {$rowNumber}: Agama '{$row['agama']}' tidak dikenali"; // GANTI
                 return false;
             }
 
@@ -258,7 +287,6 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
 
         return true;
     }
-
 
     protected function parseDate($date)
     {
@@ -272,7 +300,11 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
         }
     }
 
-    public function onError(\Throwable $e) {}
+    public function onError(\Throwable $e) {
+        // Method dari SkipsOnError trait
+        // Biarkan kosong atau tambahkan logging jika perlu
+        Log::error('Excel import error: ' . $e->getMessage());
+    }
 
     public function getStats(): array
     {
@@ -286,6 +318,6 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
 
     public function getErrors(): array
     {
-        return $this->errors;
+        return $this->importErrors; // GANTI
     }
 }

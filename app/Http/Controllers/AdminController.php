@@ -454,7 +454,6 @@ class AdminController extends Controller
                         }
 
                         // Buat struktur folder
-                        $tahun = date('Y');
                         $folderPath = $this->getFolderPath($pendaftaranTerbaru, $request->nip_nrp);
 
                         // Buat nama file
@@ -695,7 +694,7 @@ class AdminController extends Controller
         }
     }
 
-    // Helper method untuk mendapatkan folder path
+    // Helper method untuk mendapatkan folder path DENGAN KATEGORI & WILAYAH
     private function getFolderPath($pendaftaranTerbaru, $nip)
     {
         $tahun = date('Y');
@@ -703,13 +702,41 @@ class AdminController extends Controller
         if ($pendaftaranTerbaru && $pendaftaranTerbaru->jenisPelatihan && $pendaftaranTerbaru->angkatan) {
             $jenisPelatihan = $pendaftaranTerbaru->jenisPelatihan;
             $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
+            
             $angkatan = $pendaftaranTerbaru->angkatan;
             $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
+            
+            // Ambil kategori dan wilayah
+            $kategori = $angkatan->kategori ?? 'PNBP';
+            $wilayah = $angkatan->wilayah ?? null;
+            
+            $kategoriFolder = strtoupper($kategori);
 
-            return "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            // Buat struktur folder berdasarkan kategori
+            if (strtoupper($kategori) === 'FASILITASI') {
+                // Struktur untuk Fasilitasi: Berkas/Fasilitasi/Tahun/JenisPelatihan/Angkatan/Wilayah/NIP
+                $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
+                return "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$wilayahFolder}/{$nip}";
+            } else {
+                // Struktur untuk PNBP: Berkas/PNBP/Tahun/JenisPelatihan/Angkatan/NIP
+                return "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            }
         }
 
-        return "Berkas/{$tahun}/default/{$nip}";
+        // Fallback untuk default (jika tidak ada data lengkap)
+        // Coba ambil kategori dari pendaftaran jika ada
+        $kategori = 'PNBP';
+        if ($pendaftaranTerbaru && $pendaftaranTerbaru->angkatan) {
+            $kategori = $pendaftaranTerbaru->angkatan->kategori ?? 'PNBP';
+        }
+        
+        if (strtoupper($kategori) === 'FASILITASI') {
+            $wilayah = $pendaftaranTerbaru->angkatan->wilayah ?? 'Umum';
+            $wilayahFolder = str_replace(' ', '_', $wilayah);
+            return "Berkas/FASILITASI/{$tahun}/default/{$wilayahFolder}/{$nip}";
+        }
+        
+        return "Berkas/PNBP/{$tahun}/default/{$nip}";
     }
 
     // public function updateData(Request $request)

@@ -105,10 +105,12 @@ $labelMenu = match ($kodePelatihan) {
                         </a>
                         <div class="submenu">
                             @php
-    $user = auth()->user();
-    $isAdmin = in_array($user->role->name, ['admin', 'super admin']);
+                                $user = auth()->user();
+                                $isAdmin = in_array($user->role->name, ['admin', 'super admin']);
                             @endphp
-
+                            <a href="{{ route('admin.import.peserta') }}" class="submenu-link">
+                                <i class="fas fa-file-invoice me-2"></i> Import Peserta
+                            </a>
                             @if($isAdmin || $user->picPesertas->where('jenispelatihan_id', 1)->count() > 0)
                                 <a href="{{ route('peserta.index', ['jenis' => 'pkn']) }}" class="submenu-link">
                                     <i class="fas fa-user-graduate me-2"></i> Peserta PKN TK II
@@ -168,9 +170,6 @@ $labelMenu = match ($kodePelatihan) {
                             <i class="fas fa-chevron-right menu-arrow"></i>
                         </a>
                         <div class="submenu">
-                            <a href="{{ route('admin.import.peserta') }}" class="submenu-link">
-                                <i class="fas fa-file-invoice me-2"></i> Import Peserta
-                            </a>
                             <a href="{{ route('admin.export.datapeserta') }}" class="submenu-link">
                                 <i class="fas fa-chart-bar me-2"></i> Data Peserta
                             </a>

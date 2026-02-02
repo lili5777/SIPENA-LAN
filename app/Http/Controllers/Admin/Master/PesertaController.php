@@ -637,12 +637,23 @@ class PesertaController extends Controller
             // Ambil data untuk struktur folder
             $tahun = date('Y');
             $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
-            $angkatan = Angkatan::find($request->id_angkatan);
             $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
             $nip = $request->nip_nrp;
 
-            // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
-            $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            // Ambil kategori dan wilayah dari angkatan
+            $kategori = $angkatan->kategori ?? 'PNBP';
+            $wilayah = $angkatan->wilayah ?? null;
+            $kategoriFolder = strtoupper($kategori);
+
+            // Buat struktur folder berdasarkan kategori
+            if (strtoupper($kategori) === 'FASILITASI') {
+                // Struktur untuk Fasilitasi: Berkas/Fasilitasi/Tahun/JenisPelatihan/Angkatan/Wilayah/NIP
+                $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
+                $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$wilayahFolder}/{$nip}";
+            } else {
+                // Struktur untuk PNBP: Berkas/PNBP/Tahun/JenisPelatihan/Angkatan/NIP
+                $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            }
 
             $files = [];
 
@@ -1106,8 +1117,20 @@ class PesertaController extends Controller
             $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
             $nip = $request->nip_nrp;
 
-            // Buat struktur folder: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
-            $folderPath = "Berkas/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            // Ambil kategori dan wilayah dari angkatan
+            $kategori = $angkatan->kategori ?? 'PNBP';
+            $wilayah = $angkatan->wilayah ?? null;
+            $kategoriFolder = strtoupper($kategori);
+
+            // Buat struktur folder berdasarkan kategori
+            if (strtoupper($kategori) === 'FASILITASI') {
+                // Struktur untuk Fasilitasi: Berkas/Fasilitasi/Tahun/JenisPelatihan/Angkatan/Wilayah/NIP
+                $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
+                $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$wilayahFolder}/{$nip}";
+            } else {
+                // Struktur untuk PNBP: Berkas/PNBP/Tahun/JenisPelatihan/Angkatan/NIP
+                $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
+            }
 
             $files = [];
 
@@ -1484,11 +1507,24 @@ class PesertaController extends Controller
                 // =========================
                 // simpan data folder path sebelum delete model (biar tidak hilang)
                 $folderPath = null;
-                if ($peserta) {
-                    $folderPath = "Berkas/" . date('Y') . "/" .
-                        str_replace(' ', '_', $jenisPelatihan->kode_pelatihan) . "/" .
-                        str_replace(' ', '_', $angkatan->nama_angkatan) . "/" .
-                        $peserta->nip_nrp;
+                if ($peserta && $angkatan) {
+                    $kategori = $angkatan->kategori ?? 'PNBP';
+                    $wilayah = $angkatan->wilayah ?? null;
+                    $kategoriFolder = strtoupper($kategori);
+                    
+                    if (strtoupper($kategori) === 'FASILITASI') {
+                        $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
+                        $folderPath = "Berkas/{$kategoriFolder}/" . date('Y') . "/" .
+                            str_replace(' ', '_', $jenisPelatihan->kode_pelatihan) . "/" .
+                            str_replace(' ', '_', $angkatan->nama_angkatan) . "/" .
+                            "{$wilayahFolder}/" .
+                            $peserta->nip_nrp;
+                    } else {
+                        $folderPath = "Berkas/{$kategoriFolder}/" . date('Y') . "/" .
+                            str_replace(' ', '_', $jenisPelatihan->kode_pelatihan) . "/" .
+                            str_replace(' ', '_', $angkatan->nama_angkatan) . "/" .
+                            $peserta->nip_nrp;
+                    }
                 }
 
                 DB::afterCommit(function () use ($filesToDelete, $folderPath) {
