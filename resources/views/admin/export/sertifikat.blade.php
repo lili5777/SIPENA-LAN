@@ -56,11 +56,17 @@
             justify-content: center;
         }
 
+        /* Grid layout untuk semua filter */
         .export-form {
             display: grid;
-            grid-template-columns: repeat(3, 1fr) auto;
+            grid-template-columns: repeat(5, 1fr) auto;
             gap: 1.5rem;
             align-items: end;
+        }
+
+        /* Container untuk tombol export */
+        .export-button-container {
+            grid-column: span 1;
         }
 
         .form-group {
@@ -96,14 +102,51 @@
             background-size: 16px;
         }
 
-        .form-select:focus {
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--dark-color);
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus,
+        .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(26, 58, 108, 0.1);
         }
 
-        .form-select:hover {
+        .form-select:hover,
+        .form-control:hover {
             border-color: #cbd5e1;
+        }
+
+        /* Badge styling */
+        .form-label .badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .badge-required {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .badge-optional {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .badge-conditional {
+            background: var(--info-color);
+            color: white;
         }
 
         .btn-export {
@@ -122,6 +165,7 @@
             font-size: 1rem;
             height: 48px;
             min-width: 150px;
+            width: 100%;
         }
 
         .btn-export:hover {
@@ -146,25 +190,110 @@
 
         .export-info {
             margin-top: 1.5rem;
-            padding: 1rem;
-            background: #dbeafe;
+            padding: 1.25rem;
+            background: #f0f9ff;
             border-radius: 8px;
-            border-left: 4px solid var(--info-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .export-info-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
-        .export-info i {
-            color: var(--info-color);
+        .export-info-header i {
+            color: var(--primary-color);
             font-size: 1.25rem;
-            flex-shrink: 0;
         }
 
-        .export-info p {
+        .export-info-header h4 {
             margin: 0;
-            color: #475569;
+            color: var(--dark-color);
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .template-comparison {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .template-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .template-item h5 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
             font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .template-item h5 i {
+            font-size: 0.9rem;
+        }
+
+        .template-item ul {
+            margin: 0;
+            padding-left: 1.25rem;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .template-item ul li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Datalist styling */
+        datalist {
+            display: none;
+        }
+
+        .form-control[list] {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%231a3a6c' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px;
+        }
+
+        /* Style untuk filter aktif */
+        .filter-active {
+            border-color: var(--success-color) !important;
+            background: rgba(16, 185, 129, 0.05) !important;
+        }
+
+        /* Alert styling */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            border-left: 5px solid #ef4444;
+            color: #7f1d1d;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border-left: 5px solid #10b981;
+            color: #14532d;
+        }
+
+        .alert .fas {
+            margin-right: 0.75rem;
         }
 
         @keyframes fadeIn {
@@ -179,14 +308,47 @@
             }
         }
 
+        /* Responsive Styles */
+        @media (max-width: 1600px) {
+            .export-form {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.2rem;
+            }
+
+            .export-button-container {
+                grid-column: span 4;
+                display: flex;
+                justify-content: center;
+            }
+
+            .btn-export {
+                width: auto;
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .export-form {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+            }
+
+            .export-button-container {
+                grid-column: span 3;
+            }
+        }
+
         @media (max-width: 992px) {
             .export-form {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 1rem;
             }
 
-            .btn-export {
+            .export-button-container {
                 grid-column: span 2;
+            }
+
+            .btn-export {
                 width: 100%;
                 max-width: 300px;
                 margin: 0 auto;
@@ -199,9 +361,16 @@
                 gap: 1.25rem;
             }
 
-            .btn-export {
+            .export-button-container {
                 grid-column: span 1;
+            }
+
+            .btn-export {
                 max-width: 100%;
+            }
+
+            .template-comparison {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -224,6 +393,32 @@
 
 @section('content')
     <div class="export-section">
+        {{-- ALERT ERROR --}}
+        @if(session('error'))
+            <div class="alert alert-danger">
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Error!</strong>
+                </div>
+                <div style="margin-top:0.5rem;">
+                    {{ session('error') }}
+                </div>
+            </div>
+        @endif
+
+        {{-- ALERT SUCCESS --}}
+        @if(session('success'))
+            <div class="alert alert-success">
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Sukses!</strong>
+                </div>
+                <div style="margin-top:0.5rem;">
+                    {{ session('success') }}
+                </div>
+            </div>
+        @endif
+
         <div class="section-header">
             <div class="section-title">
                 <i class="fas fa-certificate"></i>
@@ -231,87 +426,104 @@
             </div>
         </div>
 
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <form action="{{ route('admin.export.sertifikat') }}" method="GET" class="export-form" target="_blank" id="exportForm">
+            <!-- Kategori (Opsional) -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-tag"></i>
+                    Kategori
+                    <span class="badge badge-optional">OPSIONAL</span>
+                </label>
+                <select name="kategori" class="form-select" id="kategori">
+                    <option value="">Semua Kategori</option>
+                    <option value="PNBP" {{ request('kategori') == 'PNBP' ? 'selected' : '' }}>PNBP</option>
+                    <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>FASILITASI</option>
+                </select>
             </div>
-        @endif
 
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <!-- Wilayah (Kondisional - muncul jika kategori FASILITASI) -->
+            <div class="form-group" id="wilayahGroup" style="display: none;">
+                <label class="form-label">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Wilayah
+                    <span class="badge badge-conditional">KONDISIONAL</span>
+                </label>
+                <input type="text"
+                       name="wilayah"
+                       class="form-control"
+                       id="wilayah"
+                       list="wilayahList"
+                       placeholder="Ketik wilayah fasilitasi..."
+                       value="{{ request('wilayah') }}">
+
+                <!-- Datalist untuk autocomplete -->
+                <datalist id="wilayahList">
+                    <option value="DKI Jakarta">
+                    <option value="Jawa Barat">
+                    <option value="Jawa Tengah">
+                    <option value="Jawa Timur">
+                    <option value="Banten">
+                    <option value="Bali">
+                    <option value="Sumatera Utara">
+                    <option value="Sumatera Barat">
+                    <option value="Sumatera Selatan">
+                    <option value="Kalimantan Timur">
+                    <option value="Kalimantan Selatan">
+                    <option value="Sulawesi Selatan">
+                    <option value="Sulawesi Utara">
+                    <option value="Papua">
+                    <option value="Papua Barat">
+                    <option value="Nusa Tenggara Barat">
+                    <option value="Nusa Tenggara Timur">
+                    <option value="Riau">
+                    <option value="Kepulauan Riau">
+                    <option value="Jambi">
+                    <option value="Bengkulu">
+                    <option value="Lampung">
+                    <option value="Kalimantan Barat">
+                    <option value="Kalimantan Tengah">
+                    <option value="Kalimantan Utara">
+                    <option value="Sulawesi Tengah">
+                    <option value="Sulawesi Tenggara">
+                    <option value="Sulawesi Barat">
+                    <option value="Gorontalo">
+                    <option value="Maluku">
+                    <option value="Maluku Utara">
+                </datalist>
             </div>
-        @endif
 
-        <form action="{{ route('admin.export.sertifikat') }}" method="GET" class="export-form" target="_blank">
-            <!-- Jenis Pelatihan -->
+            <!-- Jenis Pelatihan (Opsional) -->
             <div class="form-group">
                 <label class="form-label">
                     <i class="fas fa-graduation-cap"></i>
                     Jenis Pelatihan
+                    <span class="badge badge-optional">OPSIONAL</span>
                 </label>
-                <select name="jenis_pelatihan" class="form-select" id="jenis_pelatihan" required>
-                    <option value="">Pilih Jenis Pelatihan</option>
+                <select name="jenis_pelatihan" class="form-select" id="jenis_pelatihan">
+                    <option value="">Semua Jenis Pelatihan</option>
                     <option value="LATSAR" {{ request('jenis_pelatihan') == 'LATSAR' ? 'selected' : '' }}>LATSAR</option>
                     <option value="PKA" {{ request('jenis_pelatihan') == 'PKA' ? 'selected' : '' }}>PKA</option>
-                    <option value="PKN TK II" {{ request('jenis_pelatihan') == 'PKN TK II' ? 'selected' : '' }}>PKN TK II
-                    </option>
+                    <option value="PKN TK II" {{ request('jenis_pelatihan') == 'PKN TK II' ? 'selected' : '' }}>PKN TK II</option>
                     <option value="PKP" {{ request('jenis_pelatihan') == 'PKP' ? 'selected' : '' }}>PKP</option>
                 </select>
             </div>
 
-            <!-- Angkatan -->
+            <!-- Angkatan (Opsional) -->
             <div class="form-group">
                 <label class="form-label">
                     <i class="fas fa-users"></i>
                     Angkatan
+                    <span class="badge badge-optional">OPSIONAL</span>
                 </label>
-                <select name="angkatan" class="form-select" id="angkatan" required>
-                    <option value="">Pilih Angkatan</option>
+                <select name="angkatan" class="form-select" id="angkatan">
+                    <option value="">Semua Angkatan</option>
                     @php
                         $romawi = [
-                            'I',
-                            'II',
-                            'III',
-                            'IV',
-                            'V',
-                            'VI',
-                            'VII',
-                            'VIII',
-                            'IX',
-                            'X',
-                            'XI',
-                            'XII',
-                            'XIII',
-                            'XIV',
-                            'XV',
-                            'XVI',
-                            'XVII',
-                            'XVIII',
-                            'XIX',
-                            'XX',
-                            'XXI',
-                            'XXII',
-                            'XXIII',
-                            'XXIV',
-                            'XXV',
-                            'XXVI',
-                            'XXVII',
-                            'XXVIII',
-                            'XXIX',
-                            'XXX',
-                            'XXXI',
-                            'XXXII',
-                            'XXXIII',
-                            'XXXIV',
-                            'XXXV',
-                            'XXXVI',
-                            'XXXVII',
-                            'XXXVIII',
-                            'XXXIX',
-                            'XL'
+                            'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
+                            'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX',
+                            'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV', 'XXVI', 'XXVII', 'XXVIII', 'XXIX', 'XXX',
+                            'XXXI', 'XXXII', 'XXXIII', 'XXXIV', 'XXXV', 'XXXVI', 'XXXVII', 'XXXVIII', 'XXXIX', 'XL',
+                            'XLI', 'XLII', 'XLIII', 'XLIV', 'XLV', 'XLVI', 'XLVII', 'XLVIII', 'XLIX', 'L'
                         ];
                     @endphp
                     @foreach($romawi as $rom)
@@ -322,14 +534,15 @@
                 </select>
             </div>
 
-            <!-- Tahun -->
+            <!-- Tahun (Opsional) -->
             <div class="form-group">
                 <label class="form-label">
                     <i class="fas fa-calendar"></i>
                     Tahun
+                    <span class="badge badge-optional">OPSIONAL</span>
                 </label>
-                <select name="tahun" class="form-select" id="tahun" required>
-                    <option value="">Pilih Tahun</option>
+                <select name="tahun" class="form-select" id="tahun">
+                    <option value="">Semua Tahun</option>
                     @php
                         $currentYear = date('Y');
                         $startYear = 2020;
@@ -343,8 +556,8 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="form-group">
-                <button type="submit" class="btn-export">
+            <div class="export-button-container">
+                <button type="submit" class="btn-export" id="exportBtn">
                     <i class="fas fa-certificate"></i>
                     Export Sertifikat
                 </button>
@@ -352,12 +565,52 @@
         </form>
 
         <div class="export-info">
-            <i class="fas fa-info-circle"></i>
-            <p>
-                <strong>Info:</strong> Pilih jenis pelatihan, angkatan, dan tahun untuk mengekspor sertifikat peserta.
-                Setiap peserta akan mendapat satu halaman sertifikat landscape dengan foto, nama, NDH, angkatan, dan
-                kabupaten asal.
-            </p>
+            <div class="export-info-header">
+                <i class="fas fa-info-circle"></i>
+                <h4>Informasi Filter Export Sertifikat</h4>
+            </div>
+
+            <div class="template-comparison">
+                <div class="template-item">
+                    <h5>
+                        <i class="fas fa-tags"></i>
+                        Filter Kategori & Wilayah
+                    </h5>
+                    <ul>
+                        <li><strong>PNBP</strong> - Sertifikat peserta dengan kategori PNBP</li>
+                        <li><strong>FASILITASI</strong> - Sertifikat peserta dengan kategori Fasilitasi</li>
+                        <li><strong>Wilayah</strong> - Muncul otomatis jika kategori=FASILITASI</li>
+                        <li><strong>Semua Kategori</strong> - Kosongkan untuk semua kategori</li>
+                    </ul>
+                </div>
+
+                <div class="template-item">
+                    <h5>
+                        <i class="fas fa-filter"></i>
+                        Filter Lainnya
+                    </h5>
+                    <ul>
+                        <li><strong>Jenis Pelatihan</strong> - Filter berdasarkan jenis pelatihan</li>
+                        <li><strong>Angkatan</strong> - Filter berdasarkan nama angkatan (I - L)</li>
+                        <li><strong>Tahun</strong> - Filter berdasarkan tahun angkatan</li>
+                        <li><strong>Kombinasi</strong> - Bisa gunakan beberapa filter sekaligus</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                <h5 style="color: var(--primary-color); font-size: 0.95rem; font-weight: 600; margin-bottom: 0.75rem;">
+                    <i class="fas fa-exclamation-circle"></i> Catatan Penting
+                </h5>
+                <p style="font-size: 0.9rem; color: #64748b; margin: 0;">
+                    <strong>Perhatian:</strong><br>
+                    1. Export akan menghasilkan file PDF sertifikat landscape, satu halaman per peserta.<br>
+                    2. Semua filter bersifat opsional (kecuali wilayah muncul jika kategori=FASILITASI).<br>
+                    3. Data akan difilter berdasarkan kombinasi semua filter yang dipilih.<br>
+                    4. Jika tidak memilih filter tertentu, semua data akan diekspor.<br>
+                    5. Setiap sertifikat berisi foto, nama, NDH, angkatan, dan kabupaten asal.
+                </p>
+            </div>
         </div>
     </div>
 @endsection
@@ -365,32 +618,152 @@
 @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const exportBtn = document.querySelector('.btn-export');
-            const exportForm = document.querySelector('.export-form');
+            const exportBtn = document.getElementById('exportBtn');
+            const exportForm = document.getElementById('exportForm');
+            const kategoriSelect = document.getElementById('kategori');
+            const wilayahGroup = document.getElementById('wilayahGroup');
+            const wilayahInput = document.getElementById('wilayah');
 
+            // ====================
+            // LOGIKA TAMPIL/HIDE WILAYAH
+            // ====================
+            function toggleWilayah() {
+                const kategori = kategoriSelect.value;
+
+                if (kategori === 'FASILITASI') {
+                    wilayahGroup.style.display = 'block';
+                    wilayahInput.placeholder = "Ketik wilayah fasilitasi...";
+                    wilayahInput.classList.add('filter-active');
+                } else {
+                    wilayahGroup.style.display = 'none';
+                    wilayahInput.value = '';
+                    wilayahInput.classList.remove('filter-active');
+                }
+
+                // Highlight kategori select jika ada nilai
+                if (kategori) {
+                    kategoriSelect.classList.add('filter-active');
+                } else {
+                    kategoriSelect.classList.remove('filter-active');
+                }
+            }
+
+            // Inisialisasi pertama kali berdasarkan value yang ada di URL
+            toggleWilayah();
+
+            // Event listener untuk perubahan kategori
+            kategoriSelect.addEventListener('change', toggleWilayah);
+
+            // ====================
+            // HIGHLIGHT FILTER AKTIF SAAT LOAD
+            // ====================
+            function highlightActiveFilters() {
+                const urlParams = new URLSearchParams(window.location.search);
+
+                if (urlParams.get('kategori')) {
+                    kategoriSelect.classList.add('filter-active');
+                }
+
+                if (urlParams.get('wilayah')) {
+                    wilayahInput.classList.add('filter-active');
+                }
+
+                const jenisPelatihanSelect = document.getElementById('jenis_pelatihan');
+                if (urlParams.get('jenis_pelatihan')) {
+                    jenisPelatihanSelect.classList.add('filter-active');
+                }
+
+                const angkatanSelect = document.getElementById('angkatan');
+                if (urlParams.get('angkatan')) {
+                    angkatanSelect.classList.add('filter-active');
+                }
+
+                const tahunSelect = document.getElementById('tahun');
+                if (urlParams.get('tahun')) {
+                    tahunSelect.classList.add('filter-active');
+                }
+            }
+
+            highlightActiveFilters();
+
+            // ====================
+            // VALIDASI & SUBMIT
+            // ====================
             if (exportForm && exportBtn) {
                 exportForm.addEventListener('submit', function (e) {
-                    // Validasi form
-                    const jenisPelatihan = document.getElementById('jenis_pelatihan').value;
-                    const angkatan = document.getElementById('angkatan').value;
-                    const tahun = document.getElementById('tahun').value;
+                    // Semua filter opsional, tidak ada validasi wajib
 
-                    if (!jenisPelatihan || !angkatan || !tahun) {
-                        e.preventDefault();
-                        alert('Mohon lengkapi semua filter (Jenis Pelatihan, Angkatan, dan Tahun)');
-                        return false;
-                    }
-
+                    // Tampilkan loading
+                    const originalText = exportBtn.innerHTML;
                     exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
                     exportBtn.disabled = true;
 
-                    // Re-enable after 5 seconds
+                    // Hilangkan highlight filter aktif
+                    document.querySelectorAll('.filter-active').forEach(el => {
+                        el.classList.remove('filter-active');
+                    });
+
+                    // Re-enable setelah 10 detik jika gagal
                     setTimeout(() => {
-                        exportBtn.innerHTML = '<i class="fas fa-certificate"></i> Export Sertifikat';
+                        exportBtn.innerHTML = originalText;
                         exportBtn.disabled = false;
-                    }, 5000);
+                    }, 10000);
                 });
             }
+
+            // ====================
+            // TOGGLE HIGHLIGHT SAAT FILTER BERUBAH
+            // ====================
+            document.querySelectorAll('.form-select').forEach(select => {
+                select.addEventListener('change', function () {
+                    if (this.value) {
+                        this.classList.add('filter-active');
+                    } else {
+                        this.classList.remove('filter-active');
+                    }
+                });
+            });
+
+            // Untuk input wilayah
+            if (wilayahInput) {
+                wilayahInput.addEventListener('input', function () {
+                    if (this.value.trim()) {
+                        this.classList.add('filter-active');
+                    } else {
+                        this.classList.remove('filter-active');
+                    }
+                });
+
+                wilayahInput.addEventListener('focus', function () {
+                    this.setAttribute('list', 'wilayahList');
+                });
+            }
+
+            // ====================
+            // AUTO-SUBMIT DENGAN ENTER
+            // ====================
+            document.querySelectorAll('.form-select, .form-control').forEach(input => {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        exportForm.submit();
+                    }
+                });
+            });
+
+            // ====================
+            // RESPONSIVE ADJUSTMENT
+            // ====================
+            function adjustFormLayout() {
+                if (window.innerWidth <= 768) {
+                    if (wilayahInput) {
+                        wilayahInput.placeholder = "Ketik wilayah...";
+                    }
+                }
+            }
+
+            window.addEventListener('resize', adjustFormLayout);
+            adjustFormLayout();
         });
     </script>
 @endsection

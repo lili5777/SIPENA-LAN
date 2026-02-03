@@ -635,134 +635,154 @@ class ExportController extends Controller
      * Setiap peserta mendapat 1 halaman landscape
      */
     public function exportSertifikat(Request $request)
-    {
-        // Validasi input
-        $request->validate([
-            'jenis_pelatihan' => 'required',
-            'angkatan' => 'required',
-            'tahun' => 'required'
-        ]);
+{
+    // Ambil filter dari request
+    $jenisPelatihan = $request->jenis_pelatihan;
+    $angkatan       = $request->angkatan;
+    $tahun          = $request->tahun;
+    $kategori       = $request->kategori;
+    $wilayah        = $request->wilayah;
 
-        // Ambil filter dari request
-        $jenisPelatihan = $request->jenis_pelatihan;
-        $angkatan = $request->angkatan;
-        $tahun = $request->tahun;
+    // Query data peserta dengan filter dan relasi lengkap
+    $query = Pendaftaran::with([
+        'peserta',
+        'peserta.kepegawaian',
+        'peserta.kepegawaian.kabupaten',
+        'peserta.kepegawaian.provinsi',
+        'angkatan',
+        'angkatan.jenisPelatihan',
+        'jenisPelatihan'
+    ])->where('status_pendaftaran', 'Diterima');
 
-        // Query data peserta dengan filter dan relasi lengkap
-        $query = Pendaftaran::with([
-            'peserta',
-            'peserta.kepegawaian',
-            'peserta.kepegawaian.kabupaten',
-            'peserta.kepegawaian.provinsi',
-            'angkatan',
-            'angkatan.jenisPelatihan',
-            'jenisPelatihan'
-        ])->where('status_pendaftaran','Diterima');
-
-        // Apply filters
-        if ($jenisPelatihan) {
-            $query->whereHas('jenisPelatihan', function ($q) use ($jenisPelatihan) {
-                $q->where('nama_pelatihan', $jenisPelatihan);
-            });
-        }
-
-        if ($angkatan) {
-            $query->whereHas('angkatan', function ($q) use ($angkatan) {
-                $q->where('nama_angkatan', $angkatan);
-            });
-        }
-
-        if ($tahun) {
-            $query->whereHas('angkatan', function ($q) use ($tahun) {
-                $q->where('tahun', $tahun);
-            });
-        }
-
-        // Ambil data dan urutkan berdasarkan NDH atau ID
-        $pendaftaranList = $query->get()->sortBy(function ($pendaftaran) {
-            return $pendaftaran->peserta->ndh ?? 999;
+    // --- Filter: Jenis Pelatihan ---
+    if ($jenisPelatihan) {
+        $query->whereHas('jenisPelatihan', function ($q) use ($jenisPelatihan) {
+            $q->where('nama_pelatihan', $jenisPelatihan);
         });
+    }
 
-        // Jika tidak ada data
-        if ($pendaftaranList->isEmpty()) {
-            return redirect()->back()->with('error', 'Tidak ada data peserta untuk filter yang dipilih.');
+    // --- Filter: Angkatan ---
+    if ($angkatan) {
+        $query->whereHas('angkatan', function ($q) use ($angkatan) {
+            $q->where('nama_angkatan', $angkatan);
+        });
+    }
+
+    // --- Filter: Tahun ---
+    if ($tahun) {
+        $query->whereHas('angkatan', function ($q) use ($tahun) {
+            $q->where('tahun', $tahun);
+        });
+    }
+
+    // --- Filter: Kategori & Wilayah (sama pola dengan exportAbsen) ---
+    if ($kategori === 'PNBP') {
+        $query->whereHas('angkatan', function ($q) {
+            $q->where('kategori', 'PNBP');
+        });
+    } elseif ($kategori === 'FASILITASI') {
+        $query->whereHas('angkatan', function ($q) use ($wilayah) {
+            $q->where('kategori', 'FASILITASI');
+            if ($wilayah && trim($wilayah) !== '') {
+                $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+            }
+        });
+    } else {
+        // Kategori kosong / "Semua Kategori"
+        // Tetap bisa filter wilayah jika diisi
+        if ($wilayah && trim($wilayah) !== '') {
+            $query->whereHas('angkatan', function ($q) use ($wilayah) {
+                $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+            });
+        }
+    }
+
+    // Ambil data dan urutkan berdasarkan NDH
+    $pendaftaranList = $query->get()->sortBy(function ($pendaftaran) {
+        return $pendaftaran->peserta->ndh ?? 999;
+    });
+
+    // Jika tidak ada data
+    if ($pendaftaranList->isEmpty()) {
+        return redirect()->back()->with('error', 'Tidak ada data peserta untuk filter yang dipilih.');
+    }
+
+    // Format data peserta untuk PDF
+    $peserta = $pendaftaranList->map(function ($pendaftaran, $index) {
+        $p     = $pendaftaran->peserta;
+        $kepeg = $p->kepegawaian;
+
+        // Ambil NDH dari tabel peserta, atau gunakan nomor urut jika tidak ada
+        $ndh = $p->ndh ?? str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+
+        // Ambil nama kabupaten dari relasi
+        $kabupaten = '';
+        if ($kepeg && $kepeg->kabupaten) {
+            $kabupaten = $kepeg->kabupaten->name;
+        } elseif ($kepeg && $kepeg->asal_instansi) {
+            $kabupaten = $this->extractKabupaten($kepeg->asal_instansi);
         }
 
-        // Format data peserta untuk PDF
-        $peserta = $pendaftaranList->map(function ($pendaftaran, $index) {
-            $p = $pendaftaran->peserta;
-            $kepeg = $p->kepegawaian;
+        // Ambil foto dari Google Drive dan convert ke base64
+        $fotoBase64 = null;
+        if ($p->file_pas_foto) {
+            $fotoBase64 = $this->getImageFromGoogleDrive($p->file_pas_foto);
+        }
 
-            // Ambil NDH dari tabel peserta, atau gunakan nomor urut jika tidak ada
-            $ndh = $p->ndh ?? str_pad($index + 1, 2, '0', STR_PAD_LEFT);
-
-            // Ambil nama kabupaten dari relasi
-            $kabupaten = '';
-            if ($kepeg && $kepeg->kabupaten) {
-                $kabupaten = $kepeg->kabupaten->name;
-            } elseif ($kepeg && $kepeg->asal_instansi) {
-                // Fallback: ekstrak dari nama instansi
-                $kabupaten = $this->extractKabupaten($kepeg->asal_instansi);
-            }
-
-            // Ambil foto dari Google Drive dan convert ke base64
-            $fotoBase64 = null;
-            if ($p->file_pas_foto) {
-                $fotoBase64 = $this->getImageFromGoogleDrive($p->file_pas_foto);
-            }
-
-            return [
-                'nama' => $p->nama_lengkap ?? '-',
-                'nip' => $p->nip_nrp ?? '-',
-                'ndh' => str_pad($ndh, 2, '0', STR_PAD_LEFT),
-                'kabupaten' => $kabupaten ?: '-',
-                'foto' => $fotoBase64,
-                'instansi' => $kepeg->asal_instansi ?? '-'
-            ];
-        })->values()->toArray();
-
-        // Ekstrak angkatan tanpa kata "Angkatan"
-        $angkatanLabel = str_replace('Angkatan ', '', $angkatan);
-
-        // Convert logo dan badges ke base64
-        $logoBase64 = $this->getImageFromLocalFile('gambar/pusjar.png');
-        $badge1Base64 = $this->getImageFromLocalFile('gambar/wbbm.png');
-        $badge2Base64 = $this->getImageFromLocalFile('gambar/hut.png');
-        $bgBannerBase64 = $this->getImageFromLocalFile('gambar/bg_banner.png');
-
-        // Data untuk PDF
-        $data = [
-            'jenis_pelatihan' => $jenisPelatihan,
-            'angkatan' => $angkatanLabel,
-            'tahun' => $tahun,
-            'peserta' => $peserta,
-            'logo' => $logoBase64,
-            'badge1' => $badge1Base64,
-            'badge2' => $badge2Base64,
-            'bg_banner' => $bgBannerBase64,
+        return [
+            'nama'      => $p->nama_lengkap ?? '-',
+            'nip'       => $p->nip_nrp ?? '-',
+            'ndh'       => str_pad($ndh, 2, '0', STR_PAD_LEFT),
+            'kabupaten' => $kabupaten ?: '-',
+            'foto'      => $fotoBase64,
+            'instansi'  => $kepeg->asal_instansi ?? '-'
         ];
+    })->values()->toArray();
 
-        // Generate PDF dengan orientasi landscape
-        $pdf = Pdf::loadView('admin.export.templatesertifikat', $data);
-        $pdf->setPaper('A4', 'landscape');
+    // Ekstrak angkatan tanpa kata "Angkatan"
+    $angkatanLabel = $angkatan ? str_replace('Angkatan ', '', $angkatan) : 'SEMUA';
 
-        // Set options untuk performance
-        $pdf->setOptions([
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'defaultFont' => 'Arial'
-        ]);
+    // Convert logo dan badges ke base64
+    $logoBase64     = $this->getImageFromLocalFile('gambar/pusjar.png');
+    $badge1Base64   = $this->getImageFromLocalFile('gambar/wbbm.png');
+    $badge2Base64   = $this->getImageFromLocalFile('gambar/hut.png');
+    $bgBannerBase64 = $this->getImageFromLocalFile('gambar/bg_banner.png');
 
-        // Nama file
-        $filename = 'Sertifikat_' . str_replace(' ', '_', $jenisPelatihan) . '_' .
-            str_replace(' ', '_', $angkatan) . '_' .
-            $tahun . '.pdf';
+    // Data untuk PDF
+    $data = [
+        'jenis_pelatihan' => $jenisPelatihan ?: 'SEMUA PELATIHAN',
+        'angkatan'        => $angkatanLabel,
+        'tahun'           => $tahun ?: date('Y'),
+        'peserta'         => $peserta,
+        'logo'            => $logoBase64,
+        'badge1'          => $badge1Base64,
+        'badge2'          => $badge2Base64,
+        'bg_banner'       => $bgBannerBase64,
+    ];
 
-        // Log aktivitas
-        aktifitas('Mengekspor Sertifikat Peserta ' . $jenisPelatihan . ' ' . $angkatan . ' ' . $tahun);
+    // Generate PDF dengan orientasi landscape
+    $pdf = Pdf::loadView('admin.export.templatesertifikat', $data);
+    $pdf->setPaper('A4', 'landscape');
 
-        return $pdf->stream($filename);
-    }
+    // Set options untuk performance
+    $pdf->setOptions([
+        'isHtml5ParserEnabled' => true,
+        'isRemoteEnabled'     => true,
+        'defaultFont'         => 'Arial'
+    ]);
+
+    // Nama file
+    $filename = 'Sertifikat_'
+        . str_replace(' ', '_', $jenisPelatihan ?: 'Semua')
+        . '_' . str_replace(' ', '_', $angkatan ?: 'Semua')
+        . '_' . ($tahun ?: 'Semua')
+        . '.pdf';
+
+    // Log aktivitas
+    aktifitas('Mengekspor Sertifikat Peserta ' . ($jenisPelatihan ?: 'Semua') . ' ' . ($angkatan ?: 'Semua') . ' ' . ($tahun ?: 'Semua'));
+
+    return $pdf->stream($filename);
+}
 
     /**
      * Ambil gambar dari Google Drive dan convert ke base64

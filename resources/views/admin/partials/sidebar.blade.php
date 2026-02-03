@@ -182,9 +182,9 @@ $labelMenu = match ($kodePelatihan) {
                             <a href="{{ route('export.foto') }}" class="submenu-link">
                                 <i class="fas fa-user-tie me-2"></i> Export Foto
                             </a>
-                            {{-- <a href="{{ route('admin.export.sertifikat.view') }}" class="submenu-link">
+                            <a href="{{ route('admin.export.sertifikat.view') }}" class="submenu-link">
                                 <i class="fas fa-user-tie me-2"></i> Export Sertifikat
-                            </a> --}}
+                            </a>
                             {{-- <a href="" class="submenu-link">
                                 <i class="fas fa-clipboard-list me-2"></i> Evaluasi Program
                             </a> --}}
