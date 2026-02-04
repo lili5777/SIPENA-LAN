@@ -91,10 +91,11 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
 
                 // Jika belum ada, buat baru dengan kuota default
                 if (!$angkatan) {
-                    $angkatan = Angkatan::create(array_merge($angkatanData, [
-                        'kuota' => 100, // Default kuota
-                        'status' => 'Aktif',
-                    ]));
+                    $wilayahInfo = $angkatanData['wilayah'] ? " Wilayah: {$angkatanData['wilayah']}" : "";
+                    $this->importErrors[] = "Baris {$rowNumber}: Angkatan '{$angkatanData['nama_angkatan']}' Tahun {$angkatanData['tahun']} Kategori {$kategori}{$wilayahInfo} tidak terdaftar. Silakan buat angkatan terlebih dahulu.";
+                    $this->failedCount++;
+                    DB::rollBack();
+                    continue;
                 }
 
                 // ================= CEK KUOTA =================
@@ -137,15 +138,15 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
                         'status_perkawinan'   => $row['status_perkawinan'] ?? null,
                         'nama_pasangan'       => $row['nama_pasangan'] ?? null,
                         'olahraga_hobi'       => $row['olahraga_hobi'] ?? null,
-                        'perokok'             => $row['perokok'] ?? null,
+                        'perokok'             => $this->normalizeValue($row['perokok'] ?? null),
                         'email_pribadi'       => $row['email_pribadi'] ?? null,
                         'nomor_hp'            => $row['nomor_hp'] ?? null,
-                        'pendidikan_terakhir' => $row['pendidikan_terakhir'] ?? null,
+                        'pendidikan_terakhir' => $this->normalizeValue($row['pendidikan_terakhir'] ?? null),
                         'bidang_studi'        => $row['bidang_studi'] ?? null,
                         'bidang_keahlian'     => $row['bidang_keahlian'] ?? null,
-                        'ukuran_kaos'         => $row['ukuran_kaos'] ?? null,
-                        'ukuran_celana'       => $row['ukuran_celana'] ?? null,
-                        'ukuran_training'     => $row['ukuran_training'] ?? null,
+                        'ukuran_kaos'         => $this->normalizeValue($row['ukuran_kaos'] ?? null),
+                        'ukuran_celana'       => $this->normalizeValue($row['ukuran_celana'] ?? null),
+                        'ukuran_training'     => $this->normalizeValue($row['ukuran_training'] ?? null),
                         'status_aktif'        => true,
                     ]
                 );
@@ -179,7 +180,7 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
                         'nomor_sk_terakhir' => $row['nomor_sk_terakhir'] ?? null,
                         'tanggal_sk_jabatan' => $this->parseDate($row['tanggal_sk_jabatan'] ?? null),
                         'tahun_lulus_pkp_pim_iv' => $row['tahun_lulus_pkp_pim_iv'] ?? null,
-                        'tanggal_sk_cpns' => $row['tanggal_sk_cpns'] ?? null,
+                        'tanggal_sk_cpns' => $this->parseDate($row['tanggal_sk_cpns'] ?? null),
                     ]
                 );
 
@@ -221,6 +222,67 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
     }
 
     // ================= VALIDASI =================
+    protected function normalizeValue(?string $value): ?string
+    {
+        if (!$value) return null;
+
+        $v = strtolower(trim($value));
+
+        // ================= PEROKOK =================
+        $perokokMap = [
+            'tidak' => 'Tidak',
+            'tdk' => 'Tidak',
+            'no' => 'Tidak',
+            'n' => 'Tidak',
+            'ya' => 'Ya',
+            'iya' => 'Ya',
+            'yes' => 'Ya',
+            'y' => 'Ya',
+            'Tidak Merokok' => 'Tidak',
+            'tidak merokok' => 'Tidak',
+            'Merokok' => 'Ya',
+            'merokok' => 'Ya',
+        ];
+
+        if (array_key_exists($v, $perokokMap)) {
+            return $perokokMap[$v];
+        }
+
+        // ================= PENDIDIKAN =================
+        $pendidikanMap = [
+            's-1' => 'S1',
+            's1' => 'S1',
+            's-1 profesi' => 'S1',
+            's1 profesi' => 'S1',
+            's-2' => 'S2',
+            's2' => 'S2',
+            's-3' => 'S3',
+            's3' => 'S3',
+            'd-3' => 'D3',
+            'd3' => 'D3',
+        ];
+
+        if (array_key_exists($v, $pendidikanMap)) {
+            return $pendidikanMap[$v];
+        }
+
+
+        // ================= UKURAN =================
+        $ukuranMap = [
+            'xs' => 'S',
+            's panjang' => 'S',
+            's lengan panjang' => 'S',
+            'm panjang' => 'M',
+            'xxl (lengan panjang)' => 'XXL',
+        ];
+
+        if (array_key_exists($v, $ukuranMap)) {
+            return $ukuranMap[$v];
+        }
+
+        return trim($value);
+    }
+
     protected function validateRequiredFields(Collection &$row, int $rowNumber): bool
     {
         $required = [
@@ -230,7 +292,7 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
             'kategori', // WAJIB
             'nip_nrp', 
             'nama_lengkap', 
-            'jenis_kelamin'
+            // 'jenis_kelamin'
         ];
 
         foreach ($required as $field) {
@@ -270,6 +332,7 @@ class PesertaImport implements ToCollection, WithHeadingRow, SkipsOnError
                 'kristen protestan' => 'Kristen Protestan',
                 'protestan' => 'Kristen',
                 'katolik' => 'Katolik',
+                'kristen katolik' => 'Katolik',
                 'hindu' => 'Hindu',
                 'budha' => 'Buddha',
                 'buddha' => 'Buddha',

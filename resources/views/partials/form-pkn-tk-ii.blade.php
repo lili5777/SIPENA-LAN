@@ -6,6 +6,21 @@
 <input type="hidden" name="peserta_id" id="peserta_id" value="{{ $peserta['id'] ?? '' }}">
 <input type="hidden" name="pendaftaran_id" id="pendaftaran_id" value="{{ $pendaftaran['id'] ?? '' }}">
 
+<div class="form-group">
+    <label class="form-label required">Pilih (NDH) Sesuai Surat Pemanggilan</label>
+    <select name="ndh" id="ndh" class="form-select @error('ndh') error @enderror" required>
+        <option value="">-- Pilih NDH --</option>
+        <!-- NDH akan dimuat via JavaScript -->
+    </select>
+    <small class="form-hint" id="ndh-hint">
+        <i class="fas fa-info-circle"></i> 
+        <span id="ndh-info">Memuat daftar NDH yang tersedia...</span>
+    </small>
+    @error('ndh')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
 <div class="form-row">
     <div class="form-group">
         <label class="form-label required">Nama Lengkap (Berikut Gelar Pendidikan)</label>
@@ -130,9 +145,9 @@
             <option value="Islam" {{ ($peserta['agama'] ?? old('agama')) == 'Islam' ? 'selected' : '' }}>Islam</option>
             <option value="Kristen" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen' ? 'selected' : '' }}>Kristen
             </option>
-            <option value="Kristen Protestan" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen Protestan' ? 'selected' : '' }}>
+            {{-- <option value="Kristen Protestan" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen Protestan' ? 'selected' : '' }}>
                 Kristen Protestan
-            </option>
+            </option> --}}
             <option value="Katolik" {{ ($peserta['agama'] ?? old('agama')) == 'Katolik' ? 'selected' : '' }}>Katolik
             </option>
             <option value="Hindu" {{ ($peserta['agama'] ?? old('agama')) == 'Hindu' ? 'selected' : '' }}>Hindu</option>
@@ -773,7 +788,7 @@
 
 <!-- Pas Foto peserta dengan cropping (HANYA CROP) -->
 <div class="form-group">
-    <label class="form-label required">Unggah Pas Foto peserta (3×4)</label>
+    <label class="form-label required">Unggah Pas Foto peserta (Untuk Sertifikat)</label>
 
     @if(isset($peserta['file_pas_foto']) && $peserta['file_pas_foto'])
         <!-- Tampilkan foto yang sudah ada -->
@@ -851,6 +866,34 @@
 
     @else
         <!-- Tampilkan upload container jika belum ada foto -->
+        
+        <!-- Layout baris untuk upload dan contoh foto -->
+        <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 15px;">
+            <!-- UI upload awal -->
+            <div class="form-file" id="upload-container" style="flex: 1; min-width: 300px;">
+                <input type="file" name="file_pas_foto" id="file_pas_foto"
+                    class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
+                <label class="form-file-label" for="file_pas_foto">
+                    <i class="fas fa-cloud-upload-alt"></i><br>
+                    Klik untuk mengunggah file JPG/PNG (maks. 1MB)<br>
+                    <small style="font-size: 0.85em; color: #666;">Foto akan dipotong ke ukuran 3×4</small>
+                </label>
+                <div class="form-file-name" id="file-name-display">
+                    <span class="no-file">Belum ada file dipilih</span>
+                </div>
+            </div>
+
+            <!-- Contoh foto -->
+            <div style="text-align: center;">
+                <p style="margin: 0 0 8px 0; font-size: 0.9em; color: #666;"><strong>Contoh Foto 3×4:</strong></p>
+                <div style="width: 90px; height: 120px; border: 2px solid #ddd; overflow: hidden; border-radius: 4px;">
+                    <img src="{{ asset('gambar/contohfoto.jpeg') }}" 
+                         alt="Contoh Foto 3x4"
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         onerror="this.src='https://via.placeholder.com/90x120?text=Contoh+Foto'">
+                </div>
+            </div>
+        </div>
 
         <!-- Container untuk cropping -->
         <div id="crop-container" style="display: none;">
@@ -897,20 +940,6 @@
         <!-- Input hidden untuk data crop (HANYA INI YANG DIBUTUHKAN) -->
         <input type="hidden" name="file_pas_foto_cropped" id="file_pas_foto_cropped">
         <input type="hidden" name="crop_data" id="crop_data">
-
-        <!-- UI upload awal -->
-        <div class="form-file" id="upload-container">
-            <input type="file" name="file_pas_foto" id="file_pas_foto"
-                class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
-            <label class="form-file-label" for="file_pas_foto">
-                <i class="fas fa-cloud-upload-alt"></i><br>
-                Klik untuk mengunggah file JPG/PNG (maks. 1MB)<br>
-                <small style="font-size: 0.85em; color: #666;">Foto akan dipotong ke ukuran 3×4</small>
-            </label>
-            <div class="form-file-name" id="file-name-display">
-                <span class="no-file">Belum ada file dipilih</span>
-            </div>
-        </div>
 
     @endif
 

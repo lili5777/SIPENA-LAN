@@ -91,6 +91,22 @@
                             <div class="form-text">Password minimal 8 karakter dengan kombinasi huruf dan angka</div>
                         </div>
 
+                        <!-- Telpon -->
+                        <div class="mb-4">
+                            <label for="no_telp" class="form-label fw-medium">Nomor Telepon/WA <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-phone"></i>
+                                </span>
+                                <input type="text" class="form-control @error('no_telp') is-invalid @enderror" id="no_telp"
+                                    name="no_telp" value="{{ old('no_telp') }}" placeholder="Masukkan nomor telepon" required>
+                                @error('no_telp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="form-text">Nomor telepon pengguna yang akan ditampilkan di sistem</div>
+                        </div>
+
                         <!-- Roles (Dropdown) -->
                         <div class="mb-4">
                             <label for="role_id" class="form-label fw-medium">Pilih Role <span

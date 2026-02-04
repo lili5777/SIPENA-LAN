@@ -137,6 +137,10 @@ $isPKN = $jenis === 'pkn';
                                             <span class="info-label">Status:</span>
                                             <span class="info-badge" id="info-status-angkatan"></span>
                                         </div>
+                                        <div class="info-item" id="info-pic-wrapper" style="display:none;">
+                                            <span class="info-label">PIC:</span>
+                                           <span class="info-value" id="info-pic-angkatan"></span>
+                                        </div> 
                                     </div>
                                 </div>
                             </div>
@@ -172,6 +176,21 @@ $isPKN = $jenis === 'pkn';
                             <div class="form-section-header">
                                 <i class="fas fa-user-tie"></i> Data Pribadi
                             </div>
+                                                      <!-- NDH -->
+<div class="form-row">
+    <div class="form-group">
+        <label class="form-label ">Nomor Daftar Hadir (NDH)</label>
+        <select name="ndh" id="ndh" class="form-select @error('ndh') error @enderror"  disabled>
+            <option value="">Pilih angkatan dulu</option>
+        </select>
+        <div class="form-hint" id="ndh-info" style="display:none;">
+            <i class="fas fa-info-circle"></i> <span id="ndh-stats"></span>
+        </div>
+        @error('ndh')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+</div>
 
                             <div class="form-row">
                                 <div class="form-group">
@@ -251,7 +270,7 @@ $isPKN = $jenis === 'pkn';
                                         <option value="">Pilih</option>
                                         <option value="Islam" {{ ($pesertaData && $pesertaData->agama == 'Islam') || old('agama') == 'Islam' ? 'selected' : '' }}>Islam</option>
                                         <option value="Kristen" {{ ($pesertaData && $pesertaData->agama == 'Kristen') || old('agama') == 'Kristen' ? 'selected' : '' }}>Kristen</option>
-                                        <option value="Kristen Protestan" {{ ($pesertaData && $pesertaData->agama == 'Kristen Protestan') || old('agama') == 'Kristen Protestan' ? 'selected' : '' }}>Kristen Protestan</option>
+                                        {{-- <option value="Kristen Protestan" {{ ($pesertaData && $pesertaData->agama == 'Kristen Protestan') || old('agama') == 'Kristen Protestan' ? 'selected' : '' }}>Kristen Protestan</option> --}}
                                         <option value="Katolik" {{ ($pesertaData && $pesertaData->agama == 'Katolik') || old('agama') == 'Katolik' ? 'selected' : '' }}>Katolik</option>
                                         <option value="Hindu" {{ ($pesertaData && $pesertaData->agama == 'Hindu') || old('agama') == 'Hindu' ? 'selected' : '' }}>Hindu</option>
                                         <option value="Buddha" {{ ($pesertaData && $pesertaData->agama == 'Buddha') || old('agama') == 'Buddha' ? 'selected' : '' }}>Buddha</option>
@@ -1131,79 +1150,94 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                             </div> --}}
 
                             <div class="form-group">
-                                <label class="form-label">Upload Pasfoto peserta berwarna</label>
-                                <div class="form-hint">Format JPG/PNG, maksimal 1MB. Ukuran rekomendasi: 3x4 cm</div>
-                                
-                                <!-- Cropper Preview Area -->
-                                <div class="cropper-preview-container" id="cropperPreviewContainer" style="display: none;">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="cropper-wrapper">
-                                                <img id="imagePreview" src="" alt="Preview Image" style="max-width: 100%;">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="preview-wrapper">
-                                                <div class="preview-title">Preview Pasfoto</div>
-                                                <div class="preview-image-container">
-                                                    <div id="preview" style="width: 150px; height: 200px; overflow: hidden; margin: 0 auto;"></div>
-                                                </div>
-                                                <div class="preview-hint">Ukuran: 3x4 cm</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="cropper-controls mt-3">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" id="rotateLeft">
-                                            <i class="fas fa-undo"></i> Putar Kiri
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" id="rotateRight">
-                                            <i class="fas fa-redo"></i> Putar Kanan
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" id="zoomIn">
-                                            <i class="fas fa-search-plus"></i> Zoom In
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" id="zoomOut">
-                                            <i class="fas fa-search-minus"></i> Zoom Out
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" id="cancelCrop">
-                                            <i class="fas fa-times"></i> Batal
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-success" id="cropImage">
-                                            <i class="fas fa-crop"></i> Potong & Simpan
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <!-- Hidden canvas for cropping -->
-                                <canvas id="croppedCanvas" style="display: none;"></canvas>
-                                
-                                <!-- Hidden input untuk menyimpan data cropped image -->
-                                <input type="hidden" name="cropped_image_data" id="croppedImageData">
-                                
-                                <!-- File Input (hidden, akan diaktifkan setelah crop) -->
-                                <div class="form-file" id="pasFotoUploadContainer">
-                                    <input type="file" name="file_pas_foto" id="file_pas_foto"
-                                        class="form-file-input @error('file_pas_foto') error @enderror"
-                                        accept=".jpg,.jpeg,.png" data-cropper="true">
-                                    <label class="form-file-label" for="file_pas_foto">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 1MB)' }}</span>
-                                    </label>
-                                    <div class="form-file-name" id="filePasFotoName">
-                                        @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
-                                            File sudah ada: {{ basename($pesertaData->file_pas_foto) }}
-                                        @elseif(old('file_pas_foto'))
-                                            File sudah diupload sebelumnya
-                                        @else
-                                            Belum ada file dipilih
-                                        @endif
-                                    </div>
-                                </div>
-                                @error('file_pas_foto')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
+    <label class="form-label">Upload Pasfoto peserta berwarna</label>
+    <div class="form-hint">Format JPG/PNG, maksimal 1MB. Ukuran rekomendasi: 3x4 cm</div>
+    
+    <!-- Layout baris untuk upload dan contoh foto -->
+    <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 15px;">
+        <!-- File Input Container -->
+        <div class="form-file" id="pasFotoUploadContainer" style="flex: 1; min-width: 300px;">
+            <input type="file" name="file_pas_foto" id="file_pas_foto"
+                class="form-file-input @error('file_pas_foto') error @enderror"
+                accept=".jpg,.jpeg,.png" data-cropper="true">
+            <label class="form-file-label" for="file_pas_foto">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>{{ $isEdit && $pesertaData && $pesertaData->file_pas_foto ? 'Ganti Pasfoto' : 'Klik untuk mengunggah file JPG/PNG (maks. 1MB)' }}</span>
+            </label>
+            <div class="form-file-name" id="filePasFotoName">
+                @if($isEdit && $pesertaData && $pesertaData->file_pas_foto)
+                    File sudah ada: {{ basename($pesertaData->file_pas_foto) }}
+                @elseif(old('file_pas_foto'))
+                    File sudah diupload sebelumnya
+                @else
+                    Belum ada file dipilih
+                @endif
+            </div>
+        </div>
+
+        <!-- Contoh foto -->
+        <div style="text-align: center;">
+            <p style="margin: 0 0 8px 0; font-size: 0.9em; color: #666;"><strong>Contoh Foto 3×4:</strong></p>
+            <div style="width: 90px; height: 120px; border: 2px solid #ddd; overflow: hidden; border-radius: 4px;">
+                <img src="{{ asset('gambar/contohfoto.jpeg') }}" 
+                     alt="Contoh Foto 3x4"
+                     style="width: 100%; height: 100%; object-fit: cover;"
+                     onerror="this.src='https://via.placeholder.com/90x120?text=Contoh+Foto'">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cropper Preview Area -->
+    <div class="cropper-preview-container" id="cropperPreviewContainer" style="display: none;">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="cropper-wrapper">
+                    <img id="imagePreview" src="" alt="Preview Image" style="max-width: 100%;">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="preview-wrapper">
+                    <div class="preview-title">Preview Pasfoto</div>
+                    <div class="preview-image-container">
+                        <div id="preview" style="width: 150px; height: 200px; overflow: hidden; margin: 0 auto;"></div>
+                    </div>
+                    <div class="preview-hint">Ukuran: 3x4 cm</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cropper-controls mt-3">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="rotateLeft">
+                <i class="fas fa-undo"></i> Putar Kiri
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="rotateRight">
+                <i class="fas fa-redo"></i> Putar Kanan
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="zoomIn">
+                <i class="fas fa-search-plus"></i> Zoom In
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="zoomOut">
+                <i class="fas fa-search-minus"></i> Zoom Out
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" id="cancelCrop">
+                <i class="fas fa-times"></i> Batal
+            </button>
+            <button type="button" class="btn btn-sm btn-success" id="cropImage">
+                <i class="fas fa-crop"></i> Potong & Simpan
+            </button>
+        </div>
+    </div>
+    
+    <!-- Hidden canvas for cropping -->
+    <canvas id="croppedCanvas" style="display: none;"></canvas>
+    
+    <!-- Hidden input untuk menyimpan data cropped image -->
+    <input type="hidden" name="cropped_image_data" id="croppedImageData">
+    
+    @error('file_pas_foto')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
 
                             <!-- SK Jabatan dan Pangkat -->
                             {{-- @if($isEdit && $kepegawaianData)
@@ -2001,11 +2035,69 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                 width: 100%;
             }
         }
+        #info-pic-angkatan {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#info-pic-angkatan strong {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+#info-pic-angkatan small {
+    color: var(--gray-color);
+    font-size: 0.85rem;
+}
+
+#info-pic-angkatan small i {
+    margin-right: 5px;
+    color: var(--accent-color);
+}
     </style>
 @endsection
 
 @section('scripts')
     <script>
+            async function loadAvailableNdh(idAngkatan, idJenisPelatihan, currentNdh = null) {
+    const ndhSelect = document.getElementById('ndh');
+    if (!ndhSelect) return;
+
+    ndhSelect.innerHTML = '<option value="">Loading...</option>';
+    ndhSelect.disabled = true;
+
+    try {
+        const res = await fetch(`/api/get-available-ndh?id_jenis_pelatihan=${idJenisPelatihan}&id_angkatan=${idAngkatan}`);
+        const result = await res.json();
+
+        if (result.success) {
+            ndhSelect.innerHTML = '<option value="">Pilih NDH</option>';
+            result.data.forEach(ndh => {
+                const opt = document.createElement('option');
+                opt.value = ndh;
+                opt.textContent = `NDH ${ndh}`;
+                if (currentNdh && parseInt(currentNdh) === ndh) opt.selected = true;
+                ndhSelect.appendChild(opt);
+            });
+
+            // Jika edit mode & NDH peserta ini sudah terpakai
+            if (currentNdh && !result.data.includes(parseInt(currentNdh))) {
+                const opt = document.createElement('option');
+                opt.value = currentNdh;
+                opt.textContent = `NDH ${currentNdh} (Saat ini)`;
+                opt.selected = true;
+                ndhSelect.insertBefore(opt, ndhSelect.children[1]);
+            }
+
+            ndhSelect.disabled = false;
+            document.getElementById('ndh-info').style.display = 'block';
+            document.getElementById('ndh-stats').textContent = `Tersedia: ${result.tersedia}/${result.kuota}`;
+        }
+    } catch (err) {
+        ndhSelect.innerHTML = '<option value="">Error! Refresh halaman</option>';
+    }
+}
         // ============================================
         // REALTIME AUTO CAPITALIZATION (HURUF PERTAMA SAJA)
         // ============================================
@@ -2359,6 +2451,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             const isEdit = @json($isEdit);
             const jenis = @json($jenis);
             let selectedAngkatan = null;
+            const picDataByAngkatan = @json($picDataByAngkatan ?? []);
 
             // Initialize cropper
             const cropperFunctions = initCropperFunctionality();
@@ -2590,8 +2683,26 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                     statusBadge.style.background = 'var(--warning-color)';
                 }
 
+                const picWrapper = document.getElementById('info-pic-wrapper');
+                const picInfo = document.getElementById('info-pic-angkatan');
+                
+                if (picDataByAngkatan[selectedAngkatan.id]) {
+                    const pic = picDataByAngkatan[selectedAngkatan.id];
+                    picInfo.innerHTML = `
+                        <strong>${pic.nama} (${pic.no_telp})</strong>
+                    `;
+                    picWrapper.style.display = 'flex';
+                } else {
+                    picInfo.innerHTML = '<em style="color: var(--gray-color);">PIC belum ditentukan</em>';
+                    picWrapper.style.display = 'flex';
+                }
+
                 angkatanInfo.style.display = 'block';
                 nextToStep2Btn.disabled = false;
+                // Load NDH
+const jenisPelatihanId = @json($jenisPelatihanId);
+const currentNdh = @json($isEdit && $pesertaData ? $pesertaData->ndh : null);
+loadAvailableNdh(selectedAngkatan.id, jenisPelatihanId, currentNdh);
             });
 
             // ============================================

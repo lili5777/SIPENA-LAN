@@ -24,6 +24,10 @@
                                     <span class="info-value">{{ $pendaftaran->peserta->nama_lengkap }}</span>
                                 </div>
                                 <div class="info-item">
+                                    <span class="info-label">Email Peserta:</span>
+                                    <span class="info-value">{{ $pendaftaran->peserta->email_pribadi }}</span>
+                                </div>
+                                <div class="info-item">
                                     <span class="info-label">Jenis Pelatihan:</span>
                                     <span class="info-value">{{ $pendaftaran->jenisPelatihan->nama_pelatihan }}</span>
                                 </div>
@@ -35,9 +39,40 @@
                                     <span class="info-label">Status:</span>
                                     <span class="info-value badge badge-warning">Menunggu Verifikasi</span>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
+
+                    @if($pic && $pic->user)
+<div class="success-info">
+    <div class="info-card">
+        <h3><i class="fas fa-user-tie"></i> PIC Pelatihan</h3>
+        <div class="info-details">
+            <div class="info-item">
+                <span class="info-label">Nama PIC:</span>
+                <span class="info-value">{{ $pic->user->name }}</span>
+            </div>
+            <div class="info-item">
+    <span class="info-label">No. HP:</span>
+    <span class="info-value">
+        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $pic->user->no_telp) }}"
+           target="_blank"
+           style="color:#000000; text-decoration:none; font-weight:500;">
+            {{ $pic->user->no_telp }}
+        </a>
+    </span>
+</div>
+        </div>
+    </div>
+</div>
+@else
+<div class="success-note">
+    <p><strong>Informasi PIC</strong></p>
+    <p>PIC untuk pelatihan ini belum ditentukan.</p>
+</div>
+@endif
+
 
                     <div class="action-buttons">
                         <a href="{{ route('pendaftaran.create') }}" class="action-btn action-primary">
@@ -52,10 +87,11 @@
                     <div class="success-note">
                         <p><strong>Catatan Penting:</strong></p>
                         <ul>
-                            <li>Proses verifikasi membutuhkan waktu 3-5 hari kerja</li>
+                            <li>Proses verifikasi membutuhkan waktu 3-14 hari kerja</li>
                             <li>Pastikan email dan nomor HP yang didaftarkan aktif</li>
                             <li>Mohon cek email Anda secara berkala, termasuk folder <b>Spam/Junk</b>, untuk memastikan tidak ada pesan yang
                                 terlewat</li>
+                            <li>Simpan Nomor PIC yang tercantum di atas (Hubungi Jika ada kendala atau pertanyaan)</li>
                         </ul>
                     </div>
                 </div>

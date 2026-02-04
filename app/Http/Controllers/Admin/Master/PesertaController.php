@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendEmail;
 use App\Models\AksiPerubahan;
+use App\Models\PicPeserta;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
@@ -183,24 +184,24 @@ class PesertaController extends Controller
                 if ($request->status_pendaftaran === 'Diterima') {
 
                     // ✅ Kalau peserta sudah punya NDH, jangan generate ulang
-                    if (empty($peserta->ndh)) {
+                    // if (empty($peserta->ndh)) {
 
-                        // Ambil max NDH untuk jenis pelatihan + angkatan yang sama secara aman (lock)
-                        // Pakai join + max langsung (lebih ringan daripada ->get()->max('peserta.ndh')
-                        $lastNdh = Pendaftaran::query()
-                            ->where('pendaftaran.id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan)
-                            ->where('pendaftaran.id_angkatan', $pendaftaran->id_angkatan)
-                            ->join('peserta', 'peserta.id', '=', 'pendaftaran.id_peserta')
-                            ->lockForUpdate()
-                            ->max('peserta.ndh');
+                    //     // Ambil max NDH untuk jenis pelatihan + angkatan yang sama secara aman (lock)
+                    //     // Pakai join + max langsung (lebih ringan daripada ->get()->max('peserta.ndh')
+                    //     $lastNdh = Pendaftaran::query()
+                    //         ->where('pendaftaran.id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan)
+                    //         ->where('pendaftaran.id_angkatan', $pendaftaran->id_angkatan)
+                    //         ->join('peserta', 'peserta.id', '=', 'pendaftaran.id_peserta')
+                    //         ->lockForUpdate()
+                    //         ->max('peserta.ndh');
 
-                        $ndhBaru = $lastNdh ? ((int)$lastNdh + 1) : 1;
+                    //     $ndhBaru = $lastNdh ? ((int)$lastNdh + 1) : 1;
 
-                        // Simpan NDH
-                        $peserta->update([
-                            'ndh' => $ndhBaru
-                        ]);
-                    }
+                    //     // Simpan NDH
+                    //     $peserta->update([
+                    //         'ndh' => $ndhBaru
+                    //     ]);
+                    // }
 
                     // Buat/update akun user + kirim email hanya jika belum ada user / atau kamu memang mau selalu kirim ulang
                     $role = Role::where('name', 'user')->firstOrFail();
@@ -254,132 +255,253 @@ class PesertaController extends Controller
         }
     }
 
+/**
+ * Get available NDH for peserta form
+ */
+public function getAvailableNdhForPeserta(Request $request)
+{
+    try {
+        $request->validate([
+            'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
+            'id_angkatan' => 'required|exists:angkatan,id',
+        ]);
+
+        // Ambil data angkatan untuk mendapatkan kuota
+        $angkatan = Angkatan::findOrFail($request->id_angkatan);
+        $kuota = $angkatan->kuota;
+
+        // 🔥 FIX: Query yang benar - ambil peserta yang punya pendaftaran di angkatan + jenis pelatihan ini
+        $ndhTerpakai = Peserta::whereHas('pendaftaran', function($query) use ($request) {
+                $query->where('id_angkatan', $request->id_angkatan)
+                      ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan);
+            })
+            ->whereNotNull('ndh')
+            ->pluck('ndh')
+            ->toArray();
+
+        // Kecualikan NDH peserta yang sedang di-edit (jika ada)
+        $currentPesertaId = $request->current_peserta_id ?? null;
+        if ($currentPesertaId) {
+            $currentNdh = Peserta::where('id', $currentPesertaId)->value('ndh');
+            if ($currentNdh) {
+                // Hapus NDH peserta ini dari list yang terpakai
+                $ndhTerpakai = array_diff($ndhTerpakai, [$currentNdh]);
+            }
+        }
+
+        // Generate list NDH yang tersedia (1 sampai kuota)
+        $ndhTersedia = [];
+        for ($i = 1; $i <= $kuota; $i++) {
+            if (!in_array($i, $ndhTerpakai)) {
+                $ndhTersedia[] = $i;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $ndhTersedia,
+            'kuota' => $kuota,
+            'terpakai' => count($ndhTerpakai),
+            'tersedia' => count($ndhTersedia)
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error getting available NDH for peserta: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     // Method untuk create form
-    public function create(Request $request, $jenis = null)
-    {
-        if (!$jenis) {
-            $jenis = $request->jenis ?? session('jenis_pelatihan');
-        }
-
-        $jenisData = $this->getJenisData($jenis);
-        $jenisPelatihanId = $jenisData['id'];
-
-        $user = Auth::user();
-
-        // =====================================
-        // AMBIL ANGKATAN YANG DIAKSES OLEH PIC
-        // =====================================
-        $picAngkatanIds = [];
-
-        if ($user->role->name === 'pic') {
-            $picAngkatanIds = $user->picPesertas
-                ->where('jenispelatihan_id', $jenisPelatihanId)
-                ->pluck('angkatan_id')
-                ->unique()
-                ->toArray();
-        }
-
-        // =====================
-        // DATA MASTER
-        // =====================
-        $mentorList = Mentor::where('status_aktif', true)->get();
-
-        // =====================
-        // QUERY ANGKATAN
-        // =====================
-        $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
-            ->where('status_angkatan', 'Dibuka');
-
-        // Filter khusus PIC
-        if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
-            $angkatanQuery->whereIn('id', $picAngkatanIds);
-        }
-
-        $angkatanList = $angkatanQuery->get();
-
-        $provinsiList = Provinsi::all();
-        $kabupatenList = Kabupaten::all();
-
-        // =====================
-        // FLAG VIEW
-        // =====================
-        $isEdit = false;
-        $kunci_judul = false;
-        $aksiPerubahan = null;
-
-        session(['jenis_pelatihan' => $jenis]);
-
-        // =====================
-        // RESPONSE AJAX
-        // =====================
-        if ($request->ajax()) {
-            return response()->json([
-                'jenis_pelatihan' => $jenisPelatihanId,
-                'mentor' => $mentorList,
-                'angkatanList' => $angkatanList,
-                'provinsiList' => $provinsiList,
-                'kabupatenList' => $kabupatenList,
-            ]);
-        }
-
-        // =====================
-        // VIEW
-        // =====================
-        return view("admin.peserta.{$jenis}.create", compact(
-            'mentorList',
-            'angkatanList',
-            'provinsiList',
-            'kabupatenList',
-            'isEdit',
-            'jenis',
-            'kunci_judul',
-            'aksiPerubahan'
-        ));
+public function create(Request $request, $jenis = null)
+{
+    if (!$jenis) {
+        $jenis = $request->jenis ?? session('jenis_pelatihan');
     }
 
-    // Method untuk edit form
-    public function edit(Request $request, $jenis, $id)
-    {
-        $jenisData = $this->getJenisData($jenis);
+    $jenisData = $this->getJenisData($jenis);
+    $jenisPelatihanId = $jenisData['id'];
 
-        $pendaftaran = Pendaftaran::with([
-            'peserta',
-            'peserta.kepegawaianPeserta',
-            'peserta.kepegawaianPeserta.provinsi',
-            'peserta.kepegawaianPeserta.kabupaten',
-            'angkatan',
-            'pesertaMentor.mentor',
-            'aksiPerubahan'
-        ])->findOrFail($id);
+    $user = Auth::user();
 
-        // Verifikasi jenis pelatihan sesuai
-        if ($pendaftaran->id_jenis_pelatihan != $jenisData['id']) {
-            abort(404, 'Data tidak ditemukan untuk jenis pelatihan ini');
-        }
+    // =====================================
+    // AMBIL ANGKATAN YANG DIAKSES OLEH PIC
+    // =====================================
+    $picAngkatanIds = [];
 
-        $mentorList = Mentor::where('status_aktif', true)->get();
-        $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisData['id'])
-            ->where('status_angkatan', 'Dibuka')->get();
-        $provinsiList = Provinsi::all();
-        $kabupatenList = Kabupaten::all();
-        $kunci_judul = optional($pendaftaran->angkatan)->kunci_judul ?? false;
-        $aksiPerubahan = $pendaftaran->aksiPerubahan->first();
-
-        $isEdit = true;
-
-        return view("admin.peserta.{$jenis}.create", compact(
-            'pendaftaran',
-            'mentorList',
-            'angkatanList',
-            'provinsiList',
-            'kabupatenList',
-            'isEdit',
-            'jenis',
-            'kunci_judul',
-            'aksiPerubahan'
-        ));
+    if ($user->role->name === 'pic') {
+        $picAngkatanIds = $user->picPesertas
+            ->where('jenispelatihan_id', $jenisPelatihanId)
+            ->pluck('angkatan_id')
+            ->unique()
+            ->toArray();
     }
+
+    // =====================
+    // DATA MASTER
+    // =====================
+    $mentorList = Mentor::where('status_aktif', true)->get();
+
+    // =====================
+    // QUERY ANGKATAN
+    // =====================
+    $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId)
+        ->where('status_angkatan', 'Dibuka');
+
+    // Filter khusus PIC
+    if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
+        $angkatanQuery->whereIn('id', $picAngkatanIds);
+    }
+
+    $angkatanList = $angkatanQuery->get();
+
+    $provinsiList = Provinsi::all();
+    $kabupatenList = Kabupaten::all();
+
+    // =====================
+    // AMBIL DATA PIC UNTUK SETIAP ANGKATAN
+    // =====================
+    $picDataByAngkatan = [];
+    
+    foreach ($angkatanList as $angkatan) {
+        $picPeserta = PicPeserta::with('user')
+            ->where('jenispelatihan_id', $jenisPelatihanId)
+            ->where('angkatan_id', $angkatan->id)
+            ->first();
+        
+        if ($picPeserta && $picPeserta->user) {
+            $picDataByAngkatan[$angkatan->id] = [
+                'nama' => $picPeserta->user->name,
+                'no_telp' => $picPeserta->user->no_telp,
+                'email' => $picPeserta->user->email ?? null
+            ];
+        }
+    }
+
+    // =====================
+    // FLAG VIEW
+    // =====================
+    $isEdit = false;
+    $kunci_judul = false;
+    $aksiPerubahan = null;
+
+    session(['jenis_pelatihan' => $jenis]);
+
+    // =====================
+    // RESPONSE AJAX
+    // =====================
+    if ($request->ajax()) {
+        return response()->json([
+            'jenis_pelatihan' => $jenisPelatihanId,
+            'mentor' => $mentorList,
+            'angkatanList' => $angkatanList,
+            'provinsiList' => $provinsiList,
+            'kabupatenList' => $kabupatenList,
+            'picDataByAngkatan' => $picDataByAngkatan, // Tambahkan ini
+        ]);
+    }
+
+    // =====================
+    // VIEW
+    // =====================
+    return view("admin.peserta.{$jenis}.create", compact(
+        'mentorList',
+        'angkatanList',
+        'provinsiList',
+        'kabupatenList',
+        'isEdit',
+        'jenis',
+        'kunci_judul',
+        'aksiPerubahan',
+        'picDataByAngkatan' // Tambahkan ini
+    ));
+}
+
+// Method untuk edit form
+public function edit(Request $request, $jenis, $id)
+{
+    $jenisData = $this->getJenisData($jenis);
+
+    $pendaftaran = Pendaftaran::with([
+        'peserta',
+        'peserta.kepegawaianPeserta',
+        'peserta.kepegawaianPeserta.provinsi',
+        'peserta.kepegawaianPeserta.kabupaten',
+        'angkatan',
+        'pesertaMentor.mentor',
+        'aksiPerubahan'
+    ])->findOrFail($id);
+
+    // Verifikasi jenis pelatihan sesuai
+    if ($pendaftaran->id_jenis_pelatihan != $jenisData['id']) {
+        abort(404, 'Data tidak ditemukan untuk jenis pelatihan ini');
+    }
+
+    $mentorList = Mentor::where('status_aktif', true)->get();
+    $angkatanList = Angkatan::where('id_jenis_pelatihan', $jenisData['id'])
+        ->where('status_angkatan', 'Dibuka')->get();
+    $provinsiList = Provinsi::all();
+    $kabupatenList = Kabupaten::all();
+    $kunci_judul = optional($pendaftaran->angkatan)->kunci_judul ?? false;
+    $aksiPerubahan = $pendaftaran->aksiPerubahan->first();
+
+    // =====================
+    // AMBIL DATA PIC UNTUK ANGKATAN YANG DIPILIH
+    // =====================
+    $picData = null;
+    
+    if ($pendaftaran->id_angkatan) {
+        $picPeserta = PicPeserta::with('user')
+            ->where('jenispelatihan_id', $pendaftaran->id_jenis_pelatihan)
+            ->where('angkatan_id', $pendaftaran->id_angkatan)
+            ->first();
+        
+        if ($picPeserta && $picPeserta->user) {
+            $picData = [
+                'nama' => $picPeserta->user->name,
+                'no_telp' => $picPeserta->user->no_telp,
+                'email' => $picPeserta->user->email ?? null
+            ];
+        }
+    }
+
+    // AMBIL SEMUA PIC UNTUK ANGKATAN LAIN
+    $picDataByAngkatan = [];
+    
+    foreach ($angkatanList as $angkatan) {
+        $picPeserta = PicPeserta::with('user')
+            ->where('jenispelatihan_id', $jenisData['id'])
+            ->where('angkatan_id', $angkatan->id)
+            ->first();
+        
+        if ($picPeserta && $picPeserta->user) {
+            $picDataByAngkatan[$angkatan->id] = [
+                'nama' => $picPeserta->user->name,
+                'no_telp' => $picPeserta->user->no_telp,
+                'email' => $picPeserta->user->email ?? null
+            ];
+        }
+    }
+
+    $isEdit = true;
+
+    return view("admin.peserta.{$jenis}.create", compact(
+        'pendaftaran',
+        'mentorList',
+        'angkatanList',
+        'provinsiList',
+        'kabupatenList',
+        'isEdit',
+        'jenis',
+        'kunci_judul',
+        'aksiPerubahan',
+        'picData', // Data PIC untuk angkatan yang dipilih (edit mode)
+        'picDataByAngkatan' // Data PIC untuk semua angkatan
+    ));
+}
 
     public function store(Request $request)
     {
@@ -454,6 +576,7 @@ class PesertaController extends Controller
                     'id_angkatan' => 'required|exists:angkatan,id',
                     'nip_nrp' => 'required|string|max:50',
                     'nama_lengkap' => 'required|string|max:200',
+                    'ndh'=>'nullable|min:1',
 
                     // Semua field berikut diubah dari required menjadi nullable
                     'nama_panggilan' => 'nullable|string|max:100',
@@ -717,6 +840,7 @@ class PesertaController extends Controller
                 // Buat peserta baru
                 $peserta = Peserta::create([
                     'nip_nrp' => $request->nip_nrp,
+                    'ndh' => $request->ndh ?? null,
                     'nama_lengkap' => $request->nama_lengkap,
                     'nama_panggilan' => $request->nama_panggilan ?? null,
                     'jenis_kelamin' => $request->jenis_kelamin ?? null,
@@ -745,6 +869,7 @@ class PesertaController extends Controller
                 $peserta->update([
                     'nama_lengkap' => $request->nama_lengkap,
                     'nama_panggilan' => $request->nama_panggilan ?? $peserta->nama_panggilan,
+                    'ndh' => $request->ndh ?? $peserta->ndh,
                     'jenis_kelamin' => $request->jenis_kelamin ?? $peserta->jenis_kelamin,
                     'agama' => $request->agama ?? $peserta->agama,
                     'tempat_lahir' => $request->tempat_lahir ?? $peserta->tempat_lahir,
@@ -936,6 +1061,7 @@ class PesertaController extends Controller
                     'id_angkatan' => 'required|exists:angkatan,id',
                     'nip_nrp' => 'required|string|max:50',
                     'nama_lengkap' => 'required|string|max:200',
+                    'ndh' => 'nullable|min:1',
 
                     // Semua field berikut nullable
                     'nama_panggilan' => 'nullable|string|max:100',
@@ -1214,6 +1340,7 @@ class PesertaController extends Controller
             $pesertaData = [
                 'nip_nrp' => $request->nip_nrp,
                 'nama_lengkap' => $request->nama_lengkap,
+                'ndh' => $request->ndh ?? $peserta->ndh,
                 'nama_panggilan' => $request->nama_panggilan ?? $peserta->nama_panggilan,
                 'jenis_kelamin' => $request->jenis_kelamin ?? $peserta->jenis_kelamin,
                 'agama' => $request->agama ?? $peserta->agama,
@@ -1564,20 +1691,20 @@ class PesertaController extends Controller
                 // =========================
                 // 5. RAPINKAN NDH (AMAN)
                 // =========================
-                if ($angkatan) {
-                    $pesertaBerNDH = Peserta::whereHas('pendaftaran', function ($q) use ($angkatan) {
-                        $q->where('id_angkatan', $angkatan->id);
-                    })
-                        ->whereNotNull('ndh')
-                        ->orderBy('ndh')
-                        ->lockForUpdate()
-                        ->get();
+                // if ($angkatan) {
+                //     $pesertaBerNDH = Peserta::whereHas('pendaftaran', function ($q) use ($angkatan) {
+                //         $q->where('id_angkatan', $angkatan->id);
+                //     })
+                //         ->whereNotNull('ndh')
+                //         ->orderBy('ndh')
+                //         ->lockForUpdate()
+                //         ->get();
 
-                    $no = 1;
-                    foreach ($pesertaBerNDH as $p) {
-                        $p->update(['ndh' => $no++]);
-                    }
-                }
+                //     $no = 1;
+                //     foreach ($pesertaBerNDH as $p) {
+                //         $p->update(['ndh' => $no++]);
+                //     }
+                // }
 
                 // =========================
                 // 6. HAPUS PESERTA & USER (JIKA TIDAK PUNYA PENDAFTARAN LAIN)
@@ -1614,7 +1741,7 @@ class PesertaController extends Controller
                     'success' => true,
                     'message' => $result['already_deleted']
                         ? 'Data sudah tidak ada (mungkin sudah terhapus sebelumnya).'
-                        : 'Data peserta berhasil dihapus & NDH dirapikan'
+                        : 'Data peserta berhasil dihapus'
                 ]);
             }
 

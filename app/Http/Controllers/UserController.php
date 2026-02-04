@@ -87,6 +87,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:3',
+            'no_telp' => 'required|string|max:20',
             'role_id' => 'exists:roles,id',
         ]);
 
@@ -95,6 +96,7 @@ class UserController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
+            'no_telp' => $data['no_telp'],
             'role_id' => $data['role_id'],
         ]);
 
@@ -116,12 +118,14 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:3',
+            'no_telp' => 'required|string|max:20',
             'role_id' => 'exists:roles,id',
         ]);
 
         // Update user
         $user->name = $data['name'];
         $user->email = $data['email'];
+        $user->no_telp = $data['no_telp'];
         if (!empty($data['password'])) {
             $user->password = bcrypt($data['password']);
         }

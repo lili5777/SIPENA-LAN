@@ -554,6 +554,67 @@
             .form-group {
                 margin-bottom: 1.5rem;
             }
+            /* Contoh Foto Styles */
+.foto-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.foto-upload-section {
+    flex: 1;
+}
+
+.foto-example-section {
+    flex: 0 0 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.example-photo-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    font-weight: 600;
+    text-align: center;
+}
+
+.example-photo-container {
+    width: 120px;
+    height: 160px;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin: 0 auto;
+}
+
+.example-photo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.example-photo-note {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    text-align: center;
+    font-style: italic;
+}
+
+/* Responsive untuk contoh foto */
+@media (max-width: 768px) {
+    .foto-container {
+        flex-direction: column-reverse;
+        gap: 1.5rem;
+    }
+    
+    .foto-example-section {
+        flex: none;
+        width: 100%;
+        align-items: center;
+    }
+}
 
             .form-group.full-width {
                 grid-column: 1 / -1;
@@ -1475,8 +1536,8 @@
                             </option>
                             <option value="Kristen" {{ old('agama', $peserta->agama) == 'Kristen' ? 'selected' : '' }}>Kristen
                             </option>
-                            <option value="Kristen Protestan" {{ old('agama', $peserta->agama) == 'Kristen Protestan' ? 'selected' : '' }}>Kristen Protestan
-                            </option>
+                            {{-- <option value="Kristen Protestan" {{ old('agama', $peserta->agama) == 'Kristen Protestan' ? 'selected' : '' }}>Kristen Protestan
+                            </option> --}}
                             <option value="Katolik" {{ old('agama', $peserta->agama) == 'Katolik' ? 'selected' : '' }}>Katolik
                             </option>
                             <option value="Hindu" {{ old('agama', $peserta->agama) == 'Hindu' ? 'selected' : '' }}>Hindu
@@ -2291,106 +2352,126 @@
                 </div>
 
                 <!-- Pas Foto -->
-                <div class="form-group">
-                    <label class="form-label required">Pas Foto</label>
-
-                    <!-- Container untuk crop (awalnya tersembunyi) -->
-                    <div class="crop-container" id="crop-container" style="display: none;">
-                        <div class="crop-header">
-                            <h4><i class="fas fa-crop-alt"></i> Crop Foto 3x4</h4>
-                            <button type="button" class="btn-close-crop" id="close-crop">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-
-                        <div class="crop-preview-container">
-                            <!-- Preview kecil -->
-                            <div class="crop-preview-wrapper">
-                                <div class="crop-preview-label">Preview 3x4</div>
-                                <div class="crop-preview" id="crop-preview"></div>
-                            </div>
-
-                            <!-- Area crop utama -->
-                            <div class="crop-main-wrapper">
-                                <img id="crop-image" class="crop-image" style="max-width: 100%;">
-                            </div>
-                        </div>
-
-                        <!-- Kontrol crop -->
-                        <div class="crop-controls">
-                            <button type="button" class="btn-crop-action" id="rotate-left" title="Rotate Left">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                            <button type="button" class="btn-crop-action" id="rotate-right" title="Rotate Right">
-                                <i class="fas fa-redo"></i>
-                            </button>
-                            <button type="button" class="btn-crop-action" id="zoom-in" title="Zoom In">
-                                <i class="fas fa-search-plus"></i>
-                            </button>
-                            <button type="button" class="btn-crop-action" id="zoom-out" title="Zoom Out">
-                                <i class="fas fa-search-minus"></i>
-                            </button>
-                            <button type="button" class="btn-crop-action" id="reset-crop" title="Reset">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                        </div>
-
-                        <!-- Tombol action crop -->
-                        <div class="crop-action-buttons">
-                            <button type="button" class="btn-crop-secondary" id="cancel-crop">
-                                <i class="fas fa-times"></i> Batal
-                            </button>
-                            <button type="button" class="btn-crop-primary" id="save-crop">
-                                <i class="fas fa-check"></i> Simpan Crop
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- File input untuk crop -->
-                    <div class="form-file" id="form-file-pasfoto">
-                        <input type="file" name="file_pas_foto_input" id="file_pas_foto_input"
-                            class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
-                        <label for="file_pas_foto_input" class="form-file-label" id="file-pas-foto-label">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <div class="form-file-label-text">Klik untuk mengunggah pas foto</div>
-                            <div class="form-file-label-hint">JPG, JPEG, PNG (Maks. 1MB)</div>
-                            <div class="form-file-label-hint">Akan dicrop ke ukuran 3x4 cm</div>
-                        </label>
-
-                        <!-- Hidden input untuk hasil crop -->
-                        <input type="hidden" name="file_pas_foto" id="file_pas_foto_cropped"
-                            value="{{ old('file_pas_foto', $peserta->file_pas_foto) }}">
-
-                        <div class="form-file-name" id="file-pas-foto-info">
-                            @if($peserta->file_pas_foto)
-                                <div class="file-info">
-                                    <i class="fas fa-file-image"></i>
-                                    <div class="file-info-content">
-                                        <div class="file-name">{{ basename($peserta->file_pas_foto) }}</div>
-                                        <div class="file-size">File tersedia</div>
-                                    </div>
-                                    <div class="file-actions">
-                                        <button type="button" class="btn-change-file" id="crop-existing-photo">
-                                            <i class="fas fa-crop-alt"></i> Crop
-                                        </button>
-                                        <button type="button" class="btn-change-file" id="change-pas-foto">
-                                            <i class="fas fa-exchange-alt"></i> Ganti
-                                        </button>
-                                    </div>
-                                </div>
-                            @else
-                                <span class="no-file">Belum ada file diupload</span>
-                            @endif
-                        </div>
-                    </div>
-
-                    @error('file_pas_foto')
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
-                        </div>
-                    @enderror
+<div class="form-group">
+    <label class="form-label required">Pas Foto</label>
+    
+    <div class="foto-container">
+        <!-- Bagian Upload Foto -->
+        <div class="foto-upload-section">
+            <!-- Container untuk crop (awalnya tersembunyi) -->
+            <div class="crop-container" id="crop-container" style="display: none;">
+                <div class="crop-header">
+                    <h4><i class="fas fa-crop-alt"></i> Crop Foto 3x4</h4>
+                    <button type="button" class="btn-close-crop" id="close-crop">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
+
+                <div class="crop-preview-container">
+                    <!-- Preview kecil -->
+                    <div class="crop-preview-wrapper">
+                        <div class="crop-preview-label">Preview 3x4</div>
+                        <div class="crop-preview" id="crop-preview"></div>
+                    </div>
+
+                    <!-- Area crop utama -->
+                    <div class="crop-main-wrapper">
+                        <img id="crop-image" class="crop-image" style="max-width: 100%;">
+                    </div>
+                </div>
+
+                <!-- Kontrol crop -->
+                <div class="crop-controls">
+                    <button type="button" class="btn-crop-action" id="rotate-left" title="Rotate Left">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button type="button" class="btn-crop-action" id="rotate-right" title="Rotate Right">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <button type="button" class="btn-crop-action" id="zoom-in" title="Zoom In">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button type="button" class="btn-crop-action" id="zoom-out" title="Zoom Out">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button type="button" class="btn-crop-action" id="reset-crop" title="Reset">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+
+                <!-- Tombol action crop -->
+                <div class="crop-action-buttons">
+                    <button type="button" class="btn-crop-secondary" id="cancel-crop">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                    <button type="button" class="btn-crop-primary" id="save-crop">
+                        <i class="fas fa-check"></i> Simpan Crop
+                    </button>
+                </div>
+            </div>
+
+            <!-- File input untuk crop -->
+            <div class="form-file" id="form-file-pasfoto">
+                <input type="file" name="file_pas_foto_input" id="file_pas_foto_input"
+                    class="form-file-input @error('file_pas_foto') error @enderror" accept=".jpg,.jpeg,.png">
+                <label for="file_pas_foto_input" class="form-file-label" id="file-pas-foto-label">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div class="form-file-label-text">Klik untuk mengunggah pas foto</div>
+                    <div class="form-file-label-hint">JPG, JPEG, PNG (Maks. 1MB)</div>
+                    <div class="form-file-label-hint">Akan dicrop ke ukuran 3x4 cm</div>
+                </label>
+
+                <!-- Hidden input untuk hasil crop -->
+                <input type="hidden" name="file_pas_foto" id="file_pas_foto_cropped"
+                    value="{{ old('file_pas_foto', $peserta->file_pas_foto) }}">
+
+                <div class="form-file-name" id="file-pas-foto-info">
+                    @if($peserta->file_pas_foto)
+                        <div class="file-info">
+                            <i class="fas fa-file-image"></i>
+                            <div class="file-info-content">
+                                <div class="file-name">{{ basename($peserta->file_pas_foto) }}</div>
+                                <div class="file-size">File tersedia</div>
+                            </div>
+                            <div class="file-actions">
+                                <button type="button" class="btn-change-file" id="crop-existing-photo">
+                                    <i class="fas fa-crop-alt"></i> Crop
+                                </button>
+                                <button type="button" class="btn-change-file" id="change-pas-foto">
+                                    <i class="fas fa-exchange-alt"></i> Ganti
+                                </button>
+                            </div>
+                        </div>
+                    @else
+                        <span class="no-file">Belum ada file diupload</span>
+                    @endif
+                </div>
+            </div>
+
+            @error('file_pas_foto')
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
+        <!-- Bagian Contoh Foto -->
+        <div class="foto-example-section">
+            <div class="example-photo-label">
+                <i class="fas fa-image"></i> Contoh Foto 3x4
+            </div>
+            <div class="example-photo-container">
+                <img src="{{ asset('gambar/contohfoto.jpeg') }}" alt="Contoh Pas Foto 3x4">
+            </div>
+            <div class="example-photo-note">
+                * Gunakan foto formal
+            </div>
+        </div>
+    </div>
+</div>
+
+
                 <!-- Ganti bagian pas foto menjadi: -->
                 {{-- <div class="form-group">
                     <label class="form-label required">Pas Foto</label>
@@ -2518,8 +2599,8 @@
         ['name' => 'file_sk_jabatan', 'label' => 'SK Jabatan', 'wajib' => 'required'],
         ['name' => 'file_sk_pangkat', 'label' => 'SK Pangkat', 'wajib' => 'required'],
         ['name' => 'file_sk_cpns', 'label' => 'SK CPNS', 'wajib' => 'required'],
-        ['name' => 'file_spmt', 'label' => 'SPMT', 'wajib' => 'required'],
-        ['name' => 'file_skp', 'label' => 'SKP', 'wajib' => '-'],
+        ['name' => 'file_spmt', 'label' => 'Surat Pernyataan Melaksanaan Tugas (SPMT)', 'wajib' => 'required'],
+        ['name' => 'file_skp', 'label' => 'Sasaran Kinerja Pegawai (SKP)', 'wajib' => '-'],
     ];
 
     if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {

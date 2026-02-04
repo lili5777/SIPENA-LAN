@@ -124,6 +124,10 @@
                                             <span class="info-label">Angkatan:</span>
                                             <span class="info-value" id="detail-angkatan"></span>
                                         </div>
+                                        <div class="info-item" id="verification-pic" style="display: none;">
+                                            <span class="info-label">Nama PIC:</span>
+                                            <span class="info-value" id="detail-pic"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1007,6 +1011,16 @@
     .time-estimate i {
         color: #d97706;
     }
+    #ndh-hint {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+#ndh-info {
+    font-weight: 500;
+}
         </style>
 @endpush
 
@@ -1144,6 +1158,21 @@
                             `${pendaftaranData.angkatan.nama_angkatan} ${pendaftaranData.angkatan.tahun} (${pendaftaranData.angkatan.kategori})` : 
                             'Tidak tersedia';
 
+                         // Tampilkan data PIC jika ada
+                        const detailPic = document.getElementById('detail-pic');
+                        const verificationPic = document.getElementById('verification-pic');
+                        if (data.pic) {
+                            detailPic.innerHTML = `
+                                <strong>${data.pic.nama}</strong><br>
+                                <small> ${data.pic.no_telp}</small>
+                            `;
+                            verificationPic.style.display = 'flex';
+                        } else {
+                            detailPic.textContent = 'PIC belum ditentukan';
+                            verificationPic.style.display = 'flex';
+                        }
+
+                        
                         verificationSuccess.style.display = 'flex';
                         verificationError.style.display = 'none';
                         verificationDetails.style.display = 'flex';
@@ -1760,11 +1789,80 @@
 
                 setupPangkatAutoFill();
                 setupPhotoCropping();
+                loadAvailableNdh();
 
                 // Setup mentor form jika ada
                 setupMentorForm();
                 setupMaritalStatusLogic();
             }
+
+            // Fungsi untuk load NDH yang tersedia
+async function loadAvailableNdh() {
+    const ndhSelect = document.getElementById('ndh');
+    const ndhInfo = document.getElementById('ndh-info');
+    
+    if (!ndhSelect || !pendaftaranData || !selectedTraining) return;
+
+    ndhSelect.innerHTML = '<option value="">Memuat NDH...</option>';
+    ndhSelect.disabled = true;
+
+    try {
+        const response = await fetch(`/api/get-available-ndh?id_jenis_pelatihan=${selectedTraining.id}&id_angkatan=${pendaftaranData.id_angkatan}`);
+        const result = await response.json();
+
+        if (result.success) {
+            ndhSelect.innerHTML = '<option value="">-- Pilih NDH --</option>';
+            ndhSelect.disabled = false;
+
+            if (result.data.length === 0) {
+                ndhSelect.innerHTML = '<option value="">Tidak ada NDH tersedia</option>';
+                ndhSelect.disabled = true;
+                ndhInfo.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Semua NDH sudah terisi penuh';
+                ndhInfo.style.color = 'var(--warning-color)';
+                return;
+            }
+
+            result.data.forEach(ndh => {
+                const option = document.createElement('option');
+                option.value = ndh;
+                option.textContent = `NDH ${ndh}`;
+                
+                // Tandai jika NDH saat ini yang dipilih
+                if (verifiedPeserta && verifiedPeserta.ndh && verifiedPeserta.ndh == ndh) {
+                    option.selected = true;
+                }
+                
+                ndhSelect.appendChild(option);
+            });
+
+            // Update info
+            ndhInfo.innerHTML = `<i class="fas fa-check-circle"></i> Tersedia: ${result.tersedia} dari ${result.kuota} NDH`;
+            ndhInfo.style.color = 'var(--success-color)';
+
+            // Set value dari data peserta jika ada dan masih tersedia
+            if (verifiedPeserta && verifiedPeserta.ndh) {
+                // Cek apakah NDH peserta masih tersedia
+                if (result.data.includes(parseInt(verifiedPeserta.ndh))) {
+                    ndhSelect.value = verifiedPeserta.ndh;
+                } else {
+                    // Jika NDH sudah terpakai, beri peringatan
+                    showErrorMessage('NDH Anda sebelumnya sudah terisi. Silakan pilih NDH yang baru.');
+                }
+            }
+
+        } else {
+            throw new Error(result.message);
+        }
+
+    } catch (error) {
+        console.error('NDH error:', error);
+        ndhSelect.innerHTML = '<option value="">Error loading NDH</option>';
+        ndhSelect.disabled = false;
+        ndhInfo.innerHTML = '<i class="fas fa-exclamation-circle"></i> Gagal memuat data NDH';
+        ndhInfo.style.color = 'var(--danger-color)';
+        showErrorMessage('Gagal memuat data NDH yang tersedia');
+    }
+}
 
             function setupMentorForm() {
                 const mentorSelect = document.getElementById('sudah_ada_mentor');

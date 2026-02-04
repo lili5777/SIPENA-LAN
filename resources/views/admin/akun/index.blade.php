@@ -672,6 +672,23 @@
                     </div>
 
                     <div class="info-item">
+    <div class="info-icon">
+        <i class="fas fa-phone"></i>
+    </div>
+    <div class="info-content">
+        <div class="info-label">Nomor HP</div>
+        <div class="info-value">{{ $user->no_telp ?? '-' }}</div>
+    </div>
+    <div class="info-action">
+        <button type="button" class="btn-edit-password" onclick="openPhoneModal()">
+            <i class="fas fa-edit"></i>
+            Ubah Nomor HP
+        </button>
+    </div>
+</div>
+
+
+                    <div class="info-item">
                         <div class="info-icon">
                             <i class="fas fa-lock"></i>
                         </div>
@@ -690,6 +707,63 @@
             </div>
         </div>
     </div>
+
+    <!-- Phone Modal -->
+<div id="phoneModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fas fa-phone"></i>
+                Ubah Nomor HP
+            </div>
+            <button type="button" class="modal-close" onclick="closePhoneModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="phoneForm" action="{{ route('admin.akun.update-phone') }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-phone"></i>
+                        Nomor HP
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control"
+                               id="no_telp"
+                               name="no_telp"
+                               value="{{ old('no_telp', $user->no_telp) }}"
+                               placeholder="Contoh: 08xxxxxxxxxx"
+                               required>
+                    </div>
+
+                    <div class="error-message" id="no_telp_error" style="display:none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closePhoneModal()">
+                    <i class="fas fa-times"></i>
+                    Batal
+                </button>
+                <button type="submit" class="btn btn-primary" id="submitPhoneBtn">
+                    <i class="fas fa-save"></i>
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
     <!-- Password Modal -->
     <div id="passwordModal" class="modal">
@@ -796,186 +870,255 @@
 @endsection
 
 @section('scripts')
-    <script>
-        // Fungsi untuk membuka modal
-        function openPasswordModal() {
-            console.log('Opening password modal...');
-            const modal = document.getElementById('passwordModal');
-            if (modal) {
-                modal.classList.add('active');
-                document.body.classList.add('modal-open');
-                console.log('Modal opened successfully');
-            } else {
-                console.error('Modal element not found');
-            }
+   <script>
+    // =========================
+    // Modal: Phone
+    // =========================
+    function openPhoneModal() {
+        const modal = document.getElementById('phoneModal');
+        if (!modal) return;
+
+        modal.classList.add('active');
+        document.body.classList.add('modal-open');
+    }
+
+    function closePhoneModal() {
+        const modal = document.getElementById('phoneModal');
+        if (modal) modal.classList.remove('active');
+
+        document.body.classList.remove('modal-open');
+
+        const form = document.getElementById('phoneForm');
+        if (form) form.reset();
+
+        clearErrors();
+
+        // aktifkan kembali tombol submit kalau sebelumnya disabled
+        const btn = document.getElementById('submitPhoneBtn');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
         }
+    }
 
-        // Fungsi untuk menutup modal
-        function closePasswordModal() {
-            const modal = document.getElementById('passwordModal');
-            if (modal) {
-                modal.classList.remove('active');
-                document.body.classList.remove('modal-open');
-            }
-            document.getElementById('passwordForm').reset();
-            clearErrors();
+    // =========================
+    // Modal: Password
+    // =========================
+    function openPasswordModal() {
+        const modal = document.getElementById('passwordModal');
+        if (!modal) return;
+
+        modal.classList.add('active');
+        document.body.classList.add('modal-open');
+    }
+
+    function closePasswordModal() {
+        const modal = document.getElementById('passwordModal');
+        if (modal) modal.classList.remove('active');
+
+        document.body.classList.remove('modal-open');
+
+        const form = document.getElementById('passwordForm');
+        if (form) form.reset();
+
+        clearErrors();
+
+        // aktifkan kembali tombol submit kalau sebelumnya disabled
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
         }
+    }
 
-        // Toggle visibility password
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const button = input.nextElementSibling;
-            const icon = button.querySelector('i');
+    // =========================
+    // Toggle password visibility
+    // =========================
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+        const button = input.nextElementSibling;
+        if (!button) return;
+
+        const icon = button.querySelector('i');
+        if (!icon) return;
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
         }
+    }
 
-        // Hapus error messages
-        function clearErrors() {
-            const errorMessages = document.querySelectorAll('.error-message');
-            errorMessages.forEach(error => {
-                error.style.display = 'none';
-                error.querySelector('span').textContent = '';
-            });
-
-            const inputs = document.querySelectorAll('.form-control');
-            inputs.forEach(input => {
-                input.classList.remove('error');
-            });
-        }
-
-        // Tampilkan error
-        function showError(fieldId, message) {
-            const input = document.getElementById(fieldId);
-            const errorDiv = document.getElementById(fieldId + '_error');
-
-            if (input) {
-                input.classList.add('error');
-            }
-
-            if (errorDiv) {
-                errorDiv.style.display = 'flex';
-                errorDiv.querySelector('span').textContent = message;
-            }
-        }
-
-        // Event listener saat DOM siap
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('DOM loaded, initializing account page...');
-
-            // Event listener untuk button edit password (alternatif)
-            const editPasswordBtn = document.querySelector('.btn-edit-password');
-            if (editPasswordBtn) {
-                editPasswordBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    openPasswordModal();
-                });
-                console.log('Edit password button event listener attached');
-            }
-
-            // Event listener untuk klik di luar modal
-            const modal = document.getElementById('passwordModal');
-            if (modal) {
-                modal.addEventListener('click', function (e) {
-                    if (e.target === this) {
-                        closePasswordModal();
-                    }
-                });
-            }
-
-            // Event listener untuk tombol escape
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
-                    closePasswordModal();
-                }
-            });
-
-            // Auto-hide alerts setelah 5 detik
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    alert.style.animation = 'fadeIn 0.3s ease reverse';
-                    setTimeout(() => {
-                        if (alert.parentNode) {
-                            alert.remove();
-                        }
-                    }, 300);
-                }, 5000);
-            });
-
-            // Event listener untuk form submit
-            const passwordForm = document.getElementById('passwordForm');
-            if (passwordForm) {
-                passwordForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    clearErrors();
-
-                    const currentPassword = document.getElementById('current_password').value;
-                    const newPassword = document.getElementById('new_password').value;
-                    const confirmPassword = document.getElementById('new_password_confirmation').value;
-
-                    let isValid = true;
-
-                    // Validasi password saat ini
-                    if (!currentPassword) {
-                        showError('current_password', 'Password saat ini harus diisi');
-                        isValid = false;
-                    }
-
-                    // Validasi password baru
-                    if (!newPassword) {
-                        showError('new_password', 'Password baru harus diisi');
-                        isValid = false;
-                    } else if (newPassword.length < 8) {
-                        showError('new_password', 'Password minimal 8 karakter');
-                        isValid = false;
-                    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
-                        showError('new_password', 'Password harus mengandung huruf besar, kecil, dan angka');
-                        isValid = false;
-                    }
-
-                    // Validasi konfirmasi password
-                    if (!confirmPassword) {
-                        showError('new_password_confirmation', 'Konfirmasi password harus diisi');
-                        isValid = false;
-                    } else if (newPassword !== confirmPassword) {
-                        showError('new_password_confirmation', 'Password tidak cocok');
-                        isValid = false;
-                    }
-
-                    // Validasi password baru tidak sama dengan password lama
-                    if (isValid && currentPassword === newPassword) {
-                        showError('new_password', 'Password baru tidak boleh sama dengan password lama');
-                        isValid = false;
-                    }
-
-                    // Jika valid, submit form
-                    if (isValid) {
-                        const submitBtn = document.getElementById('submitBtn');
-                        if (submitBtn) {
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-                        }
-                        this.submit();
-                    }
-                });
-            }
-
-            console.log('Account page initialization complete');
+    // =========================
+    // Error helpers
+    // =========================
+    function clearErrors() {
+        document.querySelectorAll('.error-message').forEach(error => {
+            error.style.display = 'none';
+            const span = error.querySelector('span');
+            if (span) span.textContent = '';
         });
 
-        // Tambahkan fungsi untuk testing (opsional)
-        window.testModal = function () {
-            console.log('Testing modal from console...');
-            openPasswordModal();
-        };
-    </script>
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.classList.remove('error');
+        });
+    }
+
+    function showError(fieldId, message) {
+        const input = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId + '_error');
+
+        if (input) input.classList.add('error');
+
+        if (errorDiv) {
+            errorDiv.style.display = 'flex';
+            const span = errorDiv.querySelector('span');
+            if (span) span.textContent = message;
+        }
+    }
+
+    // =========================
+    // DOM Ready
+    // =========================
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // -------------------------------------------------
+        // Klik luar modal untuk menutup (Phone & Password)
+        // -------------------------------------------------
+        const phoneModal = document.getElementById('phoneModal');
+        if (phoneModal) {
+            phoneModal.addEventListener('click', function (e) {
+                if (e.target === this) closePhoneModal();
+            });
+        }
+
+        const passwordModal = document.getElementById('passwordModal');
+        if (passwordModal) {
+            passwordModal.addEventListener('click', function (e) {
+                if (e.target === this) closePasswordModal();
+            });
+        }
+
+        // -------------------------------------------------
+        // Tombol ESC: tutup modal yang sedang aktif
+        // -------------------------------------------------
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape') return;
+
+            if (phoneModal && phoneModal.classList.contains('active')) {
+                closePhoneModal();
+            }
+
+            if (passwordModal && passwordModal.classList.contains('active')) {
+                closePasswordModal();
+            }
+        });
+
+        // -------------------------------------------------
+        // Auto-hide alerts setelah 5 detik
+        // -------------------------------------------------
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                alert.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => {
+                    if (alert.parentNode) alert.remove();
+                }, 300);
+            }, 5000);
+        });
+
+        // -------------------------------------------------
+        // Submit Phone Form
+        // -------------------------------------------------
+        const phoneForm = document.getElementById('phoneForm');
+        if (phoneForm) {
+            phoneForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                clearErrors();
+
+                const noTelpInput = document.getElementById('no_telp');
+                const noTelp = noTelpInput ? noTelpInput.value.trim() : '';
+
+                let isValid = true;
+
+                if (!noTelp) {
+                    showError('no_telp', 'Nomor HP harus diisi');
+                    isValid = false;
+                } else if (!/^[0-9+\s()-]{9,20}$/.test(noTelp)) {
+                    showError('no_telp', 'Format nomor HP tidak valid');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    const btn = document.getElementById('submitPhoneBtn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+                    }
+                    this.submit();
+                }
+            });
+        }
+
+        // -------------------------------------------------
+        // Submit Password Form
+        // -------------------------------------------------
+        const passwordForm = document.getElementById('passwordForm');
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                clearErrors();
+
+                const currentPassword = document.getElementById('current_password')?.value || '';
+                const newPassword = document.getElementById('new_password')?.value || '';
+                const confirmPassword = document.getElementById('new_password_confirmation')?.value || '';
+
+                let isValid = true;
+
+                if (!currentPassword) {
+                    showError('current_password', 'Password saat ini harus diisi');
+                    isValid = false;
+                }
+
+                if (!newPassword) {
+                    showError('new_password', 'Password baru harus diisi');
+                    isValid = false;
+                } else if (newPassword.length < 8) {
+                    showError('new_password', 'Password minimal 8 karakter');
+                    isValid = false;
+                } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
+                    showError('new_password', 'Password harus mengandung huruf besar, kecil, dan angka');
+                    isValid = false;
+                }
+
+                if (!confirmPassword) {
+                    showError('new_password_confirmation', 'Konfirmasi password harus diisi');
+                    isValid = false;
+                } else if (newPassword !== confirmPassword) {
+                    showError('new_password_confirmation', 'Password tidak cocok');
+                    isValid = false;
+                }
+
+                if (isValid && currentPassword === newPassword) {
+                    showError('new_password', 'Password baru tidak boleh sama dengan password lama');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    const submitBtn = document.getElementById('submitBtn');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+                    }
+                    this.submit();
+                }
+            });
+        }
+    });
+</script>
 @endsection

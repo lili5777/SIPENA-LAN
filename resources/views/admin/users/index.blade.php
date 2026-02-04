@@ -97,8 +97,9 @@
                             <th width="5%" class="ps-4">No</th>
                             <th width="25%">User</th>
                             <th width="25%" class="d-none d-md-table-cell">Email</th>
-                            <th width="15%">Role</th>
-                            <th width="30%" class="text-center pe-4">Aksi</th>
+                            <th width="20%">Telp/WA</th>
+                            <th width="5%">Role</th>
+                            <th width="20%" class="text-center pe-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -125,6 +126,9 @@
                                 </td>
                                 <td class="d-none d-md-table-cell">
                                     <p class="mb-0 text-muted user-email">{{ $user->email }}</p>
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    <p class="mb-0 text-muted user-telp">{{ $user->no_telp ?? '-' }}</p>
                                 </td>
                                 <td>
                                     @php

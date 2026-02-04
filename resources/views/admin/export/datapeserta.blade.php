@@ -599,37 +599,26 @@
                     </label>
                     <select name="angkatan" class="form-select" id="angkatan">
                         <option value="">Semua Angkatan</option>
-                        @for($i = 1; $i <= 20; $i++)
-                            @php
-                                $angkaRomawi = '';
-                                switch($i) {
-                                    case 1: $angkaRomawi = 'I'; break;
-                                    case 2: $angkaRomawi = 'II'; break;
-                                    case 3: $angkaRomawi = 'III'; break;
-                                    case 4: $angkaRomawi = 'IV'; break;
-                                    case 5: $angkaRomawi = 'V'; break;
-                                    case 6: $angkaRomawi = 'VI'; break;
-                                    case 7: $angkaRomawi = 'VII'; break;
-                                    case 8: $angkaRomawi = 'VIII'; break;
-                                    case 9: $angkaRomawi = 'IX'; break;
-                                    case 10: $angkaRomawi = 'X'; break;
-                                    case 11: $angkaRomawi = 'XI'; break;
-                                    case 12: $angkaRomawi = 'XII'; break;
-                                    case 13: $angkaRomawi = 'XIII'; break;
-                                    case 14: $angkaRomawi = 'XIV'; break;
-                                    case 15: $angkaRomawi = 'XV'; break;
-                                    case 16: $angkaRomawi = 'XVI'; break;
-                                    case 17: $angkaRomawi = 'XVII'; break;
-                                    case 18: $angkaRomawi = 'XVIII'; break;
-                                    case 19: $angkaRomawi = 'XIX'; break;
-                                    case 20: $angkaRomawi = 'XX'; break;
-                                }
-                            @endphp
-                            <option value="Angkatan {{ $angkaRomawi }}" 
-                                {{ request('angkatan') == "Angkatan " . $angkaRomawi ? 'selected' : '' }}>
-                                Angkatan {{ $angkaRomawi }}
+                        @php
+                            $romawi = [
+                                'I','II','III','IV','V','VI','VII','VIII','IX','X',
+                                'XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX',
+                                'XXI','XXII','XXIII','XXIV','XXV','XXVI','XXVII','XXVIII','XXIX','XXX',
+                                'XXXI','XXXII','XXXIII','XXXIV','XXXV','XXXVI','XXXVII','XXXVIII','XXXIX','XL',
+                                'XLI','XLII','XLIII','XLIV','XLV','XLVI','XLVII','XLVIII','XLIX','L',
+                                'LI','LII','LIII','LIV','LV','LVI','LVII','LVIII','LIX','LX',
+                                'LXI','LXII','LXIII','LXIV','LXV','LXVI','LXVII','LXVIII','LXIX','LXX',
+                                'LXXI','LXXII','LXXIII','LXXIV','LXXV','LXXVI','LXXVII','LXXVIII','LXXIX','LXXX'
+                            ];
+                        @endphp
+
+                        @for ($i = 0; $i < 80; $i++)
+                            <option value="Angkatan {{ $romawi[$i] }}"
+                                {{ request('angkatan') == 'Angkatan '.$romawi[$i] ? 'selected' : '' }}>
+                                Angkatan {{ $romawi[$i] }}
                             </option>
                         @endfor
+
                     </select>
                 </div>
 

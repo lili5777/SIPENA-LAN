@@ -203,6 +203,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AuthController::class, 'index'])->name('index');
         Route::put('/update-password', [AuthController::class, 'updatePassword'])->name('update-password');
     });
+    Route::put('/admin/akun/update-phone', [AuthController::class, 'updatePhone'])
+    ->name('admin.akun.update-phone');
 
     Route::get('/aktifitas', [AdminController::class, 'histori'])->name('aktifitas.index');
 
@@ -276,6 +278,9 @@ Route::get('/api/angkatan/{id_jenis_pelatihan}', [PendaftaranController::class, 
 
 // Route untuk mendapatkan data mentor 
 Route::get('/api/mentors', [PendaftaranController::class, 'getMentors'])->name('api.mentors');
+
+Route::get('/api/get-available-ndh', [PendaftaranController::class, 'getAvailableNdh']);
+Route::get('/api/peserta/available-ndh', [PesertaController::class, 'getAvailableNdhForPeserta']);
 
 
 // Proxy untuk bypass CORS (API Wilayah Indonesia)

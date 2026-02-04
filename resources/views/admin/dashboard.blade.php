@@ -1317,22 +1317,46 @@
                             </div>
                         </div>
 
-                        <!-- Kondisi & Kesehatan -->
-                        <div class="data-card">
-                            <div class="data-card-header">
-                                <div class="data-card-title">
-                                    <i class="fas fa-user-md"></i>
-                                    Kondisi & Kesehatan
-                                </div>
-                            </div>
-                            <div class="data-item">
-                                <span class="data-label">
-                                    <i class="fas fa-stethoscope"></i>
-                                    Kondisi Peserta
-                                </span>
-                                <span class="data-value">{{ $peserta->kondisi_peserta ?? 'Belum diisi' }}</span>
-                            </div>
-                        </div>
+                       <!-- Kondisi & Kesehatan -->
+<div class="data-card">
+    <div class="data-card-header">
+        <div class="data-card-title">
+            <i class="fas fa-user-md"></i>
+            Kondisi Peserta & Data PIC
+        </div>
+    </div>
+
+    <div class="data-item">
+        <span class="data-label">
+            <i class="fas fa-stethoscope"></i>
+            Kondisi Peserta
+        </span>
+        <span class="data-value">
+            {{ $peserta->kondisi_peserta ?? 'Belum diisi' }}
+        </span>
+    </div>
+
+    <div class="data-item">
+    <span class="data-label">
+        <i class="fas fa-user-tie"></i>
+        PIC Angkatan
+    </span>
+    <span class="data-value">
+        @if($picPeserta && $picPeserta->user)
+            {{ $picPeserta->user->name }} –
+            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $picPeserta->user->no_telp) }}"
+               target="_blank"
+               style="color:#25D366; font-weight:600; text-decoration:none;">
+                {{ $picPeserta->user->no_telp }}
+            </a>
+        @else
+            <span class="text-muted">PIC belum ditentukan</span>
+        @endif
+    </span>
+</div>
+
+</div>
+
 
                         <!-- Data Pelatihan -->
                         <div class="data-card">

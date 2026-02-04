@@ -12,6 +12,7 @@ use App\Models\Mentor;
 use App\Models\Pendaftaran;
 use App\Models\Provinsi;
 use App\Models\Kabupaten;
+use App\Models\PicPeserta;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -86,6 +87,15 @@ class AdminController extends Controller
             }
         }
 
+        $picPeserta = null;
+        if ($pendaftaranTerbaru) {
+        $picPeserta = PicPeserta::with('user')
+            ->where('jenispelatihan_id', $pendaftaranTerbaru->id_jenis_pelatihan)
+            ->where('angkatan_id', $pendaftaranTerbaru->id_angkatan)
+            ->first();
+    }
+
+
         // Kirimkan data ke view
         return view('admin.dashboard', compact(
             'user',
@@ -96,7 +106,8 @@ class AdminController extends Controller
             'jenisPelatihanData',
             'angkatanData',
             'semuaPendaftaran',
-            'kunci_judul'
+            'kunci_judul',
+            'picPeserta'
         ));
     }
 

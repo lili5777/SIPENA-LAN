@@ -10,6 +10,7 @@ use App\Models\Peserta;
 use App\Models\KepegawaianPeserta;
 use App\Models\Pendaftaran;
 use App\Models\PesertaMentor;
+use App\Models\PicPeserta;
 use App\Models\Provinsi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -83,11 +84,29 @@ class PendaftaranController extends Controller
                 ['angkatan' => $existingPendaftaran->angkatan] // Menambahkan relasi
             );
 
+            $picPeserta = PicPeserta::with('user')
+            ->where('jenispelatihan_id', $request->id_jenis_pelatihan)
+            ->where('angkatan_id', $existingPendaftaran->id_angkatan)
+            ->first();
+
+            $picData = null;
+
+            if ($picPeserta && $picPeserta->user) {
+                $picData = [
+                    'nama' => $picPeserta->user->name,
+                    'no_telp' => $picPeserta->user->no_telp,
+                    'email' => $picPeserta->user->email,
+                ];
+            }
+
+
+
             return response()->json([
                 'success' => true,
                 'message' => 'Verifikasi berhasil. Peserta terdaftar pada pelatihan ini.',
                 'peserta' => $pesertaData,
-                'pendaftaran' => $pendaftaranData
+                'pendaftaran' => $pendaftaranData,
+                'pic' => $picData
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -102,6 +121,54 @@ class PendaftaranController extends Controller
             ], 500);
         }
     }
+
+    /**
+ * API untuk mendapatkan NDH yang tersedia
+ */
+public function getAvailableNdh(Request $request)
+{
+    try {
+        $request->validate([
+            'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
+            'id_angkatan' => 'required|exists:angkatan,id',
+        ]);
+
+        // Ambil data angkatan untuk mendapatkan kuota
+        $angkatan = Angkatan::findOrFail($request->id_angkatan);
+        $kuota = $angkatan->kuota;
+
+        // Ambil NDH yang sudah terpakai untuk angkatan dan jenis pelatihan ini
+        $ndhTerpakai = Peserta::whereHas('pendaftaran', function($query) use ($request) {
+                $query->where('id_angkatan', $request->id_angkatan)
+                      ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan);
+            })
+            ->whereNotNull('ndh')
+            ->pluck('ndh')
+            ->toArray();
+
+        // Generate list NDH yang tersedia (1 sampai kuota)
+        $ndhTersedia = [];
+        for ($i = 1; $i <= $kuota; $i++) {
+            if (!in_array($i, $ndhTerpakai)) {
+                $ndhTersedia[] = $i;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $ndhTersedia,
+            'kuota' => $kuota,
+            'terpakai' => count($ndhTerpakai),
+            'tersedia' => count($ndhTersedia)
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     /**
      * Menampilkan partial form berdasarkan jenis pelatihan (dengan data yang sudah ada)
@@ -221,6 +288,7 @@ class PendaftaranController extends Controller
                 'jabatan_mentor_baru' => 'nullable|string|max:200',
                 'nomor_rekening_mentor_baru' => 'nullable|string|max:200',
                 'npwp_mentor_baru' => 'nullable|string|max:50',
+                'ndh' => 'required|max:50',
             ], [
                 'nama_lengkap.required' => 'Nama lengkap wajib diisi',
                 'nama_lengkap.max' => 'Nama lengkap maksimal 200 karakter',
@@ -624,6 +692,22 @@ class PendaftaranController extends Controller
                 $angkatan = $pendaftaran->angkatan;
             }
 
+
+            // Cek apakah NDH sudah dipakai oleh peserta lain (kecuali peserta yang sedang update)
+            $ndhExists = Peserta::whereHas('pendaftaran', function($query) use ($pendaftaran) {
+                    $query->where('id_angkatan', $pendaftaran->id_angkatan)
+                        ->where('id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan);
+                })
+                ->where('ndh', $request->ndh)
+                ->where('id', '!=', $request->peserta_id)
+                ->exists();
+
+            if ($ndhExists) {
+                throw ValidationException::withMessages([
+                    'ndh' => ['Nomor NDH sudah digunakan oleh peserta lain di angkatan dan jenis pelatihan yang sama']
+                ]);
+            }
+
             // Ambil kategori dan wilayah
             $kategori = $pendaftaran->angkatan->kategori ?? 'PNBP';
             $wilayah = $pendaftaran->angkatan->wilayah ?? null;
@@ -782,6 +866,7 @@ class PendaftaranController extends Controller
                 'ukuran_celana' => $request->ukuran_celana,
                 'ukuran_training' => $request->ukuran_training,
                 'kondisi_peserta' => $request->kondisi_peserta,
+                'ndh' => $request->ndh,
             ];
 
             // Tambahkan file KTP dan pas foto jika ada
@@ -990,15 +1075,24 @@ class PendaftaranController extends Controller
     {
         $pendaftaran_id = $request->session()->get('pendaftaran_id') ?? $request->get('id');
 
-        if ($pendaftaran_id) {
-            $pendaftaran = Pendaftaran::with(['peserta', 'jenisPelatihan', 'angkatan'])
-                ->where('id', $pendaftaran_id)
-                ->firstOrFail();
-        } else {
-            return redirect()->route('home')->with('error', 'Data pendaftaran tidak ditemukan.');
+        if (!$pendaftaran_id) {
+            return redirect()->route('home')
+                ->with('error', 'Data pendaftaran tidak ditemukan.');
         }
 
-        return view('pendaftaran.success', compact('pendaftaran'));
+        $pendaftaran = Pendaftaran::with([
+            'peserta',
+            'jenisPelatihan',
+            'angkatan'
+        ])->findOrFail($pendaftaran_id);
+
+        // 🔹 Ambil PIC berdasarkan angkatan + jenis pelatihan
+        $pic = PicPeserta::with('user')
+            ->where('angkatan_id', $pendaftaran->id_angkatan)
+            ->where('jenispelatihan_id', $pendaftaran->id_jenis_pelatihan)
+            ->first();
+
+        return view('pendaftaran.success', compact('pendaftaran', 'pic'));
     }
 
     /**

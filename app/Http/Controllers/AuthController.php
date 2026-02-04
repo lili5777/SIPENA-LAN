@@ -119,4 +119,44 @@ class AuthController extends Controller
                 ->with('error', 'Terjadi kesalahan saat mengubah password');
         }
     }
+
+    public function updatePhone(Request $request)
+{
+    try {
+        $validator = Validator::make($request->all(), [
+            'no_telp' => 'required|string|min:9|max:20',
+        ], [
+            'no_telp.required' => 'Nomor HP harus diisi',
+            'no_telp.min' => 'Nomor HP minimal 9 karakter',
+            'no_telp.max' => 'Nomor HP maksimal 20 karakter',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()
+                ->route('admin.akun.index')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', $validator->errors()->first());
+        }
+
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $user->no_telp = $request->no_telp;
+        $user->save();
+
+        aktifitas('Mengubah Nomor HP', $user);
+
+        return redirect()
+            ->route('admin.akun.index')
+            ->with('success', 'Nomor HP berhasil diperbarui');
+    } catch (\Exception $e) {
+        return redirect()
+            ->route('admin.akun.index')
+            ->with('error', 'Terjadi kesalahan saat memperbarui nomor HP');
+    }
+}
+
 }
