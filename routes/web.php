@@ -220,6 +220,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/aksi-perubahan/{id}', [AksiPerubahanController::class, 'destroy'])->name('aksiperubahan.destroy');
 
     Route::get('/peserta/report/{id?}', [AdminController::class, 'generateReport'])->name('admin.peserta.report');
+    Route::get('/peserta/data/{id?}', [AdminController::class, 'generateDatapeserta'])->name('admin.peserta.data');
 
     Route::get('/peserta/{jenis}/{id}/swap', [PesertaController::class, 'showSwapForm'])
         ->name('peserta.swap.form');

@@ -1068,6 +1068,12 @@
                         Generate Report
                     </a>
 
+                    <a href="{{ route('admin.peserta.data', ['id' => $pendaftaranTerbaru->id ?? 0]) }}" class="btn-edit"
+                        title="Generate Data Peserta PDF" target="_blank">
+                        <i class="fas fa-file-pdf"></i>
+                        Generate Lembar Pernyataan
+                    </a>
+
                     <button class="btn-refresh" onclick="window.location.reload()">
                         <i class="fas fa-redo"></i>
                         Refresh

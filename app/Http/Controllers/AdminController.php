@@ -1580,4 +1580,79 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'Gagal generate report: ' . $e->getMessage());
         }
     }
+
+    public function generateDatapeserta($id = null)
+    {
+        try {
+            $user = Auth::user();
+
+            // Jika ada ID, ambil pendaftaran berdasarkan ID, jika tidak ambil pendaftaran user login
+            if ($id) {
+                $pendaftaran = Pendaftaran::with([
+                    'peserta',
+                    'peserta.kepegawaianPeserta',
+                    'peserta.kepegawaianPeserta.provinsi',
+                    'peserta.kepegawaianPeserta.kabupaten',
+                    'angkatan',
+                    'jenisPelatihan',
+                    'pesertaMentor.mentor'
+                ])->findOrFail($id);
+
+                // Verifikasi hak akses (admin bisa lihat semua, peserta hanya miliknya sendiri)
+                if ($user->role->name === 'user' && $pendaftaran->id_peserta != $user->peserta_id) {
+                    abort(403, 'Unauthorized access');
+                }
+            } else {
+                // Untuk peserta login, ambil pendaftaran terbaru
+                if ($user->role->name !== 'user') {
+                    abort(403, 'Hanya peserta yang dapat mengakses report ini');
+                }
+
+                $peserta = Peserta::where('id', $user->peserta_id)->first();
+                if (!$peserta) {
+                    abort(404, 'Data peserta tidak ditemukan');
+                }
+
+                $pendaftaran = $peserta->pendaftaran()
+                    ->with([
+                        'peserta',
+                        'peserta.kepegawaianPeserta',
+                        'peserta.kepegawaianPeserta.provinsi',
+                        'peserta.kepegawaianPeserta.kabupaten',
+                        'angkatan',
+                        'jenisPelatihan',
+                        'pesertaMentor.mentor'
+                    ])
+                    ->latest('tanggal_daftar')
+                    ->first();
+
+                if (!$pendaftaran) {
+                    abort(404, 'Data pendaftaran tidak ditemukan');
+                }
+            }
+
+            // Data untuk PDF
+            $data = [
+                'pendaftaran' => $pendaftaran,
+                'peserta' => $pendaftaran->peserta,
+                'kepegawaian' => $pendaftaran->peserta->kepegawaianPeserta,
+                'angkatan' => $pendaftaran->angkatan,
+                'jenisPelatihan' => $pendaftaran->jenisPelatihan,
+                'mentor' => $pendaftaran->pesertaMentor->first()?->mentor ?? null,
+                'tanggal_report' => now()->format('d F Y H:i:s'),
+                'user' => $user
+            ];
+
+            // Generate PDF
+            $pdf = Pdf::loadView('admin.export.templatebiodatapeserta', $data);
+
+            // Nama file PDF
+            $fileName = 'Report_Peserta_' . str_replace(' ', '_', $pendaftaran->peserta->nama_lengkap) . '_' . date('Ymd_His') . '.pdf';
+
+            // Return PDF untuk di-download atau preview
+            return $pdf->download($fileName);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal generate report: ' . $e->getMessage());
+        }
+    }
 }
