@@ -1281,7 +1281,7 @@ function aksiCard(aksi) {
                                                 <div class="col-md-4">
                                                     <div class="info-item">
                                                         <label class="text-muted small">Merokok</label>
-                                                        <p class="fw-semibold mb-0">${peserta.perokok ? 'Ya' : 'Tidak'}</p>
+                                                        <p class="fw-semibold mb-0">${peserta.perokok || '-'}</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">

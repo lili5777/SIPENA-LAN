@@ -2050,7 +2050,6 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
         function setupRealtimeAutoCapitalization() {
             // Field yang ingin auto capitalize huruf pertama setiap kata
             const capitalizeFields = [
-                'nama_lengkap',
                 'nama_panggilan',
                 'tempat_lahir',
                 'nama_pasangan',

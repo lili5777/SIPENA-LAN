@@ -36,7 +36,7 @@
     </div>
     <div class="form-group">
         <label class="form-label required">Nama lengkap gelar</label>
-        <input type="text" name="nama_lengkap" class="form-input capitalize @error('nama_lengkap') error @enderror"
+        <input type="text" name="nama_lengkap" class="form-input @error('nama_lengkap') error @enderror"
             value="{{ $peserta['nama_lengkap'] ?? old('nama_lengkap') }}" required
             placeholder="Contoh: Muhammad Ali, S.H., M.H.">
         <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>

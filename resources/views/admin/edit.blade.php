@@ -1487,7 +1487,7 @@
 
                     <div class="form-group">
                         <label class="form-label required">Nama Lengkap</label>
-                        <input type="text" name="nama_lengkap" class="form-input capitalize @error('nama_lengkap') error @enderror"
+                        <input type="text" name="nama_lengkap" class="form-input @error('nama_lengkap') error @enderror"
                             value="{{ old('nama_lengkap', $peserta->nama_lengkap) }}" required placeholder="Contoh: Muhammad Ali, S.H., M.H.">
                         @error('nama_lengkap')
                             <div class="error-message">
