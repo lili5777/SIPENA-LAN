@@ -1691,7 +1691,7 @@
 
                 <div class="form-row form-row-3">
                     <div class="form-group">
-                        <label class="form-label required">Ukuran Kaos</label>
+                        <label class="form-label required">Ukuran Baju Taktikal</label>
                         <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
                             <option value="">-- Pilih Ukuran --</option>
                             @foreach(['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
@@ -1723,7 +1723,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label required">Ukuran Training</label>
+                        <label class="form-label required">Ukuran Kaos Training</label>
                         <select name="ukuran_training" class="form-select @error('ukuran_training') error @enderror">
                             <option value="">-- Pilih Ukuran --</option>
                             @foreach(['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)

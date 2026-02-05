@@ -1304,7 +1304,7 @@ function aksiCard(aksi) {
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="info-item">
-                                                    <label class="text-muted small">Ukuran Kaos Taktikal</label>
+                                                    <label class="text-muted small">Ukuran Baju Taktikal</label>
                                                     <p class="fw-semibold mb-0">${peserta.ukuran_kaos || '-'}</p>
                                                 </div>
                                             </div>

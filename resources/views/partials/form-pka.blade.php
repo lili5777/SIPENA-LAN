@@ -386,7 +386,7 @@
 </div>
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label">Ukuran Kaos</label>
+        <label class="form-label">Ukuran Baju Taktikal</label>
         <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
             <option value="">Pilih</option>
             <option value="S" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'S' ? 'selected' : '' }}>S</option>
