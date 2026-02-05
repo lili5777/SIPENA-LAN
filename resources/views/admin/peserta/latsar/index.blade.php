@@ -592,21 +592,21 @@
                         <select class="form-select" name="status_pendaftaran" id="statusSelect" required>
                             <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
                             <option value="Diterima">Diterima</option>
-                            <option value="Ditolak">Ditolak</option>
+                            {{-- <option value="Ditolak">Ditolak</option> --}}
                             <option value="Lulus">Lulus</option>
                         </select>
                     </div>
 
-                    <div class="mb-4 text-start">
+                    {{-- <div class="mb-4 text-start">
                         <label class="form-label fw-semibold">Catatan (Opsional)</label>
                         <textarea class="form-control" name="catatan_verifikasi" id="catatanInput" rows="3"
                             placeholder="Tambahkan catatan jika diperlukan..."></textarea>
-                    </div>
-
+                    </div> --}}
+{{-- 
                     <p class="text-muted small mb-4">
                         <i class="fas fa-info-circle me-1"></i>
                         Perubahan status akan tercatat di riwayat peserta
-                    </p>
+                    </p> --}}
                     
                     <!-- Loading Indicator (hidden by default) -->
                     <div id="statusLoading" class="d-none">
@@ -828,7 +828,7 @@
                         statusSubmitBtn.disabled = false;
                         statusCancelBtn.disabled = false;
                         statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-                        document.getElementById('catatanInput').value = '';
+                        // document.getElementById('catatanInput').value = '';
 
                         statusModal.show();
                     });
