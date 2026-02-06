@@ -1485,7 +1485,7 @@ function aksiCard(aksi) {
                             icon: 'fa-handshake',
                             color: 'info',
                             file: kepegawaian?.file_skp,
-                            description: 'Surat Keterangan Pengantar'
+                            description: 'Sasaran Kinerja Pegawai'
                         },
                         {
                             title: 'Surat Tugas',

@@ -13,7 +13,7 @@
             font-family: Arial, sans-serif;
             font-size: 10pt;
             margin: 0;
-            padding: 0;
+            padding-top: 45mm;
         }
 
         .header {
@@ -60,7 +60,7 @@
         }
 
         .content {
-            margin-top: 45mm;
+            margin-top: 0;
         }
 
         .info-section {
@@ -92,6 +92,14 @@
             border-collapse: collapse;
             margin-top: 10px;
             font-size: 9pt;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
         }
 
         table.peserta th {
@@ -199,9 +207,8 @@
     <!-- Header akan muncul di setiap halaman -->
     <div class="header">
         <div class="header-content">
-            <!-- Logo -->
             <div class="logo">
-                <img src="{{ public_path('gambar/lan_header.JPG') }}" alt="Logo LAN" style="width: 80%; height: 80%;">
+                <img src="{{ public_path('gambar/lan_header.JPG') }}" alt="Logo LAN" style="width:80%; height:80%;">
             </div>
             <div class="header-text">
                 <h3>DAFTAR HADIR PESERTA</h3>
@@ -215,30 +222,26 @@
 
     <div class="content">
         <!-- Informasi Sesi -->
-        <div class="info-section">
+         <div class="info-section">
             <div class="info-row">
                 <span class="info-label">HARI/TANGGAL</span>
                 <span class="info-separator">:</span>
-                <span
-                    class="info-value">{{ $hari_tanggal ?: '.........................................................' }}</span>
+                <span class="info-value">{{ $hari_tanggal ?: '.........................................................' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">WAKTU</span>
                 <span class="info-separator">:</span>
-                <span
-                    class="info-value">{{ $waktu ?: '.........................................................' }}</span>
+                <span class="info-value">{{ $waktu ?: '.........................................................' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">MATERI</span>
                 <span class="info-separator">:</span>
-                <span
-                    class="info-value">{{ $materi ?: '.........................................................' }}</span>
+                <span class="info-value">{{ $materi ?: '.........................................................' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">NARASUMBER/FASILITATOR</span>
                 <span class="info-separator">:</span>
-                <span
-                    class="info-value">{{ $narasumber ?: '.........................................................' }}</span>
+                <span class="info-value">{{ $narasumber ?: '.........................................................' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">SESI</span>

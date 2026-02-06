@@ -1253,7 +1253,7 @@
                                 </span>
                                 <span class="data-value">
                                     @if(isset($peserta->perokok))
-                                        {{ $peserta->perokok == 1 ? 'Ya' : 'Tidak' }}
+                                        {{ $peserta->perokok }}
                                     @else
                                         Belum diisi
                                     @endif

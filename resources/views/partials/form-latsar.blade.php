@@ -436,6 +436,7 @@
             <option value="">Pilih</option>
             <option value="SMU" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'SMU' ? 'selected' : '' }}>SMU</option>
             <option value="D3" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'D3' ? 'selected' : '' }}>D3</option>
+            <option value="D4" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'D4' ? 'selected' : '' }}>D4</option>
             <option value="S1" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'S1' ? 'selected' : '' }}>S1</option>
             <option value="S2" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'S2' ? 'selected' : '' }}>S2</option>
             <option value="S3" {{ ($peserta['pendidikan_terakhir'] ?? old('pendidikan_terakhir')) == 'S3' ? 'selected' : '' }}>S3</option>
