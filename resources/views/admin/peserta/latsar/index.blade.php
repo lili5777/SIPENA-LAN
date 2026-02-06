@@ -132,9 +132,10 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <div class="row align-items-center">
+
                     <div class="col-md-6">
                         <form id="filterForm" method="GET" class="row g-2">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label small fw-semibold text-muted mb-1">
                                     <i class="fas fa-filter me-1"></i> Angkatan
                                 </label>
@@ -151,7 +152,8 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            
+                            <div class="col-md-3">
                                 <label class="form-label small fw-semibold text-muted mb-1">
                                     <i class="fas fa-tags me-1"></i> Kategori
                                 </label>
@@ -162,13 +164,33 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4 align-self-end">
+                            <!-- ✅ BARU: Filter Status Pendaftaran -->
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-muted mb-1">
+                                    <i class="fas fa-info-circle me-1"></i> Status
+                                </label>
+                                <select name="status" class="form-select">
+                                    <option value="">Semua Status</option>
+                                    <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>
+                                        Menunggu Verifikasi
+                                    </option>
+                                    <option value="Diterima" {{ request('status') == 'Diterima' ? 'selected' : '' }}>
+                                        Diterima
+                                    </option>
+                                    <option value="Lulus" {{ request('status') == 'Lulus' ? 'selected' : '' }}>
+                                        Lulus
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 align-self-end">
                                 <button type="submit" class="btn btn-filter-primary w-100">
                                     <i class="fas fa-search me-1"></i> Filter
                                 </button>
                             </div>
                         </form>
                     </div>
+
                     <div class="col-md-6">
                         <div class="d-flex justify-content-md-end align-items-center mt-3 mt-md-0">
                             <div class="d-flex align-items-center">
@@ -862,75 +884,81 @@
                 
 
                 // Status Form Submission dengan loading indicator
-                statusForm.addEventListener('submit', async function (e) {
-                    e.preventDefault();
+statusForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-                    // Tampilkan loading, sembunyikan tombol
-                    // statusLoading.classList.remove('d-none');
-                    statusSubmitBtn.disabled = true;
-                    statusCancelBtn.disabled = true;
-                    statusSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
+    // 🚨 DISABLE TOMBOL untuk cegah double click
+    const submitBtn = document.getElementById('statusSubmitBtn');
+    const cancelBtn = document.getElementById('statusCancelBtn');
+    
+    if (submitBtn.getAttribute('data-submitting') === 'true') {
+        return; // Sudah dalam proses submit, jangan lanjut
+    }
+    
+    // Set flag sedang submit
+    submitBtn.setAttribute('data-submitting', 'true');
+    submitBtn.disabled = true;
+    cancelBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
 
-                    const formData = new FormData(this);
-                    const action = this.action;
+    try {
+        const formData = new FormData(this);
+        const action = this.action;
 
-                    try {
-                        const response = await fetch(action, {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: formData
-                        });
+        const response = await fetch(action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: formData
+        });
 
-                        const result = await response.json();
+        const result = await response.json();
 
-                        if (result.success) {
-                            // Update tombol dengan sukses
-                            statusSubmitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
-                            statusSubmitBtn.classList.remove('btn-primary');
-                            statusSubmitBtn.classList.add('btn-success');
+        if (result.success) {
+            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-success');
 
-                            showAlert('success', result.message);
+            showAlert('success', result.message);
 
-                            // Tutup modal setelah sukses
-                            setTimeout(() => {
-                                statusModal.hide();
+            setTimeout(() => {
+                statusModal.hide();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            }, 1500);
+        } else {
+            // Reset tombol jika error
+            submitBtn.removeAttribute('data-submitting');
+            submitBtn.disabled = false;
+            cancelBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+            
+            showAlert('error', result.message || 'Terjadi kesalahan');
+        }
+    } catch (error) {
+        // Reset tombol jika error jaringan
+        submitBtn.removeAttribute('data-submitting');
+        submitBtn.disabled = false;
+        cancelBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+        
+        showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+        console.error('Error:', error);
+    }
+});
 
-                                // Reset tombol ke keadaan semula
-                                setTimeout(() => {
-                                    // statusLoading.classList.add('d-none');
-                                    statusSubmitBtn.disabled = false;
-                                    statusCancelBtn.disabled = false;
-                                    statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-                                    statusSubmitBtn.classList.remove('btn-success');
-                                    statusSubmitBtn.classList.add('btn-primary');
-
-                                    // Refresh halaman
-                                    window.location.reload();
-                                }, 500);
-                            }, 1500);
-                        } else {
-                            // Sembunyikan loading, aktifkan tombol kembali
-                            // statusLoading.classList.add('d-none');
-                            statusSubmitBtn.disabled = false;
-                            statusCancelBtn.disabled = false;
-                            statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-
-                            showAlert('error', result.message || 'Terjadi kesalahan');
-                        }
-                    } catch (error) {
-                        // Sembunyikan loading, aktifkan tombol kembali
-                        // statusLoading.classList.add('d-none');
-                        statusSubmitBtn.disabled = false;
-                        statusCancelBtn.disabled = false;
-                        statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-
-                        showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
-                        console.error('Error:', error);
-                    }
-                });
+// Reset tombol ketika modal ditutup
+statusModal._element.addEventListener('hidden.bs.modal', function () {
+    const submitBtn = document.getElementById('statusSubmitBtn');
+    submitBtn.removeAttribute('data-submitting');
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('btn-success');
+    submitBtn.classList.add('btn-primary');
+    submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+});
 
                 // Load All Detail Data
                 async function loadAllDetailData(pendaftaranId) {

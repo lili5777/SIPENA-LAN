@@ -134,7 +134,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <form id="filterForm" method="GET" class="row g-2">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label small fw-semibold text-muted mb-1">
                                     <i class="fas fa-filter me-1"></i> Angkatan
                                 </label>
@@ -151,7 +151,8 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            
+                            <div class="col-md-3">
                                 <label class="form-label small fw-semibold text-muted mb-1">
                                     <i class="fas fa-tags me-1"></i> Kategori
                                 </label>
@@ -162,7 +163,26 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4 align-self-end">
+                            <!-- ✅ BARU: Filter Status Pendaftaran -->
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-muted mb-1">
+                                    <i class="fas fa-info-circle me-1"></i> Status
+                                </label>
+                                <select name="status" class="form-select">
+                                    <option value="">Semua Status</option>
+                                    <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>
+                                        Menunggu Verifikasi
+                                    </option>
+                                    <option value="Diterima" {{ request('status') == 'Diterima' ? 'selected' : '' }}>
+                                        Diterima
+                                    </option>
+                                    <option value="Lulus" {{ request('status') == 'Lulus' ? 'selected' : '' }}>
+                                        Lulus
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 align-self-end">
                                 <button type="submit" class="btn btn-filter-primary w-100">
                                     <i class="fas fa-search me-1"></i> Filter
                                 </button>

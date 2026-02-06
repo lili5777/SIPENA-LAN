@@ -49,75 +49,92 @@ class PesertaController extends Controller
 
 
    public function index(Request $request, $jenis)
-    {
-        $jenisData = $this->getJenisData($jenis);
-        $jenisPelatihanId = $jenisData['id'];
-        $user = Auth::user();
+{
+    $jenisData = $this->getJenisData($jenis);
+    $jenisPelatihanId = $jenisData['id'];
+    $user = Auth::user();
 
-        // Ambil angkatan yang bisa diakses PIC
-        $picAngkatanIds = $user->picPesertas
-            ->where('jenispelatihan_id', $jenisPelatihanId)
-            ->pluck('angkatan_id')
-            ->unique()
-            ->toArray();
+    // Ambil angkatan yang bisa diakses PIC
+    $picAngkatanIds = $user->picPesertas
+        ->where('jenispelatihan_id', $jenisPelatihanId)
+        ->pluck('angkatan_id')
+        ->unique()
+        ->toArray();
 
-        // =====================
-        // LIST ANGKATAN (FILTER DROPDOWN)
-        // =====================
-        $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId);
+    // =====================
+    // LIST ANGKATAN (FILTER DROPDOWN)
+    // =====================
+    $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId);
 
-        if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
-            $angkatanQuery->whereIn('id', $picAngkatanIds);
-        }
-
-        $angkatanList = $angkatanQuery
-            ->orderBy('tahun', 'desc')
-            ->get();
-
-        // =====================
-        // QUERY PENDAFTARAN
-        // =====================
-        $pendaftaranQuery = Pendaftaran::with([
-            'peserta',
-            'peserta.kepegawaianPeserta',
-            'angkatan',
-            'pesertaMentor.mentor'
-        ])
-            ->where('id_jenis_pelatihan', $jenisPelatihanId)
-            ->whereNotNull('id_angkatan')
-            ->where('id_angkatan', '!=', 0);
-
-        // Filter akses PIC
-        if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
-            $pendaftaranQuery->whereIn('id_angkatan', $picAngkatanIds);
-        }
-
-        // Filter angkatan
-        if ($request->filled('angkatan')) {
-            $pendaftaranQuery->where('id_angkatan', $request->angkatan);
-        }
-
-        // ✅ Filter kategori (PNBP / FASILITASI)
-        if ($request->filled('kategori')) {
-            $pendaftaranQuery->whereHas('angkatan', function ($q) use ($request) {
-                $q->where('kategori', $request->kategori);
-            });
-        }
-
-        $pendaftaran = $pendaftaranQuery
-            ->orderBy('id', 'asc')
-            ->get();
-
-        $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
-
-        return view("admin.peserta.{$jenis}.index", compact(
-            'pendaftaran',
-            'angkatanList',
-            'jenisPelatihan',
-            'jenis'
-        ));
+    if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
+        $angkatanQuery->whereIn('id', $picAngkatanIds);
     }
 
+    $angkatanList = $angkatanQuery
+        ->orderBy('tahun', 'desc')
+        ->get();
+
+    // =====================
+    // QUERY PENDAFTARAN
+    // =====================
+    $pendaftaranQuery = Pendaftaran::with([
+        'peserta',
+        'peserta.kepegawaianPeserta',
+        'angkatan',
+        'pesertaMentor.mentor'
+    ])
+        ->where('pendaftaran.id_jenis_pelatihan', $jenisPelatihanId) // ✅ Tambah prefix 'pendaftaran.'
+        ->whereNotNull('pendaftaran.id_angkatan')                     // ✅ Tambah prefix 'pendaftaran.'
+        ->where('pendaftaran.id_angkatan', '!=', 0);                  // ✅ Tambah prefix 'pendaftaran.'
+
+    // Filter akses PIC
+    if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
+        $pendaftaranQuery->whereIn('pendaftaran.id_angkatan', $picAngkatanIds); // ✅ Tambah prefix
+    }
+
+    // Filter angkatan
+    if ($request->filled('angkatan')) {
+        $pendaftaranQuery->where('pendaftaran.id_angkatan', $request->angkatan); // ✅ Tambah prefix
+    }
+
+    // ✅ Filter kategori (PNBP / FASILITASI)
+    if ($request->filled('kategori')) {
+        $pendaftaranQuery->whereHas('angkatan', function ($q) use ($request) {
+            $q->where('kategori', $request->kategori);
+        });
+    }
+
+    // ✅ Filter status pendaftaran
+    if ($request->filled('status')) {
+        $pendaftaranQuery->where('pendaftaran.status_pendaftaran', $request->status); // ✅ Tambah prefix
+    }
+
+    // ✅ PENGURUTAN:
+    // 1. Berdasarkan angkatan (tahun, nama_angkatan)
+    // 2. Di dalam setiap angkatan, urutkan berdasarkan NDH (yang kosong di akhir)
+    $pendaftaran = $pendaftaranQuery
+        ->leftJoin('peserta', 'pendaftaran.id_peserta', '=', 'peserta.id')
+        ->leftJoin('angkatan', 'pendaftaran.id_angkatan', '=', 'angkatan.id')
+        ->select('pendaftaran.*')
+        ->orderBy('angkatan.tahun', 'asc')              // Urutkan berdasarkan tahun angkatan
+        ->orderBy('angkatan.nama_angkatan', 'asc')      // Kemudian nama angkatan
+        ->orderByRaw('CASE 
+            WHEN peserta.ndh IS NULL OR peserta.ndh = "" THEN 1 
+            ELSE 0 
+        END')                                             // NDH kosong ke bawah
+        ->orderByRaw('CAST(peserta.ndh AS UNSIGNED) ASC') // NDH numerik dari kecil ke besar
+        ->orderBy('pendaftaran.id', 'asc')               // Jika sama, urutkan berdasarkan ID
+        ->get();
+
+    $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
+
+    return view("admin.peserta.{$jenis}.index", compact(
+        'pendaftaran',
+        'angkatanList',
+        'jenisPelatihan',
+        'jenis'
+    ));
+}
 
     /**
      * Get peserta detail for modal.
@@ -156,106 +173,96 @@ class PesertaController extends Controller
      * Update status pendaftaran.
      */
     public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status_pendaftaran' => 'required|in:Menunggu Verifikasi,Diterima,Ditolak,Lulus',
-            'catatan_verifikasi' => 'nullable|string|max:500'
-        ]);
+{
+    $request->validate([
+        'status_pendaftaran' => 'required|in:Menunggu Verifikasi,Diterima,Ditolak,Lulus',
+        'catatan_verifikasi' => 'nullable|string|max:500'
+    ]);
 
-        try {
-            return DB::transaction(function () use ($request, $id) {
+    try {
+        return DB::transaction(function () use ($request, $id) {
 
-                // Lock row pendaftaran agar tidak diproses bersamaan
-                $pendaftaran = Pendaftaran::with(['peserta', 'angkatan', 'jenisPelatihan'])
-                    ->lockForUpdate()
-                    ->findOrFail($id);
+            // Lock row pendaftaran
+            $pendaftaran = Pendaftaran::with(['peserta', 'angkatan', 'jenisPelatihan'])
+                ->lockForUpdate()
+                ->findOrFail($id);
 
-                $peserta = $pendaftaran->peserta;
+            $peserta = $pendaftaran->peserta;
 
-                // 🔒 Validasi link grup WA (tetap seperti punyamu)
-                if (empty($pendaftaran->angkatan->link_gb_wa)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Link Grup WhatsApp angkatan belum diisi. Silakan lengkapi terlebih dahulu.'
-                    ], 422);
-                }
+            // Validasi link grup WA
+            if (empty($pendaftaran->angkatan->link_gb_wa)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Link Grup WhatsApp angkatan belum diisi. Silakan lengkapi terlebih dahulu.'
+                ], 422);
+            }
 
-                // Jika status jadi Diterima
-                if ($request->status_pendaftaran === 'Diterima') {
-
-                    // ✅ Kalau peserta sudah punya NDH, jangan generate ulang
-                    // if (empty($peserta->ndh)) {
-
-                    //     // Ambil max NDH untuk jenis pelatihan + angkatan yang sama secara aman (lock)
-                    //     // Pakai join + max langsung (lebih ringan daripada ->get()->max('peserta.ndh')
-                    //     $lastNdh = Pendaftaran::query()
-                    //         ->where('pendaftaran.id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan)
-                    //         ->where('pendaftaran.id_angkatan', $pendaftaran->id_angkatan)
-                    //         ->join('peserta', 'peserta.id', '=', 'pendaftaran.id_peserta')
-                    //         ->lockForUpdate()
-                    //         ->max('peserta.ndh');
-
-                    //     $ndhBaru = $lastNdh ? ((int)$lastNdh + 1) : 1;
-
-                    //     // Simpan NDH
-                    //     $peserta->update([
-                    //         'ndh' => $ndhBaru
-                    //     ]);
-                    // }
-
-                    // Buat/update akun user + kirim email hanya jika belum ada user / atau kamu memang mau selalu kirim ulang
+            // Jika status jadi Diterima
+            if ($request->status_pendaftaran === 'Diterima') {
+                
+                // 🚨 CEK apakah user SUDAH ADA berdasarkan peserta_id
+                $existingUser = User::where('peserta_id', $peserta->id)->first();
+                
+                if (!$existingUser) {
+                    // Jika user BELUM ada, buat baru & kirim email
                     $role = Role::where('name', 'user')->firstOrFail();
-
-                    // password baru (untuk email)
                     $passwordAsli = Str::random(8);
 
-                    $user = User::updateOrCreate(
-                        ['peserta_id' => $peserta->id],
-                        [
-                            'name'     => $peserta->nama_lengkap,
-                            'email'    => $peserta->email_pribadi,
-                            'password' => bcrypt($passwordAsli),
-                            'role_id'  => $role->id,
-                        ]
-                    );
+                    $user = User::create([
+                        'peserta_id' => $peserta->id,
+                        'name' => $peserta->nama_lengkap,
+                        'email' => $peserta->email_pribadi,
+                        'password' => bcrypt($passwordAsli),
+                        'role_id' => $role->id,
+                    ]);
 
                     $dataEmail = [
-                        'name'       => $user->name,
-                        'email'      => $user->email,
-                        'password'   => $passwordAsli,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'password' => $passwordAsli,
                         'link_gb_wa' => $pendaftaran->angkatan->link_gb_wa,
                     ];
 
                     Mail::to($user->email)->send(new SendEmail($dataEmail));
+                    
+                } else {
+                    // 🚨 Jika user SUDAH ADA, jangan buat baru dan jangan kirim email
+                    // Optional: Update nama/email jika ada perubahan
+                    $existingUser->update([
+                        'name' => $peserta->nama_lengkap,
+                        'email' => $peserta->email_pribadi,
+                        // Password tetap pakai yang lama
+                    ]);
                 }
+            }
 
-                // Update status pendaftaran (tetap)
-                $pendaftaran->update([
-                    'status_pendaftaran' => $request->status_pendaftaran,
-                    'catatan_verifikasi' => $request->catatan_verifikasi,
-                    'tanggal_verifikasi' => now()
-                ]);
+            // Update status pendaftaran
+            $pendaftaran->update([
+                'status_pendaftaran' => $request->status_pendaftaran,
+                'catatan_verifikasi' => $request->catatan_verifikasi,
+                'tanggal_verifikasi' => now()
+            ]);
 
-                // Log aktivitas (tetap)
-                $jenisPelatihan = $pendaftaran->jenisPelatihan->nama_pelatihan ?? '-';
-                $angkatan = $pendaftaran->angkatan->nama_angkatan ?? '-';
-                aktifitas("Mengubah Status Pendaftaran {$jenisPelatihan} - {$angkatan}", $peserta);
+            // Log aktivitas
+            $jenisPelatihan = $pendaftaran->jenisPelatihan->nama_pelatihan ?? '-';
+            $angkatan = $pendaftaran->angkatan->nama_angkatan ?? '-';
+            aktifitas("Mengubah Status Pendaftaran {$jenisPelatihan} - {$angkatan}", $peserta);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Status pendaftaran berhasil diperbarui'
-                ]);
-            });
-        } catch (\Throwable $e) {
-            // Kalau ada error (misal deadlock / email error), tangani dengan aman
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memperbarui status: ' . $e->getMessage()
-            ], 500);
-        }
+                'success' => true,
+                'message' => 'Status pendaftaran berhasil diperbarui'
+            ]);
+        });
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan saat memperbarui status: ' . $e->getMessage()
+        ], 500);
     }
+}
 
-/**
+
+    /**
  * Get available NDH for peserta form
  */
 public function getAvailableNdhForPeserta(Request $request)
