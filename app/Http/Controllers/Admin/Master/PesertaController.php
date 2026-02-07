@@ -62,7 +62,7 @@ class PesertaController extends Controller
         ->toArray();
 
     // =====================
-    // LIST ANGKATAN (FILTER DROPDOWN)
+    // LIST ANGKATAN (FILTER DROPDOWN) - DENGAN SORTING ROMAWI
     // =====================
     $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId);
 
@@ -70,9 +70,30 @@ class PesertaController extends Controller
         $angkatanQuery->whereIn('id', $picAngkatanIds);
     }
 
-    $angkatanList = $angkatanQuery
-        ->orderBy('tahun', 'desc')
-        ->get();
+    // ✅ Ambil data dan sort menggunakan Collection
+    $angkatanList = $angkatanQuery->get()->sortBy(function ($angkatan) {
+        // Fungsi convert romawi ke integer (inline)
+        $romans = [
+            'M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400,
+            'C' => 100, 'XC' => 90, 'L' => 50, 'XL' => 40,
+            'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1
+        ];
+        
+        // Extract romawi dari "Angkatan I", "Angkatan II", dll
+        preg_match('/Angkatan\s+([IVXLCDM]+)/i', $angkatan->nama_angkatan, $matches);
+        $roman = $matches[1] ?? '';
+        
+        // Convert ke integer
+        $result = 0;
+        foreach ($romans as $key => $value) {
+            while (strpos($roman, $key) === 0) {
+                $result += $value;
+                $roman = substr($roman, strlen($key));
+            }
+        }
+        
+        return $result;
+    })->values(); // Reset array keys
 
     // =====================
     // QUERY DASAR (untuk stats dan pagination)
@@ -107,8 +128,8 @@ class PesertaController extends Controller
     // =====================
     // STATS - Ambil SEMUA data sesuai filter (tanpa pagination)
     // =====================
-    $allPendaftaran = clone $baseQuery; // Clone query untuk stats
-    $statsData = $allPendaftaran->get(); // Ambil semua data untuk stats
+    $allPendaftaran = clone $baseQuery;
+    $statsData = $allPendaftaran->get();
 
     // =====================
     // QUERY PENDAFTARAN DENGAN PAGINATION
@@ -138,7 +159,7 @@ class PesertaController extends Controller
 
     return view("admin.peserta.{$jenis}.index", compact(
         'pendaftaran',
-        'statsData',      // ✅ Kirim data stats terpisah
+        'statsData',
         'angkatanList',
         'jenisPelatihan',
         'jenis'
