@@ -131,16 +131,21 @@ public function getAvailableNdh(Request $request)
         $request->validate([
             'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
             'id_angkatan' => 'required|exists:angkatan,id',
+            'nip_nrp' => 'nullable|string', // tambahkan ini
         ]);
 
         // Ambil data angkatan untuk mendapatkan kuota
         $angkatan = Angkatan::findOrFail($request->id_angkatan);
         $kuota = $angkatan->kuota;
 
-        // Ambil NDH yang sudah terpakai untuk angkatan dan jenis pelatihan ini
+        // Ambil NDH yang sudah terpakai KECUALI milik peserta ini
         $ndhTerpakai = Peserta::whereHas('pendaftaran', function($query) use ($request) {
                 $query->where('id_angkatan', $request->id_angkatan)
                       ->where('id_jenis_pelatihan', $request->id_jenis_pelatihan);
+            })
+            ->when($request->nip_nrp, function($query) use ($request) {
+                // Exclude peserta dengan NIP yang sedang update
+                $query->where('nip_nrp', '!=', $request->nip_nrp);
             })
             ->whereNotNull('ndh')
             ->pluck('ndh')

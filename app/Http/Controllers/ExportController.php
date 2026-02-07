@@ -636,6 +636,10 @@ class ExportController extends Controller
      */
     public function exportSertifikat(Request $request)
 {
+    // Set memory limit lebih tinggi
+    ini_set('memory_limit', '512M');
+    ini_set('max_execution_time', '300'); // 5 menit
+    
     // Ambil filter dari request
     $jenisPelatihan = $request->jenis_pelatihan;
     $angkatan       = $request->angkatan;
@@ -675,7 +679,7 @@ class ExportController extends Controller
         });
     }
 
-    // --- Filter: Kategori & Wilayah (sama pola dengan exportAbsen) ---
+    // --- Filter: Kategori & Wilayah ---
     if ($kategori === 'PNBP') {
         $query->whereHas('angkatan', function ($q) {
             $q->where('kategori', 'PNBP');
@@ -688,8 +692,6 @@ class ExportController extends Controller
             }
         });
     } else {
-        // Kategori kosong / "Semua Kategori"
-        // Tetap bisa filter wilayah jika diisi
         if ($wilayah && trim($wilayah) !== '') {
             $query->whereHas('angkatan', function ($q) use ($wilayah) {
                 $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
@@ -707,12 +709,20 @@ class ExportController extends Controller
         return redirect()->back()->with('error', 'Tidak ada data peserta untuk filter yang dipilih.');
     }
 
-    // Format data peserta untuk PDF
+    // OPTIMASI: Batasi jumlah peserta per batch jika terlalu banyak
+    $totalPeserta = $pendaftaranList->count();
+    if ($totalPeserta > 50) {
+        return redirect()->back()->with('error', 
+            "Terlalu banyak data ({$totalPeserta} peserta). Silakan filter lebih spesifik atau export per angkatan."
+        );
+    }
+
+    // Format data peserta untuk PDF dengan optimasi
     $peserta = $pendaftaranList->map(function ($pendaftaran, $index) {
         $p     = $pendaftaran->peserta;
         $kepeg = $p->kepegawaian;
 
-        // Ambil NDH dari tabel peserta, atau gunakan nomor urut jika tidak ada
+        // Ambil NDH dari tabel peserta
         $ndh = $p->ndh ?? str_pad($index + 1, 2, '0', STR_PAD_LEFT);
 
         // Ambil nama kabupaten dari relasi
@@ -723,10 +733,10 @@ class ExportController extends Controller
             $kabupaten = $this->extractKabupaten($kepeg->asal_instansi);
         }
 
-        // Ambil foto dari Google Drive dan convert ke base64
+        // OPTIMASI: Ambil foto dengan resize
         $fotoBase64 = null;
         if ($p->file_pas_foto) {
-            $fotoBase64 = $this->getImageFromGoogleDrive($p->file_pas_foto);
+            $fotoBase64 = $this->getOptimizedImageFromGoogleDrive($p->file_pas_foto);
         }
 
         return [
@@ -768,7 +778,9 @@ class ExportController extends Controller
     $pdf->setOptions([
         'isHtml5ParserEnabled' => true,
         'isRemoteEnabled'     => true,
-        'defaultFont'         => 'Arial'
+        'defaultFont'         => 'Arial',
+        'dpi'                 => 96, // Turunkan DPI untuk hemat memory
+        'isPhpEnabled'        => false
     ]);
 
     // Nama file
@@ -781,7 +793,106 @@ class ExportController extends Controller
     // Log aktivitas
     aktifitas('Mengekspor Sertifikat Peserta ' . ($jenisPelatihan ?: 'Semua') . ' ' . ($angkatan ?: 'Semua') . ' ' . ($tahun ?: 'Semua'));
 
+    // Clear memory sebelum return
+    gc_collect_cycles();
+
     return $pdf->stream($filename);
+}
+
+/**
+ * Get optimized image from Google Drive (resized untuk hemat memory)
+ */
+private function getOptimizedImageFromGoogleDrive($filePath, $maxWidth = 300, $maxHeight = 400)
+{
+    try {
+        $disk = Storage::disk('google');
+        
+        if (!$disk->exists($filePath)) {
+            \Log::warning("File foto tidak ditemukan: {$filePath}");
+            return $this->getPlaceholderImage();
+        }
+
+        // Ambil konten file
+        $imageContent = $disk->get($filePath);
+        
+        // Buat image resource dari string
+        $image = @imagecreatefromstring($imageContent);
+        
+        if ($image === false) {
+            \Log::warning("Gagal membuat image dari file: {$filePath}");
+            return $this->getPlaceholderImage();
+        }
+
+        // Dapatkan ukuran asli
+        $originalWidth = imagesx($image);
+        $originalHeight = imagesy($image);
+
+        // Hitung ukuran baru dengan maintain aspect ratio
+        $ratio = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
+        $newWidth = (int)($originalWidth * $ratio);
+        $newHeight = (int)($originalHeight * $ratio);
+
+        // Buat image baru dengan ukuran yang sudah di-resize
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+        
+        // Preserve transparency untuk PNG
+        imagealphablending($resizedImage, false);
+        imagesavealpha($resizedImage, true);
+        
+        // Resize image
+        imagecopyresampled(
+            $resizedImage, 
+            $image, 
+            0, 0, 0, 0, 
+            $newWidth, $newHeight, 
+            $originalWidth, $originalHeight
+        );
+
+        // Convert ke base64
+        ob_start();
+        imagejpeg($resizedImage, null, 85); // Quality 85%
+        $imageData = ob_get_clean();
+        
+        // Free memory
+        imagedestroy($image);
+        imagedestroy($resizedImage);
+        
+        return 'data:image/jpeg;base64,' . base64_encode($imageData);
+
+    } catch (\Exception $e) {
+        \Log::error("Error getting optimized image from Google Drive: " . $e->getMessage());
+        return $this->getPlaceholderImage();
+    }
+}
+
+/**
+ * Get placeholder image jika foto tidak tersedia
+ */
+private function getPlaceholderImage()
+{
+    // Buat gambar placeholder sederhana
+    $width = 300;
+    $height = 400;
+    
+    $image = imagecreatetruecolor($width, $height);
+    
+    // Background abu-abu
+    $bgColor = imagecolorallocate($image, 240, 240, 240);
+    imagefill($image, 0, 0, $bgColor);
+    
+    // Text "No Photo"
+    $textColor = imagecolorallocate($image, 150, 150, 150);
+    $text = "No Photo";
+    imagestring($image, 5, ($width/2)-40, ($height/2)-10, $text, $textColor);
+    
+    // Convert to base64
+    ob_start();
+    imagejpeg($image, null, 80);
+    $imageData = ob_get_clean();
+    
+    imagedestroy($image);
+    
+    return 'data:image/jpeg;base64,' . base64_encode($imageData);
 }
 
     /**

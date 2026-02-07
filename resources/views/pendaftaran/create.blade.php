@@ -1797,6 +1797,7 @@
             }
 
             // Fungsi untuk load NDH yang tersedia
+// Fungsi untuk load NDH yang tersedia
 async function loadAvailableNdh() {
     const ndhSelect = document.getElementById('ndh');
     const ndhInfo = document.getElementById('ndh-info');
@@ -1807,7 +1808,11 @@ async function loadAvailableNdh() {
     ndhSelect.disabled = true;
 
     try {
-        const response = await fetch(`/api/get-available-ndh?id_jenis_pelatihan=${selectedTraining.id}&id_angkatan=${pendaftaranData.id_angkatan}`);
+        // TAMBAHKAN nip_nrp ke query string
+        const nipNrp = verifiedPeserta?.nip_nrp || '';
+        const response = await fetch(
+            `/api/get-available-ndh?id_jenis_pelatihan=${selectedTraining.id}&id_angkatan=${pendaftaranData.id_angkatan}&nip_nrp=${nipNrp}`
+        );
         const result = await response.json();
 
         if (result.success) {
@@ -1839,14 +1844,21 @@ async function loadAvailableNdh() {
             ndhInfo.innerHTML = `<i class="fas fa-check-circle"></i> Tersedia: ${result.tersedia} dari ${result.kuota} NDH`;
             ndhInfo.style.color = 'var(--success-color)';
 
-            // Set value dari data peserta jika ada dan masih tersedia
+            // Set value dari data peserta jika ada
             if (verifiedPeserta && verifiedPeserta.ndh) {
-                // Cek apakah NDH peserta masih tersedia
-                if (result.data.includes(parseInt(verifiedPeserta.ndh))) {
-                    ndhSelect.value = verifiedPeserta.ndh;
-                } else {
-                    // Jika NDH sudah terpakai, beri peringatan
-                    showErrorMessage('NDH Anda sebelumnya sudah terisi. Silakan pilih NDH yang baru.');
+                ndhSelect.value = verifiedPeserta.ndh;
+                
+                // PENTING: Jika NDH peserta tidak ada di list (sudah terpakai oleh orang lain),
+                // tambahkan ke dropdown dengan penanda khusus
+                if (!result.data.includes(parseInt(verifiedPeserta.ndh))) {
+                    const currentNdhOption = document.createElement('option');
+                    currentNdhOption.value = verifiedPeserta.ndh;
+                    currentNdhOption.textContent = `NDH ${verifiedPeserta.ndh} (NDH Anda saat ini)`;
+                    currentNdhOption.selected = true;
+                    ndhSelect.insertBefore(currentNdhOption, ndhSelect.firstChild.nextSibling);
+                    
+                    ndhInfo.innerHTML = `<i class="fas fa-info-circle"></i> NDH Anda saat ini: ${verifiedPeserta.ndh}. Anda dapat mengubahnya jika diperlukan.`;
+                    ndhInfo.style.color = 'var(--accent-color)';
                 }
             }
 

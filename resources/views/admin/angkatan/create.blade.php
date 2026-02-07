@@ -361,7 +361,7 @@
                         <div class="mb-4">
                             <label for="kunci_judul" class="form-label fw-semibold">
                                 <i class="fas fa-lightbulb me-1 text-primary"></i>
-                                Status Judul Aksi Perubahan
+                                Status Judul Aktualisasi/Aksi Perubahan/Proyek Perubahan
                             </label>
 
                             <select name="kunci_judul" id="kunci_judul" class="form-select @error('kunci_judul') is-invalid @enderror">
