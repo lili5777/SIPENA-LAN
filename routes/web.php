@@ -231,6 +231,12 @@ Route::middleware('auth')->group(function () {
     // Route untuk AJAX - HARUS tanpa parameter {jenis} atau dengan optional parameter
     Route::post('/peserta/get-peserta-angkatan', [PesertaController::class, 'getPesertaAngkatan'])
         ->name('peserta.get-peserta-angkatan');
+    
+    Route::get('/admin/peserta/{jenis}/get-peserta-angkatan', [PesertaController::class, 'getPesertaAngkatan'])
+        ->name('peserta.getPesertaAngkatan');
+
+    Route::post('/admin/peserta/{jenis}/swap-ndh', [PesertaController::class, 'swapNdh'])
+        ->name('peserta.swapNdh');
 
     // Visi Misi Routes
     Route::prefix('visi-misi')->name('visi-misi.')->group(function () {

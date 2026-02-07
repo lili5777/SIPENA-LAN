@@ -322,6 +322,32 @@ public function getAvailableNdhForPeserta(Request $request)
     }
 }
 
+    public function swapNdh(Request $request, $jenis)
+    {
+        DB::beginTransaction();
+        try {
+            $current = Peserta::findOrFail($request->current_peserta_id);
+            $target = Peserta::findOrFail($request->target_peserta_id);
+
+            // Swap NDH
+            $temp = $current->ndh;
+            $current->ndh = $target->ndh;
+            $target->ndh = $temp;
+
+            $current->save();
+            $target->save();
+
+            // Log
+            aktifitas("Swap NDH: {$current->nama_lengkap} ↔ {$target->nama_lengkap}", $current);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'NDH berhasil ditukar']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     // Method untuk create form
 public function create(Request $request, $jenis = null)
 {

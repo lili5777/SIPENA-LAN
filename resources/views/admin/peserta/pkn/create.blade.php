@@ -176,11 +176,11 @@ $isPKN = $jenis === 'pkn';
                             <div class="form-section-header">
                                 <i class="fas fa-user-tie"></i> Data Pribadi
                             </div>
-                                                      <!-- NDH -->
+<!-- NDH Section -->
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label ">Nomor Daftar Hadir (NDH)</label>
-        <select name="ndh" id="ndh" class="form-select @error('ndh') error @enderror"  disabled>
+        <label class="form-label">Nomor Daftar Hadir (NDH)</label>
+        <select name="ndh" id="ndh" class="form-select @error('ndh') error @enderror" {{ $isEdit ? '' : 'disabled' }}>
             <option value="">Pilih angkatan dulu</option>
         </select>
         <div class="form-hint" id="ndh-info" style="display:none;">
@@ -190,7 +190,21 @@ $isPKN = $jenis === 'pkn';
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
+
+    <!-- ✅ DROPDOWN TUKAR NDH -->
+    @if($isEdit && $pesertaData && $pesertaData->ndh)
+    <div class="form-group">
+        <label class="form-label">Atau Tukar NDH dengan:</label>
+        <select id="swapNdhSelect" class="form-select">
+            <option value="">-- Pilih Peserta untuk Tukar NDH --</option>
+        </select>
+        <small class="form-hint">
+            <i class="fas fa-exchange-alt"></i> Pilih peserta lain untuk langsung tukar NDH
+        </small>
+    </div>
+    @endif
 </div>
+
 
                             <div class="form-row">
                                 <div class="form-group">
@@ -2006,6 +2020,121 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 
 @section('scripts')
     <script>
+    @if($isEdit && $pesertaData && $pesertaData->ndh)
+// ============================================
+// SIMPLE SWAP NDH
+// ============================================
+(function() {
+    const swapSelect = document.getElementById('swapNdhSelect');
+    const angkatanSelect = document.getElementById('id_angkatan');
+    
+    const currentPesertaId = @json($pesertaData->id);
+    const currentNdh = @json($pesertaData->ndh);
+    const currentNama = @json($pesertaData->nama_lengkap);
+
+    // Load peserta saat angkatan dipilih
+    if (angkatanSelect) {
+        angkatanSelect.addEventListener('change', loadSwapOptions);
+        
+        // Load immediately if angkatan already selected
+        if (angkatanSelect.value) {
+            setTimeout(loadSwapOptions, 500);
+        }
+    }
+
+    async function loadSwapOptions() {
+        const angkatanId = angkatanSelect.value;
+        if (!angkatanId || !swapSelect) return;
+
+        swapSelect.innerHTML = '<option value="">Memuat...</option>';
+        swapSelect.disabled = true;
+
+        try {
+            const jenis = @json($jenis);
+            const response = await fetch(`/admin/peserta/${jenis}/get-peserta-angkatan?angkatan_id=${angkatanId}&exclude_peserta_id=${currentPesertaId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                swapSelect.innerHTML = '<option value="">-- Pilih Peserta untuk Tukar NDH --</option>';
+                
+                data.data.forEach(peserta => {
+                    const option = document.createElement('option');
+                    option.value = peserta.peserta_id;
+                    option.textContent = `${peserta.nama} - NDH ${peserta.ndh || 'Kosong'} (${peserta.nip_nrp})`;
+                    option.dataset.nama = peserta.nama;
+                    option.dataset.ndh = peserta.ndh || '';
+                    swapSelect.appendChild(option);
+                });
+
+                swapSelect.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            swapSelect.innerHTML = '<option value="">Error memuat data</option>';
+        }
+    }
+
+    // Handle swap
+    if (swapSelect) {
+        swapSelect.addEventListener('change', async function() {
+            if (!this.value) return;
+
+            const selectedOption = this.options[this.selectedIndex];
+            const targetNama = selectedOption.dataset.nama;
+            const targetNdh = selectedOption.dataset.ndh;
+            const targetId = this.value;
+
+            const confirmMsg = `TUKAR NDH?\n\n` +
+                `${currentNama}: NDH ${currentNdh} → NDH ${targetNdh || 'Kosong'}\n` +
+                `${targetNama}: NDH ${targetNdh || 'Kosong'} → NDH ${currentNdh}\n\n` +
+                `Lanjutkan?`;
+
+            if (!confirm(confirmMsg)) {
+                this.value = '';
+                return;
+            }
+
+            // Disable select
+            this.disabled = true;
+            const originalHtml = this.innerHTML;
+            this.innerHTML = '<option value="">Memproses...</option>';
+
+            try {
+                const jenis = @json($jenis);
+                const response = await fetch(`/admin/peserta/${jenis}/swap-ndh`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_peserta_id: currentPesertaId,
+                        target_peserta_id: targetId,
+                        current_ndh: currentNdh,
+                        target_ndh: targetNdh
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ NDH berhasil ditukar! Halaman akan dimuat ulang.');
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                alert('❌ Gagal: ' + error.message);
+                this.innerHTML = originalHtml;
+                this.disabled = false;
+                this.value = '';
+            }
+        });
+    }
+})();
+@endif
+
             async function loadAvailableNdh(idAngkatan, idJenisPelatihan, currentNdh = null) {
     const ndhSelect = document.getElementById('ndh');
     if (!ndhSelect) return;
