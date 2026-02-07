@@ -57,76 +57,77 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm stat-card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
-                            <i class="fas fa-user-clock"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-1">Pending</h6>
-                            <h3 class="mb-0 fw-bold text-warning">
-                                {{ $pendaftaran->where('status_pendaftaran', 'Menunggu Verifikasi')->count() }}
-                                </h3>
-                            </div>
-                        </div>
+    <!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                        <i class="fas fa-user-clock"></i>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm stat-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
-                                <i class="fas fa-user-check"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-1">Diterima</h6>
-                                <h3 class="mb-0 fw-bold text-info">
-                                    {{ $pendaftaran->where('status_pendaftaran', 'Diterima')->count() }}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm stat-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
-                                <i class="fas fa-user-times"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-1">Ditolak</h6>
-                                <h3 class="mb-0 fw-bold text-danger">
-                                    {{ $pendaftaran->where('status_pendaftaran', 'Ditolak')->count() }}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm stat-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
-                                <i class="fas fa-graduation-cap"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-1">Lulus</h6>
-                                <h3 class="mb-0 fw-bold text-success">
-                                    {{ $pendaftaran->where('status_pendaftaran', 'Lulus')->count() }}
-                                </h3>
-                            </div>
-                        </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Pending</h6>
+                        <h3 class="mb-0 fw-bold text-warning">
+                            {{ $statsData->where('status_pendaftaran', 'Menunggu Verifikasi')->count() }}
+                        </h3>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Diterima</h6>
+                        <h3 class="mb-0 fw-bold text-info">
+                            {{ $statsData->where('status_pendaftaran', 'Diterima')->count() }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Ditolak</h6>
+                        <h3 class="mb-0 fw-bold text-danger">
+                            {{ $statsData->where('status_pendaftaran', 'Ditolak')->count() }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Lulus</h6>
+                        <h3 class="mb-0 fw-bold text-success">
+                            {{ $statsData->where('status_pendaftaran', 'Lulus')->count() }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- Filter Section -->
         <div class="card border-0 shadow-sm mb-4">
@@ -191,22 +192,7 @@
                         </form>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="d-flex justify-content-md-end align-items-center mt-3 mt-md-0">
-                            <div class="d-flex align-items-center">
-                                <label class="form-label small fw-semibold text-muted mb-0 me-2">
-                                    <i class="fas fa-list-ol me-1"></i> Tampilkan:
-                                </label>
-                                <select class="form-select form-select-sm w-auto" id="showEntries">
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                    <option value="-1">Semua</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -290,7 +276,7 @@
     ];
                                                                                                                                                 @endphp
                                                                                                                                                 <tr class="peserta-row" data-peserta-id="{{ $daftar->id }}">
-                                                                                                                                                    <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
+                                                                                                                                                    <td class="ps-4 fw-semibold">{{ $pendaftaran->firstItem() + $index }}</td>
                                                                                                                                                     <td>
                                                                                                                                                         <div class="d-flex align-items-center">
                                                                                                                                                             <div class="user-avatar me-3"
@@ -408,35 +394,106 @@
             </div>
 
             @if($pendaftaran->count() > 0)
-                <div class="card-footer bg-white py-3 border-0">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <div class="table-pagination-info">
-                                <small class="text-muted" id="paginationInfo">
-                                    Menampilkan 1-{{ $pendaftaran->count() }} dari {{ $pendaftaran->count() }} peserta
-                                </small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <nav aria-label="Table pagination" class="d-flex justify-content-md-end">
-                                <ul class="pagination pagination-sm mb-0" id="paginationControls">
+    <div class="card-footer bg-white py-3 border-0">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-2 mb-md-0">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Menampilkan <strong>{{ $pendaftaran->firstItem() }}</strong> 
+                    sampai <strong>{{ $pendaftaran->lastItem() }}</strong> 
+                    dari <strong>{{ $pendaftaran->total() }}</strong> peserta
+                    @if(request('angkatan') || request('kategori') || request('status'))
+                        <span class="text-primary">(terfilter)</span>
+                    @endif
+                </small>
+            </div>
+            <div class="col-md-6">
+                <!-- Custom Compact Pagination -->
+                @if ($pendaftaran->hasPages())
+                    <nav aria-label="Peserta pagination">
+                        <ul class="pagination pagination-sm justify-content-md-end justify-content-center mb-0">
+                            {{-- Previous Page Link --}}
+                            @if ($pendaftaran->onFirstPage())
+                                <li class="page-item disabled">
+                                    <span class="page-link">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                </li>
+                            @else
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $pendaftaran->previousPageUrl() }}" rel="prev">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            @endif
+
+                            {{-- Pagination Elements --}}
+                            @php
+                                $start = max($pendaftaran->currentPage() - 2, 1);
+                                $end = min($start + 4, $pendaftaran->lastPage());
+                                $start = max($end - 4, 1);
+                            @endphp
+
+                            {{-- First Page --}}
+                            @if($start > 1)
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $pendaftaran->url(1) }}">1</a>
+                                </li>
+                                @if($start > 2)
                                     <li class="page-item disabled">
-                                        <button class="page-link" id="prevPage">Previous</button>
+                                        <span class="page-link">...</span>
                                     </li>
+                                @endif
+                            @endif
+
+                            {{-- Page Numbers --}}
+                            @for ($i = $start; $i <= $end; $i++)
+                                @if ($i == $pendaftaran->currentPage())
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ $i }}</span>
+                                    </li>
+                                @else
                                     <li class="page-item">
-                                        <span class="page-link">
-                                            <span id="currentPage">1</span> / <span id="totalPages">1</span>
-                                        </span>
+                                        <a class="page-link" href="{{ $pendaftaran->url($i) }}">{{ $i }}</a>
                                     </li>
-                                    <li class="page-item">
-                                        <button class="page-link" id="nextPage">Next</button>
+                                @endif
+                            @endfor
+
+                            {{-- Last Page --}}
+                            @if($end < $pendaftaran->lastPage())
+                                @if($end < $pendaftaran->lastPage() - 1)
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
                                     </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            @endif
+                                @endif
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $pendaftaran->url($pendaftaran->lastPage()) }}">
+                                        {{ $pendaftaran->lastPage() }}
+                                    </a>
+                                </li>
+                            @endif
+
+                            {{-- Next Page Link --}}
+                            @if ($pendaftaran->hasMorePages())
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $pendaftaran->nextPageUrl() }}" rel="next">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            @else
+                                <li class="page-item disabled">
+                                    <span class="page-link">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </li>
+                            @endif
+                        </ul>
+                    </nav>
+                @endif
+            </div>
+        </div>
+    </div>
+@endif
         </div>
 @endsection
 
@@ -509,7 +566,7 @@
                         </button>
                         <button class="nav-link px-4 py-3 rounded-top-3 fw-semibold" id="nav-aksi-tab" data-bs-toggle="tab"
                             data-bs-target="#nav-aksi" type="button" role="tab">
-                            <i class="fas fa-lightbulb me-2"></i>Aksi Perubahan
+                            <i class="fas fa-lightbulb me-2"></i>Aktualisasi
                         </button>
                     </div>
                 </nav>
@@ -689,9 +746,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 // Initialize variables
-                let currentPage = 1;
-                let rowsPerPage = 10;
-                let filteredRows = [];
+                
 
                 // Initialize tooltips
                 const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -711,92 +766,25 @@
                 const statusLoading = document.getElementById('statusLoading');
 
                 // Initialize table
-                initializeTable();
+                // initializeTable();
 
                 // Show entries dropdown
-                const showEntries = document.getElementById('showEntries');
-                showEntries.addEventListener('change', function () {
-                    rowsPerPage = this.value === '-1' ? -1 : parseInt(this.value);
-                    currentPage = 1;
-                    updateTable();
-                });
+                
 
                 // Pagination controls
-                document.getElementById('prevPage').addEventListener('click', function () {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        updateTable();
-                    }
-                });
-
-                document.getElementById('nextPage').addEventListener('click', function () {
-                    const totalPages = Math.ceil(filteredRows.length / (rowsPerPage === -1 ?
-                        filteredRows.length : rowsPerPage));
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        updateTable();
-                    }
-                });
+                
 
                 // Initialize table function
-                function initializeTable() {
-                    const table = document.getElementById('pesertaTable');
-                    filteredRows = Array.from(table.querySelectorAll('tbody tr:not(.empty-state-row)'));
-                    updateTable();
-                }
+               
 
                 // Update table display
-                function updateTable() {
-                    const table = document.getElementById('pesertaTable');
-                    const rows = filteredRows;
-                    const totalRows = rows.length;
-
-                    // Calculate pagination
-                    const totalPages = rowsPerPage === -1 ? 1 : Math.ceil(totalRows / rowsPerPage);
-                    const startIndex = rowsPerPage === -1 ? 0 : (currentPage - 1) * rowsPerPage;
-                    const endIndex = rowsPerPage === -1 ? totalRows : startIndex + rowsPerPage;
-
-                    // Hide all rows
-                    rows.forEach(row => {
-                        row.style.display = 'none';
-                    });
-
-                    // Show rows for current page
-                    const visibleRows = rows.slice(startIndex, endIndex);
-                    visibleRows.forEach(row => {
-                        row.style.display = '';
-                    });
-
-                    // Update pagination info
-                    updatePaginationInfo(startIndex, endIndex, totalRows);
-
-                    // Update pagination controls
-                    updatePaginationControls(currentPage, totalPages);
-                }
+                
 
                 // Update pagination info
-                function updatePaginationInfo(start, end, total) {
-                    const startDisplay = total === 0 ? 0 : start + 1;
-                    const endDisplay = Math.min(end, total);
-
-                    document.getElementById('paginationInfo').textContent =
-                        `Menampilkan ${startDisplay}-${endDisplay} dari ${total} peserta`;
-
-                    document.getElementById('tableInfo').textContent =
-                        `Menampilkan ${endDisplay} dari ${total} peserta`;
-                }
+                
 
                 // Update pagination controls
-                function updatePaginationControls(current, total) {
-                    document.getElementById('currentPage').textContent = current;
-                    document.getElementById('totalPages').textContent = total;
-
-                    const prevBtn = document.getElementById('prevPage');
-                    const nextBtn = document.getElementById('nextPage');
-
-                    prevBtn.parentElement.classList.toggle('disabled', current <= 1);
-                    nextBtn.parentElement.classList.toggle('disabled', current >= total);
-                }
+                
 
                 // View Detail
                 document.querySelectorAll('.view-detail').forEach(button => {
@@ -2576,6 +2564,49 @@ function aksiCard(aksi) {
     
     .dokumen-item, .link-item {
         margin-bottom: 0.5rem;
+    }
+}
+/* Compact Pagination */
+.pagination-sm {
+    gap: 0.25rem;
+}
+
+.pagination-sm .page-link {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    color: #285496;
+    transition: all 0.2s ease;
+}
+
+.pagination-sm .page-link:hover {
+    background-color: rgba(40, 84, 150, 0.1);
+    border-color: #285496;
+}
+
+.pagination-sm .page-item.active .page-link {
+    background-color: #285496;
+    border-color: #285496;
+    color: white;
+    font-weight: 600;
+}
+
+.pagination-sm .page-item.disabled .page-link {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+/* Mobile Optimization for Pagination */
+@media (max-width: 576px) {
+    .pagination-sm .page-link {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .pagination-sm {
+        gap: 0.15rem;
     }
 }
         </style>

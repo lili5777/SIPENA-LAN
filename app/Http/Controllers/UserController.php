@@ -13,12 +13,35 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     //
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with(['role', 'picPesertas.jenisPelatihan', 'picPesertas.angkatan'])->get();
+        // Query dengan eager loading
+        $query = User::with(['role', 'picPesertas.jenisPelatihan', 'picPesertas.angkatan']);
+
+        // Filter by role
+        if ($request->filled('role')) {
+            $query->where('role_id', $request->role);
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('no_telp', 'like', "%{$search}%");
+            });
+        }
+
+        // Pagination dengan query yang sudah dioptimasi
+        $users = $query->paginate(15)->withQueryString();
+        
+        // Data untuk filter dan modal
+        $roles = Role::orderBy('name')->get();
         $allJenisPelatihan = JenisPelatihan::where('aktif', 1)->get();
         $allAngkatan = Angkatan::with('jenisPelatihan')->get();
-        return view('admin.users.index', compact('users', 'allJenisPelatihan', 'allAngkatan'));
+        
+        return view('admin.users.index', compact('users', 'roles', 'allJenisPelatihan', 'allAngkatan'));
     }
 
     // Method baru untuk mengambil akses PIC

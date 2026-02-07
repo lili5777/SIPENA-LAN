@@ -63,7 +63,7 @@
                         <i class="fas fa-list me-2" style="color: #285496;"></i> Daftar User
                     </h5>
                 </div>
-                <div class="col-auto">
+                {{-- <div class="col-auto">
                     <div class="input-group search-group" style="max-width: 300px;">
                         <span class="input-group-text bg-light border-end-0">
                             <i class="fas fa-search text-muted"></i>
@@ -74,9 +74,83 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
+
+        <!-- Filter Section -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-3">
+            <form action="{{ route('users.index') }}" method="GET" id="filterForm">
+                <div class="row g-2 align-items-end">
+                    <!-- Filter Role -->
+                    <div class="col-md-3 col-sm-6">
+                        <label class="form-label small text-muted mb-1">
+                            <i class="fas fa-user-tag me-1"></i> Filter Role
+                        </label>
+                        <select name="role" class="form-select form-select-sm" id="roleFilter">
+                            <option value="">Semua Role</option>
+                            @foreach($roles as $role)
+                                <option value="{{ $role->id }}" {{ request('role') == $role->id ? 'selected' : '' }}>
+                                    {{ $role->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="col-md-6 col-sm-6">
+                        <label class="form-label small text-muted mb-1">
+                            <i class="fas fa-search me-1"></i> Cari User
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="search" class="form-control" 
+                                placeholder="Nama, email, atau telepon..." 
+                                value="{{ request('search') }}" id="searchFilter">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="col-md-3 col-sm-12">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                                <i class="fas fa-filter me-1"></i> Filter
+                            </button>
+                            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary btn-sm flex-fill">
+                                <i class="fas fa-redo me-1"></i> Reset
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Filters Display -->
+                @if(request('role') || request('search'))
+                <div class="mt-2 pt-2 border-top">
+                    <small class="text-muted">
+                        <i class="fas fa-filter me-1"></i> Filter Aktif:
+                    </small>
+                    @if(request('role'))
+                        <span class="badge bg-primary ms-1">
+                            Role: {{ $roles->find(request('role'))->name ?? 'Unknown' }}
+                            <a href="{{ route('users.index', ['search' => request('search')]) }}" 
+                               class="text-white ms-1" style="text-decoration: none;">×</a>
+                        </span>
+                    @endif
+                    @if(request('search'))
+                        <span class="badge bg-info ms-1">
+                            Search: "{{ request('search') }}"
+                            <a href="{{ route('users.index', ['role' => request('role')]) }}" 
+                               class="text-white ms-1" style="text-decoration: none;">×</a>
+                        </span>
+                    @endif
+                </div>
+                @endif
+            </form>
+        </div>
+    </div>
 
         <!-- Search Results Info -->
         <div id="searchInfo" class="alert alert-info alert-dismissible fade show m-3 mb-0" style="display: none;">
@@ -105,7 +179,7 @@
                     <tbody>
                         @forelse($users as $index => $user)
                             <tr class="user-row" data-user-id="{{ $user->id }}">
-                                <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
+                                <td class="ps-4 fw-semibold">{{ $users->firstItem() + $index }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="user-avatar me-3"
@@ -192,10 +266,100 @@
         @if($users->count() > 0)
             <div class="card-footer bg-white py-3 border-0">
                 <div class="row align-items-center">
-                    <div class="col">
+                    <div class="col-md-6 mb-2 mb-md-0">
                         <small class="text-muted">
-                            Menampilkan {{ $users->count() }} user
+                            <i class="fas fa-info-circle me-1"></i>
+                            Menampilkan <strong>{{ $users->firstItem() }}</strong> 
+                            sampai <strong>{{ $users->lastItem() }}</strong> 
+                            dari <strong>{{ $users->total() }}</strong> user
+                            @if(request('role') || request('search'))
+                                <span class="text-primary">(terfilter)</span>
+                            @endif
                         </small>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Custom Compact Pagination -->
+                        @if ($users->hasPages())
+                            <nav aria-label="User pagination">
+                                <ul class="pagination pagination-sm justify-content-md-end justify-content-center mb-0">
+                                    {{-- Previous Page Link --}}
+                                    @if ($users->onFirstPage())
+                                        <li class="page-item disabled">
+                                            <span class="page-link">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $users->previousPageUrl() }}" rel="prev">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Pagination Elements --}}
+                                    @php
+                                        $start = max($users->currentPage() - 2, 1);
+                                        $end = min($start + 4, $users->lastPage());
+                                        $start = max($end - 4, 1);
+                                    @endphp
+
+                                    {{-- First Page --}}
+                                    @if($start > 1)
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $users->url(1) }}">1</a>
+                                        </li>
+                                        @if($start > 2)
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        @endif
+                                    @endif
+
+                                    {{-- Page Numbers --}}
+                                    @for ($i = $start; $i <= $end; $i++)
+                                        @if ($i == $users->currentPage())
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ $i }}</span>
+                                            </li>
+                                        @else
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ $users->url($i) }}">{{ $i }}</a>
+                                            </li>
+                                        @endif
+                                    @endfor
+
+                                    {{-- Last Page --}}
+                                    @if($end < $users->lastPage())
+                                        @if($end < $users->lastPage() - 1)
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        @endif
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $users->url($users->lastPage()) }}">
+                                                {{ $users->lastPage() }}
+                                            </a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Next Page Link --}}
+                                    @if ($users->hasMorePages())
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $users->nextPageUrl() }}" rel="next">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    @else
+                                        <li class="page-item disabled">
+                                            <span class="page-link">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </span>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </nav>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -476,6 +640,24 @@
 @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Auto submit on role filter change
+const roleFilter = document.getElementById('roleFilter');
+if (roleFilter) {
+    roleFilter.addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+}
+
+// Enter key submit on search
+const searchFilter = document.getElementById('searchFilter');
+if (searchFilter) {
+    searchFilter.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('filterForm').submit();
+        }
+    });
+}
             // Initialize tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -1741,5 +1923,69 @@
                 opacity: 1;
             }
         }
+        /* Filter Section */
+.form-select-sm, .form-control-sm {
+    font-size: 0.875rem;
+    border-radius: 6px;
+}
+
+.form-select-sm:focus, .form-control-sm:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(40, 84, 150, 0.15);
+}
+
+/* Active Filter Badges */
+.badge a {
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.badge a:hover {
+    opacity: 1;
+}
+
+/* Compact Pagination */
+.pagination-sm {
+    gap: 0.25rem;
+}
+
+.pagination-sm .page-link {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    color: var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.pagination-sm .page-link:hover {
+    background-color: rgba(40, 84, 150, 0.1);
+    border-color: var(--primary-color);
+}
+
+.pagination-sm .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+.pagination-sm .page-item.disabled .page-link {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+/* Mobile Optimization for Pagination */
+@media (max-width: 576px) {
+    .pagination-sm .page-link {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .pagination-sm {
+        gap: 0.15rem;
+    }
+}
     </style>
 @endsection

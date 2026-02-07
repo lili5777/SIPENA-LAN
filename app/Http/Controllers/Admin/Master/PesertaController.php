@@ -75,61 +75,70 @@ class PesertaController extends Controller
         ->get();
 
     // =====================
-    // QUERY PENDAFTARAN
+    // QUERY DASAR (untuk stats dan pagination)
     // =====================
-    $pendaftaranQuery = Pendaftaran::with([
-        'peserta',
-        'peserta.kepegawaianPeserta',
-        'angkatan',
-        'pesertaMentor.mentor'
-    ])
-        ->where('pendaftaran.id_jenis_pelatihan', $jenisPelatihanId) // ✅ Tambah prefix 'pendaftaran.'
-        ->whereNotNull('pendaftaran.id_angkatan')                     // ✅ Tambah prefix 'pendaftaran.'
-        ->where('pendaftaran.id_angkatan', '!=', 0);                  // ✅ Tambah prefix 'pendaftaran.'
+    $baseQuery = Pendaftaran::query()
+        ->where('pendaftaran.id_jenis_pelatihan', $jenisPelatihanId)
+        ->whereNotNull('pendaftaran.id_angkatan')
+        ->where('pendaftaran.id_angkatan', '!=', 0);
 
     // Filter akses PIC
     if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
-        $pendaftaranQuery->whereIn('pendaftaran.id_angkatan', $picAngkatanIds); // ✅ Tambah prefix
+        $baseQuery->whereIn('pendaftaran.id_angkatan', $picAngkatanIds);
     }
 
     // Filter angkatan
     if ($request->filled('angkatan')) {
-        $pendaftaranQuery->where('pendaftaran.id_angkatan', $request->angkatan); // ✅ Tambah prefix
+        $baseQuery->where('pendaftaran.id_angkatan', $request->angkatan);
     }
 
-    // ✅ Filter kategori (PNBP / FASILITASI)
+    // Filter kategori (PNBP / FASILITASI)
     if ($request->filled('kategori')) {
-        $pendaftaranQuery->whereHas('angkatan', function ($q) use ($request) {
+        $baseQuery->whereHas('angkatan', function ($q) use ($request) {
             $q->where('kategori', $request->kategori);
         });
     }
 
-    // ✅ Filter status pendaftaran
+    // Filter status pendaftaran
     if ($request->filled('status')) {
-        $pendaftaranQuery->where('pendaftaran.status_pendaftaran', $request->status); // ✅ Tambah prefix
+        $baseQuery->where('pendaftaran.status_pendaftaran', $request->status);
     }
 
-    // ✅ PENGURUTAN:
-    // 1. Berdasarkan angkatan (tahun, nama_angkatan)
-    // 2. Di dalam setiap angkatan, urutkan berdasarkan NDH (yang kosong di akhir)
-    $pendaftaran = $pendaftaranQuery
+    // =====================
+    // STATS - Ambil SEMUA data sesuai filter (tanpa pagination)
+    // =====================
+    $allPendaftaran = clone $baseQuery; // Clone query untuk stats
+    $statsData = $allPendaftaran->get(); // Ambil semua data untuk stats
+
+    // =====================
+    // QUERY PENDAFTARAN DENGAN PAGINATION
+    // =====================
+    $pendaftaran = $baseQuery
+        ->with([
+            'peserta',
+            'peserta.kepegawaianPeserta',
+            'angkatan',
+            'pesertaMentor.mentor'
+        ])
         ->leftJoin('peserta', 'pendaftaran.id_peserta', '=', 'peserta.id')
         ->leftJoin('angkatan', 'pendaftaran.id_angkatan', '=', 'angkatan.id')
         ->select('pendaftaran.*')
-        ->orderBy('angkatan.tahun', 'asc')              // Urutkan berdasarkan tahun angkatan
-        ->orderBy('angkatan.nama_angkatan', 'asc')      // Kemudian nama angkatan
+        ->orderBy('angkatan.tahun', 'asc')
+        ->orderBy('angkatan.nama_angkatan', 'asc')
         ->orderByRaw('CASE 
             WHEN peserta.ndh IS NULL OR peserta.ndh = "" THEN 1 
             ELSE 0 
-        END')                                             // NDH kosong ke bawah
-        ->orderByRaw('CAST(peserta.ndh AS UNSIGNED) ASC') // NDH numerik dari kecil ke besar
-        ->orderBy('pendaftaran.id', 'asc')               // Jika sama, urutkan berdasarkan ID
-        ->get();
+        END')
+        ->orderByRaw('CAST(peserta.ndh AS UNSIGNED) ASC')
+        ->orderBy('pendaftaran.id', 'asc')
+        ->paginate(10)
+        ->withQueryString();
 
     $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
 
     return view("admin.peserta.{$jenis}.index", compact(
         'pendaftaran',
+        'statsData',      // ✅ Kirim data stats terpisah
         'angkatanList',
         'jenisPelatihan',
         'jenis'
