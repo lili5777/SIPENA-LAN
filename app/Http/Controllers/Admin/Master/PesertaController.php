@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\SendEmail;
 use App\Models\AksiPerubahan;
 use App\Models\PicPeserta;
+use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
@@ -37,6 +38,14 @@ class PesertaController extends Controller
         'pka' => ['id' => 3, 'nama' => 'PKA'],
         'pkp' => ['id' => 4, 'nama' => 'PKP']
     ];
+
+    protected $whatsappService;
+
+    public function __construct(WhatsAppService $whatsappService)
+    {
+        $this->whatsappService = $whatsappService;
+    }
+
 
 
     private function getJenisData($jenis)
@@ -227,16 +236,26 @@ class PesertaController extends Controller
                 ], 422);
             }
 
+            // ✅ Validasi nomor HP peserta
+            if (empty($peserta->nomor_hp)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor HP peserta tidak tersedia. Tidak dapat mengirim informasi via WhatsApp.'
+                ], 422);
+            }
+
+            $waLink = null;
+
             // Jika status jadi Diterima
             if ($request->status_pendaftaran === 'Diterima') {
                 
                 // 🚨 CEK apakah user SUDAH ADA berdasarkan peserta_id
                 $existingUser = User::where('peserta_id', $peserta->id)->first();
+                $passwordAsli = Str::random(8); // Generate password baru
                 
                 if (!$existingUser) {
-                    // Jika user BELUM ada, buat baru & kirim email
+                    // ✅ Jika user BELUM ada, buat baru
                     $role = Role::where('name', 'user')->firstOrFail();
-                    $passwordAsli = Str::random(8);
 
                     $user = User::create([
                         'peserta_id' => $peserta->id,
@@ -246,23 +265,30 @@ class PesertaController extends Controller
                         'role_id' => $role->id,
                     ]);
 
-                    $dataEmail = [
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'password' => $passwordAsli,
-                        'link_gb_wa' => $pendaftaran->angkatan->link_gb_wa,
-                    ];
-
-                    Mail::to($user->email)->send(new SendEmail($dataEmail));
-                    
                 } else {
-                    // 🚨 Jika user SUDAH ADA, jangan buat baru dan jangan kirim email
-                    // Optional: Update nama/email jika ada perubahan
+                    // ✅ Jika user SUDAH ADA, update dengan password baru
                     $existingUser->update([
                         'name' => $peserta->nama_lengkap,
                         'email' => $peserta->email_pribadi,
-                        // Password tetap pakai yang lama
+                        'password' => bcrypt($passwordAsli), // 👈 Update password baru
                     ]);
+                }
+
+                // 📱 Generate link wa.me dengan password yang jelas
+                $dataWA = [
+                    'name' => $peserta->nama_lengkap,
+                    'email' => $peserta->email_pribadi,
+                    'password' => $passwordAsli, // 👈 Password asli/baru
+                    'link_gb_wa' => $pendaftaran->angkatan->link_gb_wa,
+                ];
+
+                $waResult = $this->whatsappService->generateAccountInfoLink(
+                    $peserta->nomor_hp,
+                    $dataWA
+                );
+
+                if ($waResult['success']) {
+                    $waLink = $waResult['link'];
                 }
             }
 
@@ -280,13 +306,111 @@ class PesertaController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Status pendaftaran berhasil diperbarui'
+                'message' => 'Status pendaftaran berhasil diperbarui.',
+                'wa_link' => $waLink,
+                'peserta_name' => $peserta->nama_lengkap
             ]);
         });
     } catch (\Throwable $e) {
         return response()->json([
             'success' => false,
             'message' => 'Terjadi kesalahan saat memperbarui status: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function resendAccountInfo($id)
+{
+    try {
+        return DB::transaction(function () use ($id) {
+            
+            // Get pendaftaran data
+            $pendaftaran = Pendaftaran::with(['peserta', 'angkatan', 'jenisPelatihan'])
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            $peserta = $pendaftaran->peserta;
+
+            // Validasi status harus "Diterima"
+            if ($pendaftaran->status_pendaftaran !== 'Diterima') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya peserta dengan status DITERIMA yang bisa dikirim ulang info akunnya.'
+                ], 422);
+            }
+
+            // Validasi link grup WA
+            if (empty($pendaftaran->angkatan->link_gb_wa)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Link Grup WhatsApp angkatan belum diisi.'
+                ], 422);
+            }
+
+            // Validasi nomor HP
+            if (empty($peserta->nomor_hp)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor HP peserta tidak tersedia.'
+                ], 422);
+            }
+
+            // Cari user yang sudah ada
+            $user = User::where('peserta_id', $peserta->id)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User belum dibuat. Silakan ubah status ke Diterima terlebih dahulu.'
+                ], 422);
+            }
+
+            // Generate password baru
+            $passwordBaru = Str::random(8);
+
+            // Update password user
+            $user->update([
+                'name' => $peserta->nama_lengkap,
+                'email' => $peserta->email_pribadi,
+                'password' => bcrypt($passwordBaru),
+            ]);
+
+            // Generate link wa.me
+            $dataWA = [
+                'name' => $peserta->nama_lengkap,
+                'email' => $peserta->email_pribadi,
+                'password' => $passwordBaru,
+                'link_gb_wa' => $pendaftaran->angkatan->link_gb_wa,
+            ];
+
+            $waResult = $this->whatsappService->generateAccountInfoLink(
+                $peserta->nomor_hp,
+                $dataWA
+            );
+
+            if (!$waResult['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal generate link WhatsApp: ' . $waResult['message']
+                ], 500);
+            }
+
+            // Log aktivitas
+            $jenisPelatihan = $pendaftaran->jenisPelatihan->nama_pelatihan ?? '-';
+            $angkatan = $pendaftaran->angkatan->nama_angkatan ?? '-';
+            aktifitas("Mengirim Ulang Info Akun {$jenisPelatihan} - {$angkatan}", $peserta);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password baru berhasil di-generate. Silakan kirim via WhatsApp.',
+                'wa_link' => $waResult['link'],
+                'peserta_name' => $peserta->nama_lengkap
+            ]);
+        });
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
         ], 500);
     }
 }

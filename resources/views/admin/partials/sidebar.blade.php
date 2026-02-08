@@ -69,28 +69,31 @@ $labelMenu = match ($kodePelatihan) {
                             <a href="" class="submenu-link">
                                 <i class="fas fa-book me-2"></i> Materi Pelatihan
                             </a> --}}
-                            @if(auth()->user()->hasPermission('mentor.read'))
-                            <a href="{{ route('mentor.index') }}" class="submenu-link">
-                                <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
-                            </a>
+                            @if (auth()->user()->role->name != "pic" )
+                                @if(auth()->user()->hasPermission('mentor.read'))
+                                <a href="{{ route('mentor.index') }}" class="submenu-link">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
+                                </a>
+                                @endif
+                                
+
+                                <a href="{{ route('visi-misi.index') }}" class="submenu-link">
+                                    <i class="fas fa-bullseye me-2"></i> Visi & Misi
+                                </a>
+
+                                <a href="{{ route('pejabat.index') }}" class="submenu-link">
+                                    <i class="fas fa-users me-2"></i> Pejabat
+                                </a>
+
+                                <a href="{{ route('berita.index') }}" class="submenu-link">
+                                    <i class="fas fa-newspaper me-2"></i> Berita
+                                </a>
+
+                                <a href="{{ route('kontak.index') }}" class="submenu-link">
+                                    <i class="fas fa-address-book me-2"></i> Kontak
+                                </a>
                             @endif
                             
-
-                            <a href="{{ route('visi-misi.index') }}" class="submenu-link">
-                                <i class="fas fa-bullseye me-2"></i> Visi & Misi
-                            </a>
-
-                            <a href="{{ route('pejabat.index') }}" class="submenu-link">
-                                <i class="fas fa-users me-2"></i> Pejabat
-                            </a>
-
-                            <a href="{{ route('berita.index') }}" class="submenu-link">
-                                <i class="fas fa-newspaper me-2"></i> Berita
-                            </a>
-
-                            <a href="{{ route('kontak.index') }}" class="submenu-link">
-                                <i class="fas fa-address-book me-2"></i> Kontak
-                            </a>
                         </div>
                     </div>
 

@@ -325,20 +325,30 @@
                                                                                                                             </p>
                                                                                                                         </td>
                                                                                                                         <td>
-                                                                                                                            <div class="d-flex flex-column gap-1">
-                                                                                                                                <span class="badge custom-badge {{ $statusData['color'] }} peserta-status">
-                                                                                                                                    <i class="fas {{ $statusData['icon'] }} me-1"></i>
-                                                                                                                                    {{ $statusData['text'] }}
-                                                                                                                                </span>
-                                                                                                                                @if ($daftar->status_pendaftaran != 'Diterima')
-                                                                                                                                    <button type="button" class="btn btn-sm btn-outline-warning update-status"
-                                                                                                                                        data-id="{{ $daftar->id }}" data-status="{{ $daftar->status_pendaftaran }}"
-                                                                                                                                        data-bs-toggle="tooltip" title="Ubah Status">
-                                                                                                                                        <i class="fas fa-edit me-1"></i> Verifikasi
-                                                                                                                                    </button>
-                                                                                                                                @endif
-                                                                                                                            </div>
-                                                                                                                        </td>
+    <div class="d-flex flex-column gap-1">
+        <span class="badge custom-badge {{ $statusData['color'] }} peserta-status">
+            <i class="fas {{ $statusData['icon'] }} me-1"></i>
+            {{ $statusData['text'] }}
+        </span>
+        
+        @if ($daftar->status_pendaftaran == 'Diterima')
+            {{-- Tombol Kirim Ulang Info Akun --}}
+            <button type="button" class="btn btn-sm btn-outline-success resend-account-info"
+                data-id="{{ $daftar->id }}" 
+                data-name="{{ $peserta->nama_lengkap }}"
+                data-bs-toggle="tooltip" title="Kirim Ulang Info Akun ke WhatsApp">
+                <i class="fab fa-whatsapp me-1"></i> Kirim Info Akun
+            </button>
+        @else
+            {{-- Tombol Verifikasi Status --}}
+            <button type="button" class="btn btn-sm btn-outline-warning update-status"
+                data-id="{{ $daftar->id }}" data-status="{{ $daftar->status_pendaftaran }}"
+                data-bs-toggle="tooltip" title="Ubah Status">
+                <i class="fas fa-edit me-1"></i> Verifikasi
+            </button>
+        @endif
+    </div>
+</td>
                                                                                                                         <td class="text-center pe-4">
                                                                                                                             <div class="btn-group" role="group">
                                                                                                                                 <button type="button" class="btn btn-sm btn-outline-info btn-action view-detail"
@@ -845,75 +855,213 @@
 
 
                 // Status Form Submission dengan loading indicator
-                statusForm.addEventListener('submit', async function (e) {
-                    e.preventDefault();
+statusForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-                    // Tampilkan loading, sembunyikan tombol
-                    // statusLoading.classList.remove('d-none');
-                    statusSubmitBtn.disabled = true;
-                    statusCancelBtn.disabled = true;
-                    statusSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
+    const submitBtn = document.getElementById('statusSubmitBtn');
+    const cancelBtn = document.getElementById('statusCancelBtn');
+    
+    if (submitBtn.getAttribute('data-submitting') === 'true') {
+        return;
+    }
+    
+    submitBtn.setAttribute('data-submitting', 'true');
+    submitBtn.disabled = true;
+    cancelBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
 
-                    const formData = new FormData(this);
-                    const action = this.action;
+    try {
+        const formData = new FormData(this);
+        const action = this.action;
 
-                    try {
-                        const response = await fetch(action, {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: formData
-                        });
+        const response = await fetch(action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: formData
+        });
 
-                        const result = await response.json();
+        const result = await response.json();
 
-                        if (result.success) {
-                            // Update tombol dengan sukses
-                            statusSubmitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
-                            statusSubmitBtn.classList.remove('btn-primary');
-                            statusSubmitBtn.classList.add('btn-success');
+        if (result.success) {
+            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-success');
 
-                            showAlert('success', result.message);
+            showAlert('success', result.message);
 
-                            // Tutup modal setelah sukses
-                            setTimeout(() => {
-                                statusModal.hide();
+            // 📱 Jika ada link WhatsApp, tampilkan modal konfirmasi
+            if (result.wa_link) {
+                setTimeout(() => {
+                    statusModal.hide();
+                    showWhatsAppModal(result.wa_link, result.peserta_name);
+                }, 1500);
+            } else {
+                setTimeout(() => {
+                    statusModal.hide();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                }, 1500);
+            }
+        } else {
+            submitBtn.removeAttribute('data-submitting');
+            submitBtn.disabled = false;
+            cancelBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+            
+            showAlert('error', result.message || 'Terjadi kesalahan');
+        }
+    } catch (error) {
+        submitBtn.removeAttribute('data-submitting');
+        submitBtn.disabled = false;
+        cancelBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+        
+        showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+        console.error('Error:', error);
+    }
+});
 
-                                // Reset tombol ke keadaan semula
-                                setTimeout(() => {
-                                    // statusLoading.classList.add('d-none');
-                                    statusSubmitBtn.disabled = false;
-                                    statusCancelBtn.disabled = false;
-                                    statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-                                    statusSubmitBtn.classList.remove('btn-success');
-                                    statusSubmitBtn.classList.add('btn-primary');
+// 📱 Function untuk menampilkan modal WhatsApp
+function showWhatsAppModal(waLink, pesertaName) {
+    // Hapus modal lama jika ada
+    const oldModal = document.getElementById('whatsappModal');
+    if (oldModal) {
+        oldModal.remove();
+    }
 
-                                    // Refresh halaman
-                                    window.location.reload();
-                                }, 500);
-                            }, 1500);
-                        } else {
-                            // Sembunyikan loading, aktifkan tombol kembali
-                            // statusLoading.classList.add('d-none');
-                            statusSubmitBtn.disabled = false;
-                            statusCancelBtn.disabled = false;
-                            statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+    // Buat modal baru
+    const modalHTML = `
+        <div class="modal fade" id="whatsappModal" tabindex="-1" aria-labelledby="whatsappModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header border-0 bg-success text-white">
+                        <h5 class="modal-title fw-bold" id="whatsappModalLabel">
+                            <i class="fab fa-whatsapp me-2"></i>Kirim Informasi via WhatsApp
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <div class="wa-icon mb-3">
+                            <i class="fab fa-whatsapp fa-5x text-success"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Status Berhasil Diperbarui!</h5>
+                        <p class="text-muted mb-4">
+                            Klik tombol di bawah untuk mengirim informasi akun ke <strong>${pesertaName}</strong> via WhatsApp.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="${waLink}" target="_blank" class="btn btn-success btn-lg" id="openWhatsAppBtn">
+                                <i class="fab fa-whatsapp me-2"></i>Buka WhatsApp
+                            </a>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                Nanti Saja
+                            </button>
+                        </div>
+                        <small class="text-muted mt-3 d-block">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Pesan akan otomatis terisi, Anda tinggal klik kirim
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 
-                            showAlert('error', result.message || 'Terjadi kesalahan');
-                        }
-                    } catch (error) {
-                        // Sembunyikan loading, aktifkan tombol kembali
-                        // statusLoading.classList.add('d-none');
-                        statusSubmitBtn.disabled = false;
-                        statusCancelBtn.disabled = false;
-                        statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+    // Tambahkan modal ke body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-                        showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
-                        console.error('Error:', error);
-                    }
-                });
+    // Tampilkan modal
+    const whatsappModal = new bootstrap.Modal(document.getElementById('whatsappModal'));
+    whatsappModal.show();
+
+    // Event: setelah buka WA, reload halaman
+    document.getElementById('openWhatsAppBtn').addEventListener('click', function() {
+        setTimeout(() => {
+            whatsappModal.hide();
+            window.location.reload();
+        }, 1000);
+    });
+
+    // Event: modal ditutup, reload halaman
+    document.getElementById('whatsappModal').addEventListener('hidden.bs.modal', function () {
+        setTimeout(() => {
+            window.location.reload();
+        }, 300);
+    });
+}
+
+// Resend Account Info - TOMBOL BARU
+document.querySelectorAll('.resend-account-info').forEach(button => {
+    button.addEventListener('click', function () {
+        const pendaftaranId = this.getAttribute('data-id');
+        const pesertaName = this.getAttribute('data-name');
+        
+        // Konfirmasi dulu
+        if (confirm(`Kirim ulang informasi akun ke ${pesertaName}?\n\nPassword baru akan di-generate dan dikirim via WhatsApp.`)) {
+            resendAccountInfo(pendaftaranId, pesertaName);
+        }
+    });
+});
+
+// Function untuk resend account info
+async function resendAccountInfo(pendaftaranId, pesertaName) {
+    try {
+        // Show loading
+        const button = document.querySelector(`.resend-account-info[data-id="${pendaftaranId}"]`);
+        const originalHTML = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Mengirim...';
+
+        const response = await fetch(`/peserta/resend-account-info/${pendaftaranId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            button.innerHTML = '<i class="fas fa-check me-1"></i> Terkirim!';
+            button.classList.remove('btn-outline-success');
+            button.classList.add('btn-success');
+
+            showAlert('success', result.message);
+
+            // Tampilkan modal WhatsApp
+            if (result.wa_link) {
+                setTimeout(() => {
+                    showWhatsAppModal(result.wa_link, pesertaName);
+                }, 1000);
+            }
+
+            // Reset button setelah 3 detik
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-success');
+            }, 3000);
+
+        } else {
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+            showAlert('error', result.message || 'Gagal mengirim informasi akun');
+        }
+    } catch (error) {
+        showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+        console.error('Error:', error);
+        
+        // Reset button
+        const button = document.querySelector(`.resend-account-info[data-id="${pendaftaranId}"]`);
+        button.innerHTML = '<i class="fab fa-whatsapp me-1"></i> Kirim Info Akun';
+        button.disabled = false;
+    }
+}
 
                 // Load All Detail Data
                 async function loadAllDetailData(pendaftaranId) {
@@ -2563,6 +2711,64 @@ function aksiCard(aksi) {
     .dokumen-item, .link-item {
         margin-bottom: 0.5rem;
     }
+}
+/* WhatsApp Modal Styling */
+#whatsappModal .modal-header {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+}
+
+#whatsappModal .wa-icon i {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-20px);
+    }
+    60% {
+        transform: translateY(-10px);
+    }
+}
+
+#whatsappModal .btn-success {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#whatsappModal .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+}
+
+/* Button Kirim Info Akun */
+.btn-outline-success.resend-account-info {
+    border-color: #25D366;
+    color: #25D366;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.btn-outline-success.resend-account-info:hover {
+    background-color: #25D366;
+    border-color: #25D366;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+}
+
+.btn-outline-success.resend-account-info:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-success.resend-account-info {
+    background-color: #25D366;
+    border-color: #25D366;
+    color: white;
 }
         </style>
 @endsection

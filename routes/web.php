@@ -144,6 +144,7 @@ Route::middleware('auth')->group(function () {
 
             // Route Update Status peserta
             Route::post('/update-status/{id}', [PesertaController::class, 'updateStatus'])->name('update-status');
+            Route::post('/resend-account-info/{id}', [PesertaController::class, 'resendAccountInfo'])->name('resend-account-info');
         });
     });
 
