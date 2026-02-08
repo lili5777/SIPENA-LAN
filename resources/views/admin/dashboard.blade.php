@@ -1004,6 +1004,239 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Progress Bar Styles */
+.progress-container {
+    width: 100%;
+}
+
+.progress-bar-wrapper {
+    width: 100%;
+    height: 28px;
+    background: #f1f5f9;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 14px;
+    transition: width 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-width: 40px;
+}
+
+.progress-text {
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.progress-bar[style*="width: 0%"] .progress-text,
+.progress-bar[style*="width: 1%"] .progress-text,
+.progress-bar[style*="width: 2%"] .progress-text {
+    color: var(--primary-color);
+    position: absolute;
+    left: 45px;
+}
+/* PIC Card Styles */
+.pic-card {
+    border-left-width: 6px;
+}
+
+.pic-summary {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(26, 58, 108, 0.05), rgba(44, 82, 130, 0.05));
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.summary-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.summary-item i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.summary-item div {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-item strong {
+    font-size: 1.25rem;
+    color: var(--dark-color);
+}
+
+.summary-item small {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* Angkatan List Styles */
+.angkatan-list {
+    margin-top: 1rem;
+}
+
+.angkatan-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.angkatan-item {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.angkatan-item:hover {
+    background: white;
+    border-color: var(--primary-color);
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(26, 58, 108, 0.1);
+}
+
+.angkatan-item:last-child {
+    margin-bottom: 0;
+}
+
+.angkatan-info {
+    margin-bottom: 0.75rem;
+}
+
+.angkatan-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.angkatan-name i {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+
+.angkatan-pelatihan {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-left: 1.4rem;
+}
+
+.angkatan-date {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-left: 1.4rem;
+    margin-top: 0.25rem;
+}
+
+.angkatan-date i {
+    margin-right: 0.25rem;
+}
+
+.angkatan-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-box {
+    background: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    min-width: 100px;
+}
+
+.stat-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.15rem;
+}
+
+.progress-mini {
+    flex: 1;
+    height: 24px;
+    background: #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-mini {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 12px;
+    transition: width 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 35px;
+}
+
+.progress-bar-mini span {
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.progress-bar-mini[style*="width: 0%"] span,
+.progress-bar-mini[style*="width: 1%"] span,
+.progress-bar-mini[style*="width: 2%"] span {
+    color: var(--primary-color);
+    position: absolute;
+    left: 40px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pic-summary {
+        flex-direction: column;
+    }
+    
+    .angkatan-stats {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .stat-box {
+        width: 100%;
+    }
+}
         </style>
 @endsection
 
@@ -1045,6 +1278,130 @@
             </div>
         </div>
     </div>
+
+
+    
+    @if(auth()->user()->role->name == 'pengawas')
+        <div class="data-peserta-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Monitoring PIC Angkatan</span>
+                </div>
+                <div class="section-actions">
+                    <div class="status-badge active">
+                        <i class="fas fa-user-tie"></i>
+                        {{ count($dataPicAngkatan) }} PIC Aktif
+                    </div>
+                    <button class="btn-refresh" onclick="window.location.reload()">
+                        <i class="fas fa-redo"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            @if(count($dataPicAngkatan) > 0)
+                <div class="data-grid">
+                    @foreach($dataPicAngkatan as $data)
+                        <div class="data-card pic-card">
+                            <div class="data-card-header">
+                                <div class="data-card-title">
+                                    <i class="fas fa-user-tie"></i>
+                                    {{ $data['pic_name'] }}
+                                </div>
+                                <div class="status-badge active">
+                                    <i class="fas fa-layer-group"></i>
+                                    {{ $data['jumlah_angkatan'] }} Angkatan
+                                </div>
+                            </div>
+                            
+                            <!-- Summary Total -->
+                            <div class="pic-summary">
+                                <div class="summary-item">
+                                    <i class="fas fa-users"></i>
+                                    <div>
+                                        <strong>{{ $data['total_diterima'] }}</strong> / {{ $data['total_kuota'] }}
+                                        <small>Total Peserta</small>
+                                    </div>
+                                </div>
+                                <div class="summary-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div>
+                                        <strong>{{ $data['overall_progress'] }}%</strong>
+                                        <small>Progress Keseluruhan</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Daftar Angkatan -->
+                            <div class="angkatan-list">
+                                <div class="angkatan-header">
+                                    <i class="fas fa-list-alt"></i>
+                                    <strong>Angkatan yang Dihandle:</strong>
+                                </div>
+                                
+                                @foreach($data['angkatan_list'] as $angkatan)
+                                    <div class="angkatan-item">
+                                        <div class="angkatan-info">
+                                            <div class="angkatan-name">
+                                                <i class="fas fa-graduation-cap"></i>
+                                                <strong>{{ $angkatan['nama_angkatan'] }}</strong>
+                                            </div>
+                                            <div class="angkatan-pelatihan">
+                                                {{ $angkatan['nama_pelatihan'] }}
+                                            </div>
+                                            @if($angkatan['tanggal_mulai'] && $angkatan['tanggal_selesai'])
+                                                <div class="angkatan-date">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                    {{ \Carbon\Carbon::parse($angkatan['tanggal_mulai'])->format('d M Y') }} 
+                                                    - 
+                                                    {{ \Carbon\Carbon::parse($angkatan['tanggal_selesai'])->format('d M Y') }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                        
+                                        <div class="angkatan-stats">
+                                            <div class="stat-box">
+                                                <div class="stat-number">{{ $angkatan['peserta_diterima'] }} / {{ $angkatan['kuota'] }}</div>
+                                                <div class="stat-label">Peserta</div>
+                                            </div>
+                                            
+                                            <div class="progress-mini">
+                                                <div class="progress-bar-mini" style="width: {{ $angkatan['progress'] }}%">
+                                                    <span>{{ $angkatan['progress'] }}%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Kontak PIC -->
+                            <div class="data-item" style="border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-top: 1rem;">
+                                <span class="data-label">
+                                    <i class="fas fa-phone"></i>
+                                    Kontak PIC
+                                </span>
+                                <span class="data-value">
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $data['pic_phone']) }}" 
+                                       target="_blank" 
+                                       style="color:#25D366; font-weight:600; text-decoration:none;">
+                                        <i class="fab fa-whatsapp"></i> {{ $data['pic_phone'] }}
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="no-data">
+                    <i class="fas fa-users-slash"></i>
+                    <h4>Belum Ada Data PIC</h4>
+                    <p>Belum ada PIC yang ditugaskan untuk angkatan manapun</p>
+                </div>
+            @endif
+        </div>
+    @endif
 
     <!-- Data Peserta Section -->
     @if ($peserta)

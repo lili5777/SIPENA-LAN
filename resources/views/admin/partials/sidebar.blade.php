@@ -49,7 +49,7 @@ $labelMenu = match ($kodePelatihan) {
             </div>
         @endif
 
-        @if (auth()->user()->role->name != "user")
+        @if (auth()->user()->role->name != "user" && auth()->user()->role->name != "pengawas")
                     <!-- Master Data -->
                     <div class="menu-item has-submenu">
                         <a href="#" class="menu-link">

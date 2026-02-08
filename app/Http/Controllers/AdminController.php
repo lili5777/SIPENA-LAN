@@ -21,95 +21,142 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class AdminController extends Controller
 {
     public function index()
-    {
-        // Ambil data user yang sedang login
-        $user = Auth::user();
+{
+    $user = Auth::user();
+    
+    // Inisialisasi variabel untuk role user
+    $peserta = null;
+    $kepegawaian = null;
+    $pendaftaranTerbaru = null;
+    $mentorData = null;
+    $jenisPelatihanData = null;
+    $angkatanData = null;
+    $semuaPendaftaran = [];
+    $kunci_judul = false;
+    $picPeserta = null;
+    
+    // Inisialisasi variabel untuk role pengawas
+    $dataPicAngkatan = [];
 
-        // Inisialisasi variabel
-        $peserta = null;
-        $kepegawaian = null;
-        $pendaftaranTerbaru = null;
-        $mentorData = null;
-        $jenisPelatihanData = null;
-        $angkatanData = null;
-        $semuaPendaftaran = [];
-        $kunci_judul = false;
+    // Logic untuk role 'user'
+    if ($user->role->name == 'user') {
+        $peserta = Peserta::where('id', $user->peserta_id)
+            ->with([
+                'kepegawaian' => function ($query) {
+                    $query->with(['provinsi', 'kabupaten']);
+                },
+                'pendaftaran' => function ($query) {
+                    $query->with([
+                        'jenisPelatihan',
+                        'angkatan',
+                        'pesertaMentor' => function ($q) {
+                            $q->with('mentor');
+                        }
+                    ])->orderBy('tanggal_daftar', 'desc');
+                },
+                'logAktivitas'
+            ])
+            ->first();
 
-        // Ambil data peserta jika role user adalah 'user'
-        if ($user->role->name == 'user') {
-            // Ambil peserta dengan SEMUA relasi yang dibutuhkan
-            $peserta = Peserta::where('id', $user->peserta_id)
-                ->with([
-                    'kepegawaian' => function ($query) {
-                        $query->with(['provinsi', 'kabupaten']);
-                    },
-                    'pendaftaran' => function ($query) {
-                        $query->with([
-                            'jenisPelatihan',
-                            'angkatan',
-                            'pesertaMentor' => function ($q) {
-                                $q->with('mentor');
-                            }
-                        ])->orderBy('tanggal_daftar', 'desc');
-                    },
-                    'logAktivitas'
-                ])
-                ->first();
-
-            // Jika peserta ditemukan
-            if ($peserta) {
-                // Ambil data kepegawaian
-                $kepegawaian = $peserta->kepegawaian;
-
-                // Ambil pendaftaran terbaru
-                $pendaftaranTerbaru = $peserta->pendaftaran->first();
-
-                // Ambil semua pendaftaran untuk ditampilkan
-                $semuaPendaftaran = $peserta->pendaftaran;
-
-                $kunci_judul = $pendaftaranTerbaru->angkatan->kunci_edit ?? false;
-                
-
-                // Jika ada pendaftaran terbaru, ambil data mentor
-                if ($pendaftaranTerbaru && $pendaftaranTerbaru->pesertaMentor->isNotEmpty()) {
-                    $mentorData = $pendaftaranTerbaru->pesertaMentor->first()->mentor;
-                }
-
-                // Ambil data jenis pelatihan dari pendaftaran terbaru
-                if ($pendaftaranTerbaru && $pendaftaranTerbaru->jenisPelatihan) {
-                    $jenisPelatihanData = $pendaftaranTerbaru->jenisPelatihan;
-                }
-
-                // Ambil data angkatan dari pendaftaran terbaru
-                if ($pendaftaranTerbaru && $pendaftaranTerbaru->angkatan) {
-                    $angkatanData = $pendaftaranTerbaru->angkatan;
-                }
+        if ($peserta) {
+            $kepegawaian = $peserta->kepegawaian;
+            $pendaftaranTerbaru = $peserta->pendaftaran->first();
+            $semuaPendaftaran = $peserta->pendaftaran;
+            $kunci_judul = $pendaftaranTerbaru->angkatan->kunci_edit ?? false;
+            
+            if ($pendaftaranTerbaru && $pendaftaranTerbaru->pesertaMentor->isNotEmpty()) {
+                $mentorData = $pendaftaranTerbaru->pesertaMentor->first()->mentor;
+            }
+            
+            if ($pendaftaranTerbaru && $pendaftaranTerbaru->jenisPelatihan) {
+                $jenisPelatihanData = $pendaftaranTerbaru->jenisPelatihan;
+            }
+            
+            if ($pendaftaranTerbaru && $pendaftaranTerbaru->angkatan) {
+                $angkatanData = $pendaftaranTerbaru->angkatan;
             }
         }
 
-        $picPeserta = null;
         if ($pendaftaranTerbaru) {
-        $picPeserta = PicPeserta::with('user')
-            ->where('jenispelatihan_id', $pendaftaranTerbaru->id_jenis_pelatihan)
-            ->where('angkatan_id', $pendaftaranTerbaru->id_angkatan)
-            ->first();
+            $picPeserta = PicPeserta::with('user')
+                ->where('jenispelatihan_id', $pendaftaranTerbaru->id_jenis_pelatihan)
+                ->where('angkatan_id', $pendaftaranTerbaru->id_angkatan)
+                ->first();
+        }
     }
+    
+    // Logic untuk role 'pengawas'
+if ($user->role->name == 'pengawas') {
+    // Ambil semua PIC dengan angkatan yang mereka handle
+    $picData = PicPeserta::with([
+        'user',
+        'jenisPelatihan',
+        'angkatan' => function($q) {
+            $q->withCount([
+                'pendaftaran as peserta_diterima' => function($query) {
+                    $query->where('status_pendaftaran', 'Diterima');
+                }
+            ]);
+        }
+    ])->get();
 
+    // Group by user_id untuk menggabungkan PIC yang sama
+    $groupedByPic = $picData->groupBy('user_id');
 
-        // Kirimkan data ke view
-        return view('admin.dashboard', compact(
-            'user',
-            'peserta',
-            'kepegawaian',
-            'pendaftaranTerbaru',
-            'mentorData',
-            'jenisPelatihanData',
-            'angkatanData',
-            'semuaPendaftaran',
-            'kunci_judul',
-            'picPeserta'
-        ));
-    }
+    $dataPicAngkatan = $groupedByPic->map(function($picItems) {
+        $firstPic = $picItems->first();
+        
+        // Kumpulkan semua angkatan yang di-handle PIC ini
+        $angkatanList = $picItems->map(function($pic) {
+            $kuota = $pic->angkatan->kuota ?? 0;
+            $pesertaDiterima = $pic->angkatan->peserta_diterima ?? 0;
+            $progress = $kuota > 0 ? round(($pesertaDiterima / $kuota) * 100) : 0;
+            
+            return [
+                'nama_angkatan' => $pic->angkatan->nama_angkatan ?? 'N/A',
+                'nama_pelatihan' => $pic->jenisPelatihan->nama_pelatihan ?? 'N/A',
+                'kuota' => $kuota,
+                'peserta_diterima' => $pesertaDiterima,
+                'progress' => $progress,
+                'tanggal_mulai' => $pic->angkatan->tanggal_mulai ?? null,
+                'tanggal_selesai' => $pic->angkatan->tanggal_selesai ?? null,
+            ];
+        })->sortByDesc('progress')->values()->toArray(); // Sort angkatan by progress descending
+
+        // Hitung total untuk card
+        $totalKuota = collect($angkatanList)->sum('kuota');
+        $totalDiterima = collect($angkatanList)->sum('peserta_diterima');
+        $overallProgress = $totalKuota > 0 ? round(($totalDiterima / $totalKuota) * 100) : 0;
+        
+        return [
+            'pic_name' => $firstPic->user->name ?? 'N/A',
+            'pic_email' => $firstPic->user->email ?? 'N/A',
+            'pic_phone' => $firstPic->user->no_telp ?? 'N/A',
+            'jumlah_angkatan' => count($angkatanList),
+            'angkatan_list' => $angkatanList,
+            'total_kuota' => $totalKuota,
+            'total_diterima' => $totalDiterima,
+            'overall_progress' => $overallProgress,
+        ];
+    })
+    ->sortByDesc('overall_progress') // Sort PIC by overall_progress descending
+    ->values(); // Reset keys setelah sorting
+}
+
+    return view('admin.dashboard', compact(
+        'user',
+        'peserta',
+        'kepegawaian',
+        'pendaftaranTerbaru',
+        'mentorData',
+        'jenisPelatihanData',
+        'angkatanData',
+        'semuaPendaftaran',
+        'kunci_judul',
+        'picPeserta',
+        'dataPicAngkatan'
+    ));
+}
 
 
     public function editData(Request $request)

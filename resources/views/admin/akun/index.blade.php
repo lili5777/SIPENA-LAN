@@ -651,7 +651,7 @@
                     <i class="fas fa-user"></i>
                 </div>
                 <h2 class="account-name">{{ $user->name ?? 'Administrator' }}</h2>
-                <p class="account-role">Administrator</p>
+                <p class="account-role">{{ $user->role->name ?? 'Administrator' }}</p>
             </div>
 
             <div class="account-body">
