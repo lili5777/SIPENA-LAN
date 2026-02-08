@@ -70,29 +70,23 @@ class PesertaController extends Controller
         ->unique()
         ->toArray();
 
-    // =====================
-    // LIST ANGKATAN (FILTER DROPDOWN) - DENGAN SORTING ROMAWI
-    // =====================
+    // LIST ANGKATAN (FILTER DROPDOWN)
     $angkatanQuery = Angkatan::where('id_jenis_pelatihan', $jenisPelatihanId);
 
     if ($user->role->name === 'pic' && !empty($picAngkatanIds)) {
         $angkatanQuery->whereIn('id', $picAngkatanIds);
     }
 
-    // ✅ Ambil data dan sort menggunakan Collection
     $angkatanList = $angkatanQuery->get()->sortBy(function ($angkatan) {
-        // Fungsi convert romawi ke integer (inline)
         $romans = [
             'M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400,
             'C' => 100, 'XC' => 90, 'L' => 50, 'XL' => 40,
             'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1
         ];
         
-        // Extract romawi dari "Angkatan I", "Angkatan II", dll
         preg_match('/Angkatan\s+([IVXLCDM]+)/i', $angkatan->nama_angkatan, $matches);
         $roman = $matches[1] ?? '';
         
-        // Convert ke integer
         $result = 0;
         foreach ($romans as $key => $value) {
             while (strpos($roman, $key) === 0) {
@@ -102,11 +96,9 @@ class PesertaController extends Controller
         }
         
         return $result;
-    })->values(); // Reset array keys
+    })->values();
 
-    // =====================
-    // QUERY DASAR (untuk stats dan pagination)
-    // =====================
+    // QUERY DASAR
     $baseQuery = Pendaftaran::query()
         ->where('pendaftaran.id_jenis_pelatihan', $jenisPelatihanId)
         ->whereNotNull('pendaftaran.id_angkatan')
@@ -122,27 +114,39 @@ class PesertaController extends Controller
         $baseQuery->where('pendaftaran.id_angkatan', $request->angkatan);
     }
 
-    // Filter kategori (PNBP / FASILITASI)
+    // Filter kategori
     if ($request->filled('kategori')) {
         $baseQuery->whereHas('angkatan', function ($q) use ($request) {
             $q->where('kategori', $request->kategori);
         });
     }
 
-    // Filter status pendaftaran
+    // Filter status
     if ($request->filled('status')) {
         $baseQuery->where('pendaftaran.status_pendaftaran', $request->status);
     }
 
-    // =====================
-    // STATS - Ambil SEMUA data sesuai filter (tanpa pagination)
-    // =====================
+    // ✅ TAMBAHAN: Server-Side Search
+    if ($request->filled('search')) {
+        $searchTerm = $request->search;
+        
+        $baseQuery->where(function($q) use ($searchTerm) {
+            $q->whereHas('peserta', function($query) use ($searchTerm) {
+                $query->where('nama_lengkap', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('nip_nrp', 'LIKE', "%{$searchTerm}%");
+            })
+            ->orWhereHas('peserta.kepegawaianPeserta', function($query) use ($searchTerm) {
+                $query->where('asal_instansi', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('unit_kerja', 'LIKE', "%{$searchTerm}%");
+            });
+        });
+    }
+
+    // STATS - Ambil semua data sesuai filter
     $allPendaftaran = clone $baseQuery;
     $statsData = $allPendaftaran->get();
 
-    // =====================
     // QUERY PENDAFTARAN DENGAN PAGINATION
-    // =====================
     $pendaftaran = $baseQuery
         ->with([
             'peserta',

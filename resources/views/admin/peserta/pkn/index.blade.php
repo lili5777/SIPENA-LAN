@@ -127,71 +127,87 @@
     </div>
 </div>
 
-        <!-- Filter Section -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <form id="filterForm" method="GET" class="row g-2">
-                            <div class="col-md-3">
-                                <label class="form-label small fw-semibold text-muted mb-1">
-                                    <i class="fas fa-filter me-1"></i> Angkatan
-                                </label>
-                                <select name="angkatan" class="form-select">
-                                    <option value="">Semua Angkatan</option>
-                                    @foreach($angkatanList as $angkatan)
-                                        <option value="{{ $angkatan->id }}"
-                                            {{ request('angkatan') == $angkatan->id ? 'selected' : '' }}>
-                                            {{ $angkatan->nama_angkatan }} - {{ $angkatan->tahun }} 
-                                            @if(!empty($angkatan->wilayah))
-                                                ({{ $angkatan->wilayah }})
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <div class="col-md-3">
-                                <label class="form-label small fw-semibold text-muted mb-1">
-                                    <i class="fas fa-tags me-1"></i> Kategori
-                                </label>
-                                <select name="kategori" class="form-select">
-                                    <option value="">Semua Kategori</option>
-                                    <option value="PNBP" {{ request('kategori') == 'PNBP' ? 'selected' : '' }}>PNBP</option>
-                                    <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>Fasilitasi</option>
-                                </select>
-                            </div>
+         <!-- Filter Section -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form id="filterForm" method="GET" class="row g-3 align-items-end">
+            <!-- Filter Angkatan -->
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted mb-1">
+                    <i class="fas fa-filter me-1"></i> Angkatan
+                </label>
+                <select name="angkatan" class="form-select">
+                    <option value="">Semua Angkatan</option>
+                    @foreach($angkatanList as $angkatan)
+                        <option value="{{ $angkatan->id }}"
+                            {{ request('angkatan') == $angkatan->id ? 'selected' : '' }}>
+                            {{ $angkatan->nama_angkatan }} - {{ $angkatan->tahun }} 
+                            @if(!empty($angkatan->wilayah))
+                                ({{ $angkatan->wilayah }})
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <!-- Filter Kategori -->
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">
+                    <i class="fas fa-tags me-1"></i> Kategori
+                </label>
+                <select name="kategori" class="form-select">
+                    <option value="">Semua Kategori</option>
+                    <option value="PNBP" {{ request('kategori') == 'PNBP' ? 'selected' : '' }}>PNBP</option>
+                    <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>Fasilitasi</option>
+                </select>
+            </div>
 
-                            <!-- ✅ BARU: Filter Status Pendaftaran -->
-                            <div class="col-md-3">
-                                <label class="form-label small fw-semibold text-muted mb-1">
-                                    <i class="fas fa-info-circle me-1"></i> Status
-                                </label>
-                                <select name="status" class="form-select">
-                                    <option value="">Semua Status</option>
-                                    <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>
-                                        Menunggu Verifikasi
-                                    </option>
-                                    <option value="Diterima" {{ request('status') == 'Diterima' ? 'selected' : '' }}>
-                                        Diterima
-                                    </option>
-                                    <option value="Lulus" {{ request('status') == 'Lulus' ? 'selected' : '' }}>
-                                        Lulus
-                                    </option>
-                                </select>
-                            </div>
+            <!-- Filter Status -->
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">
+                    <i class="fas fa-info-circle me-1"></i> Status
+                </label>
+                <select name="status" class="form-select">
+                    <option value="">Semua Status</option>
+                    <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>
+                        Menunggu Verifikasi
+                    </option>
+                    <option value="Diterima" {{ request('status') == 'Diterima' ? 'selected' : '' }}>
+                        Diterima
+                    </option>
+                    <option value="Lulus" {{ request('status') == 'Lulus' ? 'selected' : '' }}>
+                        Lulus
+                    </option>
+                </select>
+            </div>
 
-                            <div class="col-md-3 align-self-end">
-                                <button type="submit" class="btn btn-filter-primary w-100">
-                                    <i class="fas fa-search me-1"></i> Filter
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    
+            <!-- ✅ SEARCH INPUT (Server-Side) -->
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold text-muted mb-1">
+                    <i class="fas fa-search me-1"></i> Cari Peserta
+                </label>
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Nama, NIP, atau Instansi..." 
+                           value="{{ request('search') }}">
+                    @if(request('search'))
+                        <a href="{{ route('peserta.index', ['jenis' => request()->route('jenis')]) }}" 
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    @endif
                 </div>
             </div>
-        </div>
+
+            <!-- Tombol Filter -->
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-filter-primary w-100">
+                    <i class="fas fa-search me-1"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
         <!-- Peserta Table Card -->
         <div class="card border-0 shadow-lg overflow-hidden">
@@ -202,10 +218,14 @@
                             <i class="fas fa-list me-2" style="color: #285496;"></i> Daftar Peserta
                         </h5>
                         <small class="text-muted" id="tableInfo">
-                            Menampilkan {{ $pendaftaran->count() }} dari {{ $pendaftaran->count() }} peserta
+                            @if(request('search'))
+                                Ditemukan {{ $pendaftaran->total() }} peserta dengan kata kunci "{{ request('search') }}"
+                            @else
+                                Menampilkan {{ $pendaftaran->count() }} dari {{ $pendaftaran->total() }} peserta
+                            @endif
                         </small>
                     </div>
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0">
                                 <i class="fas fa-search text-muted"></i>
@@ -216,7 +236,7 @@
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
@@ -2029,7 +2049,7 @@ function aksiCard(aksi) {
                     }
 
                     // Initialize search
-                    initializeSearch();
+                    // initializeSearch();
 
                     // Auto-hide alerts
                     const alerts = document.querySelectorAll('.alert');
@@ -2056,92 +2076,92 @@ function aksiCard(aksi) {
                 });
 
                 // Search Functionality
-                function initializeSearch() {
-                    const searchInput = document.getElementById('searchInput');
-                    const clearSearchBtn = document.getElementById('clearSearch');
-                    const pesertaTable = document.getElementById('pesertaTable');
-                    const tbody = pesertaTable.querySelector('tbody');
+                // function initializeSearch() {
+                //     const searchInput = document.getElementById('searchInput');
+                //     const clearSearchBtn = document.getElementById('clearSearch');
+                //     const pesertaTable = document.getElementById('pesertaTable');
+                //     const tbody = pesertaTable.querySelector('tbody');
 
-                    searchInput.addEventListener('input', function () {
-                        const term = this.value.trim();
+                //     searchInput.addEventListener('input', function () {
+                //         const term = this.value.trim();
 
-                        if (term !== '') {
-                            clearSearchBtn.style.display = 'block';
-                        } else {
-                            clearSearchBtn.style.display = 'none';
-                        }
+                //         if (term !== '') {
+                //             clearSearchBtn.style.display = 'block';
+                //         } else {
+                //             clearSearchBtn.style.display = 'none';
+                //         }
 
-                        performSearch(term);
-                    });
+                //         performSearch(term);
+                //     });
 
-                    clearSearchBtn.addEventListener('click', function () {
-                        searchInput.value = '';
-                        this.style.display = 'none';
-                        performSearch('');
-                    });
+                //     clearSearchBtn.addEventListener('click', function () {
+                //         searchInput.value = '';
+                //         this.style.display = 'none';
+                //         performSearch('');
+                //     });
 
-                    function performSearch(searchTerm) {
-                        const term = searchTerm.toLowerCase().trim();
-                        const allRows = Array.from(tbody.querySelectorAll('tr.peserta-row'));
+                //     function performSearch(searchTerm) {
+                //         const term = searchTerm.toLowerCase().trim();
+                //         const allRows = Array.from(tbody.querySelectorAll('tr.peserta-row'));
 
-                        // SELALU hapus pesan no-result di awal
-                        removeNoResultsMessage();
+                //         // SELALU hapus pesan no-result di awal
+                //         removeNoResultsMessage();
 
-                        allRows.forEach(row => {
-                            const nameText = row.querySelector('.peserta-name')?.textContent.toLowerCase() || '';
-                            const nipText = row.querySelector('.text-muted')?.textContent.toLowerCase() || '';
-                            const instansiText = row.querySelector('.peserta-instansi')?.textContent.toLowerCase() || '';
+                //         allRows.forEach(row => {
+                //             const nameText = row.querySelector('.peserta-name')?.textContent.toLowerCase() || '';
+                //             const nipText = row.querySelector('.text-muted')?.textContent.toLowerCase() || '';
+                //             const instansiText = row.querySelector('.peserta-instansi')?.textContent.toLowerCase() || '';
 
-                            if (term === '') {
-                                // Input kosong → tampilkan semua data
-                                row.style.display = '';
-                            } else if (
-                                nameText.includes(term) ||
-                                nipText.includes(term) ||
-                                instansiText.includes(term)
-                            ) {
-                                row.style.display = '';
-                            } else {
-                                row.style.display = 'none';
-                            }
-                        });
+                //             if (term === '') {
+                //                 // Input kosong → tampilkan semua data
+                //                 row.style.display = '';
+                //             } else if (
+                //                 nameText.includes(term) ||
+                //                 nipText.includes(term) ||
+                //                 instansiText.includes(term)
+                //             ) {
+                //                 row.style.display = '';
+                //             } else {
+                //                 row.style.display = 'none';
+                //             }
+                //         });
 
-                        // Kalau term kosong → jangan tampilkan pesan apa pun
-                        if (term === '') {
-                            return;
-                        }
+                //         // Kalau term kosong → jangan tampilkan pesan apa pun
+                //         if (term === '') {
+                //             return;
+                //         }
 
-                        // Cek apakah masih ada row yang terlihat
-                        const anyVisible = allRows.some(row => row.style.display !== 'none');
+                //         // Cek apakah masih ada row yang terlihat
+                //         const anyVisible = allRows.some(row => row.style.display !== 'none');
 
-                        if (!anyVisible) {
-                            showNoResultsMessage(tbody, term);
-                        }
-                    }
+                //         if (!anyVisible) {
+                //             showNoResultsMessage(tbody, term);
+                //         }
+                //     }
 
-                    function showNoResultsMessage(tbody, term) {
-                        removeNoResultsMessage();
+                //     function showNoResultsMessage(tbody, term) {
+                //         removeNoResultsMessage();
 
-                        const noResultsRow = document.createElement('tr');
-                        noResultsRow.className = 'no-results-row';
-                        noResultsRow.innerHTML = `
-                        <td colspan="6" class="text-center py-4">
-                            <div class="text-muted">
-                                <i class="fas fa-search me-2"></i>
-                                Tidak ditemukan peserta dengan kata kunci "${term}"
-                            </div>
-                        </td>
-                    `;
-                        tbody.appendChild(noResultsRow);
-                    }
+                //         const noResultsRow = document.createElement('tr');
+                //         noResultsRow.className = 'no-results-row';
+                //         noResultsRow.innerHTML = `
+                //         <td colspan="6" class="text-center py-4">
+                //             <div class="text-muted">
+                //                 <i class="fas fa-search me-2"></i>
+                //                 Tidak ditemukan peserta dengan kata kunci "${term}"
+                //             </div>
+                //         </td>
+                //     `;
+                //         tbody.appendChild(noResultsRow);
+                //     }
 
-                    function removeNoResultsMessage() {
-                        const existing = tbody.querySelector('.no-results-row');
-                        if (existing) {
-                            existing.remove();
-                        }
-                    }
-                }
+                //     function removeNoResultsMessage() {
+                //         const existing = tbody.querySelector('.no-results-row');
+                //         if (existing) {
+                //             existing.remove();
+                //         }
+                //     }
+                // }
 
                 function clearSearch() {
                     const searchInput = document.getElementById('searchInput');
