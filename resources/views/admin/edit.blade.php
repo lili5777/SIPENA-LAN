@@ -2150,7 +2150,7 @@
                                             <option value="{{ $mentor->id }}" data-nama="{{ $mentor->nama_mentor }}"
                                                 data-nip="{{ $mentor->nip_mentor }}"
                                                 data-jabatan="{{ $mentor->jabatan_mentor }}"
-                                                data-rekening="{{ $mentor->nomor_rekening }}" data-npwp="{{ $mentor->npwp_mentor }}" {{ old('id_mentor', $pendaftaranTerbaru->id_mentor) == $mentor->id ? 'selected' : '' }}>
+                                                data-rekening="{{ $mentor->nomor_rekening }}" data-npwp="{{ $mentor->npwp_mentor }}" data-nomorhp="{{ $mentor->nomor_hp_mentor }}" {{ old('id_mentor', $pendaftaranTerbaru->id_mentor) == $mentor->id ? 'selected' : '' }}>
                                                 {{ $mentor->nama_mentor }} - {{ $mentor->jabatan_mentor }}
                                             </option>
                                         @endforeach
@@ -2192,6 +2192,23 @@
                                         <label class="form-label">NPWP Mentor</label>
                                         <input type="text" name="npwp_mentor" id="npwp_mentor_select" class="form-input" readonly
                                             value="{{ old('npwp_mentor', $pendaftaranTerbaru->mentor->npwp_mentor ?? '') }}">
+                                    </div>
+                                </div>
+
+                                <!-- Di dalam #select-mentor-form -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Nomor Telepon Mentor</label>
+                                        <input type="text" name="nomor_hp_mentor" id="nomor_hp_mentor_select"
+                                            class="form-input @error('nomor_hp_mentor') error @enderror"
+                                            value="{{ old('nomor_hp_mentor', $pendaftaranTerbaru->mentor->nomor_hp_mentor ?? '') }}"
+                                            placeholder="Akan terisi otomatis saat memilih mentor" readonly>
+                                        @error('nomor_hp_mentor')
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-circle"></i>
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
@@ -2276,6 +2293,26 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
+                                </div>
+                                <!-- Di dalam #add-mentor-form (setelah field NPWP) -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Nomor Telepon Mentor</label>
+                                        <input type="tel" name="nomor_hp_mentor_baru" id="nomor_hp_mentor_baru"
+                                            class="form-input @error('nomor_hp_mentor_baru') error @enderror"
+                                            value="{{ old('nomor_hp_mentor_baru', $pendaftaranTerbaru->mentor->nomor_hp_mentor ?? '') }}"
+                                            placeholder="Contoh: 081234567890">
+                                        <small class="form-hint">
+                                            <i class="fas fa-info-circle"></i> 
+                                            Format: +62812-3456-7890 atau 081234567890
+                                        </small>
+                                        @error('nomor_hp_mentor_baru')
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-circle"></i>
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3266,6 +3303,7 @@
             });
         }
 
+
         // ===== MAIN INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', function () {
             const editForm = document.getElementById('editForm');
@@ -3275,6 +3313,68 @@
             // Setup awal
             setupAutoCapitalization();
             attachFileActionListeners();
+
+            // ===== MENTOR VALIDATION FUNCTIONS =====
+            function validatePhoneNumber(input) {
+                const phoneRegex = /^[0-9\-\+]+$/;
+                const value = input.value;
+                
+                if (value && !phoneRegex.test(value)) {
+                    input.classList.add('error');
+                    const formGroup = input.closest('.form-group');
+                    const existingError = formGroup.querySelector('.phone-format-error');
+                    
+                    if (!existingError) {
+                        const errorMsg = document.createElement('small');
+                        errorMsg.className = 'text-danger phone-format-error';
+                        errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Format nomor telepon tidak valid. Gunakan angka, +, atau - saja.';
+                        formGroup.appendChild(errorMsg);
+                    }
+                    return false;
+                }
+                
+                input.classList.remove('error');
+                const formGroup = input.closest('.form-group');
+                const errorMsg = formGroup.querySelector('.phone-format-error');
+                if (errorMsg) errorMsg.remove();
+                return true;
+            }
+
+            // Setup mentor validation
+            function setupMentorValidation() {
+                // Validasi nomor telepon mentor
+                const nomorHpMentorInput = document.getElementById('nomor_hp_mentor_baru');
+                if (nomorHpMentorInput) {
+                    nomorHpMentorInput.addEventListener('input', function(e) {
+                        validatePhoneNumber(e.target);
+                    });
+                    
+                    nomorHpMentorInput.addEventListener('blur', function(e) {
+                        validatePhoneNumber(e.target);
+                    });
+                }
+                
+                // Normalisasi NIP mentor
+                const nipMentorInput = document.getElementById('nip_mentor_baru');
+                if (nipMentorInput) {
+                    nipMentorInput.addEventListener('input', function(e) {
+                        // Hapus spasi dan titik secara real-time
+                        e.target.value = e.target.value.replace(/[\s\.]/g, '');
+                    });
+                    
+                    nipMentorInput.addEventListener('paste', function(e) {
+                        // Handle paste event
+                        setTimeout(() => {
+                            e.target.value = e.target.value.replace(/[\s\.]/g, '');
+                        }, 10);
+                    });
+                }
+            }
+
+            // Initialize mentor validation jika sudah ada input
+            if (document.getElementById('nomor_hp_mentor_baru') || document.getElementById('nip_mentor_baru')) {
+                setupMentorValidation();
+            }
 
             // Initialize form validator
             if (editForm) {
@@ -3546,12 +3646,14 @@
                         document.getElementById('jabatan_mentor_select').value = selectedOption.dataset.jabatan;
                         document.getElementById('nomor_rekening_mentor_select').value = selectedOption.dataset.rekening || '';
                         document.getElementById('npwp_mentor_select').value = selectedOption.dataset.npwp || '';
+                        document.getElementById('nomor_hp_mentor_select').value = selectedOption.dataset.nomorhp || '';
                     } else {
                         document.getElementById('nama_mentor_select').value = '';
                         document.getElementById('nip_mentor_select').value = '';
                         document.getElementById('jabatan_mentor_select').value = '';
                         document.getElementById('nomor_rekening_mentor_select').value = '';
                         document.getElementById('npwp_mentor_select').value = '';
+                        document.getElementById('nomor_hp_mentor_select').value = '';
                     }
                 });
 

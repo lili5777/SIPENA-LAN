@@ -681,9 +681,9 @@ $isPKN = $jenis === 'pkn';
                             </div>
 
                             @php
-$hasMentor = $mentorData ? true : false;
-$selectedMentorId = $mentorData ? $mentorData->id_mentor : null;
-$selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') : '';
+                            $hasMentor = $mentorData ? true : false;
+                            $selectedMentorId = $mentorData ? $mentorData->id_mentor : null;
+                            $selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') : '';
                             @endphp
 
                             <div class="form-group">
@@ -724,11 +724,14 @@ $selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') :
                                             class="form-select @error('id_mentor') error @enderror">
                                             <option value="">Pilih Mentor...</option>
                                             @foreach($mentorList as $mentor)
-                                                <option value="{{ $mentor->id }}" data-nama="{{ $mentor->nama_mentor }}"
+                                                <option value="{{ $mentor->id }}" 
+                                                    data-nama="{{ $mentor->nama_mentor }}"
                                                     data-nip="{{ $mentor->nip_mentor }}"
                                                     data-jabatan="{{ $mentor->jabatan_mentor }}"
                                                     data-nomor-rekening="{{ $mentor->nomor_rekening }}"
-                                                    data-npwp="{{ $mentor->npwp_mentor }}" {{ ($selectedMentorId == $mentor->id) || old('id_mentor') == $mentor->id ? 'selected' : '' }}>
+                                                    data-npwp="{{ $mentor->npwp_mentor }}"
+                                                    data-nomor-hp="{{ $mentor->nomor_hp_mentor ?? '' }}"
+                                                    {{ ($selectedMentorId == $mentor->id) || old('id_mentor') == $mentor->id ? 'selected' : '' }}>
                                                     {{ $mentor->nama_mentor }} - {{ $mentor->jabatan_mentor }}
                                                 </option>
                                             @endforeach
@@ -794,6 +797,16 @@ $selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') :
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Nomor HP Mentor</label>
+                                            <input type="text" name="nomor_hp_mentor" id="nomor_hp_mentor_select"
+                                                class="form-input @error('nomor_hp_mentor') error @enderror"
+                                                value="{{ $mentorData && $mentorData->mentor ? $mentorData->mentor->nomor_hp_mentor : old('nomor_hp_mentor') }}"
+                                                readonly>
+                                            @error('nomor_hp_mentor')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
                                     </div>
                                 </div>
 
@@ -806,8 +819,8 @@ $selectedMentorMode = $mentorData ? ($mentorData->mentor ? 'pilih' : 'tambah') :
                                     </div>
 
                                     @php
-$mentorBaruNama = $mentorData && !$mentorData->mentor ? $mentorData->nama_mentor_custom : old('nama_mentor_baru');
-$mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_mentor_custom : old('jabatan_mentor_baru');
+                                    $mentorBaruNama = $mentorData && !$mentorData->mentor ? $mentorData->nama_mentor_custom : old('nama_mentor_baru');
+                                    $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_mentor_custom : old('jabatan_mentor_baru');
                                     @endphp
 
                                     <div class="form-row">
@@ -842,6 +855,16 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
 
                                     <div class="form-row">
                                         <div class="form-group">
+                                            <label class="form-label">Nomor HP/WhatsApp Mentor</label>
+                                            <input type="tel" name="nomor_hp_mentor_baru" id="nomor_hp_mentor_baru"
+                                                class="form-input @error('nomor_hp_mentor_baru') error @enderror"
+                                                value="{{ old('nomor_hp_mentor_baru') }}" 
+                                                placeholder="0812xxxxxxxx">
+                                            @error('nomor_hp_mentor_baru')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group">
                                             <label class="form-label">Nomor Rekening Mentor</label>
                                             <input type="text" name="nomor_rekening_mentor_baru"
                                                 id="nomor_rekening_mentor_baru"
@@ -852,6 +875,9 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
+                                    </div>
+
+                                    <div class="form-row">
                                         <div class="form-group">
                                             <label class="form-label">NPWP Mentor</label>
                                             <input type="text" name="npwp_mentor_baru" id="npwp_mentor_baru"
@@ -864,6 +890,8 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
                                     </div>
                                 </div>
                             </div>
+
+
 
                             @if ($kunci_judul == true)
                                 <!-- Data Projek -->
@@ -2595,6 +2623,7 @@ $mentorBaruJabatan = $mentorData && !$mentorData->mentor ? $mentorData->jabatan_
             const jabatanMentorSelect = document.getElementById('jabatan_mentor_select');
             const nomorRekeningMentorSelect = document.getElementById('nomor_rekening_mentor_select');
             const npwpMentorSelect = document.getElementById('npwp_mentor_select');
+            const nomorHpMentorSelect = document.getElementById('nomor_hp_mentor_select');
 
             // Provinsi & Kabupaten elements
             const provinsiSelect = document.getElementById('id_provinsi');
@@ -2825,6 +2854,7 @@ loadAvailableNdh(selectedAngkatan.id, jenisPelatihanId, currentNdh);
                             if (jabatanMentorSelect) jabatanMentorSelect.value = selectedOption.dataset.jabatan || '';
                             if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = selectedOption.dataset.nomorRekening || '';
                             if (npwpMentorSelect) npwpMentorSelect.value = selectedOption.dataset.npwp || '';
+                            if (nomorHpMentorSelect) nomorHpMentorSelect.value = selectedOption.dataset.nomorHp || '';
                         } else {
                             resetMentorFields();
                         }
@@ -2849,6 +2879,7 @@ loadAvailableNdh(selectedAngkatan.id, jenisPelatihanId, currentNdh);
                 if (jabatanMentorSelect) jabatanMentorSelect.value = '';
                 if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = '';
                 if (npwpMentorSelect) npwpMentorSelect.value = '';
+                if (nomorHpMentorSelect) nomorHpMentorSelect.value = '';
             }
 
             async function loadMentors() {
@@ -2870,11 +2901,12 @@ loadAvailableNdh(selectedAngkatan.id, jenisPelatihanId, currentNdh);
                         option.textContent = `${mentor.nama_mentor} - ${mentor.jabatan_mentor}`;
 
                         // Store mentor data in dataset
-                        option.dataset.nama = mentor.nama_mentor;
-                        option.dataset.nip = mentor.nip_mentor;
-                        option.dataset.jabatan = mentor.jabatan_mentor;
+                        option.dataset.nama = mentor.nama_mentor || '';
+                        option.dataset.nip = mentor.nip_mentor || '';
+                        option.dataset.jabatan = mentor.jabatan_mentor || '';
                         option.dataset.nomorRekening = mentor.nomor_rekening_mentor || mentor.nomor_rekening || '';
                         option.dataset.npwp = mentor.npwp_mentor || mentor.npwp || '';
+                        option.dataset.nomorHp = mentor.nomor_hp_mentor || '';
 
                         mentorSelect.appendChild(option);
                     });

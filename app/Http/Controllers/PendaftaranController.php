@@ -643,6 +643,7 @@ public function getAvailableNdh(Request $request)
             }
 
             // Validasi mentor jika sudah ada mentor
+            // Di dalam method updateData(), sekitar baris validasi mentor
             if ($request->sudah_ada_mentor === 'Ya') {
                 $additionalRules['mentor_mode'] = 'required|in:pilih,tambah';
                 $additionalMessages['mentor_mode.required'] = 'Pilih mode mentor (Pilih dari daftar atau Tambah baru)';
@@ -652,12 +653,36 @@ public function getAvailableNdh(Request $request)
                     $additionalRules['id_mentor'] = 'required|exists:mentor,id';
                     $additionalMessages['id_mentor.required'] = 'Pilih mentor dari daftar';
                 } elseif ($request->mentor_mode === 'tambah') {
+                    // VALIDASI BARU: Normalisasi NIP (hapus spasi dan titik)
                     $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
-                    $additionalRules['nip_mentor_baru'] = 'nullable|string|max:200';
+                    $additionalRules['nip_mentor_baru'] = [
+                        'required',
+                        'string',
+                        'max:200',
+                        function ($attribute, $value, $fail) {
+                            // Normalisasi NIP: hapus spasi dan titik
+                            $normalizedNip = preg_replace('/[\s\.]/', '', $value);
+                            
+                            // Cek apakah NIP sudah ada di database (dengan normalisasi)
+                            $exists = Mentor::whereRaw(
+                                "REPLACE(REPLACE(nip_mentor, ' ', ''), '.', '') = ?",
+                                [$normalizedNip]
+                            )->exists();
+                            
+                            if ($exists) {
+                                $fail('NIP Mentor sudah terdaftar. Silakan pilih dari daftar mentor yang tersedia.');
+                            }
+                        }
+                    ];
                     $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
+                    $additionalRules['nomor_hp_mentor_baru'] = 'nullable|string|max:20|regex:/^[0-9\-\+]+$/';
+                    
                     $additionalMessages['nama_mentor_baru.required'] = 'Nama mentor baru wajib diisi';
-                    $additionalMessages['nip_mentor_baru.max'] = 'NIP mentor baru maksimal 200 karakter.';
+                    $additionalMessages['nip_mentor_baru.required'] = 'NIP mentor baru wajib diisi';
+                    $additionalMessages['nip_mentor_baru.max'] = 'NIP mentor baru maksimal 200 karakter';
                     $additionalMessages['jabatan_mentor_baru.required'] = 'Jabatan mentor baru wajib diisi';
+                    $additionalMessages['nomor_hp_mentor_baru.max'] = 'Nomor HP mentor maksimal 20 karakter';
+                    $additionalMessages['nomor_hp_mentor_baru.regex'] = 'Format nomor HP mentor tidak valid';
                 }
             }
 
@@ -965,18 +990,23 @@ public function getAvailableNdh(Request $request)
             }
 
             // 8. SIMPAN MENTOR JIKA ADA
+            // Di dalam method updateData(), bagian simpan mentor (sekitar baris 8)
             if ($request->sudah_ada_mentor === 'Ya') {
                 $mentor = null;
 
                 if ($request->mentor_mode === 'pilih' && $request->id_mentor) {
                     $mentor = Mentor::find($request->id_mentor);
                 } elseif ($request->mentor_mode === 'tambah') {
+                    // NORMALISASI NIP: Hapus spasi dan titik sebelum disimpan
+                    $nipMentorBersih = preg_replace('/[\s\.]/', '', $request->nip_mentor_baru);
+                    
                     $mentor = Mentor::create([
                         'nama_mentor' => $request->nama_mentor_baru,
-                        'nip_mentor' => $request->nip_mentor_baru,
+                        'nip_mentor' => $nipMentorBersih, // Simpan NIP yang sudah dinormalisasi
                         'jabatan_mentor' => $request->jabatan_mentor_baru,
                         'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                         'npwp_mentor' => $request->npwp_mentor_baru,
+                        'nomor_hp_mentor' => $request->nomor_hp_mentor_baru,
                         'status_aktif' => true,
                     ]);
                 }

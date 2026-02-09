@@ -857,6 +857,7 @@ public function edit(Request $request, $jenis, $id)
                     'file_pas_foto.max' => 'Pas foto maksimal 1MB.',
                 ]
             );
+            $additionalMessages = []; 
 
             // 4. AMBIL JENIS PELATIHAN UNTUK VALIDASI TAMBAHAN
             $jenisPelatihan = JenisPelatihan::find($jenisPelatihanId);
@@ -907,16 +908,53 @@ public function edit(Request $request, $jenis, $id)
 
             // Jika sudah ada mentor dan mode pilih
             if ($request->sudah_ada_mentor === 'Ya') {
-                $additionalRules['mentor_mode'] = 'nullable|in:pilih,tambah';
+                $additionalRules['mentor_mode'] = 'required|in:pilih,tambah';
+                $additionalMessages['mentor_mode.required'] = 'Pilih mode mentor (Pilih dari daftar atau Tambah baru)';
 
                 if ($request->mentor_mode === 'pilih') {
-                    $additionalRules['id_mentor'] = 'nullable|exists:mentor,id';
+                    $additionalRules['id_mentor'] = 'required|exists:mentor,id';
+                    $additionalMessages['id_mentor.required'] = 'Pilih mentor dari daftar';
                 } elseif ($request->mentor_mode === 'tambah') {
-                    $additionalRules['nama_mentor_baru'] = 'nullable|string|max:200';
-                    $additionalRules['nip_mentor_baru'] = 'nullable|string|max:200';
-                    $additionalRules['jabatan_mentor_baru'] = 'nullable|string|max:200';
+                    $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
+                    
+                    $additionalRules['nip_mentor_baru'] = [
+                        'nullable',
+                        'string',
+                        'max:200',
+                        function ($attribute, $value, $fail) {
+                            if ($value) {
+                                // Normalisasi NIP: hapus spasi, titik, dan strip
+                                $normalizedNip = preg_replace('/[\s\.\-]/', '', $value);
+                                
+                                // Cek apakah NIP sudah ada di database (dengan normalisasi)
+                                $exists = \App\Models\Mentor::whereRaw(
+                                    "REGEXP_REPLACE(nip_mentor, '[\\s\\.\\-]', '') = ?",
+                                    [$normalizedNip]
+                                )->exists();
+                                
+                                if ($exists) {
+                                    $fail('NIP Mentor sudah terdaftar. Silakan pilih dari daftar mentor yang tersedia.');
+                                }
+                            }
+                        }
+                    ];
+                    
+                    $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
+                    $additionalRules['nomor_hp_mentor_baru'] = 'nullable|string|max:20|regex:/^[0-9\-\+\s]+$/';
                     $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
+                    
+                    $additionalMessages = array_merge($additionalMessages, [
+                        'nama_mentor_baru.required' => 'Nama mentor baru wajib diisi',
+                        'nama_mentor_baru.max' => 'Nama mentor baru maksimal 200 karakter',
+                        'nip_mentor_baru.max' => 'NIP mentor baru maksimal 200 karakter',
+                        'jabatan_mentor_baru.required' => 'Jabatan mentor baru wajib diisi',
+                        'jabatan_mentor_baru.max' => 'Jabatan mentor baru maksimal 200 karakter',
+                        'nomor_hp_mentor_baru.max' => 'Nomor HP mentor maksimal 20 karakter',
+                        'nomor_hp_mentor_baru.regex' => 'Format nomor HP mentor tidak valid',
+                        'nomor_rekening_mentor_baru.max' => 'Nomor rekening mentor maksimal 200 karakter',
+                        'npwp_mentor_baru.max' => 'NPWP mentor maksimal 50 karakter',
+                    ]);
                 }
             }
 
@@ -1135,36 +1173,44 @@ public function edit(Request $request, $jenis, $id)
             ]);
 
             // 9. SIMPAN MENTOR JIKA ADA
-            if ($request->sudah_ada_mentor === 'Ya') {
-                $mentor = null;
+            if (!empty($additionalRules)) {
+            $request->validate($additionalRules, $additionalMessages);
+        }
 
-                if ($request->mentor_mode === 'pilih' && $request->id_mentor) {
-                    // Gunakan mentor yang dipilih
-                    $mentor = Mentor::find($request->id_mentor);
-                } elseif ($request->mentor_mode === 'tambah') {
-                    // Buat mentor baru hanya jika ada data
-                    if ($request->nama_mentor_baru && $request->jabatan_mentor_baru) {
-                        $mentor = Mentor::create([
-                            'nama_mentor' => $request->nama_mentor_baru,
-                            'nip_mentor' => $request->nip_mentor_baru,
-                            'jabatan_mentor' => $request->jabatan_mentor_baru,
-                            'nomor_rekening' => $request->nomor_rekening_mentor_baru,
-                            'npwp_mentor' => $request->npwp_mentor_baru,
-                            'status_aktif' => true,
-                        ]);
-                    }
-                }
+        // ... lanjutan kode penyimpanan ...
+        
+        // 9. SIMPAN MENTOR JIKA ADA (PERBAIKI DENGAN NOMOR HP)
+        if ($request->sudah_ada_mentor === 'Ya') {
+            $mentor = null;
 
-                if ($mentor) {
-                    // Simpan hubungan peserta-mentor
-                    PesertaMentor::create([
-                        'id_pendaftaran' => $pendaftaran->id,
-                        'id_mentor' => $mentor->id,
-                        'tanggal_penunjukan' => now(),
-                        'status_mentoring' => 'Ditugaskan',
+            if ($request->mentor_mode === 'pilih' && $request->id_mentor) {
+                // Gunakan mentor yang dipilih
+                $mentor = Mentor::find($request->id_mentor);
+            } elseif ($request->mentor_mode === 'tambah') {
+                // Buat mentor baru hanya jika ada data
+                if ($request->nama_mentor_baru && $request->jabatan_mentor_baru) {
+                    $mentor = Mentor::create([
+                        'nama_mentor' => $request->nama_mentor_baru,
+                        'nip_mentor' => $request->nip_mentor_baru,
+                        'jabatan_mentor' => $request->jabatan_mentor_baru,
+                        'nomor_hp_mentor' => $request->nomor_hp_mentor_baru, // TAMBAHKAN INI
+                        'nomor_rekening' => $request->nomor_rekening_mentor_baru,
+                        'npwp_mentor' => $request->npwp_mentor_baru,
+                        'status_aktif' => true,
                     ]);
                 }
             }
+
+            if ($mentor) {
+                // Simpan hubungan peserta-mentor
+                PesertaMentor::create([
+                    'id_pendaftaran' => $pendaftaran->id,
+                    'id_mentor' => $mentor->id,
+                    'tanggal_penunjukan' => now(),
+                    'status_mentoring' => 'Ditugaskan',
+                ]);
+            }
+        }
 
             $angkatanNama = $angkatan->nama_angkatan;
             aktifitas("Menambahkan Peserta {$jenisPelatihan->nama_pelatihan} - {$angkatanNama}", $peserta);
@@ -1385,17 +1431,57 @@ public function edit(Request $request, $jenis, $id)
             }
 
             // Jika sudah ada mentor dan mode pilih
+            // Di dalam validasi mentor baru (setelah validasi mentor_mode)
             if ($request->sudah_ada_mentor === 'Ya') {
-                $additionalRules['mentor_mode'] = 'nullable|in:pilih,tambah';
+                $additionalRules['mentor_mode'] = 'required|in:pilih,tambah';
+                $additionalMessages['mentor_mode.required'] = 'Pilih mode mentor (Pilih dari daftar atau Tambah baru)';
 
                 if ($request->mentor_mode === 'pilih') {
-                    $additionalRules['id_mentor'] = 'nullable|exists:mentor,id';
+                    $additionalRules['id_mentor'] = 'required|exists:mentor,id';
+                    $additionalMessages['id_mentor.required'] = 'Pilih mentor dari daftar';
                 } elseif ($request->mentor_mode === 'tambah') {
-                    $additionalRules['nama_mentor_baru'] = 'nullable|string|max:200';
-                    $additionalRules['nip_mentor_baru'] = 'nullable|string|max:200';
-                    $additionalRules['jabatan_mentor_baru'] = 'nullable|string|max:200';
+                    $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
+                    
+                    $additionalRules['nip_mentor_baru'] = [
+                        'nullable',
+                        'string',
+                        'max:200',
+                        function ($attribute, $value, $fail) {
+                            if ($value) {
+                                // Normalisasi NIP: hapus spasi, titik, dan strip
+                                $normalizedNip = preg_replace('/[\s\.\-]/', '', $value);
+                                
+                                // Cek apakah NIP sudah ada di database (dengan normalisasi)
+                                $exists = \App\Models\Mentor::whereRaw(
+                                    "REGEXP_REPLACE(nip_mentor, '[\\s\\.\\-]', '') = ?",
+                                    [$normalizedNip]
+                                )->exists();
+                                
+                                if ($exists) {
+                                    $fail('NIP Mentor sudah terdaftar. Silakan pilih dari daftar mentor yang tersedia.');
+                                }
+                            }
+                        }
+                    ];
+                    
+                    $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
+                    $additionalRules['nomor_hp_mentor_baru'] = 'nullable|string|max:20|regex:/^[0-9\-\+\s]+$/';
                     $additionalRules['nomor_rekening_mentor_baru'] = 'nullable|string|max:200';
                     $additionalRules['npwp_mentor_baru'] = 'nullable|string|max:50';
+                    
+                    
+                    
+                    $additionalMessages = array_merge($additionalMessages, [
+                        'nama_mentor_baru.required' => 'Nama mentor baru wajib diisi',
+                        'nama_mentor_baru.max' => 'Nama mentor baru maksimal 200 karakter',
+                        'nip_mentor_baru.max' => 'NIP mentor baru maksimal 200 karakter',
+                        'jabatan_mentor_baru.required' => 'Jabatan mentor baru wajib diisi',
+                        'jabatan_mentor_baru.max' => 'Jabatan mentor baru maksimal 200 karakter',
+                        'nomor_hp_mentor_baru.max' => 'Nomor HP mentor maksimal 20 karakter',
+                        'nomor_hp_mentor_baru.regex' => 'Format nomor HP mentor tidak valid',
+                        'nomor_rekening_mentor_baru.max' => 'Nomor rekening mentor maksimal 200 karakter',
+                        'npwp_mentor_baru.max' => 'NPWP mentor maksimal 50 karakter',
+                    ]);
                 }
             }
 
@@ -1652,6 +1738,7 @@ public function edit(Request $request, $jenis, $id)
                             'nama_mentor' => $request->nama_mentor_baru,
                             'nip_mentor' => $request->nip_mentor_baru,
                             'jabatan_mentor' => $request->jabatan_mentor_baru,
+                            'nomor_hp_mentor' => $request->nomor_hp_mentor_baru, // tambah ini
                             'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                             'npwp_mentor' => $request->npwp_mentor_baru,
                             'status_aktif' => true,

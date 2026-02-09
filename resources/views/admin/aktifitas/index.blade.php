@@ -230,27 +230,65 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <nav aria-label="Table pagination" class="d-flex justify-content-md-end">
-                            <ul class="pagination pagination-sm mb-0">
-                                <li class="page-item {{ $logs->onFirstPage() ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ $logs->previousPageUrl() }}" tabindex="-1">
-                                        Previous
-                                    </a>
-                                </li>
-
-                                @for ($i = 1; $i <= $logs->lastPage(); $i++)
-                                    <li class="page-item {{ $logs->currentPage() == $i ? 'active' : '' }}">
-                                        <a class="page-link" href="{{ $logs->url($i) }}">{{ $i }}</a>
+                        {{-- Custom Pagination --}}
+                        @if ($logs->hasPages())
+                            <nav aria-label="Table pagination" class="d-flex justify-content-md-end">
+                                <ul class="pagination pagination-sm mb-0">
+                                    {{-- Previous Page Link --}}
+                                    <li class="page-item {{ $logs->onFirstPage() ? 'disabled' : '' }}">
+                                        <a class="page-link" href="{{ $logs->appends(request()->query())->previousPageUrl() }}" tabindex="-1" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
                                     </li>
-                                @endfor
 
-                                <li class="page-item {{ !$logs->hasMorePages() ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ $logs->nextPageUrl() }}">
-                                        Next
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
+                                    {{-- Pagination Elements --}}
+                                    @php
+                                        $currentPage = $logs->currentPage();
+                                        $lastPage = $logs->lastPage();
+                                        $start = max(1, $currentPage - 2);
+                                        $end = min($lastPage, $currentPage + 2);
+                                    @endphp
+
+                                    {{-- First Page --}}
+                                    @if($start > 1)
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $logs->appends(request()->query())->url(1) }}">1</a>
+                                        </li>
+                                        @if($start > 2)
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        @endif
+                                    @endif
+
+                                    {{-- Page Numbers --}}
+                                    @for ($i = $start; $i <= $end; $i++)
+                                        <li class="page-item {{ $currentPage == $i ? 'active' : '' }}">
+                                            <a class="page-link" href="{{ $logs->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                                        </li>
+                                    @endfor
+
+                                    {{-- Last Page --}}
+                                    @if($end < $lastPage)
+                                        @if($end < $lastPage - 1)
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        @endif
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $logs->appends(request()->query())->url($lastPage) }}">{{ $lastPage }}</a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Next Page Link --}}
+                                    <li class="page-item {{ !$logs->hasMorePages() ? 'disabled' : '' }}">
+                                        <a class="page-link" href="{{ $logs->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -400,6 +438,38 @@
             border-radius: 3px;
         }
 
+        /* Pagination Styling */
+        .pagination {
+            gap: 4px;
+        }
+
+        .page-link {
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            color: #285496;
+            padding: 0.375rem 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .page-link:hover {
+            background-color: #f8f9fa;
+            border-color: #285496;
+            color: #285496;
+        }
+
+        .page-item.active .page-link {
+            background-color: #285496;
+            border-color: #285496;
+            color: white;
+            font-weight: 600;
+        }
+
+        .page-item.disabled .page-link {
+            background-color: transparent;
+            border-color: #dee2e6;
+            color: #6c757d;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .activity-row {
@@ -408,6 +478,14 @@
             
             .activity-row .activity-content:before {
                 display: none;
+            }
+
+            .pagination {
+                font-size: 0.875rem;
+            }
+
+            .page-link {
+                padding: 0.25rem 0.5rem;
             }
         }
 

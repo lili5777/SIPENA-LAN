@@ -320,25 +320,27 @@ class ExportController extends Controller
             $query->whereHas('angkatan', function ($q) use ($wilayah) {
                 $q->where('kategori', 'FASILITASI');
                 if ($wilayah && trim($wilayah) !== '') {
-                    // Gunakan LIKE untuk partial match
                     $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
                 }
             });
         } else if ($kategori === 'SEMUA') {
-            // Jika kategori SEMUA, kita tetap bisa filter wilayah jika dipilih
             if ($wilayah && trim($wilayah) !== '') {
                 $query->whereHas('angkatan', function ($q) use ($wilayah) {
-                    // Gunakan LIKE untuk partial match
                     $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
                 });
             }
         }
 
-        $pendaftaranList = $query->get();
+        // ✅ PERBAIKAN: Ambil data dan sorting berdasarkan NDH
+        $pendaftaranList = $query->get()->sortBy(function ($pendaftaran) {
+            // Konversi NDH ke integer untuk sorting numerik yang benar
+            $ndh = $pendaftaran->peserta->ndh ?? 9999;
+            return (int) $ndh;
+        })->values(); // ⚠️ PENTING: values() untuk reset index array setelah sorting
 
         // Jika tidak ada data
         if ($pendaftaranList->isEmpty()) {
-            return redirect()->back()->with('error', 'Tidak ada data peserta untuk filter yang dipilih.');
+            return back()->with('error', 'Tidak ada data peserta ditemukan sesuai filter yang dipilih.');
         }
 
         // Format data peserta untuk PDF
@@ -346,8 +348,8 @@ class ExportController extends Controller
             $p = $pendaftaran->peserta;
             $kepeg = $p->kepegawaianPeserta;
 
-            // Ambil NDH dari tabel peserta, atau gunakan nomor urut jika tidak ada
-            $ndh = $p->ndh ?? ($index + 1);
+            // Ambil NDH dari tabel peserta
+            $ndh = $p->ndh ?? 9999;
 
             return [
                 'nama' => $p->nama_lengkap ?? '-',

@@ -392,9 +392,9 @@
                 // Validasi NPWP format (15 digit jika diisi)
                 const npwp = document.getElementById('npwp_mentor').value;
                 const npwpDigits = npwp.replace(/\D/g, '');
-                if (npwp && npwpDigits.length !== 15) {
-                    errors.push('NPWP harus 15 digit');
-                }
+                // if (npwp && npwpDigits.length !== 15) {
+                //     errors.push('NPWP harus 15 digit');
+                // }
 
                 if (errors.length > 0) {
                     e.preventDefault();

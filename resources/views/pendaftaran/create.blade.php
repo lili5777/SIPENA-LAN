@@ -1790,6 +1790,7 @@
                 setupPangkatAutoFill();
                 setupPhotoCropping();
                 loadAvailableNdh();
+                setupNipNormalization();
 
                 // Setup mentor form jika ada
                 setupMentorForm();
@@ -1875,6 +1876,24 @@ async function loadAvailableNdh() {
         showErrorMessage('Gagal memuat data NDH yang tersedia');
     }
 }
+            function setupNipNormalization() {
+                // Auto-normalize NIP mentor saat user mengetik
+                const nipInputs = document.querySelectorAll('.nip-normalize');
+                
+                nipInputs.forEach(input => {
+                    input.addEventListener('input', function(e) {
+                        // Hapus spasi dan titik secara real-time
+                        this.value = this.value.replace(/[\s\.]/g, '');
+                    });
+                    
+                    input.addEventListener('paste', function(e) {
+                        // Handle paste event
+                        setTimeout(() => {
+                            this.value = this.value.replace(/[\s\.]/g, '');
+                        }, 10);
+                    });
+                });
+            }
 
             function setupMentorForm() {
                 const mentorSelect = document.getElementById('sudah_ada_mentor');
@@ -1938,6 +1957,7 @@ async function loadAvailableNdh() {
                         document.getElementById('jabatan_mentor_select').value = mentor.jabatan_mentor || '';
                         document.getElementById('nomor_rekening_mentor_select').value = mentor.nomor_rekening_mentor || '';
                         document.getElementById('npwp_mentor_select').value = mentor.npwp_mentor || '';
+                        document.getElementById('nomor_hp_mentor_select').value = mentor.nomor_hp_mentor || '';
                     });
                 }
 
@@ -1966,7 +1986,8 @@ async function loadAvailableNdh() {
                             nip_mentor: mentor.nip_mentor,              
                             jabatan_mentor: mentor.jabatan_mentor,
                             nomor_rekening_mentor: mentor.nomor_rekening,
-                            npwp_mentor: mentor.npwp_mentor
+                            npwp_mentor: mentor.npwp_mentor,
+                            nomor_hp_mentor: mentor.nomor_hp_mentor
                         });
                         mentorDropdown.appendChild(option);
                     });

@@ -1086,6 +1086,19 @@
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
             </div>
+            <!-- Di dalam #select-mentor-form (sekitar line 444-468) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Nomor Telepon Mentor</label>
+                    <input type="text" name="nomor_hp_mentor" id="nomor_hp_mentor_select"
+                        class="form-input @error('nomor_hp_mentor') error @enderror"
+                        placeholder="Akan terisi otomatis saat memilih mentor"
+                        value="{{ $peserta['nomor_hp_mentor'] ?? old('nomor_hp_mentor') }}" readonly>
+                    @error('nomor_hp_mentor')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1111,10 +1124,16 @@
             </div>
             <div class="form-group">
                 <label class="form-label required">NIP Mentor</label>
-                <input type="text" name="nip_mentor_baru" id="nip_mentor_baru"
-                    class="form-input uppercase @error('nip_mentor_baru') error @enderror"
-                    value="{{ $peserta['nip_mentor_baru'] ?? old('nip_mentor_baru') }}" placeholder="Contoh: 196501011990031001">
-                <small class="form-hint">Huruf akan otomatis kapital</small>
+                <input type="text" 
+                    name="nip_mentor_baru" 
+                    id="nip_mentor_baru"
+                    class="form-input nip-normalize @error('nip_mentor_baru') error @enderror"
+                    value="{{ $peserta['nip_mentor_baru'] ?? old('nip_mentor_baru') }}"
+                    placeholder="Contoh: 196512311989031001">
+                <small class="form-hint">
+                    <i class="fas fa-info-circle"></i> 
+                    Masukkan NIP tanpa spasi dan titik. Sistem akan otomatis menghapus spasi/titik yang Anda ketik.
+                </small>
                 @error('nip_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -1152,6 +1171,20 @@
                 @error('npwp_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
+            </div>
+            <!-- Di dalam #add-mentor-form (sekitar line 487-528) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Nomor Telepon Mentor</label>
+                    <input type="tel" name="nomor_hp_mentor_baru" id="nomor_hp_mentor_baru"
+                        class="form-input @error('nomor_hp_mentor_baru') error @enderror"
+                        placeholder="Contoh: 081234567890"
+                        value="{{ $peserta['nomor_hp_mentor_baru'] ?? old('nomor_hp_mentor_baru') }}">
+                    <small class="form-hint">Format: +62812-3456-7890 atau 081234567890</small>
+                    @error('nomor_hp_mentor_baru')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
             </div>
         </div>
     </div>
