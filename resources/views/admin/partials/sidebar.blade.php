@@ -69,14 +69,12 @@ $labelMenu = match ($kodePelatihan) {
                             <a href="" class="submenu-link">
                                 <i class="fas fa-book me-2"></i> Materi Pelatihan
                             </a> --}}
-                            @if (auth()->user()->role->name != "pic" )
-                                @if(auth()->user()->hasPermission('mentor.read'))
+                            @if(auth()->user()->hasPermission('mentor.read'))
                                 <a href="{{ route('mentor.index') }}" class="submenu-link">
                                     <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
                                 </a>
-                                @endif
-                                
-
+                            @endif
+                            @if (auth()->user()->role->name != "pic" )
                                 <a href="{{ route('visi-misi.index') }}" class="submenu-link">
                                     <i class="fas fa-bullseye me-2"></i> Visi & Misi
                                 </a>

@@ -193,7 +193,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             $peserta->ukuran_kaos ?? '-',
             $peserta->ukuran_training ?? '-',
             $peserta->ukuran_celana ?? '-',
-            $peserta->perokok ? 'MEROKOK' : 'TIDAK MEROKOK',
+            $peserta->perokok ?? '-',
             $mentor->nama_mentor ?? '-',
             $mentor->nip_mentor ?? '-',
             $mentor->jabatan_mentor ?? '-',
