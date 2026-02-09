@@ -138,7 +138,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'NAMA MENTOR',
             'NIP MENTOR',
             'JABATAN MENTOR',
-            'NOMOR REKENING MENTOR',
+            'NAMA BANK & NOMOR REKENING MENTOR',
             'NPWP MENTOR',
             'EMAIL MENTOR',
             'NOMOR HP MENTOR',
