@@ -14,16 +14,57 @@ class CleanupMentorDuplicatesSeeder extends Seeder
         echo "🔧 MEMULAI CLEANUP MENTOR DUPLIKAT\n";
         echo "==================================\n\n";
 
+        $this->cleanupNipFormat();
         $this->cleanDuplicatesByNip();
         $this->mergeSimilarMentors();
         $this->reportResults();
+    }
+
+    private function cleanupNipFormat(): void
+    {
+        echo "0. MERAPIKAN FORMAT NIP MENTOR (Hapus spasi & karakter khusus):\n";
+        
+        // Ambil semua mentor yang memiliki NIP
+        $mentors = DB::table('mentor')
+            ->whereNotNull('nip_mentor')
+            ->where('nip_mentor', '!=', '')
+            ->get();
+
+        $updatedCount = 0;
+        
+        foreach ($mentors as $mentor) {
+            $originalNip = $mentor->nip_mentor;
+            $cleanedNip = $this->cleanNip($originalNip);
+            
+            // Jika NIP berubah, update ke database
+            if ($cleanedNip !== $originalNip) {
+                DB::table('mentor')
+                    ->where('id', $mentor->id)
+                    ->update(['nip_mentor' => $cleanedNip]);
+                
+                $updatedCount++;
+                echo "   🔧 ID {$mentor->id}: '{$originalNip}' → '{$cleanedNip}'\n";
+            }
+        }
+
+        if ($updatedCount > 0) {
+            echo "   ✅ Telah merapikan {$updatedCount} NIP mentor\n\n";
+        } else {
+            echo "   ✅ Semua NIP sudah rapi (tanpa spasi)\n\n";
+        }
+    }
+
+    private function cleanNip(string $nip): string
+    {
+        // Ambil hanya angka saja, buang semua karakter lain (spasi, tanda hubung, dll)
+        return preg_replace('/[^0-9]/', '', $nip);
     }
 
     private function cleanDuplicatesByNip(): void
     {
         echo "1. MENCARI MENTOR DENGAN NIP SAMA:\n";
         
-        // Cari NIP yang muncul lebih dari 1 kali
+        // Cari NIP yang muncul lebih dari 1 kali (setelah dibersihkan)
         $duplicateNips = DB::table('mentor')
             ->select('nip_mentor', DB::raw('COUNT(*) as count'))
             ->whereNotNull('nip_mentor')
@@ -40,12 +81,12 @@ class CleanupMentorDuplicatesSeeder extends Seeder
         echo "   📊 Ditemukan " . $duplicateNips->count() . " NIP duplikat\n\n";
 
         foreach ($duplicateNips as $dup) {
-            echo "   🔍 NIP: {$dup->nip_mentor} (ada {$dup->count} duplikat)\n";
+            echo "   🔍 NIP: '{$dup->nip_mentor}' (ada {$dup->count} duplikat)\n";
             
-            // Ambil semua mentor dengan NIP ini (order by id, bukan id_mentor)
+            // Ambil semua mentor dengan NIP ini
             $mentors = DB::table('mentor')
                 ->where('nip_mentor', $dup->nip_mentor)
-                ->orderBy('id') // PERUBAHAN DI SINI
+                ->orderBy('id')
                 ->get();
 
             $keepMentor = $mentors->first();
@@ -54,8 +95,8 @@ class CleanupMentorDuplicatesSeeder extends Seeder
             foreach ($deleteMentors as $deleteMentor) {
                 // 1. Pindahkan semua peserta ke mentor pertama
                 $affected = DB::table('peserta_mentor')
-                    ->where('id_mentor', $deleteMentor->id) // PERUBAHAN DI SINI
-                    ->update(['id_mentor' => $keepMentor->id]); // PERUBAHAN DI SINI
+                    ->where('id_mentor', $deleteMentor->id)
+                    ->update(['id_mentor' => $keepMentor->id]);
 
                 if ($affected > 0) {
                     echo "      📝 Pindah {$affected} peserta ke mentor ID {$keepMentor->id}\n";
@@ -65,7 +106,7 @@ class CleanupMentorDuplicatesSeeder extends Seeder
                 $this->mergeMentorData($keepMentor, $deleteMentor);
 
                 // 3. Hapus mentor duplikat
-                DB::table('mentor')->where('id', $deleteMentor->id)->delete(); // PERUBAHAN DI SINI
+                DB::table('mentor')->where('id', $deleteMentor->id)->delete();
                 echo "      🗑️  Hapus mentor ID {$deleteMentor->id} ({$deleteMentor->nama_mentor})\n";
             }
         }
@@ -77,7 +118,15 @@ class CleanupMentorDuplicatesSeeder extends Seeder
         $updates = [];
 
         // Gabungkan data yang lebih lengkap
-        $fields = ['jabatan_mentor', 'nomor_rekening', 'npwp_mentor', 'email_mentor', 'nomor_hp_mentor'];
+        $fields = [
+            'nama_mentor',
+            'jabatan_mentor', 
+            'nomor_rekening', 
+            'npwp_mentor', 
+            'email_mentor', 
+            'nomor_hp_mentor',
+            'nip_mentor'
+        ];
         
         foreach ($fields as $field) {
             if (empty($keepMentor->$field) && !empty($deleteMentor->$field)) {
@@ -87,7 +136,7 @@ class CleanupMentorDuplicatesSeeder extends Seeder
 
         if (!empty($updates)) {
             DB::table('mentor')
-                ->where('id', $keepMentor->id) // PERUBAHAN DI SINI
+                ->where('id', $keepMentor->id)
                 ->update($updates);
             
             echo "      🔄 Update data mentor: " . implode(', ', array_keys($updates)) . "\n";
@@ -103,7 +152,7 @@ class CleanupMentorDuplicatesSeeder extends Seeder
             ->select('nama_mentor', DB::raw('COUNT(*) as count'))
             ->where(function($query) {
                 $query->whereNull('nip_mentor')
-                      ->orWhere('nip_mentor', '');
+                      ->orWhere('nip_mentor', '=', '');
             })
             ->groupBy('nama_mentor')
             ->having('count', '>', 1)
@@ -117,15 +166,15 @@ class CleanupMentorDuplicatesSeeder extends Seeder
         echo "   📊 Ditemukan " . $similarNames->count() . " nama duplikat\n\n";
 
         foreach ($similarNames as $dup) {
-            echo "   🔍 Nama: {$dup->nama_mentor} (ada {$dup->count} duplikat)\n";
+            echo "   🔍 Nama: '{$dup->nama_mentor}' (ada {$dup->count} duplikat)\n";
             
             $mentors = DB::table('mentor')
                 ->where('nama_mentor', $dup->nama_mentor)
                 ->where(function($query) {
                     $query->whereNull('nip_mentor')
-                          ->orWhere('nip_mentor', '');
+                          ->orWhere('nip_mentor', '=', '');
                 })
-                ->orderBy('id') // PERUBAHAN DI SINI
+                ->orderBy('id')
                 ->get();
 
             $keepMentor = $mentors->first();
@@ -134,8 +183,8 @@ class CleanupMentorDuplicatesSeeder extends Seeder
             foreach ($deleteMentors as $deleteMentor) {
                 // Pindahkan peserta
                 $affected = DB::table('peserta_mentor')
-                    ->where('id_mentor', $deleteMentor->id) // PERUBAHAN DI SINI
-                    ->update(['id_mentor' => $keepMentor->id]); // PERUBAHAN DI SINI
+                    ->where('id_mentor', $deleteMentor->id)
+                    ->update(['id_mentor' => $keepMentor->id]);
 
                 if ($affected > 0) {
                     echo "      📝 Pindah {$affected} peserta\n";
@@ -145,7 +194,7 @@ class CleanupMentorDuplicatesSeeder extends Seeder
                 $this->mergeMentorData($keepMentor, $deleteMentor);
 
                 // Hapus
-                DB::table('mentor')->where('id', $deleteMentor->id)->delete(); // PERUBAHAN DI SINI
+                DB::table('mentor')->where('id', $deleteMentor->id)->delete();
                 echo "      🗑️  Hapus mentor ID {$deleteMentor->id}\n";
             }
         }
@@ -187,6 +236,21 @@ class CleanupMentorDuplicatesSeeder extends Seeder
             echo "   ✅ SELAMAT! Tidak ada NIP duplikat\n";
         } else {
             echo "   ⚠️  MASIH ADA NIP DUPLIKAT! Jalankan seeder lagi.\n";
+        }
+
+        // Cek NIP yang masih ada spasi
+        $nipsWithSpaces = DB::table('mentor')
+            ->whereNotNull('nip_mentor')
+            ->where('nip_mentor', '!=', '')
+            ->where('nip_mentor', 'like', '% %')
+            ->count();
+
+        echo "5. NIP DENGAN SPASI (harusnya 0): {$nipsWithSpaces}\n";
+
+        if ($nipsWithSpaces === 0) {
+            echo "   ✅ SEMUA NIP TANPA SPASI\n";
+        } else {
+            echo "   ⚠️  Ada {$nipsWithSpaces} NIP yang masih ada spasi\n";
         }
 
         echo "\n✨ CLEANUP SELESAI!\n";

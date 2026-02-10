@@ -22,7 +22,7 @@ class MentorController extends Controller
             $query->where('status_aktif', $request->status === 'Aktif');
         }
 
-        // Search functionality
+        // Search functionality - mencakup semua data
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -45,11 +45,25 @@ class MentorController extends Controller
             $query->orderBy('nama_mentor', 'asc');
         }
 
-        $mentor = $query->get();
+        // Pagination - ambil parameter per_page dari request
+        $perPage = $request->get('per_page', 10);
+        if ($perPage == '-1') {
+            $mentor = $query->get();
+            $mentor = new \Illuminate\Pagination\LengthAwarePaginator(
+                $mentor,
+                $mentor->count(),
+                $mentor->count(),
+                1,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        } else {
+            $mentor = $query->paginate($perPage)->appends($request->except('page'));
+        }
 
-        // Stats for cards
-        $totalMentor = $mentor->count();
-        $aktifMentor = $mentor->where('status_aktif', true)->count();
+        // Stats for cards - hitung dari semua data (tanpa pagination)
+        $allMentor = Mentor::all();
+        $totalMentor = $allMentor->count();
+        $aktifMentor = $allMentor->where('status_aktif', true)->count();
         $nonaktifMentor = $totalMentor - $aktifMentor;
 
         return view('admin.mentor.index', compact('mentor', 'totalMentor', 'aktifMentor', 'nonaktifMentor'));
