@@ -525,12 +525,42 @@
     <!-- Form untuk memilih mentor yang sudah ada -->
     <div id="select-mentor-form"
         style="display: {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'pilih' ? 'block' : 'none' }};">
+        
+        <!-- FITUR PENCARIAN MENTOR -->
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">
+                <i class="fas fa-search"></i> Cari Mentor
+            </label>
+            <div style="position: relative;">
+                <input type="text" 
+                    id="search-mentor" 
+                    class="form-input" 
+                    placeholder="Ketik nama atau NIP mentor untuk mencari..."
+                    style="padding-right: 40px;">
+                <i class="fas fa-search" 
+                style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+            </div>
+            <small class="form-hint">
+                <i class="fas fa-info-circle"></i> 
+                Pencarian berdasarkan Nama atau NIP Mentor (Ketik nip mentor tanpa spasi)
+            </small>
+            <div id="search-info" style="margin-top: 8px; font-size: 0.9em; color: #666; display: none;">
+                <i class="fas fa-users"></i> <span id="search-result-count"></span>
+            </div>
+        </div>
+        
         <div class="form-group">
             <label class="form-label required">Pilih Mentor</label>
             <select name="id_mentor" id="id_mentor" class="form-select @error('id_mentor') error @enderror">
                 <option value="">Pilih Mentor...</option>
                 <!-- Data mentor akan dimuat via AJAX -->
             </select>
+            <div id="mentor-loading" style="display: none; margin-top: 10px; color: #666;">
+                <i class="fas fa-spinner fa-spin"></i> Memuat daftar mentor...
+            </div>
+            <div id="mentor-not-found" style="display: none; margin-top: 10px; color: #f56565;">
+                <i class="fas fa-exclamation-circle"></i> Mentor tidak ditemukan
+            </div>
             @error('id_mentor')
                 <small class="text-danger">{{ $message }}</small>
             @enderror
@@ -549,7 +579,7 @@
             <div class="form-group">
                 <label class="form-label required">NIP Mentor</label>
                 <input type="text" name="nip_mentor" id="nip_mentor_select"
-                    class="form-input uppercase @error('nip_mentor') error @enderror"
+                    class="form-input @error('nip_mentor') error @enderror"
                     value="{{ $peserta['nip_mentor'] ?? old('nip_mentor') }}" readonly>
                 @error('nip_mentor')
                     <small class="text-danger">{{ $message }}</small>
@@ -568,7 +598,7 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label class="form-label">Nomor Rekening Mentor</label>
+                <label class="form-label">Nama Bank & Nomor Rekening Mentor</label>
                 <input type="text" name="nomor_rekening_mentor" id="nomor_rekening_mentor_select"
                     class="form-input @error('nomor_rekening_mentor') error @enderror"
                     placeholder="Contoh: Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
@@ -586,18 +616,18 @@
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
             </div>
-            <!-- Di dalam #select-mentor-form (sekitar line 444-468) -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Nomor Telepon Mentor</label>
-                    <input type="text" name="nomor_hp_mentor" id="nomor_hp_mentor_select"
-                        class="form-input @error('nomor_hp_mentor') error @enderror"
-                        placeholder="Akan terisi otomatis saat memilih mentor"
-                        value="{{ $peserta['nomor_hp_mentor'] ?? old('nomor_hp_mentor') }}" readonly>
-                    @error('nomor_hp_mentor')
-                        <small class="text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Nomor Telepon Mentor</label>
+                <input type="text" name="nomor_hp_mentor" id="nomor_hp_mentor_select"
+                    class="form-input @error('nomor_hp_mentor') error @enderror"
+                    placeholder="Akan terisi otomatis saat memilih mentor"
+                    value="{{ $peserta['nomor_hp_mentor'] ?? old('nomor_hp_mentor') }}" readonly>
+                @error('nomor_hp_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
             </div>
         </div>
     </div>

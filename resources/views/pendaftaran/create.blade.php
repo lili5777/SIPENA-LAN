@@ -1018,9 +1018,54 @@
     margin-top: 8px;
 }
 
-#ndh-info {
-    font-weight: 500;
-}
+    #ndh-info {
+        font-weight: 500;
+    }
+    /* Styling untuk search input */
+    #search-mentor {
+        transition: border-color 0.3s ease;
+    }
+
+    #search-mentor:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    /* Styling untuk info hasil pencarian */
+    #search-info {
+        padding: 8px 12px;
+        background: rgba(66, 153, 225, 0.1);
+        border-left: 3px solid var(--accent-color);
+        border-radius: 4px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Styling untuk loading dan not found indicator */
+    #mentor-loading {
+        padding: 10px;
+        text-align: center;
+        background: rgba(245, 158, 11, 0.1);
+        border-radius: 4px;
+    }
+
+    #mentor-not-found {
+        padding: 10px;
+        text-align: center;
+        background: rgba(245, 101, 101, 0.1);
+        border-radius: 4px;
+        border-left: 3px solid var(--danger-color);
+    }
         </style>
 @endpush
 
@@ -1900,6 +1945,7 @@ async function loadAvailableNdh() {
                 const mentorContainer = document.getElementById('mentor-container');
                 const mentorModeSelect = document.getElementById('mentor_mode');
                 const mentorDropdown = document.getElementById('id_mentor');
+                const searchInput = document.getElementById('search-mentor');
 
                 if (!mentorSelect || !mentorContainer) return;
 
@@ -1934,6 +1980,23 @@ async function loadAvailableNdh() {
                     });
                 }
 
+                // FITUR PENCARIAN MENTOR
+                if (searchInput) {
+                    let searchTimeout;
+                    
+                    searchInput.addEventListener('input', function() {
+                        const searchValue = this.value.trim();
+                        
+                        // Clear timeout sebelumnya
+                        clearTimeout(searchTimeout);
+                        
+                        // Debounce: tunggu 500ms setelah user berhenti mengetik
+                        searchTimeout = setTimeout(() => {
+                            loadMentors(searchValue);
+                        }, 500);
+                    });
+                }
+
                 // Auto-fill field saat pilih mentor
                 if (mentorDropdown) {
                     mentorDropdown.addEventListener('change', function () {
@@ -1947,6 +2010,7 @@ async function loadAvailableNdh() {
                             document.getElementById('jabatan_mentor_select').value = '';
                             document.getElementById('nomor_rekening_mentor_select').value = '';
                             document.getElementById('npwp_mentor_select').value = '';
+                            document.getElementById('nomor_hp_mentor_select').value = '';
                             return;
                         }
 
@@ -1960,50 +2024,92 @@ async function loadAvailableNdh() {
                         document.getElementById('nomor_hp_mentor_select').value = mentor.nomor_hp_mentor || '';
                     });
                 }
-
             }
 
-            async function loadMentors() {
+            async function loadMentors(searchTerm = '') {
                 const mentorDropdown = document.getElementById('id_mentor');
+                const loadingIndicator = document.getElementById('mentor-loading');
+                const notFoundIndicator = document.getElementById('mentor-not-found');
+                const searchInfo = document.getElementById('search-info');
+                const searchResultCount = document.getElementById('search-result-count');
+                
                 if (!mentorDropdown) return;
+
+                // Tampilkan loading
+                if (loadingIndicator) loadingIndicator.style.display = 'block';
+                if (notFoundIndicator) notFoundIndicator.style.display = 'none';
+                if (searchInfo) searchInfo.style.display = 'none';
 
                 mentorDropdown.innerHTML = '<option value="">Memuat daftar mentor...</option>';
                 mentorDropdown.disabled = true;
 
                 try {
-                    const response = await fetch('/api/mentors');
-                    const data = await response.json();
+                    // Kirim parameter pencarian ke API
+                    const url = searchTerm 
+                        ? `/api/mentors?search=${encodeURIComponent(searchTerm)}`
+                        : '/api/mentors';
+                        
+                    const response = await fetch(url);
+                    const result = await response.json();
 
-                    mentorDropdown.innerHTML = '<option value="">Pilih Mentor</option>';
-                    mentorDropdown.disabled = false;
+                    // Sembunyikan loading
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
 
-                    data.forEach(mentor => {
-                        const option = document.createElement('option');
-                        option.value = mentor.id_mentor || mentor.id;
-                        option.textContent = `${mentor.nama_mentor} - ${mentor.jabatan_mentor}`;
-                        option.dataset.mentor = JSON.stringify({
-                            nama_mentor: mentor.nama_mentor,
-                            nip_mentor: mentor.nip_mentor,              
-                            jabatan_mentor: mentor.jabatan_mentor,
-                            nomor_rekening_mentor: mentor.nomor_rekening,
-                            npwp_mentor: mentor.npwp_mentor,
-                            nomor_hp_mentor: mentor.nomor_hp_mentor
+                    if (result.success && result.data && result.data.length > 0) {
+                        mentorDropdown.innerHTML = '<option value="">Pilih Mentor</option>';
+                        mentorDropdown.disabled = false;
+
+                        result.data.forEach(mentor => {
+                            const option = document.createElement('option');
+                            option.value = mentor.id_mentor || mentor.id;
+                            option.textContent = `${mentor.nama_mentor} - ${mentor.nip_mentor} - ${mentor.jabatan_mentor}`;
+                            option.dataset.mentor = JSON.stringify({
+                                nama_mentor: mentor.nama_mentor,
+                                nip_mentor: mentor.nip_mentor,              
+                                jabatan_mentor: mentor.jabatan_mentor,
+                                nomor_rekening_mentor: mentor.nomor_rekening,
+                                npwp_mentor: mentor.npwp_mentor,
+                                nomor_hp_mentor: mentor.nomor_hp_mentor
+                            });
+                            mentorDropdown.appendChild(option);
                         });
-                        mentorDropdown.appendChild(option);
-                    });
 
-                    // Set value dari data peserta jika ada
-                    if (verifiedPeserta && verifiedPeserta.id_mentor) {
-                        mentorDropdown.value = verifiedPeserta.id_mentor;
-                        if (mentorDropdown.value) {
-                            mentorDropdown.dispatchEvent(new Event('change'));
+                        // Tampilkan info hasil pencarian
+                        if (searchTerm && searchInfo && searchResultCount) {
+                            searchInfo.style.display = 'block';
+                            searchResultCount.textContent = `Ditemukan ${result.total} mentor yang sesuai dengan "${searchTerm}"`;
+                        }
+
+                        // Set value dari data peserta jika ada
+                        if (verifiedPeserta && verifiedPeserta.id_mentor) {
+                            mentorDropdown.value = verifiedPeserta.id_mentor;
+                            if (mentorDropdown.value) {
+                                mentorDropdown.dispatchEvent(new Event('change'));
+                            }
+                        }
+
+                    } else {
+                        // Tidak ada data mentor
+                        mentorDropdown.innerHTML = '<option value="">Tidak ada mentor ditemukan</option>';
+                        mentorDropdown.disabled = false;
+                        
+                        if (notFoundIndicator) {
+                            notFoundIndicator.style.display = 'block';
+                            if (searchTerm) {
+                                notFoundIndicator.innerHTML = `<i class="fas fa-exclamation-circle"></i> Tidak ada mentor yang sesuai dengan "${searchTerm}"`;
+                            }
                         }
                     }
 
                 } catch (error) {
                     console.error('Error loading mentors:', error);
+                    
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    
                     mentorDropdown.innerHTML = '<option value="">Error loading mentors</option>';
                     mentorDropdown.disabled = false;
+                    
+                    showErrorMessage('Gagal memuat daftar mentor. Silakan coba lagi.');
                 }
             }
 

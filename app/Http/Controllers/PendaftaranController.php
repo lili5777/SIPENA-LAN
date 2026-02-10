@@ -1131,13 +1131,34 @@ public function getAvailableNdh(Request $request)
     }
 
     /**
-     * API untuk mendapatkan daftar mentor
+     * API untuk mendapatkan daftar mentor dengan fitur pencarian
      */
-    public function getMentors()
+    public function getMentors(Request $request)
     {
-        $mentors = Mentor::where('status_aktif', true)->get();
+        $search = $request->get('search', '');
+        
+        $query = Mentor::where('status_aktif', true);
+        
+        // Jika ada parameter pencarian
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                // Normalisasi input pencarian (hapus spasi dan titik)
+                $normalizedSearch = preg_replace('/[\s\.]/', '', $search);
+                
+                // Cari berdasarkan nama mentor (case insensitive)
+                $q->where('nama_mentor', 'LIKE', "%{$search}%")
+                // Cari berdasarkan NIP mentor (normalisasi)
+                ->orWhereRaw("REPLACE(REPLACE(nip_mentor, ' ', ''), '.', '') LIKE ?", ["%{$normalizedSearch}%"]);
+            });
+        }
+        
+        $mentors = $query->orderBy('nama_mentor', 'asc')->get();
 
-        return response()->json($mentors);
+        return response()->json([
+            'success' => true,
+            'data' => $mentors,
+            'total' => $mentors->count()
+        ]);
     }
 
     /**

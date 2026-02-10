@@ -215,6 +215,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'AL' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Rekening Mentor
             'AM' => NumberFormat::FORMAT_TEXT, // Kolom NPWP Mentor
             'AO' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP Mentor
+            'AQ' => NumberFormat::FORMAT_TEXT,
         ];
     }
 
@@ -253,7 +254,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
                 $highestColumn = $sheet->getHighestColumn();
 
                 // KUNCI UTAMA: Format kolom-kolom yang berisi angka panjang sebagai TEXT
-                $textColumns = ['E', 'R', 'W', 'Y', 'AN', 'AL', 'AM', 'AO'];
+                $textColumns = ['E', 'R', 'W', 'Y', 'AN', 'AL', 'AM', 'AO', 'AQ'];
 
                 foreach ($textColumns as $col) {
                     // Set format code '@' untuk TEXT
