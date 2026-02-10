@@ -35,6 +35,43 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
         $this->wilayah = $wilayah;
     }
 
+    /**
+     * Fungsi helper untuk mengkonversi angka romawi ke integer
+     */
+    private function romanToInt($roman)
+    {
+        if (empty($roman)) return 0;
+        
+        $romans = [
+            'M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400,
+            'C' => 100, 'XC' => 90, 'L' => 50, 'XL' => 40,
+            'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1
+        ];
+        
+        $result = 0;
+        foreach ($romans as $key => $value) {
+            while (strpos($roman, $key) === 0) {
+                $result += $value;
+                $roman = substr($roman, strlen($key));
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Fungsi helper untuk ekstrak angka romawi dari nama angkatan
+     */
+    private function extractRomanNumeral($namaAngkatan)
+    {
+        if (empty($namaAngkatan)) return '';
+        
+        // Cari pola angka romawi (contoh: "Angkatan I", "I", "IX", dll)
+        if (preg_match('/\b([IVXLCDM]+)\b/', strtoupper($namaAngkatan), $matches)) {
+            return $matches[1];
+        }
+        return '';
+    }
+
     public function collection()
     {
         $query = Pendaftaran::with([
@@ -91,7 +128,31 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             }
         }
 
-        return $query->get();
+        $data = $query->get();
+
+        // =========================
+        // 🔥 SORTING: Angkatan (Romawi) → NDH
+        // =========================
+        $sorted = $data->sort(function ($a, $b) {
+            // 1. Sort berdasarkan angka romawi angkatan (terkecil dulu)
+            $romanA = $this->extractRomanNumeral($a->angkatan->nama_angkatan ?? '');
+            $romanB = $this->extractRomanNumeral($b->angkatan->nama_angkatan ?? '');
+            
+            $numA = $this->romanToInt($romanA);
+            $numB = $this->romanToInt($romanB);
+            
+            if ($numA != $numB) {
+                return $numA <=> $numB;
+            }
+            
+            // 2. Jika angkatan sama, sort berdasarkan NDH (terkecil dulu)
+            $ndhA = $a->peserta->ndh ?? 0;
+            $ndhB = $b->peserta->ndh ?? 0;
+            
+            return $ndhA <=> $ndhB;
+        });
+
+        return $sorted->values();
     }
 
     public function headings(): array
@@ -101,6 +162,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'JENIS PELATIHAN',
             'ANGKATAN',
             'TAHUN',
+            'NDH', // Kolom baru ditambahkan di sini
             'NIP/NRP',
             'NAMA',
             'JENIS KELAMIN',
@@ -160,7 +222,8 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             $pendaftaran->jenisPelatihan->nama_pelatihan ?? '-',
             $pendaftaran->angkatan->nama_angkatan ?? '-',
             $pendaftaran->angkatan->tahun ?? '-',
-            $peserta->nip_nrp ?? '-', // Tanpa prefix '
+            $peserta->ndh ?? '-', // Kolom NDH ditambahkan di sini
+            $peserta->nip_nrp ?? '-',
             $peserta->nama_lengkap ?? '-',
             $peserta->jenis_kelamin ?? '-',
             $peserta->agama ?? '-',
@@ -207,15 +270,16 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
     public function columnFormats(): array
     {
         return [
-            'E' => NumberFormat::FORMAT_TEXT, // Kolom NIP/NRP (kolom E)
-            'R' => NumberFormat::FORMAT_TEXT, // Kolom Nomor SK Jabatan
-            'W' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP/WA Peserta (kolom W)
-            'Y' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Telepon Instansi
-            'AN' => NumberFormat::FORMAT_TEXT,
-            'AL' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Rekening Mentor
-            'AM' => NumberFormat::FORMAT_TEXT, // Kolom NPWP Mentor
-            'AO' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP Mentor
-            'AQ' => NumberFormat::FORMAT_TEXT,
+            'E' => NumberFormat::FORMAT_TEXT, // Kolom NDH (sekarang kolom E)
+            'F' => NumberFormat::FORMAT_TEXT, // Kolom NIP/NRP (bergeser jadi kolom F)
+            'S' => NumberFormat::FORMAT_TEXT, // Kolom Nomor SK Jabatan (bergeser jadi S)
+            'X' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP/WA Peserta (bergeser jadi X)
+            'Z' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Telepon Instansi (bergeser jadi Z)
+            'AO' => NumberFormat::FORMAT_TEXT, // NIP Mentor
+            'AM' => NumberFormat::FORMAT_TEXT, // Kolom Nomor Rekening Mentor
+            'AN' => NumberFormat::FORMAT_TEXT, // NPWP Mentor
+            'AP' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP Mentor
+            'AR' => NumberFormat::FORMAT_TEXT, // Kolom Nomor HP Mentor
         ];
     }
 
@@ -254,7 +318,8 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
                 $highestColumn = $sheet->getHighestColumn();
 
                 // KUNCI UTAMA: Format kolom-kolom yang berisi angka panjang sebagai TEXT
-                $textColumns = ['E', 'R', 'W', 'Y', 'AN', 'AL', 'AM', 'AO', 'AQ'];
+                // Disesuaikan karena ada penambahan kolom NDH
+                $textColumns = ['E', 'F', 'S', 'X', 'Z', 'AO', 'AM', 'AN', 'AP', 'AR'];
 
                 foreach ($textColumns as $col) {
                     // Set format code '@' untuk TEXT
@@ -286,7 +351,8 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
                     ],
                 ]);
 
-                $sheet->getStyle('B1:D' . $highestRow)->applyFromArray([
+                // Kolom B-E (JENIS PELATIHAN, ANGKATAN, TAHUN, NDH) di-center
+                $sheet->getStyle('B1:E' . $highestRow)->applyFromArray([
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                     ],
