@@ -1729,4 +1729,46 @@ if ($user->role->name == 'pengawas') {
             return redirect()->back()->with('error', 'Gagal generate report: ' . $e->getMessage());
         }
     }
+
+
+    /**
+     * Get mentors for search (AJAX)
+     */
+    public function getMentors(Request $request)
+    {
+        try {
+            $search = $request->input('search', '');
+            
+            $query = Mentor::where('status_aktif', true);
+            
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    // Search by name
+                    $q->where('nama_mentor', 'like', "%{$search}%")
+                    // Search by NIP (normalized - ignore spaces, dots, dashes)
+                    ->orWhereRaw(
+                        "REPLACE(REPLACE(REPLACE(nip_mentor, ' ', ''), '.', ''), '-', '') LIKE ?",
+                        ['%' . str_replace([' ', '.', '-'], '', $search) . '%']
+                    );
+                });
+            }
+            
+            $mentors = $query->orderBy('nama_mentor', 'asc')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $mentors,
+                'total' => $mentors->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error in getMentors: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat data mentor',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
