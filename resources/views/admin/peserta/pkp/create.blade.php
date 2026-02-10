@@ -877,6 +877,31 @@ $isPKN = $jenis === 'pkn';
                                 <!-- Form untuk memilih mentor yang sudah ada -->
                                 <div id="select-mentor-form"
                                     style="display: {{ $selectedMentorMode == 'pilih' || old('mentor_mode') == 'pilih' ? 'block' : 'none' }};">
+                                    <!-- ✅ SEARCH INPUT -->
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-search"></i> Cari Mentor
+                                        </label>
+                                        <input type="text" 
+                                            id="mentor-search" 
+                                            class="form-input" 
+                                            placeholder="Cari berdasarkan nama atau NIP mentor..."
+                                            autocomplete="off">
+                                        <div class="form-hint" id="mentor-search-info" style="display:none;">
+                                            <i class="fas fa-info-circle"></i> <span id="mentor-search-stats"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- ✅ LOADING & NOT FOUND INDICATORS -->
+                                    <div id="mentor-loading" style="display:none; padding: 10px; background: #fff3cd; border-radius: 6px; margin-bottom: 15px;">
+                                        <i class="fas fa-spinner fa-spin"></i> Mencari mentor...
+                                    </div>
+                                    
+                                    <div id="mentor-not-found" style="display:none; padding: 10px; background: #f8d7da; border-radius: 6px; margin-bottom: 15px; color: #721c24;">
+                                        <i class="fas fa-exclamation-circle"></i> Tidak ada mentor yang sesuai dengan pencarian
+                                    </div>
+                                    
+                                    <!-- DROPDOWN MENTOR -->
                                     <div class="form-group">
                                         <label class="form-label">Pilih Mentor</label>
                                         <select name="id_mentor" id="id_mentor"
@@ -891,7 +916,7 @@ $isPKN = $jenis === 'pkn';
                                                     data-npwp="{{ $mentor->npwp_mentor }}"
                                                     data-nomor-hp="{{ $mentor->nomor_hp_mentor ?? '' }}"
                                                     {{ ($selectedMentorId == $mentor->id) || old('id_mentor') == $mentor->id ? 'selected' : '' }}>
-                                                    {{ $mentor->nama_mentor }} - {{ $mentor->jabatan_mentor }}
+                                                    {{ $mentor->nama_mentor }} - {{ $mentor->nip_mentor ?? 'Tanpa NIP' }} - {{ $mentor->jabatan_mentor }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -2600,6 +2625,118 @@ $isPKN = $jenis === 'pkn';
             };
         }
 
+        // ============================================
+        // MENTOR SEARCH FUNCTIONALITY
+        // ============================================
+        function setupMentorSearch() {
+            const searchInput = document.getElementById('mentor-search');
+            const mentorSelect = document.getElementById('id_mentor');
+            const loadingIndicator = document.getElementById('mentor-loading');
+            const notFoundIndicator = document.getElementById('mentor-not-found');
+            const searchInfo = document.getElementById('mentor-search-info');
+            const searchStats = document.getElementById('mentor-search-stats');
+            
+            let searchTimeout;
+            const jenis = @json($jenis);
+            
+            if (!searchInput || !mentorSelect) return;
+            
+            // Debounced search function
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                
+                const searchValue = this.value.trim();
+                
+                // Hide indicators
+                notFoundIndicator.style.display = 'none';
+                searchInfo.style.display = 'none';
+                
+                // If search is empty, reload all mentors
+                if (!searchValue) {
+                    loadMentors('');
+                    return;
+                }
+                
+                // Show loading
+                loadingIndicator.style.display = 'block';
+                
+                // Debounce 500ms
+                searchTimeout = setTimeout(() => {
+                    loadMentors(searchValue);
+                }, 500);
+            });
+            
+            async function loadMentors(searchTerm = '') {
+                try {
+                    // Build URL with search parameter
+                    let url = `/admin/peserta/${jenis}/get-mentors`;
+                    if (searchTerm) {
+                        url += `?search=${encodeURIComponent(searchTerm)}`;
+                    }
+                    
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    // Hide loading
+                    loadingIndicator.style.display = 'none';
+                    
+                    if (result.success) {
+                        // Clear current options except the first one
+                        mentorSelect.innerHTML = '<option value="">Pilih Mentor...</option>';
+                        
+                        if (result.data.length > 0) {
+                            // Add new options
+                            result.data.forEach(mentor => {
+                                const option = document.createElement('option');
+                                option.value = mentor.id;
+                                option.textContent = `${mentor.nama_mentor} - ${mentor.nip_mentor || 'Tanpa NIP'} - ${mentor.jabatan_mentor}`;
+                                
+                                // Store data attributes
+                                option.dataset.nama = mentor.nama_mentor || '';
+                                option.dataset.nip = mentor.nip_mentor || '';
+                                option.dataset.jabatan = mentor.jabatan_mentor || '';
+                                option.dataset.nomorRekening = mentor.nomor_rekening || '';
+                                option.dataset.npwp = mentor.npwp_mentor || '';
+                                option.dataset.nomorHp = mentor.nomor_hp_mentor || '';
+                                
+                                mentorSelect.appendChild(option);
+                            });
+                            
+                            // Show search info
+                            if (searchTerm) {
+                                searchInfo.style.display = 'block';
+                                searchStats.textContent = `Ditemukan ${result.total} mentor yang sesuai dengan "${searchTerm}"`;
+                            }
+                            
+                            notFoundIndicator.style.display = 'none';
+                        } else {
+                            // No results found
+                            if (searchTerm) {
+                                notFoundIndicator.style.display = 'block';
+                                notFoundIndicator.innerHTML = `<i class="fas fa-exclamation-circle"></i> Tidak ada mentor yang sesuai dengan "${searchTerm}"`;
+                            }
+                        }
+                    } else {
+                        console.error('Error loading mentors:', result.message);
+                        notFoundIndicator.style.display = 'block';
+                        notFoundIndicator.innerHTML = '<i class="fas fa-exclamation-circle"></i> Gagal memuat data mentor';
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    loadingIndicator.style.display = 'none';
+                    notFoundIndicator.style.display = 'block';
+                    notFoundIndicator.innerHTML = '<i class="fas fa-exclamation-circle"></i> Terjadi kesalahan saat memuat data';
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // ============================================
             // KONFIGURASI AWAL
@@ -2884,6 +3021,10 @@ loadAvailableNdh(selectedAngkatan.id, jenisPelatihanId, currentNdh);
                     if (this.value === 'pilih') {
                         selectMentorForm.style.display = 'block';
                         addMentorForm.style.display = 'none';
+                        setTimeout(() => {
+                            setupMentorSearch();
+                        }, 100);
+                        
                         // Load mentors if not loaded
                         if (mentorSelect && mentorSelect.options.length <= 1) {
                             loadMentors();
@@ -2922,6 +3063,13 @@ loadAvailableNdh(selectedAngkatan.id, jenisPelatihanId, currentNdh);
                 }
                 if (mentorModeSelect && mentorModeSelect.value) {
                     mentorModeSelect.dispatchEvent(new Event('change'));
+                    
+                    // ✅ Initialize search jika sudah mode 'pilih'
+                    if (mentorModeSelect.value === 'pilih') {
+                        setTimeout(() => {
+                            setupMentorSearch();
+                        }, 200);
+                    }
                 }
                 if (mentorSelect && mentorSelect.value) {
                     mentorSelect.dispatchEvent(new Event('change'));

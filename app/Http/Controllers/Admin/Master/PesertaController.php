@@ -2513,4 +2513,44 @@ public function edit(Request $request, $jenis, $id)
             }
         }
     }
+
+    /**
+     * Get mentors with search functionality (AJAX endpoint)
+     */
+    public function getMentors(Request $request)
+    {
+        try {
+            $query = Mentor::where('status_aktif', true);
+            
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                
+                $query->where(function($q) use ($searchTerm) {
+                    // Search by name (case-insensitive)
+                    $q->where('nama_mentor', 'LIKE', "%{$searchTerm}%")
+                    // Search by NIP (normalized - ignore spaces, dots, dashes)
+                    ->orWhereRaw("REPLACE(REPLACE(REPLACE(nip_mentor, ' ', ''), '.', ''), '-', '') LIKE ?", 
+                                ['%' . str_replace([' ', '.', '-'], '', $searchTerm) . '%']);
+                });
+            }
+            
+            $mentors = $query->orderBy('nama_mentor', 'asc')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $mentors,
+                'total' => $mentors->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error getting mentors: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
 }

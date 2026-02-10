@@ -290,6 +290,9 @@ Route::get('/api/mentors', [PendaftaranController::class, 'getMentors'])->name('
 Route::get('/api/get-available-ndh', [PendaftaranController::class, 'getAvailableNdh']);
 Route::get('/api/peserta/available-ndh', [PesertaController::class, 'getAvailableNdhForPeserta']);
 
+// Route untuk get mentors dengan search (AJAX)
+Route::get('/admin/peserta/{jenis}/get-mentors', [PesertaController::class, 'getMentors'])
+    ->name('peserta.getMentors');
 
 // Proxy untuk bypass CORS (API Wilayah Indonesia)
 // Provinsi
