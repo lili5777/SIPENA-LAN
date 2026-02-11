@@ -42,236 +42,456 @@ class ExportController extends Controller
      * Export data peserta dengan filter
      */
     
+    // public function exportPeserta(Request $request)
+    // {
+    //     // =========================
+    //     // 1️⃣ Ambil parameter
+    //     // =========================
+    //     $template       = $request->template;
+    //     $jenisPelatihan = $request->jenis_pelatihan;
+    //     $angkatan       = $request->angkatan;
+    //     $tahun          = $request->tahun;
+    //     $kategori       = $request->kategori;
+    //     $wilayah        = $request->wilayah;
+
+    //     // =========================
+    //     // 2️⃣ Validasi template
+    //     // =========================
+    //     if (!$template) {
+    //         return back()->with('error', 'Silakan pilih template export terlebih dahulu.');
+    //     }
+
+    //     if (!in_array($template, ['form_registrasi', 'smart_bangkom'])) {
+    //         return back()->with('error', 'Template export tidak valid.');
+    //     }
+
+    //     // =========================
+    //     // 3️⃣ QUERY UTAMA
+    //     // =========================
+    //     $query = Pendaftaran::with([
+    //         'peserta',
+    //         'peserta.kepegawaianPeserta',
+    //         'angkatan',
+    //         'jenisPelatihan'
+    //     ])->where('status_pendaftaran', 'Diterima');
+
+    //     if ($jenisPelatihan) {
+    //         $query->whereHas(
+    //             'jenisPelatihan',
+    //             fn($q) =>
+    //             $q->where('nama_pelatihan', $jenisPelatihan)
+    //         );
+    //     }
+
+    //     if ($angkatan) {
+    //         $query->whereHas(
+    //             'angkatan',
+    //             fn($q) =>
+    //             $q->where('nama_angkatan', $angkatan)
+    //         );
+    //     }
+
+    //     if ($tahun) {
+    //         $query->whereHas(
+    //             'angkatan',
+    //             fn($q) =>
+    //             $q->where('tahun', $tahun)
+    //         );
+    //     }
+
+    //     // =========================
+    //     // 🔥 FILTER KATEGORI & WILAYAH (OPSIONAL)
+    //     // =========================
+    //     if ($kategori === 'PNBP') {
+    //         $query->whereHas('angkatan', function ($q) {
+    //             $q->where('kategori', 'PNBP');
+    //         });
+    //     } elseif ($kategori === 'FASILITASI') {
+    //         $query->whereHas('angkatan', function ($q) use ($wilayah) {
+    //             $q->where('kategori', 'FASILITASI');
+    //             if ($wilayah && trim($wilayah) !== '') {
+    //                 // Gunakan LIKE untuk partial match
+    //                 $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+    //             }
+    //         });
+    //     } else if ($kategori === 'SEMUA') {
+    //         // Jika kategori SEMUA, kita tetap bisa filter wilayah jika dipilih
+    //         if ($wilayah && trim($wilayah) !== '') {
+    //             $query->whereHas('angkatan', function ($q) use ($wilayah) {
+    //                 // Gunakan LIKE untuk partial match
+    //                 $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+    //             });
+    //         }
+    //     }
+
+    //     // =========================
+    //     // 🔥 VALIDASI DATA KOSONG (GLOBAL)
+    //     // =========================
+    //     if (!$query->exists()) {
+    //         return back()->with(
+    //             'error',
+    //             'Data peserta tidak ditemukan sesuai filter yang dipilih.'
+    //         );
+    //     }
+
+    //     // =========================
+    //     // 4️⃣ NAMA FILE
+    //     // =========================
+    //     $fileNameParts = [
+    //         $template === 'smart_bangkom' ? 'SMART_BANGKOM' : 'DATA_PESERTA'
+    //     ];
+
+    //     if ($jenisPelatihan) $fileNameParts[] = strtoupper(str_replace(' ', '_', $jenisPelatihan));
+    //     if ($angkatan)       $fileNameParts[] = strtoupper(str_replace(' ', '_', $angkatan));
+    //     if ($tahun)          $fileNameParts[] = $tahun;
+    //     if ($kategori && $kategori !== 'SEMUA') $fileNameParts[] = $kategori;
+    //     if ($wilayah)        $fileNameParts[] = strtoupper(str_replace(' ', '_', $wilayah));
+
+    //     $fileNameParts[] = now()->format('Ymd_His');
+    //     $fileName = implode('_', $fileNameParts) . '.xlsx';
+
+    //     // =========================
+    //     // 5️⃣ TEMPLATE SMART BANGKOM
+    //     // =========================
+    //     if ($template === 'smart_bangkom') {
+
+    //         aktifitas('Mengekspor Data Peserta - Template Smart Bangkom');
+
+    //         $templatePath = public_path('smartbangkom.xlsx');
+
+    //         if (!file_exists($templatePath)) {
+    //             return back()->with('error', 'Template Smart Bangkom tidak ditemukan.');
+    //         }
+
+    //         $data = $query->get();
+
+    //         $spreadsheet = IOFactory::load($templatePath);
+    //         $sheet = $spreadsheet->getActiveSheet();
+
+    //         // mulai baris ke-3
+    //         $row = 3;
+
+    //         foreach ($data as $item) {
+    //             $p = $item->peserta;
+    //             $k = $p->kepegawaianPeserta;
+
+    //             $gender = match (strtolower($p->jenis_kelamin)) {
+    //                 'perempuan', 'wanita' => 'Wanita',
+    //                 'laki-laki', 'laki laki', 'pria' => 'Pria',
+    //                 default => '',
+    //             };
+
+    //             $sheet->setCellValue("A$row", $p->nama_lengkap);
+    //             $sheet->setCellValueExplicit("B$row", $p->nip_nrp, DataType::TYPE_STRING);
+    //             $sheet->setCellValue("C$row", $gender);
+    //             $sheet->setCellValue("D$row", $p->agama);
+    //             $sheet->setCellValue("E$row", $p->tempat_lahir);
+
+    //             if ($p->tanggal_lahir) {
+    //                 $sheet->setCellValue("F$row", Date::PHPToExcel($p->tanggal_lahir));
+    //                 $sheet->getStyle("F$row")
+    //                     ->getNumberFormat()
+    //                     ->setFormatCode('dd-mm-yyyy');
+    //             }
+
+    //             $sheet->setCellValue("G$row", $p->email_pribadi);
+    //             $sheet->setCellValueExplicit(
+    //                 "H$row",
+    //                 $p->nomor_hp ?? ($k->nomor_telepon_kantor ?? ''),
+    //                 DataType::TYPE_STRING
+    //             );
+
+    //             $sheet->setCellValue("I$row", 'PNS');
+    //             $sheet->setCellValue("J$row", $k->golongan_ruang ?? '');
+    //             $sheet->setCellValue("K$row", $k->pangkat ?? '');
+    //             $sheet->setCellValue("L$row", $k->jabatan ?? '');
+    //             $sheet->setCellValue("M$row", 'Pengiriman/PNBP');
+    //             $sheet->setCellValue("N$row", 'APBD');
+    //             $sheet->setCellValue("O$row", $k->asal_instansi ?? '');
+    //             $sheet->setCellValue("P$row", $k->alamat_kantor ?? '');
+
+    //             $row++;
+    //         }
+
+    //         return response()->streamDownload(function () use ($spreadsheet) {
+    //             IOFactory::createWriter($spreadsheet, 'Xlsx')->save('php://output');
+    //         }, $fileName);
+    //     }
+
+    //     // =========================
+    //     // 6️⃣ TEMPLATE FORM REGISTRASI
+    //     // =========================
+    //     aktifitas('Mengekspor Data Peserta - Template Form Registrasi');
+
+    //     return Excel::download(
+    //         new DataPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
+    //         $fileName
+    //     );
+    // }
+
     public function exportPeserta(Request $request)
-    {
-        // =========================
-        // 1️⃣ Ambil parameter
-        // =========================
-        $template       = $request->template;
-        $jenisPelatihan = $request->jenis_pelatihan;
-        $angkatan       = $request->angkatan;
-        $tahun          = $request->tahun;
-        $kategori       = $request->kategori;
-        $wilayah        = $request->wilayah;
+{
+    // =========================
+    // 1️⃣ Ambil parameter
+    // =========================
+    $template       = $request->template;
+    $jenisPelatihan = $request->jenis_pelatihan;
+    $angkatan       = $request->angkatan;
+    $tahun          = $request->tahun;
+    $kategori       = $request->kategori;
+    $wilayah        = $request->wilayah;
 
-        // =========================
-        // 2️⃣ Validasi template
-        // =========================
-        if (!$template) {
-            return back()->with('error', 'Silakan pilih template export terlebih dahulu.');
-        }
+    // =========================
+    // 2️⃣ Validasi template
+    // =========================
+    if (!$template) {
+        return back()->with('error', 'Silakan pilih template export terlebih dahulu.');
+    }
 
-        if (!in_array($template, ['form_registrasi', 'smart_bangkom'])) {
-            return back()->with('error', 'Template export tidak valid.');
-        }
+    if (!in_array($template, ['form_registrasi', 'smart_bangkom'])) {
+        return back()->with('error', 'Template export tidak valid.');
+    }
 
-        // =========================
-        // 3️⃣ QUERY UTAMA
-        // =========================
-        $query = Pendaftaran::with([
-            'peserta',
-            'peserta.kepegawaianPeserta',
+    // =========================
+    // 3️⃣ QUERY UTAMA
+    // =========================
+    $query = Pendaftaran::with([
+        'peserta',
+        'peserta.kepegawaianPeserta',
+        'angkatan',
+        'jenisPelatihan'
+    ])->where('status_pendaftaran', 'Diterima');
+
+    if ($jenisPelatihan) {
+        $query->whereHas(
+            'jenisPelatihan',
+            fn($q) =>
+            $q->where('nama_pelatihan', $jenisPelatihan)
+        );
+    }
+
+    if ($angkatan) {
+        $query->whereHas(
             'angkatan',
-            'jenisPelatihan'
-        ])->where('status_pendaftaran', 'Diterima');
+            fn($q) =>
+            $q->where('nama_angkatan', $angkatan)
+        );
+    }
 
-        if ($jenisPelatihan) {
-            $query->whereHas(
-                'jenisPelatihan',
-                fn($q) =>
-                $q->where('nama_pelatihan', $jenisPelatihan)
-            );
-        }
+    if ($tahun) {
+        $query->whereHas(
+            'angkatan',
+            fn($q) =>
+            $q->where('tahun', $tahun)
+        );
+    }
 
-        if ($angkatan) {
-            $query->whereHas(
-                'angkatan',
-                fn($q) =>
-                $q->where('nama_angkatan', $angkatan)
-            );
-        }
-
-        if ($tahun) {
-            $query->whereHas(
-                'angkatan',
-                fn($q) =>
-                $q->where('tahun', $tahun)
-            );
-        }
-
-        // =========================
-        // 🔥 FILTER KATEGORI & WILAYAH (OPSIONAL)
-        // =========================
-        if ($kategori === 'PNBP') {
-            $query->whereHas('angkatan', function ($q) {
-                $q->where('kategori', 'PNBP');
-            });
-        } elseif ($kategori === 'FASILITASI') {
-            $query->whereHas('angkatan', function ($q) use ($wilayah) {
-                $q->where('kategori', 'FASILITASI');
-                if ($wilayah && trim($wilayah) !== '') {
-                    // Gunakan LIKE untuk partial match
-                    $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
-                }
-            });
-        } else if ($kategori === 'SEMUA') {
-            // Jika kategori SEMUA, kita tetap bisa filter wilayah jika dipilih
+    // =========================
+    // 🔥 FILTER KATEGORI & WILAYAH (OPSIONAL)
+    // =========================
+    if ($kategori === 'PNBP') {
+        $query->whereHas('angkatan', function ($q) {
+            $q->where('kategori', 'PNBP');
+        });
+    } elseif ($kategori === 'FASILITASI') {
+        $query->whereHas('angkatan', function ($q) use ($wilayah) {
+            $q->where('kategori', 'FASILITASI');
             if ($wilayah && trim($wilayah) !== '') {
-                $query->whereHas('angkatan', function ($q) use ($wilayah) {
-                    // Gunakan LIKE untuk partial match
-                    $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
-                });
+                // Gunakan LIKE untuk partial match
+                $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
             }
+        });
+    } else if ($kategori === 'SEMUA') {
+        // Jika kategori SEMUA, kita tetap bisa filter wilayah jika dipilih
+        if ($wilayah && trim($wilayah) !== '') {
+            $query->whereHas('angkatan', function ($q) use ($wilayah) {
+                // Gunakan LIKE untuk partial match
+                $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
+            });
+        }
+    }
+
+    // =========================
+    // 🔥 VALIDASI DATA KOSONG (GLOBAL)
+    // =========================
+    if (!$query->exists()) {
+        return back()->with(
+            'error',
+            'Data peserta tidak ditemukan sesuai filter yang dipilih.'
+        );
+    }
+
+    // =========================
+    // 4️⃣ NAMA FILE
+    // =========================
+    $fileNameParts = [
+        $template === 'smart_bangkom' ? 'SMART_BANGKOM' : 'DATA_PESERTA'
+    ];
+
+    if ($jenisPelatihan) $fileNameParts[] = strtoupper(str_replace(' ', '_', $jenisPelatihan));
+    if ($angkatan)       $fileNameParts[] = strtoupper(str_replace(' ', '_', $angkatan));
+    if ($tahun)          $fileNameParts[] = $tahun;
+    if ($kategori && $kategori !== 'SEMUA') $fileNameParts[] = $kategori;
+    if ($wilayah)        $fileNameParts[] = strtoupper(str_replace(' ', '_', $wilayah));
+
+    $fileNameParts[] = now()->format('Ymd_His');
+    $fileName = implode('_', $fileNameParts) . '.xlsx';
+
+    // =========================
+    // 5️⃣ TEMPLATE SMART BANGKOM
+    // =========================
+    if ($template === 'smart_bangkom') {
+
+        aktifitas('Mengekspor Data Peserta - Template Smart Bangkom');
+
+        $templatePath = public_path('smartbangkom.xlsx');
+
+        if (!file_exists($templatePath)) {
+            return back()->with('error', 'Template Smart Bangkom tidak ditemukan.');
         }
 
-        // =========================
-        // 🔥 VALIDASI DATA KOSONG (GLOBAL)
-        // =========================
-        if (!$query->exists()) {
-            return back()->with(
-                'error',
-                'Data peserta tidak ditemukan sesuai filter yang dipilih.'
-            );
-        }
+        $data = $query->get();
 
         // =========================
-        // 4️⃣ NAMA FILE
+        // 🔥 FUNGSI KONVERSI ANGKA ROMAWI KE DESIMAL
         // =========================
-        $fileNameParts = [
-            $template === 'smart_bangkom' ? 'SMART_BANGKOM' : 'DATA_PESERTA'
-        ];
-
-        if ($jenisPelatihan) $fileNameParts[] = strtoupper(str_replace(' ', '_', $jenisPelatihan));
-        if ($angkatan)       $fileNameParts[] = strtoupper(str_replace(' ', '_', $angkatan));
-        if ($tahun)          $fileNameParts[] = $tahun;
-        if ($kategori && $kategori !== 'SEMUA') $fileNameParts[] = $kategori;
-        if ($wilayah)        $fileNameParts[] = strtoupper(str_replace(' ', '_', $wilayah));
-
-        $fileNameParts[] = now()->format('Ymd_His');
-        $fileName = implode('_', $fileNameParts) . '.xlsx';
-
-        // =========================
-        // 5️⃣ TEMPLATE SMART BANGKOM
-        // =========================
-        if ($template === 'smart_bangkom') {
-
-            aktifitas('Mengekspor Data Peserta - Template Smart Bangkom');
-
-            $templatePath = public_path('smartbangkom.xlsx');
-
-            if (!file_exists($templatePath)) {
-                return back()->with('error', 'Template Smart Bangkom tidak ditemukan.');
-            }
-
-            $data = $query->get();
-
-            $spreadsheet = IOFactory::load($templatePath);
-            $sheet = $spreadsheet->getActiveSheet();
-
-            // mulai baris ke-3
-            $row = 3;
-
-            foreach ($data as $item) {
-                $p = $item->peserta;
-                $k = $p->kepegawaianPeserta;
-
-                $gender = match (strtolower($p->jenis_kelamin)) {
-                    'perempuan', 'wanita' => 'Wanita',
-                    'laki-laki', 'laki laki', 'pria' => 'Pria',
-                    default => '',
-                };
-
-                $sheet->setCellValue("A$row", $p->nama_lengkap);
-                $sheet->setCellValueExplicit("B$row", $p->nip_nrp, DataType::TYPE_STRING);
-                $sheet->setCellValue("C$row", $gender);
-                $sheet->setCellValue("D$row", $p->agama);
-                $sheet->setCellValue("E$row", $p->tempat_lahir);
-
-                if ($p->tanggal_lahir) {
-                    $sheet->setCellValue("F$row", Date::PHPToExcel($p->tanggal_lahir));
-                    $sheet->getStyle("F$row")
-                        ->getNumberFormat()
-                        ->setFormatCode('dd-mm-yyyy');
+        $romanToDecimal = function ($roman) {
+            $romanNumerals = [
+                'I' => 1, 'V' => 5, 'X' => 10, 'L' => 50,
+                'C' => 100, 'D' => 500, 'M' => 1000
+            ];
+            
+            $result = 0;
+            $prevValue = 0;
+            
+            // Hapus spasi dan uppercase
+            $roman = strtoupper(trim($roman));
+            
+            for ($i = strlen($roman) - 1; $i >= 0; $i--) {
+                $currentValue = $romanNumerals[$roman[$i]] ?? 0;
+                
+                if ($currentValue < $prevValue) {
+                    $result -= $currentValue;
+                } else {
+                    $result += $currentValue;
                 }
+                
+                $prevValue = $currentValue;
+            }
+            
+            return $result;
+        };
 
-                $sheet->setCellValue("G$row", $p->email_pribadi);
-                $sheet->setCellValueExplicit(
-                    "H$row",
-                    $p->nomor_hp ?? ($k->nomor_telepon_kantor ?? ''),
-                    DataType::TYPE_STRING
-                );
+        // =========================
+        // 🔥 SORTING DATA
+        // =========================
+        $data = $data->sort(function ($a, $b) use ($romanToDecimal) {
+            // 1. Sorting berdasarkan angkatan (romawi terkecil)
+            $angkatanA = $romanToDecimal($a->angkatan->nama_angkatan ?? '');
+            $angkatanB = $romanToDecimal($b->angkatan->nama_angkatan ?? '');
+            
+            if ($angkatanA != $angkatanB) {
+                return $angkatanA <=> $angkatanB;
+            }
+            
+            // 2. Prioritaskan kategori PNBP
+            $kategoriA = strtoupper($a->angkatan->kategori ?? '');
+            $kategoriB = strtoupper($b->angkatan->kategori ?? '');
+            
+            if ($kategoriA === 'PNBP' && $kategoriB !== 'PNBP') {
+                return -1;
+            }
+            if ($kategoriA !== 'PNBP' && $kategoriB === 'PNBP') {
+                return 1;
+            }
+            
+            // 3. Sorting berdasarkan NIP/NRP terkecil
+            $nipA = $a->peserta->nip_nrp ?? '';
+            $nipB = $b->peserta->nip_nrp ?? '';
+            
+            return strcmp($nipA, $nipB);
+        });
 
-                $sheet->setCellValue("I$row", 'PNS');
-                $sheet->setCellValue("J$row", $k->golongan_ruang ?? '');
-                $sheet->setCellValue("K$row", $k->pangkat ?? '');
-                $sheet->setCellValue("L$row", $k->jabatan ?? '');
-                $sheet->setCellValue("M$row", 'PNBP');
-                $sheet->setCellValue("N$row", 'APBD');
-                $sheet->setCellValue("O$row", $k->asal_instansi ?? '');
-                $sheet->setCellValue("P$row", $k->alamat_kantor ?? '');
+        $spreadsheet = IOFactory::load($templatePath);
+        $sheet = $spreadsheet->getActiveSheet();
 
-                $row++;
+        // mulai baris ke-3
+        $row = 3;
+
+        foreach ($data as $item) {
+            $p = $item->peserta;
+            $k = $p->kepegawaianPeserta;
+
+            $gender = match (strtolower($p->jenis_kelamin)) {
+                'perempuan', 'wanita' => 'Wanita',
+                'laki-laki', 'laki laki', 'pria' => 'Pria',
+                default => '',
+            };
+
+            // 🔥 NORMALISASI AGAMA
+            $agama = match (strtolower(trim($p->agama ?? ''))) {
+                'kristen' => 'Kristen Protestan',
+                'katolik' => 'Kristen Katolik',
+                default => $p->agama,
+            };
+
+            // 🔥 GOLONGAN RUANG HURUF KAPITAL
+            $golonganRuang = strtoupper($k->golongan_ruang ?? '');
+
+            // 🔥 POLA PENYELENGGARAAN BERDASARKAN KATEGORI ANGKATAN
+            $polaPenyelenggaraan = match (strtoupper($item->angkatan->kategori ?? '')) {
+                'PNBP' => 'Pengiriman/PNBP',
+                'FASILITASI' => 'Fasilitasi',
+                default => 'Pengiriman/PNBP',
+            };
+
+            $sheet->setCellValue("A$row", $p->nama_lengkap);
+            $sheet->setCellValueExplicit("B$row", $p->nip_nrp, DataType::TYPE_STRING);
+            $sheet->setCellValue("C$row", $gender);
+            $sheet->setCellValue("D$row", $agama);
+            $sheet->setCellValue("E$row", $p->tempat_lahir);
+
+            if ($p->tanggal_lahir) {
+                $sheet->setCellValue("F$row", Date::PHPToExcel($p->tanggal_lahir));
+                $sheet->getStyle("F$row")
+                    ->getNumberFormat()
+                    ->setFormatCode('dd-mm-yyyy');
             }
 
-            return response()->streamDownload(function () use ($spreadsheet) {
-                IOFactory::createWriter($spreadsheet, 'Xlsx')->save('php://output');
-            }, $fileName);
+            $sheet->setCellValue("G$row", $p->email_pribadi);
+            $sheet->setCellValueExplicit(
+                "H$row",
+                $p->nomor_hp ?? ($k->nomor_telepon_kantor ?? ''),
+                DataType::TYPE_STRING
+            );
+
+            $sheet->setCellValue("I$row", 'PNS');
+            $sheet->setCellValue("J$row", $golonganRuang);
+            $sheet->setCellValue("K$row", $k->pangkat ?? '');
+            $sheet->setCellValue("L$row", $k->jabatan ?? '');
+            $sheet->setCellValue("M$row", $polaPenyelenggaraan);
+            $sheet->setCellValue("N$row", 'APBD');
+            $sheet->setCellValue("O$row", $k->asal_instansi ?? '');
+            $sheet->setCellValue("P$row", $k->alamat_kantor ?? '');
+
+            $row++;
         }
 
-        // =========================
-        // 6️⃣ TEMPLATE FORM REGISTRASI
-        // =========================
-        aktifitas('Mengekspor Data Peserta - Template Form Registrasi');
-
-        return Excel::download(
-            new DataPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
-            $fileName
-        );
+        return response()->streamDownload(function () use ($spreadsheet) {
+            IOFactory::createWriter($spreadsheet, 'Xlsx')->save('php://output');
+        }, $fileName);
     }
 
-    /**
-     * Export komposisi peserta dengan filter
-     */
-    public function exportKomposisi()
-    {
-        // Ambil parameter filter dari request
-        $jenisPelatihan = request('jenis_pelatihan');
-        $angkatan = request('angkatan');
-        $tahun = request('tahun');
-        $kategori = request('kategori');
-        $wilayah = request('wilayah');
+    // =========================
+    // 6️⃣ TEMPLATE FORM REGISTRASI
+    // =========================
+    aktifitas('Mengekspor Data Peserta - Template Form Registrasi');
 
-        // Buat nama file berdasarkan filter yang dipilih
-        $fileNameParts = ['KOMPOSISI'];
-
-        if ($jenisPelatihan) {
-            $fileNameParts[] = str_replace(' ', '_', strtoupper($jenisPelatihan));
-        }
-
-        if ($angkatan) {
-            $fileNameParts[] = str_replace(' ', '_', strtoupper($angkatan));
-        }
-
-        if ($tahun) {
-            $fileNameParts[] = $tahun;
-        }
-
-        // Jika tidak ada filter, tambahkan tanggal
-        if (count($fileNameParts) === 1) {
-            $fileNameParts[] = 'PESERTA';
-            $fileNameParts[] = date('Y_m_d');
-        }
-
-        $fileName = implode('_', $fileNameParts) . '.xlsx';
-
-        aktifitas('Mengekspor Komposisi Peserta');
-
-        // Kirim parameter filter ke export class
-        return Excel::download(
-            new KomposisiPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
-            $fileName
-        );
-    }
+    return Excel::download(
+        new DataPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
+        $fileName
+    );
+}
 
     /**
      * Export absen peserta dengan filter
