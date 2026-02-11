@@ -180,6 +180,9 @@ $labelMenu = match ($kodePelatihan) {
                             <a href="{{ route('admin.export.komposisipeserta') }}" class="submenu-link">
                                 <i class="fas fa-file-invoice me-2"></i> Komposisi Peserta
                             </a>
+                            <a href="{{ route('admin.export.jadwal-seminar.index') }}" class="submenu-link">
+                                <i class="fas fa-calendar-alt me-2"></i> Jadwal Seminar
+                            </a>
                             <a href="{{ route('export.foto') }}" class="submenu-link">
                                 <i class="fas fa-user-tie me-2"></i> Export Foto
                             </a>

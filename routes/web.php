@@ -195,6 +195,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/sertifikat/pdf', [ExportController::class, 'exportSertifikat'])
             ->name('sertifikat');
     });
+    
+    // Export Jadwal Seminar
+    Route::get('/export/jadwal-seminar', [ExportController::class, 'indexJadwalSeminar'])
+        ->name('admin.export.jadwal-seminar.index');
+
+    Route::get('/export/jadwal-seminar/download', [ExportController::class, 'exportJadwalSeminar'])
+        ->name('admin.export.jadwal-seminar');
 
     Route::get('/import/peserta', [ImportController::class, 'showImportForm'])->name('admin.import.peserta');
     Route::post('/import/peserta', [ImportController::class, 'importPeserta'])->name('admin.import.peserta.process');
