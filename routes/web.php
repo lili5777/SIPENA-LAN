@@ -172,6 +172,7 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{id}', [MentorController::class, 'destroy'])->name('destroy');
         });
     });
+    Route::get('/mentor/{id}/peserta', [MentorController::class, 'getPeserta'])->name('mentor.peserta');
     
 
     // Export routes

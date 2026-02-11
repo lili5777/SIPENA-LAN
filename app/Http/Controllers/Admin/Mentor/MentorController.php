@@ -11,6 +11,62 @@ use Carbon\Carbon;
 class MentorController extends Controller
 {
     /**
+ * Get peserta details for a specific mentor
+ */
+public function getPeserta($id)
+{
+    try {
+        $mentor = Mentor::with([
+            'pesertaMentor.pendaftaran.peserta.kepegawaianPeserta',
+            'pesertaMentor.pendaftaran.angkatan'
+        ])->findOrFail($id);
+        
+        $pesertaList = $mentor->pesertaMentor->map(function ($pesertaMentor) {
+            // Ambil data peserta melalui pendaftaran
+            $peserta = $pesertaMentor->pendaftaran->peserta ?? null;
+            $angkatan = $pesertaMentor->pendaftaran->angkatan ?? null;
+            $kepegawaian = $peserta ? $peserta->kepegawaianPeserta : null;
+            
+            if (!$peserta) {
+                return null; // Skip jika peserta tidak ditemukan
+            }
+            
+            return [
+                'nama' => $peserta->nama_lengkap ?? '-',
+                'nip' => $peserta->nip_nrp ?? '-',
+                'ndh' => $peserta->ndh ?? '-',
+                'email' => $peserta->email_pribadi ?? '-',
+                'nomor_hp' => $peserta->nomor_hp ?? '-',
+                'instansi' => $kepegawaian->asal_instansi ?? '-',
+                'angkatan' => $angkatan->nama_angkatan ?? '-',
+                'tahun' => $angkatan->tahun ?? '-',
+                'status_mentoring' => $pesertaMentor->status_mentoring ?? '-',
+                'tanggal_penunjukan' => $pesertaMentor->tanggal_penunjukan 
+                    ? \Carbon\Carbon::parse($pesertaMentor->tanggal_penunjukan)->format('d/m/Y') 
+                    : '-',
+            ];
+        })->filter()->values(); // Filter null values dan reset keys
+        
+        return response()->json([
+            'success' => true,
+            'mentor' => [
+                'nama' => $mentor->nama_mentor,
+                'nip' => $mentor->nip_mentor,
+                'jabatan' => $mentor->jabatan_mentor,
+            ],
+            'peserta' => $pesertaList,
+            'total' => $pesertaList->count()
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data peserta: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+    /**
      * Display a listing of mentor.
      */
     public function index(Request $request)

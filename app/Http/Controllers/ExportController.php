@@ -493,6 +493,50 @@ class ExportController extends Controller
     );
 }
 
+/**
+     * Export komposisi peserta dengan filter
+     */
+    public function exportKomposisi()
+    {
+        // Ambil parameter filter dari request
+        $jenisPelatihan = request('jenis_pelatihan');
+        $angkatan = request('angkatan');
+        $tahun = request('tahun');
+        $kategori = request('kategori');
+        $wilayah = request('wilayah');
+
+        // Buat nama file berdasarkan filter yang dipilih
+        $fileNameParts = ['KOMPOSISI'];
+
+        if ($jenisPelatihan) {
+            $fileNameParts[] = str_replace(' ', '_', strtoupper($jenisPelatihan));
+        }
+
+        if ($angkatan) {
+            $fileNameParts[] = str_replace(' ', '_', strtoupper($angkatan));
+        }
+
+        if ($tahun) {
+            $fileNameParts[] = $tahun;
+        }
+
+        // Jika tidak ada filter, tambahkan tanggal
+        if (count($fileNameParts) === 1) {
+            $fileNameParts[] = 'PESERTA';
+            $fileNameParts[] = date('Y_m_d');
+        }
+
+        $fileName = implode('_', $fileNameParts) . '.xlsx';
+
+        aktifitas('Mengekspor Komposisi Peserta');
+
+        // Kirim parameter filter ke export class
+        return Excel::download(
+            new KomposisiPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
+            $fileName
+        );
+    }
+
     /**
      * Export absen peserta dengan filter
      */
