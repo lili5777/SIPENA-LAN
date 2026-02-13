@@ -75,7 +75,8 @@ class WhatsAppService
             "- Simpan data login Anda\n" .
             "- Join grup untuk informasi resmi\n" .
             "- Update data diri jika ada perubahan\n\n\n" .
-            "_Hubungi admin jika ada kendala_\n\n" .
+            "_Hubungi admin jika ada kendala_\n" .
+            "_Mohon tidak membalas pesan ini jika tidak ada kendala_\n\n" .
             "Salam,\n*Tim LAN PUSJAR SKMP*";
     }
 }
