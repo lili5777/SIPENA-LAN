@@ -1536,7 +1536,7 @@
                                     Tanggal Lahir
                                 </span>
                                 <span class="data-value">
-                                    {{ $peserta->tanggal_lahir ? \Carbon\Carbon::parse($peserta->tanggal_lahir)->format('d F Y') : 'Belum diisi' }}
+                                   {{ $peserta->tanggal_lahir ? \Carbon\Carbon::parse($peserta->tanggal_lahir)->locale('id')->translatedFormat('d F Y') : 'Belum diisi' }}
                                 </span>
                             </div>
                             <div class="data-item">
