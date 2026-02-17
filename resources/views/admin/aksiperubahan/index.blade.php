@@ -646,6 +646,8 @@
                 font-size: 0.95rem;
             }
         }
+
+        
     </style>
 @endsection
 
@@ -712,10 +714,10 @@
                             <i class="fas fa-edit"></i>
                             Edit
                         </button>
-                        <button onclick="openPengajuanModal()" class="btn-success">
+                        {{-- <button onclick="openPengajuanModal()" class="btn-success">
                             <i class="fas fa-file-signature"></i>
                             Ajukan Pengesahan
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
 
@@ -881,7 +883,7 @@
                         rows="5"></textarea>
                 </div>
 
-                @php
+                {{-- @php
 $kategoriOptions = [
     'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
     'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
@@ -894,9 +896,9 @@ $kategoriOptions = [
 ];
 
 $selectedKategori = old('kategori_aksatika', $aksiPerubahan->kategori_aksatika ?? '');
-                @endphp
+                @endphp --}}
 
-                <!-- Row 1: Kategori dan File (2 kolom) -->
+                {{-- <!-- Row 1: Kategori dan File (2 kolom) -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Kategori Aksatika</label>
@@ -943,7 +945,7 @@ $selectedKategori = old('kategori_aksatika', $aksiPerubahan->kategori_aksatika ?
                             Link laporan di majalah
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
                 <button type="submit" class="btn-submit" id="btnSubmitAdd">
                     <span class="btn-text">
@@ -988,18 +990,37 @@ $selectedKategori = old('kategori_aksatika', $aksiPerubahan->kategori_aksatika ?
                             rows="5">{{ $aksiPerubahan->abstrak }}</textarea>
                     </div>
 
-                    <!-- Row 1: Kategori dan File (2 kolom) -->
+                    {{-- @php
+$kategoriOptions = [
+    'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
+    'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
+    'Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif, dan melanjutkan pengembangan infrastruktur',
+    'Memperkuat pembangunan sumber daya manusia (SDM), sains, teknologi, pendidikan, kesehatan, prestasi olahraga, kesetaraan gender, serta penguatan peran perempuan, pemuda, dan penyandang disabilitas',
+    'Melanjutkan hilirisasi dan industrialisasi untuk meningkatkan nilai tambah di dalam negeri',
+    'Membangun dari desa dan dari bawah untuk pemerataan ekonomi dan pemberantasan kemiskinan.',
+    'Memperkuat reformasi politik, hukum, dan birokrasi, serta memperkuat pencegahan dan pemberantasan korupsi dan narkoba',
+    'Memperkuat penyelarasan kehidupan yang harmonis dengan lingkungan, alam, dan budaya, serta peningkatan toleransi antarumat beragama untuk mencapai masyarakat yang adil dan makmur',
+];
+
+$selectedKategori = old('kategori_aksatika', $aksiPerubahan->kategori_aksatika ?? '');
+                @endphp --}}
+
+                    {{-- <!-- Row 1: Kategori dan File (2 kolom) -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Kategori Aksatika</label>
-                            <select name="kategori_aksatika" class="form-control">
-                                <option value="">-- Pilih Kategori --</option>
-                                <option value="pilihan1" {{ $aksiPerubahan->kategori_aksatika == 'pilihan1' ? 'selected' : '' }}>
-                                    Pilihan 1</option>
-                                <option value="pilihan2" {{ $aksiPerubahan->kategori_aksatika == 'pilihan2' ? 'selected' : '' }}>
-                                    Pilihan 2</option>
-                            </select>
-                        </div>
+                        <label class="form-label">Kategori Aksatika</label>
+                        <select name="kategori_aksatika" class="form-control @error('kategori_aksatika') is-invalid @enderror">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($kategoriOptions as $opt)
+                                <option value="{{ $opt }}" {{ $selectedKategori === $opt ? 'selected' : '' }}>
+                                    {{ $opt }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('kategori_aksatika')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
                         <div class="form-group">
                             <label class="form-label">Dokumen {{ $labelPerubahan }}</label>
@@ -1035,7 +1056,7 @@ $selectedKategori = old('kategori_aksatika', $aksiPerubahan->kategori_aksatika ?
                             <input type="url" name="link_laporan_majalah" class="form-control"
                                 value="{{ $aksiPerubahan->link_laporan_majalah }}" placeholder="https://example.com/laporan">
                         </div>
-                    </div>
+                    </div> --}}
 
                     <button type="submit" class="btn-submit" id="btnSubmitEdit">
                         <span class="btn-text">
