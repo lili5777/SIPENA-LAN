@@ -688,7 +688,7 @@ $isPKN = $jenis === 'pkn';
                             @if ($kunci_judul == true)
                                 <!-- Data Projek -->
                                 <div class="form-section-header">
-                                    <i class="fas fa-lightbulb"></i>Projek Aksi Perubahan
+                                    <i class="fas fa-lightbulb"></i>Aktualisasi
                                 </div>
 
                                 <!-- Judul -->
@@ -697,14 +697,14 @@ $isPKN = $jenis === 'pkn';
                                     <input type="text" name="judul"
                                         class="form-input @error('judul') error @enderror"
                                         value="{{ old('judul', optional($aksiPerubahan)->judul) }}"
-                                        placeholder="anunya">
+                                        placeholder="Masukkan judul aktualisasi">
                                     @error('judul')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
 
                                 <!-- Upload Hasil Projek (File PDF) -->
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label class="form-label">Upload Laporan Lengkap</label>
                                     <div class="form-hint">Format PDF, maksimal 1MB</div>
                                     <div class="form-file">
@@ -726,10 +726,10 @@ $isPKN = $jenis === 'pkn';
                                     @error('file')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
-                                </div>
+                                </div> --}}
 
                                 <!-- Upload Lembar Pengesahan (File) -->
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label class="form-label">Upload Lembar Pengesahan</label>
                                     <div class="form-hint">Format PDF, maksimal 1MB</div>
                                     <div class="form-file">
@@ -751,9 +751,9 @@ $isPKN = $jenis === 'pkn';
                                     @error('lembar_pengesahan')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
-                                </div>
+                                </div> --}}
 
-                                @php
+                                {{-- @php
     $kategoriOptions = [
         'Memperkokoh ideologi Pancasila, demokrasi, dan hak asasi manusia (HAM)',
         'Memantapkan sistem pertahanan keamanan negara dan mendorong kemandirian bangsa melalui swasembada pangan, energi, air, ekonomi kreatif, ekonomi hijau, dan ekonomi biru',
@@ -766,9 +766,9 @@ $isPKN = $jenis === 'pkn';
     ];
 
     $selectedKategori = old('kategori_aksatika', optional($aksiPerubahan)->kategori_aksatika);
-                                @endphp
+                                @endphp --}}
 
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label class="form-label">Kategori Aksatika</label>
                                     <select name="kategori_aksatika" class="form-input @error('kategori_aksatika') error @enderror">
                                         <option value="">Pilih Kategori</option>
@@ -807,7 +807,7 @@ $isPKN = $jenis === 'pkn';
                                     @error('link_laporan_majalah')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
-                                </div>
+                                </div> --}}
                             @endif
 
 
