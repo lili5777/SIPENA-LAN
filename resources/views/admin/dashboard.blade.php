@@ -4,6 +4,7 @@
 @section('page-title', 'Dashboard')
 
 @section('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <style>
             :root {
                 --primary-color: #1a3a6c;
@@ -1237,6 +1238,54 @@
         width: 100%;
     }
 }
+    .info-box {
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.97);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        min-width: 160px;
+        border-left: 4px solid #1a3a6c;
+    }
+    .info-box h4 {
+        margin: 0 0 4px;
+        color: #1a3a6c;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .info-box .count {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .info-box .label {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .legend {
+        background: white;
+        padding: 10px 14px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        line-height: 2;
+        font-size: 0.8rem;
+        color: #475569;
+    }
+    .legend strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #1a3a6c;
+    }
+    .legend i {
+        width: 16px;
+        height: 16px;
+        float: left;
+        margin-right: 8px;
+        border-radius: 3px;
+        margin-top: 2px;
+    }
         </style>
 @endsection
 
@@ -1278,6 +1327,26 @@
             </div>
         </div>
     </div>
+
+    @if(auth()->user()->role->name != 'user')
+        <div class="map-section" style="margin-top: 2rem; margin-bottom: 2rem;">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Sebaran Peserta per Provinsi</span>
+                </div>
+                <div class="section-actions">
+                    <button class="btn-refresh" onclick="resetPeta()">
+                        <i class="fas fa-compress-arrows-alt"></i>
+                        Reset Peta
+                    </button>
+                </div>
+            </div>
+            <div style="background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; padding: 1rem;">
+                <div id="indonesia-map" style="height: 480px; width: 100%; border-radius: 10px;"></div>
+            </div>
+        </div>
+    @endif
 
 
     
@@ -1402,6 +1471,8 @@
             @endif
         </div>
     @endif
+
+
 
     <!-- Data Peserta Section -->
     @if ($peserta)
@@ -2850,4 +2921,169 @@
             setInterval(updateDateTime, 60000);
             updateDateTime();
         </script>
+
+      @if(auth()->user()->role->name != 'user')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const map = L.map('indonesia-map', {
+        center: [-2.5, 118],
+        zoom: 5,
+        scrollWheelZoom: false,
+        zoomControl: true,
+    });
+    window.resetPeta = function() { map.setView([-2.5, 118], 5); };
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        opacity: 0.2
+    }).addTo(map);
+
+    const GEOJSON_NAME_KEY = 'Propinsi';
+
+    const nameMapping = {
+        'IRIAN JAYA TIMUR'          : 'PAPUA',
+        'IRIAN JAYA TENGAH'         : 'PAPUA TENGAH',
+        'IRIAN JAYA BARAT'          : 'PAPUA BARAT',
+        'PROBANTEN'                 : 'BANTEN',
+        'DI. ACEH'                  : 'ACEH',
+        'NUSATENGGARA BARAT'        : 'NUSA TENGGARA BARAT',
+        'NUSATENGGARA TIMUR'        : 'NUSA TENGGARA TIMUR',
+        'DAERAH ISTIMEWA YOGYAKARTA': 'DI YOGYAKARTA',
+        'DKI JAKARTA'               : 'DKI JAKARTA',
+    };
+
+    // Warna unik per provinsi
+    const provinsiColors = [
+        '#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c',
+        '#3498db','#9b59b6','#e91e63','#00bcd4','#8bc34a',
+        '#ff5722','#607d8b','#795548','#009688','#673ab7',
+        '#ff9800','#4caf50','#2196f3','#f44336','#9c27b0',
+        '#03a9f4','#cddc39','#ffc107','#ff4081','#00e676',
+        '#40c4ff','#69f0ae','#ffab40','#ea80fc','#b2ff59',
+        '#ff6d00','#1de9b6',
+    ];
+
+    let colorMap = {}; // nama provinsi → warna
+    let colorIndex = 0;
+
+    function getProvinsiColor(name) {
+        if (!colorMap[name]) {
+            colorMap[name] = provinsiColors[colorIndex % provinsiColors.length];
+            colorIndex++;
+        }
+        return colorMap[name];
+    }
+
+    function resolveName(rawName) {
+        const upper = rawName.toUpperCase();
+        return nameMapping[upper] || upper;
+    }
+
+    let pesertaData = {};
+    let geojsonLayer;
+    let highlighted = null;
+
+    function getCount(feature) {
+        const rawName = feature.properties[GEOJSON_NAME_KEY] || '';
+        const resolved = resolveName(rawName);
+        const matchKey = Object.keys(pesertaData).find(k => k.toUpperCase() === resolved);
+        return matchKey ? pesertaData[matchKey].jumlah_peserta : 0;
+    }
+
+    function styleFn(feature) {
+        const name = (feature.properties[GEOJSON_NAME_KEY] || 'unknown').toUpperCase();
+        return {
+            fillColor: getProvinsiColor(name),
+            weight: 1,
+            opacity: 1,
+            color: 'white',
+            fillOpacity: 0.75
+        };
+    }
+
+    // Info box
+    const info = L.control({ position: 'topright' });
+    info.onAdd = function () {
+        this._div = L.DomUtil.create('div', 'info-box');
+        this.update();
+        return this._div;
+    };
+    info.update = function (props, count) {
+        if (!props) {
+            this._div.innerHTML = '<h4>Sebaran Peserta</h4><span class="label">Arahkan cursor ke provinsi</span>';
+            return;
+        }
+        const rawName = props[GEOJSON_NAME_KEY] || 'N/A';
+        const displayName = rawName.split(' ').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ');
+        const color = getProvinsiColor(rawName.toUpperCase());
+        this._div.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <div style="width:14px;height:14px;border-radius:3px;background:${color};flex-shrink:0;"></div>
+                <h4 style="margin:0">${displayName}</h4>
+            </div>
+            <div style="font-size:0.85rem;color:#64748b;margin-bottom:4px;">Jumlah peserta terdaftar:</div>
+            <span class="count">${count ?? 0}</span>
+            <span class="label"> peserta</span>
+        `;
+    };
+    info.addTo(map);
+
+    // Legend yang jelas
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function () {
+        const div = L.DomUtil.create('div', 'legend');
+        div.innerHTML = `
+            <strong>Sebaran Peserta per Provinsi</strong>
+            <div style="margin-top:8px;font-size:0.78rem;color:#64748b;line-height:1.8;">
+                <div>🔍 Klik provinsi untuk zoom in</div>
+            </div>
+           
+        `;
+        return div;
+    };
+    legend.addTo(map);
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: function (e) {
+                // Reset highlight sebelumnya
+                if (highlighted && highlighted !== e.target) {
+                    geojsonLayer.resetStyle(highlighted);
+                }
+                highlighted = e.target;
+                e.target.setStyle({ weight: 3, color: '#1a3a6c', fillOpacity: 0.95 });
+                e.target.bringToFront();
+                info.update(feature.properties, getCount(feature));
+            },
+            mouseout: function (e) {
+                geojsonLayer.resetStyle(e.target);
+                highlighted = null;
+                info.update();
+            },
+            click: function (e) {
+                map.fitBounds(e.target.getBounds());
+            }
+        });
+    }
+
+    fetch('{{ route("admin.dashboard.mapData") }}')
+        .then(res => res.json())
+        .then(data => {
+            pesertaData = data;
+            return fetch('{{ asset("geojson/indonesia-province-simple.json") }}');
+        })
+        .then(res => res.json())
+        .then(geojson => {
+            geojsonLayer = L.geoJSON(geojson, {
+                style: styleFn,
+                onEachFeature: onEachFeature
+            }).addTo(map);
+        })
+        .catch(err => console.error('Error loading map:', err));
+});
+</script>
+@endif
+
 @endsection

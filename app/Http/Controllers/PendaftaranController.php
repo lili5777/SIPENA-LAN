@@ -217,6 +217,8 @@ public function getAvailableNdh(Request $request)
      */
     public function updateData(Request $request)
     {
+        set_time_limit(600); // tambah ini
+        ini_set('max_execution_time', 600);
         try {
             // 1. VALIDASI DASAR
             $validated = $request->validate([

@@ -158,6 +158,21 @@ if ($user->role->name == 'pengawas') {
     ));
 }
 
+    public function mapData()
+    {
+        $pesertaPerProvinsi = \DB::table('kepegawaian_peserta')
+            ->join('provinsis', 'kepegawaian_peserta.id_provinsi', '=', 'provinsis.id')
+            ->select(
+                \DB::raw('UPPER(provinsis.name) as provinsi_name'),
+                \DB::raw('COUNT(*) as jumlah_peserta')
+            )
+            ->groupBy('provinsis.id', 'provinsis.name')
+            ->get()
+            ->keyBy('provinsi_name');
+
+        return response()->json($pesertaPerProvinsi);
+    }
+
 
     public function editData(Request $request)
     {

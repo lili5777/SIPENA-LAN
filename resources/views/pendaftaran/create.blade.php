@@ -2428,7 +2428,7 @@ async function loadAvailableNdh() {
                 try {
                     // Set timeout yang lebih lama untuk proses upload
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 menit timeout
+                    const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 menit timeout
 
                     const response = await fetch(this.action, {
                         method: 'POST',
@@ -2442,6 +2442,32 @@ async function loadAvailableNdh() {
                     });
 
                     clearTimeout(timeoutId);
+
+                    // Cek status sebelum parse JSON
+                    if (!response.ok) {
+                        const text = await response.text();
+                        console.error('Server response:', text);
+                        
+                        let errorMsg = 'Terjadi kesalahan jaringan. Silakan coba lagi.';
+                        if (response.status === 413) {
+                            errorMsg = 'Ukuran file terlalu besar. Kompres file Anda dan coba lagi.';
+                        } else if (response.status === 422) {
+                            errorMsg = 'Data tidak valid. Periksa kembali isian Anda.';
+                        } else if (response.status === 500) {
+                            errorMsg = 'Terjadi kesalahan di server (500). Hubungi administrator.';
+                        } else if (response.status === 504 || response.status === 408) {
+                            errorMsg = 'Koneksi timeout. Coba gunakan WiFi atau kompres ukuran file.';
+                        }
+                        
+                        showErrorMessage(errorMsg);
+                        
+                        // Reset form
+                        this.classList.remove('submitting');
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        hideLoadingOverlay();
+                        return;
+                    }
 
                     const data = await response.json();
 
