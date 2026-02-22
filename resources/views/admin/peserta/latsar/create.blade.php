@@ -890,6 +890,8 @@ $isPKN = $jenis === 'pkn';
                                                     data-nama="{{ $mentor->nama_mentor }}"
                                                     data-nip="{{ $mentor->nip_mentor }}"
                                                     data-jabatan="{{ $mentor->jabatan_mentor }}"
+                                                    data-golongan="{{ $mentor->golongan ?? '' }}"
+                                                    data-pangkat="{{ $mentor->pangkat ?? '' }}"
                                                     data-nomor-rekening="{{ $mentor->nomor_rekening }}"
                                                     data-npwp="{{ $mentor->npwp_mentor }}"
                                                     data-nomor-hp="{{ $mentor->nomor_hp_mentor ?? '' }}"
@@ -933,6 +935,20 @@ $isPKN = $jenis === 'pkn';
                                             @error('jabatan_mentor')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
+                                        </div>
+                                    </div>
+
+                                    {{-- Di dalam form-row nomor rekening & npwp, tambahkan baris baru: --}}
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label">Golongan Mentor</label>
+                                            <input type="text" id="golongan_mentor_select"
+                                                class="form-input" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Pangkat Mentor</label>
+                                            <input type="text" id="pangkat_mentor_select"
+                                                class="form-input" readonly>
                                         </div>
                                     </div>
 
@@ -1012,6 +1028,34 @@ $isPKN = $jenis === 'pkn';
                                             @error('jabatan_mentor_baru')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
+                                        </div>
+                                    </div>
+
+                                    {{-- Setelah field jabatan_mentor_baru --}}
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label">Golongan Ruang Mentor</label>
+                                            <select name="golongan_mentor_baru" id="golongan_mentor_baru"
+                                                class="form-select @error('golongan_mentor_baru') error @enderror">
+                                                <option value="">Pilih</option>
+                                                <option value="II/a">II/a</option>
+                                                <option value="II/b">II/b</option>
+                                                <option value="II/c">II/c</option>
+                                                <option value="II/d">II/d</option>
+                                                <option value="III/a">III/a</option>
+                                                <option value="III/b">III/b</option>
+                                                <option value="III/c">III/c</option>
+                                                <option value="III/d">III/d</option>
+                                                <option value="IV/a">IV/a</option>
+                                                <option value="IV/b">IV/b</option>
+                                                <option value="IV/c">IV/c</option>
+                                                <option value="IV/d">IV/d</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Pangkat Mentor</label>
+                                            <input type="text" name="pangkat_mentor_baru" id="pangkat_mentor_baru"
+                                                class="form-input" placeholder="Otomatis terisi" readonly>
                                         </div>
                                     </div>
 
@@ -2817,6 +2861,21 @@ $isPKN = $jenis === 'pkn';
             }
 
             // ============================================
+            // GOLONGAN & PANGKAT MENTOR BARU
+            // ============================================
+            const golonganMentorBaru = document.getElementById('golongan_mentor_baru');
+            const pangkatMentorBaru = document.getElementById('pangkat_mentor_baru');
+
+            if (golonganMentorBaru && pangkatMentorBaru) {
+                golonganMentorBaru.addEventListener('change', function () {
+                    const golongan = this.value;
+                    pangkatMentorBaru.value = golongan && pangkatMapping[golongan]
+                        ? pangkatMapping[golongan].pangkat
+                        : '';
+                });
+            }
+
+            // ============================================
             // STEP 1: ANGKATAN SELECTION
             // ============================================
             const wilayahWrapper = document.getElementById('info-wilayah-wrapper');
@@ -2941,6 +3000,12 @@ loadAvailableNdh(selectedAngkatan.id, jenisPelatihanId, currentNdh);
                             if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = selectedOption.dataset.nomorRekening || '';
                             if (npwpMentorSelect) npwpMentorSelect.value = selectedOption.dataset.npwp || '';
                             if (nomorHpMentorSelect) nomorHpMentorSelect.value = selectedOption.dataset.nomorHp || '';
+
+                            const golonganEl = document.getElementById('golongan_mentor_select');
+                            const pangkatEl = document.getElementById('pangkat_mentor_select');
+                            const golongan = selectedOption.dataset.golongan || '';
+                            if (golonganEl) golonganEl.value = golongan;
+                            if (pangkatEl) pangkatEl.value = pangkatMapping[golongan]?.pangkat || '';
                         } else {
                             resetMentorFields();
                         }
@@ -2973,6 +3038,10 @@ loadAvailableNdh(selectedAngkatan.id, jenisPelatihanId, currentNdh);
                 if (nomorRekeningMentorSelect) nomorRekeningMentorSelect.value = '';
                 if (npwpMentorSelect) npwpMentorSelect.value = '';
                 if (nomorHpMentorSelect) nomorHpMentorSelect.value = ''; 
+                const golonganEl = document.getElementById('golongan_mentor_select');
+                const pangkatEl = document.getElementById('pangkat_mentor_select');
+                if (golonganEl) golonganEl.value = '';
+                if (pangkatEl) pangkatEl.value = '';
             }
 
             async function loadMentors() {

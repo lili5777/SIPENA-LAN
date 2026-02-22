@@ -577,6 +577,30 @@
             </div>
         </div>
 
+        {{-- Setelah field jabatan_mentor_select --}}
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Golongan Mentor</label>
+                <input type="text" name="golongan_mentor" id="golongan_mentor_select"
+                    class="form-input @error('golongan_mentor') error @enderror"
+                    value="{{ $peserta['golongan_mentor'] ?? old('golongan_mentor') }}" readonly
+                    placeholder="Akan terisi otomatis saat memilih mentor">
+                @error('golongan_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pangkat Mentor</label>
+                <input type="text" name="pangkat_mentor" id="pangkat_mentor_select"
+                    class="form-input @error('pangkat_mentor') error @enderror"
+                    value="{{ $peserta['pangkat_mentor'] ?? old('pangkat_mentor') }}" readonly
+                    placeholder="Akan terisi otomatis saat memilih mentor">
+                @error('pangkat_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
+
         <div class="form-row">
             <div class="form-group">
                 <label class="form-label">Nama Bank & Nomor Rekening Mentor</label>
@@ -657,6 +681,39 @@
                     placeholder="Contoh: Kepala Bagian Perencanaan">
                 <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
                 @error('jabatan_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
+
+        {{-- Setelah field jabatan_mentor_baru --}}
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Golongan Ruang Mentor</label>
+                <select name="golongan_mentor_baru" id="golongan_mentor_baru"
+                    class="form-select @error('golongan_mentor_baru') error @enderror">
+                    <option value="">-- Pilih Golongan Ruang --</option>
+                    @foreach(['II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d'] as $gol)
+                        <option value="{{ $gol }}"
+                            {{ ($peserta['golongan_mentor_baru'] ?? old('golongan_mentor_baru')) == $gol ? 'selected' : '' }}>
+                            {{ $gol }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('golongan_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pangkat Mentor</label>
+                <input type="text" name="pangkat_mentor_baru" id="pangkat_mentor_baru"
+                    class="form-input @error('pangkat_mentor_baru') error @enderror"
+                    value="{{ $peserta['pangkat_mentor_baru'] ?? old('pangkat_mentor_baru') }}" readonly
+                    placeholder="Terisi otomatis berdasarkan golongan">
+                <small class="form-hint">
+                    <i class="fas fa-info-circle"></i> Terisi otomatis saat golongan dipilih
+                </small>
+                @error('pangkat_mentor_baru')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
             </div>

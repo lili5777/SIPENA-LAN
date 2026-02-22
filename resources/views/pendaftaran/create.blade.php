@@ -1840,6 +1840,7 @@
                 // Setup mentor form jika ada
                 setupMentorForm();
                 setupMaritalStatusLogic();
+                setupPangkatMentorAutoFill();
             }
 
             // Fungsi untuk load NDH yang tersedia
@@ -2022,6 +2023,10 @@ async function loadAvailableNdh() {
                         document.getElementById('nomor_rekening_mentor_select').value = mentor.nomor_rekening_mentor || '';
                         document.getElementById('npwp_mentor_select').value = mentor.npwp_mentor || '';
                         document.getElementById('nomor_hp_mentor_select').value = mentor.nomor_hp_mentor || '';
+                        const golEl = document.getElementById('golongan_mentor_select');
+                        const pakEl = document.getElementById('pangkat_mentor_select');
+                        if (golEl) golEl.value = mentor.golongan || '';
+                        if (pakEl) pakEl.value = mentor.pangkat || '';
                     });
                 }
             }
@@ -2067,6 +2072,8 @@ async function loadAvailableNdh() {
                                 nama_mentor: mentor.nama_mentor,
                                 nip_mentor: mentor.nip_mentor,              
                                 jabatan_mentor: mentor.jabatan_mentor,
+                                golongan : mentor.golongan,  
+                                pangkat : mentor.pangkat,
                                 nomor_rekening_mentor: mentor.nomor_rekening,
                                 npwp_mentor: mentor.npwp_mentor,
                                 nomor_hp_mentor: mentor.nomor_hp_mentor
@@ -2222,6 +2229,40 @@ async function loadAvailableNdh() {
                 updatePangkatFromGolongan();
 
                 console.log('Auto-fill pangkat sudah di-setup');
+            }
+
+            // ============================================
+            // FUNGSI AUTO-FILL PANGKAT MENTOR BARU
+            // ============================================
+            function setupPangkatMentorAutoFill() {
+                const golonganMentorBaru = document.getElementById('golongan_mentor_baru');
+                const pangkatMentorBaru  = document.getElementById('pangkat_mentor_baru');
+
+                if (!golonganMentorBaru || !pangkatMentorBaru) return;
+
+                const pangkatMapping = {
+                    'II/a' : 'Pengatur Muda',
+                    'II/b' : 'Pengatur Muda Tingkat I',
+                    'II/c' : 'Pengatur',
+                    'II/d' : 'Pengatur Tingkat I',
+                    'III/a': 'Penata Muda',
+                    'III/b': 'Penata Muda Tingkat I',
+                    'III/c': 'Penata',
+                    'III/d': 'Penata Tingkat I',
+                    'IV/a' : 'Pembina',
+                    'IV/b' : 'Pembina Tingkat I',
+                    'IV/c' : 'Pembina Utama Muda',
+                    'IV/d' : 'Pembina Utama Madya',
+                };
+
+                // Set saat load (jika ada old value)
+                if (golonganMentorBaru.value) {
+                    pangkatMentorBaru.value = pangkatMapping[golonganMentorBaru.value] || '';
+                }
+
+                golonganMentorBaru.addEventListener('change', function () {
+                    pangkatMentorBaru.value = pangkatMapping[this.value] || '';
+                });
             }
 
             // ============================================

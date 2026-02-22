@@ -79,9 +79,16 @@
             @endif
 
             <div class="card-body">
+
+                {{-- ========== SECTION: DATA PRIBADI ========== --}}
+                <div class="section-divider mb-4">
+                    <span><i class="fas fa-user me-2"></i>Data Pribadi</span>
+                </div>
+
                 <div class="row">
                     <!-- Kolom Kiri -->
                     <div class="col-md-6">
+
                         <!-- Nama Mentor -->
                         <div class="mb-4">
                             <label for="nama_mentor" class="form-label fw-semibold">
@@ -97,7 +104,7 @@
                             @enderror
                             <small class="text-muted mt-1 d-block">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Nama lengkap mentor sesuai dengan dokumen resmi
+                                Nama lengkap sesuai dokumen resmi
                             </small>
                         </div>
 
@@ -131,86 +138,52 @@
                             @enderror
                             <small class="text-muted mt-1 d-block">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Jabatan atau posisi mentor dalam organisasi
+                                Jabatan atau posisi dalam organisasi
                             </small>
                         </div>
 
-                        <!-- Email Mentor -->
-                        <div class="mb-4">
-                            <label for="email_mentor" class="form-label fw-semibold">
-                                <i class="fas fa-envelope me-1 text-primary"></i>
-                                Email Mentor
-                            </label>
-                            <input type="email" class="form-control @error('email_mentor') is-invalid @enderror"
-                                id="email_mentor" name="email_mentor"
-                                value="{{ old('email_mentor', $isEdit ? $mentor->email_mentor : '') }}"
-                                placeholder="contoh@email.com">
-                            @error('email_mentor')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted mt-1 d-block">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Email aktif untuk komunikasi dengan mentor
-                            </small>
-                        </div>
-
-                        <!-- Nomor HP Mentor -->
-                        <div class="mb-4">
-                            <label for="nomor_hp_mentor" class="form-label fw-semibold">
-                                <i class="fas fa-phone me-1 text-primary"></i>
-                                Nomor HP Mentor
-                            </label>
-                            <input type="text" class="form-control @error('nomor_hp_mentor') is-invalid @enderror"
-                                id="nomor_hp_mentor" name="nomor_hp_mentor"
-                                value="{{ old('nomor_hp_mentor', $isEdit ? $mentor->nomor_hp_mentor : '') }}"
-                                placeholder="081234567890">
-                            @error('nomor_hp_mentor')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted mt-1 d-block">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Nomor WhatsApp atau telepon yang dapat dihubungi
-                            </small>
-                        </div>
                     </div>
 
                     <!-- Kolom Kanan -->
                     <div class="col-md-6">
-                        <!-- Nomor Rekening -->
+
+                        <!-- Golongan Ruang -->
                         <div class="mb-4">
-                            <label for="nomor_rekening" class="form-label fw-semibold">
-                                <i class="fas fa-credit-card me-1 text-primary"></i>
-                                Nomor Rekening
+                            <label for="golongan" class="form-label fw-semibold">
+                                <i class="fas fa-layer-group me-1 text-primary"></i>
+                                Golongan Ruang
                             </label>
-                            <input type="text" class="form-control @error('nomor_rekening') is-invalid @enderror"
-                                id="nomor_rekening" name="nomor_rekening"
-                                value="{{ old('nomor_rekening', $isEdit ? $mentor->nomor_rekening : '') }}"
-                                placeholder="Contoh: 1234567890">
-                            @error('nomor_rekening')
+                            <select class="form-select @error('golongan') is-invalid @enderror"
+                                id="golongan" name="golongan">
+                                <option value="">-- Pilih Golongan Ruang --</option>
+                                @foreach(['II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d'] as $gol)
+                                    <option value="{{ $gol }}"
+                                        {{ old('golongan', $isEdit ? $mentor->golongan : '') == $gol ? 'selected' : '' }}>
+                                        {{ $gol }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('golongan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <small class="text-muted mt-1 d-block">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Nomor rekening untuk pembayaran honorarium
-                            </small>
                         </div>
 
-                        <!-- NPWP Mentor -->
+                        <!-- Pangkat (auto-fill) -->
                         <div class="mb-4">
-                            <label for="npwp_mentor" class="form-label fw-semibold">
-                                <i class="fas fa-id-card me-1 text-primary"></i>
-                                NPWP Mentor
+                            <label for="pangkat" class="form-label fw-semibold">
+                                <i class="fas fa-medal me-1 text-primary"></i>
+                                Pangkat
                             </label>
-                            <input type="text" class="form-control @error('npwp_mentor') is-invalid @enderror"
-                                id="npwp_mentor" name="npwp_mentor"
-                                value="{{ old('npwp_mentor', $isEdit ? $mentor->npwp_mentor : '') }}"
-                                placeholder="Contoh: 12.345.678.9-012.345">
-                            @error('npwp_mentor')
+                            <input type="text" class="form-control @error('pangkat') is-invalid @enderror"
+                                id="pangkat" name="pangkat"
+                                value="{{ old('pangkat', $isEdit ? $mentor->pangkat : '') }}"
+                                placeholder="Terisi otomatis berdasarkan golongan" readonly>
+                            @error('pangkat')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <small class="text-muted mt-1 d-block">
                                 <i class="fas fa-info-circle me-1"></i>
-                                NPWP untuk keperluan perpajakan
+                                Terisi otomatis saat golongan dipilih
                             </small>
                         </div>
 
@@ -237,6 +210,117 @@
                                 Status menentukan apakah mentor masih aktif mengajar
                             </small>
                         </div>
+
+                    </div>
+                </div>
+
+                {{-- ========== SECTION: KONTAK ========== --}}
+                <div class="section-divider mb-4 mt-2">
+                    <span><i class="fas fa-address-book me-2"></i>Informasi Kontak</span>
+                </div>
+
+                <div class="row">
+                    <!-- Kolom Kiri -->
+                    <div class="col-md-6">
+
+                        <!-- Email Mentor -->
+                        <div class="mb-4">
+                            <label for="email_mentor" class="form-label fw-semibold">
+                                <i class="fas fa-envelope me-1 text-primary"></i>
+                                Email Mentor
+                            </label>
+                            <input type="email" class="form-control @error('email_mentor') is-invalid @enderror"
+                                id="email_mentor" name="email_mentor"
+                                value="{{ old('email_mentor', $isEdit ? $mentor->email_mentor : '') }}"
+                                placeholder="contoh@email.com">
+                            @error('email_mentor')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Email aktif untuk komunikasi dengan mentor
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <!-- Kolom Kanan -->
+                    <div class="col-md-6">
+
+                        <!-- Nomor HP Mentor -->
+                        <div class="mb-4">
+                            <label for="nomor_hp_mentor" class="form-label fw-semibold">
+                                <i class="fas fa-phone me-1 text-primary"></i>
+                                Nomor HP Mentor
+                            </label>
+                            <input type="text" class="form-control @error('nomor_hp_mentor') is-invalid @enderror"
+                                id="nomor_hp_mentor" name="nomor_hp_mentor"
+                                value="{{ old('nomor_hp_mentor', $isEdit ? $mentor->nomor_hp_mentor : '') }}"
+                                placeholder="081234567890">
+                            @error('nomor_hp_mentor')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Nomor WhatsApp atau telepon yang dapat dihubungi
+                            </small>
+                        </div>
+
+                    </div>
+                </div>
+
+                {{-- ========== SECTION: KEUANGAN ========== --}}
+                <div class="section-divider mb-4 mt-2">
+                    <span><i class="fas fa-money-bill-wave me-2"></i>Informasi Keuangan</span>
+                </div>
+
+                <div class="row">
+                    <!-- Kolom Kiri -->
+                    <div class="col-md-6">
+
+                        <!-- Nomor Rekening -->
+                        <div class="mb-4">
+                            <label for="nomor_rekening" class="form-label fw-semibold">
+                                <i class="fas fa-credit-card me-1 text-primary"></i>
+                                Nomor Rekening
+                            </label>
+                            <input type="text" class="form-control @error('nomor_rekening') is-invalid @enderror"
+                                id="nomor_rekening" name="nomor_rekening"
+                                value="{{ old('nomor_rekening', $isEdit ? $mentor->nomor_rekening : '') }}"
+                                placeholder="Contoh: Bank Mandiri - 1234567890">
+                            @error('nomor_rekening')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Nomor rekening untuk pembayaran honorarium
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <!-- Kolom Kanan -->
+                    <div class="col-md-6">
+
+                        <!-- NPWP Mentor -->
+                        <div class="mb-4">
+                            <label for="npwp_mentor" class="form-label fw-semibold">
+                                <i class="fas fa-file-invoice me-1 text-primary"></i>
+                                NPWP Mentor
+                            </label>
+                            <input type="text" class="form-control @error('npwp_mentor') is-invalid @enderror"
+                                id="npwp_mentor" name="npwp_mentor"
+                                value="{{ old('npwp_mentor', $isEdit ? $mentor->npwp_mentor : '') }}"
+                                placeholder="Contoh: 12.345.678.9-012.345">
+                            @error('npwp_mentor')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                NPWP untuk keperluan perpajakan
+                            </small>
+                        </div>
+
                     </div>
                 </div>
 
@@ -327,31 +411,12 @@
             npwpInput.addEventListener('input', function (e) {
                 let value = e.target.value.replace(/\D/g, '');
                 let formattedValue = '';
-
-                if (value.length > 2) {
-                    formattedValue += value.substr(0, 2) + '.';
-                    value = value.substr(2);
-                }
-                if (value.length > 3) {
-                    formattedValue += value.substr(0, 3) + '.';
-                    value = value.substr(3);
-                }
-                if (value.length > 3) {
-                    formattedValue += value.substr(0, 3) + '.';
-                    value = value.substr(3);
-                }
-                if (value.length > 1) {
-                    formattedValue += value.substr(0, 1) + '-';
-                    value = value.substr(1);
-                }
-                if (value.length > 3) {
-                    formattedValue += value.substr(0, 3) + '.';
-                    value = value.substr(3);
-                }
-                if (value.length > 0) {
-                    formattedValue += value;
-                }
-
+                if (value.length > 2) { formattedValue += value.substr(0, 2) + '.'; value = value.substr(2); }
+                if (value.length > 3) { formattedValue += value.substr(0, 3) + '.'; value = value.substr(3); }
+                if (value.length > 3) { formattedValue += value.substr(0, 3) + '.'; value = value.substr(3); }
+                if (value.length > 1) { formattedValue += value.substr(0, 1) + '-'; value = value.substr(1); }
+                if (value.length > 3) { formattedValue += value.substr(0, 3) + '.'; value = value.substr(3); }
+                if (value.length > 0) { formattedValue += value; }
                 e.target.value = formattedValue;
             });
 
@@ -359,15 +424,10 @@
             const phoneInput = document.getElementById('nomor_hp_mentor');
             phoneInput.addEventListener('input', function (e) {
                 let value = e.target.value.replace(/\D/g, '');
-
-                // Tambahkan +62 jika dimulai dengan 0
                 if (value.startsWith('0')) {
                     value = '62' + value.substr(1);
                 }
-
-                // Batasi maksimal 15 digit
                 value = value.substr(0, 15);
-
                 e.target.value = value;
             });
 
@@ -377,24 +437,15 @@
                 validationErrors.innerHTML = '';
                 validationSummary.classList.add('d-none');
 
-                // Validasi email format
                 const email = document.getElementById('email_mentor').value;
                 if (email && !validateEmail(email)) {
                     errors.push('Format email tidak valid');
                 }
 
-                // Validasi nomor HP (minimal 10 digit jika diisi)
                 const phone = document.getElementById('nomor_hp_mentor').value;
                 if (phone && phone.replace(/\D/g, '').length < 10) {
                     errors.push('Nomor HP minimal 10 digit');
                 }
-
-                // Validasi NPWP format (15 digit jika diisi)
-                const npwp = document.getElementById('npwp_mentor').value;
-                const npwpDigits = npwp.replace(/\D/g, '');
-                // if (npwp && npwpDigits.length !== 15) {
-                //     errors.push('NPWP harus 15 digit');
-                // }
 
                 if (errors.length > 0) {
                     e.preventDefault();
@@ -404,13 +455,10 @@
                         li.textContent = error;
                         validationErrors.appendChild(li);
                     });
-
-                    // Scroll to validation summary
                     validationSummary.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             });
 
-            // Email validation function
             function validateEmail(email) {
                 const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return re.test(email);
@@ -441,10 +489,59 @@
                     }
                 }
             }
+
+            // ========== AUTO-FILL PANGKAT ==========
+            const golonganPangkat = {
+                'II/a' : 'Pengatur Muda',
+                'II/b' : 'Pengatur Muda Tingkat I',
+                'II/c' : 'Pengatur',
+                'II/d' : 'Pengatur Tingkat I',
+                'III/a': 'Penata Muda',
+                'III/b': 'Penata Muda Tingkat I',
+                'III/c': 'Penata',
+                'III/d': 'Penata Tingkat I',
+                'IV/a' : 'Pembina',
+                'IV/b' : 'Pembina Tingkat I',
+                'IV/c' : 'Pembina Utama Muda',
+                'IV/d' : 'Pembina Utama Madya',
+            };
+
+            const golonganSelect = document.getElementById('golongan');
+            const pangkatInput   = document.getElementById('pangkat');
+
+            // Set saat halaman load (untuk mode edit)
+            if (golonganSelect.value) {
+                pangkatInput.value = golonganPangkat[golonganSelect.value] || '';
+            }
+
+            // Update saat pilih golongan
+            golonganSelect.addEventListener('change', function () {
+                pangkatInput.value = golonganPangkat[this.value] || '';
+            });
         });
     </script>
 
     <style>
+        /* Section Divider */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #285496;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, #285496, #dee2e6);
+        }
+        .section-divider::after {
+            background: linear-gradient(to left, #285496, #dee2e6);
+        }
+
         /* Form Styling */
         .form-label {
             font-weight: 600;
@@ -466,10 +563,14 @@
             box-shadow: 0 0 0 0.25rem rgba(40, 84, 150, 0.25);
         }
 
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
         .form-control.is-invalid,
         .form-select.is-invalid {
             border-color: #dc3545;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
         }
 
         .invalid-feedback {
@@ -520,10 +621,6 @@
             color: white;
         }
 
-        .btn-lift {
-            transition: transform 0.2s ease;
-        }
-
         .btn-lift:hover {
             transform: translateY(-2px);
         }
@@ -541,19 +638,9 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .card-body {
-                padding: 1.5rem;
-            }
-
-            .btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.875rem;
-            }
-
-            .form-control,
-            .form-select {
-                padding: 0.5rem 0.75rem;
-            }
+            .card-body { padding: 1.5rem; }
+            .btn { padding: 0.5rem 1rem; font-size: 0.875rem; }
+            .form-control, .form-select { padding: 0.5rem 0.75rem; }
         }
     </style>
 @endsection

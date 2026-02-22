@@ -17,6 +17,8 @@ class Mentor extends Model
         'nama_mentor',
         'nip_mentor',
         'jabatan_mentor',
+        'golongan',
+        'pangkat',
         'nomor_rekening',
         'npwp_mentor',
         'email_mentor',

@@ -88,7 +88,7 @@ class Dataawal extends Seeder
         ]);
 
         // Ambil data provinsi
-        $response = Http::get('https://wilayah.id/api/provinces.json')->json();
+        $response = Http::timeout(30)->get('https://wilayah.id/api/provinces.json')->json();
         $provinces = $response['data']; // Akses key 'data' dulu
 
         foreach ($provinces as $province) {
@@ -102,7 +102,7 @@ class Dataawal extends Seeder
         $provinces = Provinsi::all();
 
         foreach ($provinces as $province) {
-            $response = Http::get("https://wilayah.id/api/regencies/{$province->code}.json")->json();
+            $response = Http::timeout(30)->get("https://wilayah.id/api/regencies/{$province->code}.json")->json();
             $regencies = $response['data']; // Akses key 'data' juga di sini
 
             foreach ($regencies as $regency) {

@@ -197,6 +197,7 @@
                             <th width="20%">Nama Mentor</th>
                             <th width="15%">NIP</th>
                             <th width="15%">Jabatan</th>
+                            <th width="13%">Golongan & Pangkat</th>
                             <th width="15%">Kontak</th>
                             <th width="15%">Informasi Keuangan</th>
                             <th width="10%">Jumlah Peserta</th>
@@ -261,6 +262,24 @@
                                         <i class="fas fa-briefcase me-1"></i>
                                         {{ $item->jabatan_mentor ?? '-' }}
                                     </p>
+                                </td>
+                                <td>
+                                    @if($item->golongan || $item->pangkat)
+                                        <div class="mb-1">
+                                            <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1">
+                                                <i class="fas fa-layer-group me-1"></i>
+                                                {{ $item->golongan ?? '-' }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-medal me-1"></i>
+                                                {{ $item->pangkat ?? '-' }}
+                                            </small>
+                                        </div>
+                                    @else
+                                        <span class="text-muted small">-</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="mb-1">
@@ -328,7 +347,7 @@
                             </tr>
                         @empty
                             <tr class="empty-state-row">
-                                <td colspan="8" class="text-center py-5">
+                                <td colspan="9" class="text-center py-5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon mb-3">
                                             <i class="fas fa-chalkboard-teacher fa-4x" style="color: #e9ecef;"></i>

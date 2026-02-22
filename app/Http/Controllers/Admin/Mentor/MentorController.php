@@ -148,7 +148,9 @@ public function getPeserta($id)
             'npwp_mentor' => 'nullable|string|max:50',
             'email_mentor' => 'nullable|email|max:100|unique:mentor,email_mentor',
             'nomor_hp_mentor' => 'nullable|string|max:20',
-            'status_aktif' => 'required|boolean'
+            'status_aktif' => 'required|boolean',
+            'golongan' => 'nullable|string|max:50',
+            'pangkat' => 'nullable|string|max:100',
         ], [
             'nama_mentor.required' => 'Nama mentor wajib diisi.',
             'nama_mentor.max' => 'Nama mentor maksimal 200 karakter.',
@@ -161,7 +163,9 @@ public function getPeserta($id)
             'email_mentor.unique' => 'Email mentor sudah terdaftar.',
             'nomor_hp_mentor.max' => 'Nomor HP mentor maksimal 20 karakter.',
             'status_aktif.required' => 'Status mentor wajib dipilih.',
-            'status_aktif.boolean' => 'Status mentor tidak valid.'
+            'status_aktif.boolean' => 'Status mentor tidak valid.',
+            'golongan.max' => 'Golongan maksimal 50 karakter.',
+            'pangkat.max' => 'Pangkat maksimal 100 karakter.',
         ]);
 
         try {
@@ -171,6 +175,8 @@ public function getPeserta($id)
                         'nama_mentor' => $request->nama_mentor,
                         'nip_mentor' => $request->nip_mentor,
                         'jabatan_mentor' => $request->jabatan_mentor,
+                        'golongan' => $request->golongan,
+                        'pangkat' => $request->pangkat,
                         'nomor_rekening' => $request->nomor_rekening,
                         'npwp_mentor' => $request->npwp_mentor,
                         'email_mentor' => $request->email_mentor,
@@ -220,7 +226,9 @@ public function getPeserta($id)
             'npwp_mentor' => 'nullable|string|max:50',
             'email_mentor' => 'nullable|email|max:100|unique:mentor,email_mentor,' . $id,
             'nomor_hp_mentor' => 'nullable|string|max:20',
-            'status_aktif' => 'required|boolean'
+            'status_aktif' => 'required|boolean',
+            'golongan' => 'nullable|string|max:50',
+            'pangkat' => 'nullable|string|max:100',
         ], [
             'nama_mentor.required' => 'Nama mentor wajib diisi.',
             'nama_mentor.max' => 'Nama mentor maksimal 200 karakter.',
@@ -233,7 +241,9 @@ public function getPeserta($id)
             'email_mentor.unique' => 'Email mentor sudah terdaftar.',
             'nomor_hp_mentor.max' => 'Nomor HP mentor maksimal 20 karakter.',
             'status_aktif.required' => 'Status mentor wajib dipilih.',
-            'status_aktif.boolean' => 'Status mentor tidak valid.'
+            'status_aktif.boolean' => 'Status mentor tidak valid.',
+            'golongan.max' => 'Golongan maksimal 50 karakter.',
+            'pangkat.max' => 'Pangkat maksimal 100 karakter.',
         ]);
 
         try {
@@ -243,6 +253,8 @@ public function getPeserta($id)
                 'nama_mentor' => $request->nama_mentor,
                 'nip_mentor' => $request->nip_mentor,
                 'jabatan_mentor' => $request->jabatan_mentor,
+                'golongan' => $request->golongan,
+                'pangkat' => $request->pangkat,
                 'nomor_rekening' => $request->nomor_rekening,
                 'npwp_mentor' => $request->npwp_mentor,
                 'email_mentor' => $request->email_mentor,

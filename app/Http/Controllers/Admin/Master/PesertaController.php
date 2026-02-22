@@ -829,6 +829,8 @@ public function edit(Request $request, $jenis, $id)
                     'npwp_mentor' => 'nullable|string|max:50',
                     'has_mentor' => 'nullable|in:Ya,Tidak',
                     'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
+                    'golongan_mentor_baru' => 'nullable|string|max:50',
+                    'pangkat_mentor_baru'  => 'nullable|string|max:100',
                 ],
                 [
                     'id_jenis_pelatihan.required' => 'Jenis pelatihan wajib dipilih.',
@@ -855,6 +857,8 @@ public function edit(Request $request, $jenis, $id)
                     'sudah_ada_mentor.in' => 'Pilihan sudah ada mentor harus Ya atau Tidak.',
                     'file_pas_foto.mimes' => 'Pas foto harus berupa file JPG, JPEG, atau PNG.',
                     'file_pas_foto.max' => 'Pas foto maksimal 1MB.',
+
+
                 ]
             );
             $additionalMessages = []; 
@@ -1196,6 +1200,8 @@ public function edit(Request $request, $jenis, $id)
                         'nomor_hp_mentor' => $request->nomor_hp_mentor_baru, // TAMBAHKAN INI
                         'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                         'npwp_mentor' => $request->npwp_mentor_baru,
+                        'golongan' => $request->golongan_mentor_baru,
+                        'pangkat' => $request->pangkat_mentor_baru,      
                         'status_aktif' => true,
                     ]);
                 }
@@ -1740,6 +1746,8 @@ public function edit(Request $request, $jenis, $id)
                             'jabatan_mentor' => $request->jabatan_mentor_baru,
                             'nomor_hp_mentor' => $request->nomor_hp_mentor_baru, // tambah ini
                             'nomor_rekening' => $request->nomor_rekening_mentor_baru,
+                            'golongan' => $request->golongan_mentor_baru,
+                            'pangkat' => $request->pangkat_mentor_baru,   
                             'npwp_mentor' => $request->npwp_mentor_baru,
                             'status_aktif' => true,
                         ]);

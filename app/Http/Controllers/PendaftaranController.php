@@ -296,6 +296,8 @@ public function getAvailableNdh(Request $request)
                 'nomor_rekening_mentor_baru' => 'nullable|string|max:200',
                 'npwp_mentor_baru' => 'nullable|string|max:50',
                 'ndh' => 'required|max:50',
+                'golongan_mentor_baru'=> 'nullable|string|max:50',
+                'pangkat_mentor_baru' => 'nullable|string|max:100',
             ], [
                 'nama_lengkap.required' => 'Nama lengkap wajib diisi',
                 'nama_lengkap.max' => 'Nama lengkap maksimal 200 karakter',
@@ -1006,6 +1008,8 @@ public function getAvailableNdh(Request $request)
                         'nama_mentor' => $request->nama_mentor_baru,
                         'nip_mentor' => $nipMentorBersih, // Simpan NIP yang sudah dinormalisasi
                         'jabatan_mentor' => $request->jabatan_mentor_baru,
+                        'golongan'       => $request->golongan_mentor_baru,
+                        'pangkat'        => $request->pangkat_mentor_baru, 
                         'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                         'npwp_mentor' => $request->npwp_mentor_baru,
                         'nomor_hp_mentor' => $request->nomor_hp_mentor_baru,

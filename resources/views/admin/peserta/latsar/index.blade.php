@@ -1900,6 +1900,18 @@ function aksiCard(aksi) {
                                                         <p class="fw-semibold mb-0">${mentor.nomor_hp_mentor || '-'}</p>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="text-muted small">Golongan Ruang</label>
+                                                        <p class="fw-semibold mb-0">${mentor.golongan || '-'}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="text-muted small">Pangkat</label>
+                                                        <p class="fw-semibold mb-0">${mentor.pangkat || '-'}</p>
+                                                    </div>
+                                                </div>
 
                                             </div>
                                         </div>

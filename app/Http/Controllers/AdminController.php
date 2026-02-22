@@ -321,6 +321,10 @@ if ($user->role->name == 'pengawas') {
                 'jabatan_mentor_baru' => 'nullable|string|max:200',
                 'nomor_rekening_mentor_baru' => 'nullable|string|max:200',
                 'npwp_mentor_baru' => 'nullable|string|max:50',
+                'golongan_mentor_baru' => 'nullable|string|max:10',
+                'pangkat_mentor_baru'  => 'nullable|string|max:50',
+                'golongan_mentor'      => 'nullable|string|max:10',
+                'pangkat_mentor'       => 'nullable|string|max:50',
             ], [
                 'nama_lengkap.required' => 'Nama lengkap wajib diisi',
                 'nip_nrp.required' => 'NIP/NRP wajib diisi',
@@ -758,6 +762,8 @@ if ($user->role->name == 'pengawas') {
                         'nomor_rekening' => $request->nomor_rekening_mentor_baru,
                         'npwp_mentor' => $request->npwp_mentor_baru,
                         // TAMBAHKAN NOMOR HP MENTOR
+                        'golongan'        => $request->golongan_mentor_baru,
+                        'pangkat'         => $request->pangkat_mentor_baru,
                         'nomor_hp_mentor' => $request->nomor_hp_mentor_baru,
                         'status_aktif' => true,
                     ]);

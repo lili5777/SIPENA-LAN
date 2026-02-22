@@ -2389,6 +2389,13 @@
                             </div>
                             <div class="data-item">
                                 <span class="data-label">
+                                    <i class="fas fa-file-contract"></i>
+                                    Golongan & Pangkat Mentor
+                                </span>
+                                <span class="data-value">{{ $mentorData->golongan ?? 'Belum diisi' }} - {{ $mentorData->pangkat ?? 'Belum diisi' }}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">
                                     <i class="fas fa-toggle-on"></i>
                                     Status Aktif Mentor
                                 </span>

@@ -2208,6 +2208,8 @@
                                                 data-nama="{{ $mentor->nama_mentor }}"
                                                 data-nip="{{ $mentor->nip_mentor }}"
                                                 data-jabatan="{{ $mentor->jabatan_mentor }}"
+                                                data-golongan="{{ $mentor->golongan }}"
+                                                data-pangkat="{{ $mentor->pangkat }}"
                                                 data-rekening="{{ $mentor->nomor_rekening }}" 
                                                 data-npwp="{{ $mentor->npwp_mentor }}" 
                                                 data-nomorhp="{{ $mentor->nomor_hp_mentor }}" 
@@ -2244,9 +2246,27 @@
 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label class="form-label">Nomor Rekening Mentor</label>
+                                        <label class="form-label">Golongan Mentor</label>
+                                        <input type="text" name="golongan_mentor" id="golongan_mentor_select"
+                                            class="form-input" readonly
+                                            value="{{ old('golongan_mentor', $pendaftaranTerbaru->mentor->golongan ?? '') }}"
+                                            placeholder="Akan terisi otomatis saat memilih mentor">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Pangkat Mentor</label>
+                                        <input type="text" name="pangkat_mentor" id="pangkat_mentor_select"
+                                            class="form-input" readonly
+                                            value="{{ old('pangkat_mentor', $pendaftaranTerbaru->mentor->pangkat ?? '') }}"
+                                            placeholder="Akan terisi otomatis saat memilih mentor">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Nama Bank & Nomor Rekening Mentor & Atas Nama</label>
                                         <input type="text" name="nomor_rekening_mentor" id="nomor_rekening_mentor_select"
                                             class="form-input" readonly
+                                            placeholder="Contoh: BRI 9797XXXXXX , MUhammad Ali"
                                             value="{{ old('nomor_rekening_mentor', $pendaftaranTerbaru->mentor->nomor_rekening ?? '') }}">
                                     </div>
                                     <div class="form-group">
@@ -2332,9 +2352,38 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Nomor Rekening Mentor</label>
+                                    <label class="form-label">Golongan Ruang Mentor</label>
+                                    <select name="golongan_mentor_baru" id="golongan_mentor_baru"
+                                        class="form-select @error('golongan_mentor_baru') error @enderror">
+                                        <option value="">-- Pilih Golongan --</option>
+                                        @foreach(['II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d'] as $gr)
+                                            <option value="{{ $gr }}" {{ old('golongan_mentor_baru', $pendaftaranTerbaru->mentor->golongan ?? '') == $gr ? 'selected' : '' }}>{{ $gr }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('golongan_mentor_baru')
+                                        <div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Pangkat Mentor</label>
+                                    <input type="text" name="pangkat_mentor_baru" id="pangkat_mentor_baru"
+                                        class="form-input capitalize @error('pangkat_mentor_baru') error @enderror"
+                                        value="{{ old('pangkat_mentor_baru', $pendaftaranTerbaru->mentor->pangkat ?? '') }}"
+                                        readonly
+                                        placeholder="Terisi otomatis berdasarkan golongan">
+                                    <small class="form-hint"><i class="fas fa-info-circle"></i> Terisi otomatis berdasarkan golongan yang dipilih</small>
+                                    @error('pangkat_mentor_baru')
+                                        <div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Nama Bank & Nomor Rekening Mentor & Atas Nama</label>
                                     <input type="text" name="nomor_rekening_mentor_baru" id="nomor_rekening_mentor_baru"
                                         class="form-input @error('nomor_rekening_mentor_baru') error @enderror"
+                                        placeholder="Contoh: BRI 9797XXXXXX , MUhammad Ali"
                                         value="{{ old('nomor_rekening_mentor_baru', $pendaftaranTerbaru->mentor->nomor_rekening ?? '') }}">
                                     @error('nomor_rekening_mentor_baru')
                                         <div class="error-message">
@@ -3440,6 +3489,8 @@
                                 option.dataset.rekening = mentor.nomor_rekening || '';
                                 option.dataset.npwp = mentor.npwp_mentor || '';
                                 option.dataset.nomorhp = mentor.nomor_hp_mentor || '';
+                                option.dataset.golongan = mentor.golongan || '';
+                                option.dataset.pangkat = mentor.pangkat || '';
                                 
                                 mentorSelect.appendChild(option);
                             });
@@ -3548,6 +3599,35 @@
             // Initialize mentor validation jika sudah ada input
             if (document.getElementById('nomor_hp_mentor_baru') || document.getElementById('nip_mentor_baru')) {
                 setupMentorValidation();
+            }
+
+            // ===== GOLONGAN & PANGKAT AUTO-FILL UNTUK MENTOR BARU =====
+            const golonganMentorSelect = document.getElementById('golongan_mentor_baru');
+            const pangkatMentorInput = document.getElementById('pangkat_mentor_baru');
+
+            if (golonganMentorSelect && pangkatMentorInput) {
+                golonganMentorSelect.addEventListener('change', function () {
+                    const pangkatMentorMapping = {
+                        'II/a': 'Pengatur Muda',
+                        'II/b': 'Pengatur Muda Tingkat I',
+                        'II/c': 'Pengatur',
+                        'II/d': 'Pengatur Tingkat I',
+                        'III/a': 'Penata Muda',
+                        'III/b': 'Penata Muda Tingkat I',
+                        'III/c': 'Penata',
+                        'III/d': 'Penata Tingkat I',
+                        'IV/a': 'Pembina',
+                        'IV/b': 'Pembina Tingkat I',
+                        'IV/c': 'Pembina Muda',
+                        'IV/d': 'Pembina Madya'
+                    };
+                    pangkatMentorInput.value = pangkatMentorMapping[this.value] || '';
+                });
+
+                // Trigger saat page load jika sudah ada nilai
+                if (golonganMentorSelect.value) {
+                    golonganMentorSelect.dispatchEvent(new Event('change'));
+                }
             }
 
             // Initialize form validator
@@ -3831,6 +3911,8 @@
                         document.getElementById('nomor_rekening_mentor_select').value = selectedOption.dataset.rekening || '';
                         document.getElementById('npwp_mentor_select').value = selectedOption.dataset.npwp || '';
                         document.getElementById('nomor_hp_mentor_select').value = selectedOption.dataset.nomorhp || '';
+                        document.getElementById('golongan_mentor_select').value = selectedOption.dataset.golongan || '';
+                        document.getElementById('pangkat_mentor_select').value = selectedOption.dataset.pangkat || '';
                     } else {
                         document.getElementById('nama_mentor_select').value = '';
                         document.getElementById('nip_mentor_select').value = '';
