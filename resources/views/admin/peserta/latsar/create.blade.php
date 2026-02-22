@@ -1071,7 +1071,7 @@ $isPKN = $jenis === 'pkn';
                                             @enderror
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label">Nomor Rekening Mentor</label>
+                                            <label class="form-label">Nama Bank dan Nomor Rekening Mentor</label>
                                             <input type="text" name="nomor_rekening_mentor_baru"
                                                 id="nomor_rekening_mentor_baru"
                                                 class="form-input @error('nomor_rekening_mentor_baru') error @enderror"
