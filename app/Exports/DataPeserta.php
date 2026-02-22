@@ -202,6 +202,8 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'JABATAN MENTOR',
             'NAMA BANK & NOMOR REKENING MENTOR',
             'NPWP MENTOR',
+            'GOLONGAN MENTOR',
+            'PANGKAT MENTOR',
             'EMAIL MENTOR',
             'NOMOR HP MENTOR',
         ];
@@ -262,6 +264,8 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             $mentor->jabatan_mentor ?? '-',
             $mentor->nomor_rekening ?? '-',
             $mentor->npwp_mentor ?? '-',
+            $mentor->golongan ?? '-',
+            $mentor->pangkat ?? '-',
             $mentor->email_mentor ?? '-',
             $mentor->nomor_hp_mentor ?? '-',
         ];
