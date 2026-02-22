@@ -1303,7 +1303,7 @@
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="welcome-stat-content">
-                    <h5>1,248</h5>
+                    <h5>{{ $tpeserta }}</h5>
                     <small>Total Peserta</small>
                 </div>
             </div>
@@ -1312,8 +1312,8 @@
                     <i class="fas fa-chalkboard-teacher"></i>
                 </div>
                 <div class="welcome-stat-content">
-                    <h5>48</h5>
-                    <small>Kelas Aktif</small>
+                    <h5>{{ $tangkatan }}</h5>
+                    <small>Angkatan Aktif</small>
                 </div>
             </div>
             <div class="welcome-stat">

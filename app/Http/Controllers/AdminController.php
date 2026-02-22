@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Aktifitas;
+use App\Models\Angkatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Peserta;
@@ -23,6 +24,9 @@ class AdminController extends Controller
     public function index()
 {
     $user = Auth::user();
+
+    $tpeserta = Peserta::count();
+    $tangkatan = Angkatan::where('status_angkatan', 'Dibuka')->count();
     
     // Inisialisasi variabel untuk role user
     $peserta = null;
@@ -154,7 +158,9 @@ if ($user->role->name == 'pengawas') {
         'semuaPendaftaran',
         'kunci_judul',
         'picPeserta',
-        'dataPicAngkatan'
+        'dataPicAngkatan',
+        'tpeserta',
+        'tangkatan'
     ));
 }
 
