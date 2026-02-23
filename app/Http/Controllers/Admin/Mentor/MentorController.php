@@ -10,6 +10,318 @@ use Carbon\Carbon;
 
 class MentorController extends Controller
 {
+
+    /**
+ * Preview duplicate mentors before cleanup
+ */
+public function previewDuplicates()
+{
+    try {
+        $duplicates = [];
+
+        // ─── 1. Duplikat NIP ───
+        $allMentors = DB::table('mentor')
+            ->whereNotNull('nip_mentor')
+            ->where('nip_mentor', '!=', '')
+            ->get();
+
+        $nipGroups = [];
+        foreach ($allMentors as $mentor) {
+            $cleanNip = preg_replace('/[^0-9]/', '', $mentor->nip_mentor);
+            if ($cleanNip) {
+                $nipGroups[$cleanNip][] = $mentor;
+            }
+        }
+
+        foreach ($nipGroups as $nip => $mentors) {
+            if (count($mentors) > 1) {
+
+                // Ambil ID dari grup, query by ID agar tidak terpengaruh format NIP di DB
+                $mentorIds = collect($mentors)->pluck('id')->toArray();
+
+                $mentorsWithCount = DB::table('mentor')
+                    ->select('mentor.*', DB::raw('(SELECT COUNT(*) FROM peserta_mentor WHERE peserta_mentor.id_mentor = mentor.id) as total_peserta'))
+                    ->whereIn('mentor.id', $mentorIds)
+                    ->orderByDesc('total_peserta')
+                    ->orderBy('mentor.id')
+                    ->get();
+
+                if ($mentorsWithCount->isEmpty()) continue;
+
+                $keepMentor    = $mentorsWithCount->first();
+                $removeMentors = $mentorsWithCount->slice(1);
+
+                $pesertaToMove = [];
+                foreach ($removeMentors as $rm) {
+                    $peserta = DB::table('peserta_mentor')
+                        ->join('pendaftaran', 'peserta_mentor.id_pendaftaran', '=', 'pendaftaran.id')
+                        ->join('peserta', 'pendaftaran.id_peserta', '=', 'peserta.id')
+                        ->join('angkatan', 'pendaftaran.id_angkatan', '=', 'angkatan.id')
+                        ->where('peserta_mentor.id_mentor', $rm->id)
+                        ->select('peserta.nama_lengkap', 'peserta.nip_nrp', 'angkatan.nama_angkatan')
+                        ->get();
+                    foreach ($peserta as $p) $pesertaToMove[] = $p;
+                }
+
+                $duplicates[] = [
+                    'type'       => 'nip',
+                    'identifier' => $nip,
+                    'label'      => 'NIP: ' . $nip,
+                    'keep'       => [
+                        'id'            => $keepMentor->id,
+                        'nama'          => $keepMentor->nama_mentor,
+                        'nip'           => $keepMentor->nip_mentor,
+                        'jabatan'       => $keepMentor->jabatan_mentor,
+                        'total_peserta' => $keepMentor->total_peserta,
+                    ],
+                    'remove' => $removeMentors->map(fn($m) => [
+                        'id'            => $m->id,
+                        'nama'          => $m->nama_mentor,
+                        'nip'           => $m->nip_mentor,
+                        'jabatan'       => $m->jabatan_mentor,
+                        'total_peserta' => $m->total_peserta,
+                    ])->values()->toArray(),
+                    'peserta_dipindah' => $pesertaToMove,
+                ];
+            }
+        }
+
+        // ─── 2. Duplikat Nama (NIP kosong) ───
+        $namaGroups = DB::table('mentor')
+            ->select('nama_mentor', DB::raw('COUNT(*) as count'))
+            ->where(function ($q) {
+                $q->whereNull('nip_mentor')->orWhere('nip_mentor', '=', '');
+            })
+            ->groupBy('nama_mentor')
+            ->having('count', '>', 1)
+            ->get();
+
+        foreach ($namaGroups as $group) {
+
+            // Ambil semua ID mentor dengan nama ini
+            $mentorIds = DB::table('mentor')
+                ->where('nama_mentor', $group->nama_mentor)
+                ->where(function ($q) {
+                    $q->whereNull('nip_mentor')->orWhere('nip_mentor', '=', '');
+                })
+                ->pluck('id')
+                ->toArray();
+
+            $mentors = DB::table('mentor')
+                ->select('mentor.*', DB::raw('(SELECT COUNT(*) FROM peserta_mentor WHERE peserta_mentor.id_mentor = mentor.id) as total_peserta'))
+                ->whereIn('mentor.id', $mentorIds)
+                ->orderByDesc('total_peserta')
+                ->orderBy('mentor.id')
+                ->get();
+
+            if ($mentors->isEmpty()) continue;
+
+            $keepMentor    = $mentors->first();
+            $removeMentors = $mentors->slice(1);
+
+            $pesertaToMove = [];
+            foreach ($removeMentors as $rm) {
+                $peserta = DB::table('peserta_mentor')
+                    ->join('pendaftaran', 'peserta_mentor.id_pendaftaran', '=', 'pendaftaran.id')
+                    ->join('peserta', 'pendaftaran.id_peserta', '=', 'peserta.id')
+                    ->join('angkatan', 'pendaftaran.id_angkatan', '=', 'angkatan.id')
+                    ->where('peserta_mentor.id_mentor', $rm->id)
+                    ->select('peserta.nama_lengkap', 'peserta.nip_nrp', 'angkatan.nama_angkatan')
+                    ->get();
+                foreach ($peserta as $p) $pesertaToMove[] = $p;
+            }
+
+            $duplicates[] = [
+                'type'       => 'nama',
+                'identifier' => $group->nama_mentor,
+                'label'      => 'Nama: ' . $group->nama_mentor,
+                'keep'       => [
+                    'id'            => $keepMentor->id,
+                    'nama'          => $keepMentor->nama_mentor,
+                    'nip'           => $keepMentor->nip_mentor ?? '-',
+                    'jabatan'       => $keepMentor->jabatan_mentor,
+                    'total_peserta' => $keepMentor->total_peserta,
+                ],
+                'remove' => $removeMentors->map(fn($m) => [
+                    'id'            => $m->id,
+                    'nama'          => $m->nama_mentor,
+                    'nip'           => $m->nip_mentor ?? '-',
+                    'jabatan'       => $m->jabatan_mentor,
+                    'total_peserta' => $m->total_peserta,
+                ])->values()->toArray(),
+                'peserta_dipindah' => $pesertaToMove,
+            ];
+        }
+
+        return response()->json([
+            'success'        => true,
+            'total_duplikat' => count($duplicates),
+            'duplicates'     => $duplicates,
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal memuat preview duplikat: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Execute cleanup of duplicate mentors
+ */
+public function cleanupDuplicates(Request $request)
+{
+    try {
+        DB::beginTransaction();
+
+        $log         = [];
+        $totalHapus  = 0;
+        $totalPindah = 0;
+
+        // ─── Step 1: Rapikan format NIP ───
+        $allMentors = DB::table('mentor')
+            ->whereNotNull('nip_mentor')
+            ->where('nip_mentor', '!=', '')
+            ->get();
+
+        foreach ($allMentors as $mentor) {
+            $cleanNip = preg_replace('/[^0-9]/', '', $mentor->nip_mentor);
+            if ($cleanNip !== $mentor->nip_mentor) {
+                DB::table('mentor')->where('id', $mentor->id)->update(['nip_mentor' => $cleanNip]);
+                $log[] = "Format NIP dirapikan: ID {$mentor->id} '{$mentor->nip_mentor}' → '{$cleanNip}'";
+            }
+        }
+
+        // ─── Step 2: Duplikat berdasarkan NIP ───
+        // Ambil ulang setelah NIP dibersihkan
+        $allMentorsClean = DB::table('mentor')
+            ->whereNotNull('nip_mentor')
+            ->where('nip_mentor', '!=', '')
+            ->get();
+
+        $nipGroups = [];
+        foreach ($allMentorsClean as $mentor) {
+            $nipGroups[$mentor->nip_mentor][] = $mentor->id;
+        }
+
+        foreach ($nipGroups as $nip => $ids) {
+            if (count($ids) <= 1) continue;
+
+            $mentors = DB::table('mentor')
+                ->select('mentor.*', DB::raw('(SELECT COUNT(*) FROM peserta_mentor WHERE peserta_mentor.id_mentor = mentor.id) as total_peserta'))
+                ->whereIn('mentor.id', $ids)
+                ->orderByDesc('total_peserta')
+                ->orderBy('mentor.id')
+                ->get();
+
+            if ($mentors->isEmpty()) continue;
+
+            $keep    = $mentors->first();
+            $removes = $mentors->slice(1);
+
+            foreach ($removes as $remove) {
+                $moved = DB::table('peserta_mentor')
+                    ->where('id_mentor', $remove->id)
+                    ->update(['id_mentor' => $keep->id]);
+
+                $totalPindah += $moved;
+
+                // Merge field kosong dari duplikat ke yang dipertahankan
+                $keepFresh = DB::table('mentor')->where('id', $keep->id)->first();
+                $updates   = [];
+                foreach (['jabatan_mentor', 'nomor_rekening', 'npwp_mentor', 'email_mentor', 'nomor_hp_mentor', 'golongan', 'pangkat'] as $field) {
+                    if (empty($keepFresh->$field) && !empty($remove->$field)) {
+                        $updates[$field] = $remove->$field;
+                    }
+                }
+                if ($updates) {
+                    DB::table('mentor')->where('id', $keep->id)->update($updates);
+                }
+
+                DB::table('mentor')->where('id', $remove->id)->delete();
+                $totalHapus++;
+                $log[] = "Hapus duplikat NIP '{$nip}': ID {$remove->id} ({$remove->nama_mentor}), pertahankan ID {$keep->id} ({$keep->nama_mentor}, {$keep->total_peserta} peserta), pindah {$moved} peserta";
+            }
+        }
+
+        // ─── Step 3: Duplikat berdasarkan Nama (NIP kosong) ───
+        $namaGroups = DB::table('mentor')
+            ->select('nama_mentor', DB::raw('COUNT(*) as count'))
+            ->where(function ($q) {
+                $q->whereNull('nip_mentor')->orWhere('nip_mentor', '=', '');
+            })
+            ->groupBy('nama_mentor')
+            ->having('count', '>', 1)
+            ->get();
+
+        foreach ($namaGroups as $group) {
+
+            $mentorIds = DB::table('mentor')
+                ->where('nama_mentor', $group->nama_mentor)
+                ->where(function ($q) {
+                    $q->whereNull('nip_mentor')->orWhere('nip_mentor', '=', '');
+                })
+                ->pluck('id')
+                ->toArray();
+
+            $mentors = DB::table('mentor')
+                ->select('mentor.*', DB::raw('(SELECT COUNT(*) FROM peserta_mentor WHERE peserta_mentor.id_mentor = mentor.id) as total_peserta'))
+                ->whereIn('mentor.id', $mentorIds)
+                ->orderByDesc('total_peserta')
+                ->orderBy('mentor.id')
+                ->get();
+
+            if ($mentors->isEmpty()) continue;
+
+            $keep    = $mentors->first();
+            $removes = $mentors->slice(1);
+
+            foreach ($removes as $remove) {
+                $moved = DB::table('peserta_mentor')
+                    ->where('id_mentor', $remove->id)
+                    ->update(['id_mentor' => $keep->id]);
+
+                $totalPindah += $moved;
+
+                $keepFresh = DB::table('mentor')->where('id', $keep->id)->first();
+                $updates   = [];
+                foreach (['jabatan_mentor', 'nomor_rekening', 'npwp_mentor', 'email_mentor', 'nomor_hp_mentor', 'golongan', 'pangkat'] as $field) {
+                    if (empty($keepFresh->$field) && !empty($remove->$field)) {
+                        $updates[$field] = $remove->$field;
+                    }
+                }
+                if ($updates) {
+                    DB::table('mentor')->where('id', $keep->id)->update($updates);
+                }
+
+                DB::table('mentor')->where('id', $remove->id)->delete();
+                $totalHapus++;
+                $log[] = "Hapus duplikat Nama '{$group->nama_mentor}': ID {$remove->id}, pertahankan ID {$keep->id} ({$keep->total_peserta} peserta), pindah {$moved} peserta";
+            }
+        }
+
+        DB::commit();
+        aktifitas("Cleanup Mentor Duplikat", null);
+
+        return response()->json([
+            'success'      => true,
+            'message'      => "Berhasil! {$totalHapus} mentor duplikat dihapus, {$totalPindah} peserta dipindahkan.",
+            'total_hapus'  => $totalHapus,
+            'total_pindah' => $totalPindah,
+            'log'          => $log,
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal melakukan cleanup: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
     /**
  * Get peserta details for a specific mentor
  */

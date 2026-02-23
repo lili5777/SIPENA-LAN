@@ -175,6 +175,8 @@ Route::middleware('auth')->group(function () {
         });
     });
     Route::get('/mentor/{id}/peserta', [MentorController::class, 'getPeserta'])->name('mentor.peserta');
+    Route::get('mentor/preview-duplicates', [MentorController::class, 'previewDuplicates'])->name('mentor.previewDuplicates');
+    Route::post('mentor/cleanup-duplicates', [MentorController::class, 'cleanupDuplicates'])->name('mentor.cleanupDuplicates');
     
 
     // Export routes

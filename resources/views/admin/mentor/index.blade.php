@@ -19,10 +19,18 @@
                 </div>
             </div>
             <div class="col-auto">
-                <a href="{{ route('mentor.create') }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
-                    <i class="fas fa-plus me-2"></i>
-                    Tambah Mentor
-                </a>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ route('mentor.create') }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
+                        <i class="fas fa-plus me-2"></i>
+                        Tambah Mentor
+                    </a>
+                    <button type="button" id="btnPreviewDuplikat" 
+                        class="btn btn-warning btn-hover-lift shadow-sm d-flex align-items-center"
+                        data-bs-toggle="tooltip" title="Temukan dan hapus mentor yang terdaftar ganda">
+                        <i class="fas fa-broom me-2"></i>
+                        Rapikan Duplikat
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -526,6 +534,102 @@
             </div>
         </div>
     </div>
+
+    <!-- Cleanup Duplikat Modal -->
+<div class="modal fade" id="cleanupModal" tabindex="-1" aria-labelledby="cleanupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 text-white"
+                style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1" id="cleanupModalLabel">
+                        <i class="fas fa-broom me-2"></i>
+                        Rapikan Mentor Duplikat
+                    </h5>
+                    <p class="mb-0 small opacity-75">Preview data sebelum pembersihan dilakukan</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-0">
+
+                <!-- Loading -->
+                <div id="cleanupLoading" class="text-center py-5">
+                    <div class="spinner-border text-warning" role="status"></div>
+                    <p class="text-muted mt-3">Memindai data mentor duplikat...</p>
+                </div>
+
+                <!-- Error -->
+                <div id="cleanupError" class="alert alert-danger m-4" style="display:none;"></div>
+
+                <!-- Tidak ada duplikat -->
+                <div id="cleanupEmpty" class="text-center py-5" style="display:none;">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h5 class="text-muted">Data mentor sudah bersih!</h5>
+                    <p class="text-muted">Tidak ditemukan mentor dengan data duplikat.</p>
+                </div>
+
+                <!-- Ada duplikat -->
+                <div id="cleanupContent" style="display:none;">
+                    <!-- Summary Banner -->
+                    <div class="alert alert-warning m-4 mb-0 d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-lg me-3 flex-shrink-0"></i>
+                        <div>
+                            Ditemukan <strong id="totalDuplikat">0</strong> kelompok mentor duplikat.
+                            Sistem akan <strong>mempertahankan mentor dengan peserta terbanyak</strong> dan 
+                            <strong>memindahkan semua peserta</strong> dari mentor duplikat ke mentor yang dipertahankan, 
+                            kemudian mentor duplikat akan <strong class="text-danger">dihapus permanen</strong>. 
+                            Jika jumlah peserta sama, mentor dengan <strong>ID terkecil</strong> yang dipertahankan.
+                        </div>
+                    </div>
+
+                    <!-- List Duplikat -->
+                    <div id="duplikatList" class="p-4"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 bg-light">
+                <div class="w-100 d-flex justify-content-between align-items-center">
+                    <span class="text-muted small" id="cleanupFooterInfo"></span>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Batal
+                        </button>
+                        <button type="button" id="btnExecCleanup" class="btn btn-danger" style="display:none;">
+                            <i class="fas fa-broom me-2"></i>
+                            Bersihkan Sekarang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cleanup Result Modal -->
+<div class="modal fade" id="cleanupResultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 bg-success text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-check-circle me-2"></i> Pembersihan Selesai
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h5 id="resultMessage" class="fw-bold mb-3"></h5>
+                <div id="resultDetail" class="text-muted small"></div>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync me-2"></i>Muat Ulang Halaman
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -541,6 +645,298 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('#filterForm select').forEach(select => {
         select.addEventListener('change', function() {
             document.getElementById('filterForm').submit();
+        });
+    });
+
+    // ============================================
+    // 🧹 CLEANUP DUPLIKAT HANDLER
+    // ============================================
+    const cleanupModal = new bootstrap.Modal(document.getElementById('cleanupModal'));
+    const cleanupResultModal = new bootstrap.Modal(document.getElementById('cleanupResultModal'));
+
+    document.getElementById('btnPreviewDuplikat').addEventListener('click', function () {
+        // Reset state
+        document.getElementById('cleanupLoading').style.display = 'block';
+        document.getElementById('cleanupError').style.display = 'none';
+        document.getElementById('cleanupEmpty').style.display = 'none';
+        document.getElementById('cleanupContent').style.display = 'none';
+        document.getElementById('btnExecCleanup').style.display = 'none';
+        document.getElementById('cleanupFooterInfo').textContent = '';
+
+        cleanupModal.show();
+
+        fetch('{{ route("mentor.previewDuplicates") }}')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('cleanupLoading').style.display = 'none';
+
+                if (!data.success) {
+                    document.getElementById('cleanupError').style.display = 'block';
+                    document.getElementById('cleanupError').textContent = data.message;
+                    return;
+                }
+
+                if (data.total_duplikat === 0) {
+                    document.getElementById('cleanupEmpty').style.display = 'block';
+                    return;
+                }
+
+                // Ada duplikat — render
+                document.getElementById('totalDuplikat').textContent = data.total_duplikat;
+                document.getElementById('cleanupContent').style.display = 'block';
+                document.getElementById('btnExecCleanup').style.display = 'inline-flex';
+                document.getElementById('cleanupFooterInfo').innerHTML =
+                    `<i class="fas fa-info-circle me-1 text-warning"></i> 
+                    ${data.total_duplikat} kelompok duplikat ditemukan`;
+
+                const list = document.getElementById('duplikatList');
+                list.innerHTML = '';
+
+                data.duplicates.forEach((dup, idx) => {
+                    // ── Baris peserta yang akan dipindahkan ──
+                    const pesertaRows = dup.peserta_dipindah.length > 0
+                        ? dup.peserta_dipindah.map((p, pi) => `
+                            <tr>
+                                <td class="text-center fw-semibold text-muted">${pi + 1}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                                            style="width:30px;height:30px;font-size:0.75rem;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <span class="fw-semibold">${p.nama_lengkap}</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-light text-dark border"><i class="fas fa-id-badge me-1 text-muted"></i>${p.nip_nrp ?? '-'}</span></td>
+                                <td><span class="badge bg-info bg-opacity-10 text-info"><i class="fas fa-graduation-cap me-1"></i>${p.nama_angkatan}</span></td>
+                                <td class="text-center">
+                                    <span class="text-danger me-1"><i class="fas fa-arrow-right"></i></span>
+                                    <span class="fw-semibold text-success">${dup.keep.nama}</span>
+                                </td>
+                            </tr>`
+                        ).join('')
+                        : `<tr><td colspan="5" class="text-center text-muted py-3">
+                                <i class="fas fa-info-circle me-1"></i>Tidak ada peserta yang perlu dipindahkan
+                        </td></tr>`;
+
+                    // ── Card mentor yang DIHAPUS ──
+                    const removeCards = dup.remove.map(r => `
+                        <div class="d-flex align-items-start gap-3 p-3 rounded mb-2"
+                            style="background:rgba(220,53,69,0.06); border:1px solid rgba(220,53,69,0.2);">
+                            <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-flex align-items-center justify-content-center flex-shrink-0"
+                                style="width:40px;height:40px;">
+                                <i class="fas fa-trash-alt"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold text-danger">${r.nama}</div>
+                                <div class="small text-muted mt-1">
+                                    <span class="me-3"><i class="fas fa-id-badge me-1"></i>${r.nip && r.nip !== '-' ? r.nip : 'NIP tidak ada'}</span>
+                                    <span><i class="fas fa-briefcase me-1"></i>${r.jabatan ?? '-'}</span>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                                        <i class="fas fa-users me-1"></i>${r.total_peserta} peserta dimiliki
+                                    </span>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 ms-1">
+                                        <i class="fas fa-arrow-right me-1"></i>Semua peserta dipindah ke: ${dup.keep.nama}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>`
+                    ).join('');
+
+                    // ── Render card utama duplikat ──
+                    list.innerHTML += `
+                    <div class="card mb-4 shadow-sm" style="border:2px solid #f39c12; border-radius:12px; overflow:hidden;">
+
+                        {{-- === HEADER === --}}
+                        <div class="card-header d-flex justify-content-between align-items-center py-3"
+                            style="background:linear-gradient(135deg,#fff8e1,#fff3cd); border-bottom:2px solid #f39c12;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-warning fw-bold"
+                                    style="width:32px;height:32px;background:rgba(243,156,18,0.15);font-size:0.9rem;">${idx + 1}</div>
+                                <div>
+                                    <span class="fw-bold text-dark">${dup.label}</span>
+                                    <span class="badge ms-2 ${dup.type === 'nip' ? 'bg-primary' : 'bg-secondary'} bg-opacity-75">
+                                        <i class="fas fa-${dup.type === 'nip' ? 'fingerprint' : 'font'} me-1"></i>
+                                        ${dup.type === 'nip' ? 'Duplikat NIP' : 'Duplikat Nama'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="fas fa-copy me-1"></i>
+                                ${1 + dup.remove.length} entri ditemukan
+                            </div>
+                        </div>
+
+                        <div class="card-body p-0">
+
+                            {{-- === BAGIAN 1: MENTOR DIPERTAHANKAN === --}}
+                            <div class="p-3" style="background:#f0fdf4; border-bottom:1px solid #d1fae5;">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="fas fa-shield-alt text-success"></i>
+                                    <span class="fw-bold text-success text-uppercase" style="font-size:0.78rem;letter-spacing:0.05em;">
+                                        Mentor Dipertahankan
+                                    </span>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 ms-auto">
+                                        Peserta terbanyak → diprioritaskan
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center flex-shrink-0"
+                                        style="width:48px;height:48px;font-size:1.2rem;">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold fs-6">${dup.keep.nama}</div>
+                                        <div class="text-muted small mt-1 d-flex flex-wrap gap-3">
+                                            <span><i class="fas fa-id-badge me-1 text-primary"></i><strong>ID:</strong> ${dup.keep.id}</span>
+                                            <span><i class="fas fa-hashtag me-1 text-primary"></i><strong>NIP:</strong> ${dup.keep.nip && dup.keep.nip !== '-' ? dup.keep.nip : '<em>tidak ada</em>'}</span>
+                                            <span><i class="fas fa-briefcase me-1 text-primary"></i><strong>Jabatan:</strong> ${dup.keep.jabatan ?? '-'}</span>
+                                        </div>
+                                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                                            <span class="badge bg-success px-3 py-2">
+                                                <i class="fas fa-users me-1"></i>
+                                                ${dup.keep.total_peserta} peserta saat ini
+                                            </span>
+                                            ${dup.peserta_dipindah.length > 0 ? `
+                                            <span class="badge bg-primary px-3 py-2">
+                                                <i class="fas fa-plus me-1"></i>
+                                                +${dup.peserta_dipindah.length} peserta akan ditambahkan
+                                            </span>
+                                            <span class="badge bg-dark px-3 py-2">
+                                                <i class="fas fa-layer-group me-1"></i>
+                                                Total akhir: ${parseInt(dup.keep.total_peserta) + dup.peserta_dipindah.length} peserta
+                                            </span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- === BAGIAN 2: MENTOR DIHAPUS === --}}
+                            <div class="p-3" style="background:#fff5f5; border-bottom:1px solid #fed7d7;">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="fas fa-trash-alt text-danger"></i>
+                                    <span class="fw-bold text-danger text-uppercase" style="font-size:0.78rem;letter-spacing:0.05em;">
+                                        Mentor Akan Dihapus (${dup.remove.length} entri)
+                                    </span>
+                                </div>
+                                ${removeCards}
+                            </div>
+
+                            {{-- === BAGIAN 3: TABEL PESERTA DIPINDAHKAN === --}}
+                            <div class="p-3">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="fas fa-exchange-alt text-primary"></i>
+                                    <span class="fw-bold text-primary text-uppercase" style="font-size:0.78rem;letter-spacing:0.05em;">
+                                        Daftar Peserta yang Dipindahkan
+                                    </span>
+                                    <span class="badge bg-primary ms-1">${dup.peserta_dipindah.length} peserta</span>
+                                    ${dup.peserta_dipindah.length > 0 ? `
+                                    <span class="ms-auto small text-muted">
+                                        <i class="fas fa-arrow-right me-1 text-danger"></i>semua dipindah ke
+                                        <strong class="text-success">${dup.keep.nama}</strong>
+                                    </span>` : ''}
+                                </div>
+
+                                ${dup.peserta_dipindah.length > 0 ? `
+                                <div class="table-responsive rounded" style="max-height:220px;overflow-y:auto;border:1px solid #e2e8f0;">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead style="position:sticky;top:0;background:#f8fafc;z-index:5;">
+                                            <tr>
+                                                <th class="text-center ps-3" width="5%">No</th>
+                                                <th width="28%">Nama Peserta</th>
+                                                <th width="18%">NIP/NRP</th>
+                                                <th width="18%">Angkatan</th>
+                                                <th width="31%">Dipindah Ke</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>${pesertaRows}</tbody>
+                                    </table>
+                                </div>` : `
+                                <div class="text-center py-4 text-muted rounded" style="background:#f8fafc;border:1px dashed #cbd5e0;">
+                                    <i class="fas fa-check-circle fa-2x text-success mb-2 d-block"></i>
+                                    Tidak ada peserta yang perlu dipindahkan dari mentor duplikat ini
+                                </div>`}
+                            </div>
+
+                            {{-- === BAGIAN 4: RINGKASAN AKSI === --}}
+                            <div class="px-3 pb-3">
+                                <div class="rounded p-3 d-flex flex-wrap gap-3 align-items-center"
+                                    style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;">
+                                    <i class="fas fa-info-circle text-primary fa-lg"></i>
+                                    <div class="small">
+                                        <strong>Yang akan terjadi:</strong>
+                                        <ol class="mb-0 mt-1 ps-3">
+                                            <li>Mentor <strong class="text-danger">${dup.remove.map(r => r.nama).join(', ')}</strong> akan <strong class="text-danger">dihapus</strong></li>
+                                            ${dup.peserta_dipindah.length > 0
+                                                ? `<li><strong>${dup.peserta_dipindah.length} peserta</strong> dipindahkan ke <strong class="text-success">${dup.keep.nama}</strong></li>`
+                                                : '<li>Tidak ada peserta yang perlu dipindahkan</li>'}
+                                            <li>Data yang kosong pada <strong class="text-success">${dup.keep.nama}</strong> akan dilengkapi dari data duplikat</li>
+                                            <li>Mentor <strong class="text-success">${dup.keep.nama}</strong> akan memiliki <strong>${parseInt(dup.keep.total_peserta) + dup.peserta_dipindah.length} peserta</strong> setelah cleanup</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>`;
+                });
+            })
+            .catch(err => {
+                document.getElementById('cleanupLoading').style.display = 'none';
+                document.getElementById('cleanupError').style.display = 'block';
+                document.getElementById('cleanupError').textContent = 'Gagal memuat data. Silakan coba lagi.';
+            });
+    });
+
+    // Eksekusi pembersihan
+    document.getElementById('btnExecCleanup').addEventListener('click', function () {
+        if (!confirm('Anda yakin ingin membersihkan data mentor duplikat? Tindakan ini tidak dapat dibatalkan.')) return;
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Membersihkan...';
+
+        fetch('{{ route("mentor.cleanupDuplicates") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            cleanupModal.hide();
+
+            if (data.success) {
+                document.getElementById('resultMessage').textContent = data.message;
+                document.getElementById('resultDetail').innerHTML =
+                    `<div class="row g-3 justify-content-center mt-2">
+                        <div class="col-auto">
+                            <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
+                                <div class="fs-3 fw-bold text-danger">${data.total_hapus}</div>
+                                <div class="small">Mentor Dihapus</div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                                <div class="fs-3 fw-bold text-primary">${data.total_pindah}</div>
+                                <div class="small">Peserta Dipindah</div>
+                            </div>
+                        </div>
+                    </div>`;
+                cleanupResultModal.show();
+            } else {
+                alert('Gagal: ' + data.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-broom me-2"></i> Bersihkan Sekarang';
+            }
+        })
+        .catch(() => {
+            alert('Terjadi kesalahan jaringan. Silakan coba lagi.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-broom me-2"></i> Bersihkan Sekarang';
         });
     });
 

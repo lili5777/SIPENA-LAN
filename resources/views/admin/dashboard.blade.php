@@ -1731,14 +1731,14 @@
                             <div class="data-item">
                                 <span class="data-label">
                                     <i class="fas fa-tshirt"></i>
-                                    Ukuran Kaos
+                                    Ukuran Baju Kaos
                                 </span>
                                 <span class="data-value">{{ $peserta->ukuran_kaos ?? 'Belum diisi' }}</span>
                             </div>
                             <div class="data-item">
                                 <span class="data-label">
                                     <i class="fas fa-vest"></i>
-                                    Ukuran Training
+                                    Ukuran Baju Taktikal
                                 </span>
                                 <span class="data-value">{{ $peserta->ukuran_training ?? 'Belum diisi' }}</span>
                             </div>
