@@ -250,6 +250,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/admin/peserta/{jenis}/swap-ndh', [PesertaController::class, 'swapNdh'])
         ->name('peserta.swapNdh');
+    
+    Route::post('/peserta/{jenis}/bulk-delete', [PesertaController::class, 'bulkDelete'])->name('peserta.bulkDelete');
 
     // Visi Misi Routes
     Route::prefix('visi-misi')->name('visi-misi.')->group(function () {

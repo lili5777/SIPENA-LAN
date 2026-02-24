@@ -129,6 +129,32 @@
     </div>
 </div>
 
+<!-- Bulk Action Toolbar (muncul saat ada checkbox dipilih) -->
+<div id="bulkActionToolbar" class="bulk-toolbar d-none mb-3">
+    <div class="card border-0 shadow-sm" style="border-left: 4px solid #dc3545 !important; border-radius: 10px;">
+        <div class="card-body py-2 px-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bulk-count-badge">
+                        <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 fw-bold" id="selectedCount">0</span>
+                        <span class="ms-2 fw-semibold text-dark">peserta dipilih</span>
+                    </div>
+                    <div class="vr d-none d-md-block"></div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelSelection">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-danger btn-lift shadow-sm" id="bulkDeleteBtn">
+                        <i class="fas fa-trash-alt me-2"></i>
+                        Hapus <span id="bulkDeleteCount">0</span> Peserta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
         <!-- Filter Section -->
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
@@ -247,7 +273,15 @@
                     <table class="table table-hover mb-0" id="pesertaTable">
                         <thead>
                             <tr class="table-light">
-                                <th width="5%" class="ps-4">No</th>
+                                <th width="5%" class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input select-all-checkbox" type="checkbox" id="selectAll" 
+                                                title="Pilih semua peserta di halaman ini">
+                                        </div>
+                                        <span>No</span>
+                                    </div>
+                                </th>
                                 <th width="25%">Identitas</th>
                                 <th width="15%" class="d-none d-md-table-cell">Instansi</th>
                                 <th width="15%" class="d-none d-md-table-cell">Angkatan</th>
@@ -294,7 +328,17 @@
     ];
                                                                                                                                                 @endphp
                                                                                                                                                 <tr class="peserta-row" data-peserta-id="{{ $daftar->id }}">
-                                                                                                                                                    <td class="ps-4 fw-semibold">{{ $pendaftaran->firstItem() + $index }}</td>
+                                                                                                                                                    <td class="ps-4">
+                                                                                                                                                        <div class="d-flex align-items-center gap-2">
+                                                                                                                                                            <div class="form-check mb-0">
+                                                                                                                                                                <input class="form-check-input peserta-checkbox" type="checkbox" 
+                                                                                                                                                                    value="{{ $daftar->id }}"
+                                                                                                                                                                    data-name="{{ $peserta->nama_lengkap }}"
+                                                                                                                                                                    data-jenis="{{ request()->route('jenis') }}">
+                                                                                                                                                            </div>
+                                                                                                                                                            <span class="fw-semibold">{{ $pendaftaran->firstItem() + $index }}</span>
+                                                                                                                                                        </div>
+                                                                                                                                                    </td>
                                                                                                                                                     <td>
                                                                                                                                                         <div class="d-flex align-items-center">
                                                                                                                                                             <div class="user-avatar me-3"
@@ -770,2084 +814,1328 @@
     </div>
 </div>
 
+<!-- Bulk Delete Confirmation Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center px-4 pb-4">
+                <div class="delete-icon mb-3">
+                    <i class="fas fa-exclamation-triangle fa-4x" style="color: #ff4757;"></i>
+                </div>
+                <h4 class="modal-title mb-2 fw-bold" id="bulkDeleteModalLabel">Konfirmasi Hapus Massal</h4>
+                <p class="text-muted mb-1">Anda akan menghapus <strong id="bulkDeleteCountModal" class="text-danger">0</strong> peserta:</p>
+                
+                <!-- Preview list peserta yang dipilih -->
+                <div id="bulkDeletePreview" class="text-start bg-light rounded-3 p-3 mb-4 mt-3" 
+                     style="max-height: 200px; overflow-y: auto; font-size: 0.875rem;">
+                </div>
+                
+                <div class="alert alert-danger d-flex align-items-start text-start py-2" role="alert">
+                    <i class="fas fa-exclamation-circle me-2 mt-1 flex-shrink-0"></i>
+                    <div>
+                        <strong>Peringatan!</strong> Tindakan ini tidak dapat dibatalkan. 
+                        Semua data, dokumen, akun user, dan relasi peserta akan dihapus permanen.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> Batal
+                </button>
+                <button type="button" class="btn btn-danger px-4 btn-lift" id="confirmBulkDelete">
+                    <i class="fas fa-trash-alt me-2"></i> Ya, Hapus Semua
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // Initialize variables
-                
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-                // Initialize tooltips
-                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl);
-                });
+    // ================================================================
+    // INITIALIZE TOOLTIPS
+    // ================================================================
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 
-                // Modals
-                const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-                const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
-                const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    // ================================================================
+    // MODALS
+    // ================================================================
+    const detailModal     = new bootstrap.Modal(document.getElementById('detailModal'));
+    const statusModal     = new bootstrap.Modal(document.getElementById('statusModal'));
+    const deleteModal     = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const bulkDeleteModal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
 
-                // Status Form Elements
-                const statusForm = document.getElementById('statusForm');
-                const statusSubmitBtn = document.getElementById('statusSubmitBtn');
-                const statusCancelBtn = document.getElementById('statusCancelBtn');
-                const statusLoading = document.getElementById('statusLoading');
+    // ================================================================
+    // STATUS FORM ELEMENTS
+    // ================================================================
+    const statusForm      = document.getElementById('statusForm');
+    const statusSubmitBtn = document.getElementById('statusSubmitBtn');
+    const statusCancelBtn = document.getElementById('statusCancelBtn');
+    const statusLoading   = document.getElementById('statusLoading');
 
-                // Initialize table
-                // initializeTable();
-
-                // Show entries dropdown
-                
-
-                // Pagination controls
-                
-
-                // Initialize table function
-               
-
-                // Update table display
-                
-
-                // Update pagination info
-                
-
-                // Update pagination controls
-                
-
-                // View Detail
-                document.querySelectorAll('.view-detail').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const pendaftaranId = this.getAttribute('data-id');
-                        loadAllDetailData(pendaftaranId);
-                        detailModal.show();
-                    });
-                });
-
-                // Swap angkatan button
-                document.querySelectorAll('.swap-angkatan').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const pendaftaranId = this.getAttribute('data-id');
-                        const jenis = this.getAttribute('data-jenis');
-                        
-                        window.location.href = `/peserta/${jenis}/${pendaftaranId}/swap`;
-                    });
-                });
-
-                // Update Status - PERBAIKAN: Gunakan data-status yang benar
-                document.querySelectorAll('.update-status').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const pendaftaranId = this.getAttribute('data-id');
-                        const currentStatus = this.getAttribute('data-status'); 
-                        const jenis = "{{ request()->route('jenis') }}";
-
-                        // Set form action - Sesuaikan dengan route Anda
-                        const form = document.getElementById('statusForm');
-                        form.action = `/peserta/update-status/${pendaftaranId}`;
-
-                        // Set current status
-                        const currentStatusElement = document.getElementById('currentStatus');
-                        const statusText = formatStatusText(currentStatus);
-                        const statusColor = getStatusColor(currentStatus);
-                        const statusIcon = getStatusIcon(currentStatus);
-
-                        currentStatusElement.innerHTML = `
-                            <span class="badge custom-badge ${statusColor}">
-                                <i class="fas ${statusIcon} me-1"></i>
-                                ${statusText}
-                            </span>
-                        `;
-
-                        // Set current status in select
-                        const statusSelect = document.getElementById('statusSelect');
-                        statusSelect.value = currentStatus;
-
-                        // Reset form state
-                        statusLoading.classList.add('d-none');
-                        statusSubmitBtn.disabled = false;
-                        statusCancelBtn.disabled = false;
-                        statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-                        // document.getElementById('catatanInput').value = '';
-
-                        statusModal.show();
-                    });
-                });
-
-               // Delete Peserta
-                const deleteForm = document.getElementById('deleteForm');
-                const deletePesertaName = document.getElementById('deletePesertaName');
-                const deleteSubmitBtn = document.getElementById('deleteSubmitBtn');
-
-                document.querySelectorAll('.delete-peserta').forEach(button => {
-                button.addEventListener('click', function () {
-                    const pesertaId = this.getAttribute('data-id');
-                    const pesertaName = this.getAttribute('data-name');
-                    const jenis = this.getAttribute('data-jenis');
-
-                    deletePesertaName.textContent = pesertaName;
-                    deleteForm.action = `/peserta/${jenis}/${pesertaId}`;
-                    deleteModal.show();
-                });
-                });
-
-                // ✅ disable tombol saat submit supaya tidak double submit
-                if (deleteForm && deleteSubmitBtn) {
-                deleteForm.addEventListener('submit', function () {
-                    deleteSubmitBtn.disabled = true;
-                    deleteSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menghapus...';
-                });
-                }
-
-                
-
-// Status Form Submission dengan loading indicator
-statusForm.addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    const submitBtn = document.getElementById('statusSubmitBtn');
-    const cancelBtn = document.getElementById('statusCancelBtn');
-    
-    if (submitBtn.getAttribute('data-submitting') === 'true') {
-        return;
-    }
-    
-    submitBtn.setAttribute('data-submitting', 'true');
-    submitBtn.disabled = true;
-    cancelBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
-
-    try {
-        const formData = new FormData(this);
-        const action = this.action;
-
-        const response = await fetch(action, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: formData
+    // ================================================================
+    // VIEW DETAIL
+    // ================================================================
+    document.querySelectorAll('.view-detail').forEach(button => {
+        button.addEventListener('click', function () {
+            const pendaftaranId = this.getAttribute('data-id');
+            loadAllDetailData(pendaftaranId);
+            detailModal.show();
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
-            submitBtn.classList.remove('btn-primary');
-            submitBtn.classList.add('btn-success');
-
-            showAlert('success', result.message);
-
-            // 📱 Jika ada link WhatsApp, tampilkan modal konfirmasi
-            if (result.wa_link) {
-                setTimeout(() => {
-                    statusModal.hide();
-                    showWhatsAppModal(result.wa_link, result.peserta_name);
-                }, 1500);
-            } else {
-                setTimeout(() => {
-                    statusModal.hide();
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
-                }, 1500);
-            }
-        } else {
-            submitBtn.removeAttribute('data-submitting');
-            submitBtn.disabled = false;
-            cancelBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-            
-            showAlert('error', result.message || 'Terjadi kesalahan');
-        }
-    } catch (error) {
-        submitBtn.removeAttribute('data-submitting');
-        submitBtn.disabled = false;
-        cancelBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-        
-        showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
-        console.error('Error:', error);
-    }
-});
-
-// 📱 Function untuk menampilkan modal WhatsApp
-function showWhatsAppModal(waLink, pesertaName) {
-    // Hapus modal lama jika ada
-    const oldModal = document.getElementById('whatsappModal');
-    if (oldModal) {
-        oldModal.remove();
-    }
-
-    // Buat modal baru
-    const modalHTML = `
-        <div class="modal fade" id="whatsappModal" tabindex="-1" aria-labelledby="whatsappModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header border-0 bg-success text-white">
-                        <h5 class="modal-title fw-bold" id="whatsappModalLabel">
-                            <i class="fab fa-whatsapp me-2"></i>Kirim Informasi via WhatsApp
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-center p-4">
-                        <div class="wa-icon mb-3">
-                            <i class="fab fa-whatsapp fa-5x text-success"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Status Berhasil Diperbarui!</h5>
-                        <p class="text-muted mb-4">
-                            Klik tombol di bawah untuk mengirim informasi akun ke <strong>${pesertaName}</strong> via WhatsApp.
-                        </p>
-                        <div class="d-grid gap-2">
-                            <a href="${waLink}" target="_blank" class="btn btn-success btn-lg" id="openWhatsAppBtn">
-                                <i class="fab fa-whatsapp me-2"></i>Buka WhatsApp
-                            </a>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                                Nanti Saja
-                            </button>
-                        </div>
-                        <small class="text-muted mt-3 d-block">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Pesan akan otomatis terisi, Anda tinggal klik kirim
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Tambahkan modal ke body
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-    // Tampilkan modal
-    const whatsappModal = new bootstrap.Modal(document.getElementById('whatsappModal'));
-    whatsappModal.show();
-
-    // Event: setelah buka WA, reload halaman
-    document.getElementById('openWhatsAppBtn').addEventListener('click', function() {
-        setTimeout(() => {
-            whatsappModal.hide();
-            window.location.reload();
-        }, 1000);
     });
 
-    // Event: modal ditutup, reload halaman
-    document.getElementById('whatsappModal').addEventListener('hidden.bs.modal', function () {
-        setTimeout(() => {
-            window.location.reload();
-        }, 300);
-    });
-}
-
-// Resend Account Info - TOMBOL BARU
-document.querySelectorAll('.resend-account-info').forEach(button => {
-    button.addEventListener('click', function () {
-        const pendaftaranId = this.getAttribute('data-id');
-        const pesertaName = this.getAttribute('data-name');
-        
-        // Konfirmasi dulu
-        if (confirm(`Kirim ulang informasi akun ke ${pesertaName}?\n\nPassword baru akan di-generate dan dikirim via WhatsApp.`)) {
-            resendAccountInfo(pendaftaranId, pesertaName);
-        }
-    });
-});
-
-// Function untuk resend account info
-async function resendAccountInfo(pendaftaranId, pesertaName) {
-    try {
-        // Show loading
-        const button = document.querySelector(`.resend-account-info[data-id="${pendaftaranId}"]`);
-        const originalHTML = button.innerHTML;
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Mengirim...';
-
-        const response = await fetch(`/peserta/resend-account-info/${pendaftaranId}`, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
+    // ================================================================
+    // SWAP ANGKATAN
+    // ================================================================
+    document.querySelectorAll('.swap-angkatan').forEach(button => {
+        button.addEventListener('click', function () {
+            const pendaftaranId = this.getAttribute('data-id');
+            const jenis         = this.getAttribute('data-jenis');
+            window.location.href = `/peserta/${jenis}/${pendaftaranId}/swap`;
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-            button.innerHTML = '<i class="fas fa-check me-1"></i> Terkirim!';
-            button.classList.remove('btn-outline-success');
-            button.classList.add('btn-success');
-
-            showAlert('success', result.message);
-
-            // Tampilkan modal WhatsApp
-            if (result.wa_link) {
-                setTimeout(() => {
-                    showWhatsAppModal(result.wa_link, pesertaName);
-                }, 1000);
-            }
-
-            // Reset button setelah 3 detik
-            setTimeout(() => {
-                button.innerHTML = originalHTML;
-                button.disabled = false;
-                button.classList.remove('btn-success');
-                button.classList.add('btn-outline-success');
-            }, 3000);
-
-        } else {
-            button.innerHTML = originalHTML;
-            button.disabled = false;
-            showAlert('error', result.message || 'Gagal mengirim informasi akun');
-        }
-    } catch (error) {
-        showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
-        console.error('Error:', error);
-        
-        // Reset button
-        const button = document.querySelector(`.resend-account-info[data-id="${pendaftaranId}"]`);
-        button.innerHTML = '<i class="fab fa-whatsapp me-1"></i> Kirim Info Akun';
-        button.disabled = false;
-    }
-}
-
-// Reset tombol ketika modal ditutup
-statusModal._element.addEventListener('hidden.bs.modal', function () {
-    const submitBtn = document.getElementById('statusSubmitBtn');
-    submitBtn.removeAttribute('data-submitting');
-    submitBtn.disabled = false;
-    submitBtn.classList.remove('btn-success');
-    submitBtn.classList.add('btn-primary');
-    submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
-});
-
-                // Load All Detail Data
-                async function loadAllDetailData(pendaftaranId) {
-                    try {
-                        const response = await fetch(`/peserta/detail/${pendaftaranId}`);
-                        const result = await response.json();
-
-                        if (result.success) {
-                            const data = result.data;
-
-                            // Update modal header
-                            document.getElementById('detailModalSubtitle').textContent =
-                                `${data.peserta.nip_nrp || 'NIP/NRP tidak tersedia'} • ${data.angkatan?.nama_angkatan || ''}`;
-
-                            // Update status badge
-                            updateStatusBadge(data.pendaftaran.status_pendaftaran);
-
-                            // Update timestamp
-                            document.getElementById('detailTimestamp').textContent =
-                                `Terakhir diperbarui: ${formatDateTime(new Date())}`;
-
-                            // Load tab contents
-                            loadDataPesertaContent(data);
-                            loadDokumenContent(data);
-                            loadMentorContent(data);
-                            loadAksiContent(data);
-                        } else {
-                            showDetailError();
-                        }
-                    } catch (error) {
-                        showDetailError();
-                        console.error('Error loading detail:', error);
-                    }
-                }
-
-                // Load Data Peserta Content
-                function loadDataPesertaContent(data) {
-                    const content = document.getElementById('dataPesertaContent');
-                    content.innerHTML = generateDataPesertaHTML(data);
-                }
-
-                // Load Dokumen Content - SEMUA DISATUKAN
-                function loadDokumenContent(data) {
-                    const content = document.getElementById('dokumenContent');
-                    content.innerHTML = generateDokumenHTML(data);
-
-                    // Add event listeners for document viewer
-                    content.querySelectorAll('.view-document').forEach(button => {
-                        button.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            const path = this.getAttribute('data-path');
-                            const title = this.getAttribute('data-title');
-                            if (path) {
-                                window.open(`/preview-drive?path=${encodeURIComponent(path)}`, '_blank');
-                            }
-                            // openDocumentViewer(url, title);
-                        });
-                    });
-                }
-
-                // Load Aksi Perubahan Content (1 data saja)
-function loadAksiContent(data) {
-  const content = document.getElementById('aksiContent');
-  content.innerHTML = generateAksiHTML(data);
-
-  // Viewer untuk file (dokumen + lembar pengesahan)
-  content.querySelectorAll('.view-aksi-document').forEach(button => {
-    button.addEventListener('click', function (e) {
-      e.preventDefault();
-      const path = this.getAttribute('data-path');
-      if (path) {
-        window.open(`/preview-drive?path=${encodeURIComponent(path)}`, '_blank');
-      }
     });
-  });
-}
 
-// helper: ambil nama file dari path drive
-function fileNameFromPath(path) {
-  if (!path) return '';
-  const clean = path.split('?')[0];
-  return clean.split('/').pop() || 'file.pdf';
-}
+    // ================================================================
+    // UPDATE STATUS
+    // ================================================================
+    document.querySelectorAll('.update-status').forEach(button => {
+        button.addEventListener('click', function () {
+            const pendaftaranId = this.getAttribute('data-id');
+            const currentStatus = this.getAttribute('data-status');
 
-// helper: pastikan link punya http/https
-function normalizeUrl(url) {
-  if (!url) return null;
-  if (/^https?:\/\//i.test(url)) return url;
-  return `https://${url}`;
-}
+            const form = document.getElementById('statusForm');
+            form.action = `/peserta/update-status/${pendaftaranId}`;
 
-// Generate Aksi Perubahan HTML (tanpa perulangan)
-function generateAksiHTML(data) {
-  // support kalau backend ngirim array atau object
-  const aksi = Array.isArray(data.aksi_perubahan)
-    ? (data.aksi_perubahan[0] || null)
-    : (data.aksi_perubahan || null);
-
-  if (!aksi) {
-    return `
-      <div class="aksi-content text-center py-5">
-        <div class="empty-state">
-          <div class="empty-state-icon mb-4">
-            <i class="fas fa-lightbulb fa-4x" style="color: #e9ecef;"></i>
-          </div>
-          <h4 class="text-muted mb-3">Belum Ada Aksi Perubahan</h4>
-          <p class="text-muted mb-4">Peserta ini belum mengirimkan aksi perubahan</p>
-        </div>
-      </div>
-    `;
-  }
-
-  return `
-    <div class="aksi-container">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="fw-bold mb-0 d-flex align-items-center">
-          <div class="icon-wrapper bg-warning bg-opacity-10 p-2 rounded-3 me-3">
-            <i class="fas fa-lightbulb text-warning"></i>
-          </div>
-          <span>Aksi Perubahan</span>
-        </h5>
-      </div>
-
-      <div class="row g-4">
-        ${aksiCard(aksi)}
-      </div>
-    </div>
-  `;
-}
-
-// Card tunggal (tanpa index/perulangan)
-function aksiCard(aksi) {
-  // sesuaikan dengan dropdown kamu: pilihan1/pilihan2
-  const kategoriMap = {
-    'pilihan1': { color: 'success', icon: 'fa-bolt', text: 'Pilihan 1' },
-    'pilihan2': { color: 'info', icon: 'fa-tag', text: 'Pilihan 2' }
-  };
-
-  const kategori = kategoriMap[aksi.kategori_aksatika] || {
-    color: 'secondary',
-    icon: 'fa-question',
-    text: aksi.kategori_aksatika || '-'
-  };
-
-  const videoUrl = normalizeUrl(aksi.link_video);
-  const majalahUrl = normalizeUrl(aksi.link_laporan_majalah);
-
-  return `
-    <div class="col-xl-6 col-lg-12">
-      <div class="aksi-card card border-0 shadow-sm h-100">
-        <div class="card-body p-4">
-
-          <div class="d-flex align-items-start mb-3">
-            <div class="badge-number me-3">
-              <span class="badge bg-primary rounded-circle p-2"
-                style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                1
-              </span>
-            </div>
-
-            <div class="flex-grow-1">
-              <h6 class="fw-bold mb-2 text-dark">${aksi.judul || 'Aksi Perubahan'}</h6>
-
-              <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                <span class="badge bg-${kategori.color} bg-opacity-10 text-${kategori.color}">
-                  <i class="fas ${kategori.icon} me-1"></i>${kategori.text}
+            const currentStatusElement = document.getElementById('currentStatus');
+            currentStatusElement.innerHTML = `
+                <span class="badge custom-badge ${getStatusColor(currentStatus)}">
+                    <i class="fas ${getStatusIcon(currentStatus)} me-1"></i>
+                    ${formatStatusText(currentStatus)}
                 </span>
-              </div>
+            `;
 
-              ${aksi.abstrak ? `
-                <div class="abstrak-section mb-3">
-                  <label class="text-muted small">Abstrak</label>
-                  <p class="mb-0 text-dark" style="line-height: 1.5;">
-                    ${aksi.abstrak}
-                  </p>
-                </div>
-              ` : ''}
-            </div>
-          </div>
+            document.getElementById('statusSelect').value = currentStatus;
 
-          <!-- Dokumen dan Link -->
-          <div class="row g-2">
-            ${aksi.file ? `
-              <div class="col-md-6">
-                <div class="dokumen-item d-flex align-items-center p-2 border rounded">
-                  <div class="dokumen-icon bg-primary bg-opacity-10 rounded p-2 me-2">
-                    <i class="fas fa-file-pdf text-primary"></i>
-                  </div>
-                  <div class="flex-grow-1">
-                    <small class="text-muted d-block">Laporan Lengkap</small>
-                    <small class="fw-semibold">${fileNameFromPath(aksi.file)}</small>
-                  </div>
-                  <button type="button" class="btn btn-sm btn-outline-primary view-aksi-document"
-                          data-path="${aksi.file}" data-title="Laporan Lengkap">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
-              </div>
-            ` : ''}
+            statusLoading.classList.add('d-none');
+            statusSubmitBtn.disabled  = false;
+            statusCancelBtn.disabled  = false;
+            statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
 
-            ${aksi.lembar_pengesahan ? `
-              <div class="col-md-6">
-                <div class="dokumen-item d-flex align-items-center p-2 border rounded">
-                  <div class="dokumen-icon bg-success bg-opacity-10 rounded p-2 me-2">
-                    <i class="fas fa-file-signature text-success"></i>
-                  </div>
-                  <div class="flex-grow-1">
-                    <small class="text-muted d-block">Lembar Pengesahan</small>
-                    <small class="fw-semibold">${fileNameFromPath(aksi.lembar_pengesahan)}</small>
-                  </div>
-                  <button type="button" class="btn btn-sm btn-outline-success view-aksi-document"
-                          data-path="${aksi.lembar_pengesahan}" data-title="Lembar Pengesahan">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
-              </div>
-            ` : ''}
+            statusModal.show();
+        });
+    });
 
-            ${videoUrl ? `
-              <div class="col-md-6">
-                <div class="link-item d-flex align-items-center p-2 border rounded">
-                  <div class="link-icon bg-danger bg-opacity-10 rounded p-2 me-2">
-                    <i class="fab fa-youtube text-danger"></i>
-                  </div>
-                  <div class="flex-grow-1">
-                    <small class="text-muted d-block">Video Presentasi</small>
-                    <small class="fw-semibold">Buka Link</small>
-                  </div>
-                  <a href="${videoUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-danger">
-                    <i class="fas fa-external-link-alt"></i>
-                  </a>
-                </div>
-              </div>
-            ` : ''}
+    // ================================================================
+    // DELETE PESERTA (SINGLE)
+    // ================================================================
+    const deleteForm        = document.getElementById('deleteForm');
+    const deletePesertaName = document.getElementById('deletePesertaName');
+    const deleteSubmitBtn   = document.getElementById('deleteSubmitBtn');
 
-            ${majalahUrl ? `
-              <div class="col-md-6">
-                <div class="link-item d-flex align-items-center p-2 border rounded">
-                  <div class="link-icon bg-info bg-opacity-10 rounded p-2 me-2">
-                    <i class="fas fa-newspaper text-info"></i>
-                  </div>
-                  <div class="flex-grow-1">
-                    <small class="text-muted d-block">Laporan Majalah</small>
-                    <small class="fw-semibold">Buka Link</small>
-                  </div>
-                  <a href="${majalahUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">
-                    <i class="fas fa-external-link-alt"></i>
-                  </a>
-                </div>
-              </div>
-            ` : ''}
-          </div>
+    document.querySelectorAll('.delete-peserta').forEach(button => {
+        button.addEventListener('click', function () {
+            const pesertaId   = this.getAttribute('data-id');
+            const pesertaName = this.getAttribute('data-name');
+            const jenis       = this.getAttribute('data-jenis');
 
-        </div>
-      </div>
-    </div>
-  `;
-}
+            deletePesertaName.textContent = pesertaName;
+            deleteForm.action = `/peserta/${jenis}/${pesertaId}`;
+            deleteModal.show();
+        });
+    });
 
-                // Load Mentor Content
-                function loadMentorContent(data) {
-                    const content = document.getElementById('mentorContent');
-                    content.innerHTML = generateMentorHTML(data);
-                }
+    if (deleteForm && deleteSubmitBtn) {
+        deleteForm.addEventListener('submit', function () {
+            deleteSubmitBtn.disabled  = true;
+            deleteSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menghapus...';
+        });
+    }
 
-                 // Generate Data Peserta HTML
-                function generateDataPesertaHTML(data) {
-                    const peserta = data.peserta;
-                    const kepegawaian = data.kepegawaian;
+    // ================================================================
+    // STATUS FORM SUBMIT (AJAX)
+    // ================================================================
+    statusForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-                    return `
-                        <div class="detail-content">
-                            <!-- Profile Header -->
-                            <div class="profile-header mb-4 pb-4 border-bottom">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h4 class="fw-bold text-primary mb-2">${peserta.nama_lengkap}</h4>
-                                        <h6 class="fw-bold mb-3 pb-2 border-bottom">
-                                            <i class="fas fa-id-card me-2 text-primary"></i>Informasi Pribadi
-                                        </h6>
-                                        <div class="row g-3">
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Nama Panggilan</label>
-                                                    <p class="fw-semibold mb-0">${peserta.nama_panggilan || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">NIP/NRP</label>
-                                                    <p class="fw-semibold mb-0">${peserta.nip_nrp || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Jenis Kelamin</label>
-                                                    <p class="fw-semibold mb-0">${peserta.jenis_kelamin || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Tempat/Tanggal Lahir</label>
-                                                    <p class="fw-semibold mb-0">${peserta.tempat_lahir || '-'}, ${formatDate(peserta.tanggal_lahir)}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Agama</label>
-                                                    <p class="fw-semibold mb-0">${peserta.agama || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Status</label>
-                                                    <p class="fw-semibold mb-0">${peserta.status_perkawinan || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Nama Pasangan</label>
-                                                    <p class="fw-semibold mb-0">${peserta.nama_pasangan || '-'}</p>
-                                                </div>
-                                            </div>
-                                             <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Alamat Rumah</label>
-                                                    <p class="fw-semibold mb-0">${peserta.alamat_rumah || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Email Pribadi</label>
-                                                    <p class="fw-semibold mb-0">${peserta.email_pribadi || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Nomor HP/WhatsApp</label>
-                                                    <p class="fw-semibold mb-0">${peserta.nomor_hp || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Olahraga/Hobi</label>
-                                                    <p class="fw-semibold mb-0">${peserta.olahraga_hobi || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Merokok</label>
-                                                    <p class="fw-semibold mb-0">${peserta.perokok || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Pendidikan Terakhir</label>
-                                                    <p class="fw-semibold mb-0">${peserta.pendidikan_terakhir || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Bidang Studi</label>
-                                                    <p class="fw-semibold mb-0">${peserta.bidang_studi || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Bidang Keahlian</label>
-                                                    <p class="fw-semibold mb-0">${peserta.bidang_keahlian || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Ukuran Baju Kaos</label>
-                                                    <p class="fw-semibold mb-0">${peserta.ukuran_kaos || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Ukuran Baju Taktikal</label>
-                                                    <p class="fw-semibold mb-0">${peserta.ukuran_training || '-'}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="info-item">
-                                                    <label class="text-muted small">Ukuran Celana</label>
-                                                    <p class="fw-semibold mb-0">${peserta.ukuran_celana || '-'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 text-center">
-                                        <div class="avatar-placeholder rounded-3 bg-primary bg-opacity-10 p-4 d-inline-flex flex-column align-items-center">
-                                            <i class="fas fa-user fa-4x text-primary mb-2"></i>
+        if (statusSubmitBtn.getAttribute('data-submitting') === 'true') return;
 
-                                            <label class="text-muted small mt-2">NDH</label>
-                                            <p class="fw-semibold mb-0 text-center">
-                                                ${peserta.ndh ?? '-'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+        statusSubmitBtn.setAttribute('data-submitting', 'true');
+        statusSubmitBtn.disabled  = true;
+        statusCancelBtn.disabled  = true;
+        statusSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
 
-
-                            <!-- Informasi Kepegawaian -->
-                            <div class="info-section mb-4">
-                                <h6 class="fw-bold mb-3 pb-2 border-bottom">
-                                    <i class="fas fa-building me-2 text-primary"></i>Informasi Kepegawaian
-                                </h6>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Asal Instansi</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.asal_instansi || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Unit Kerja/Detail Instansi</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.unit_kerja || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Provinsi</label>
-                                            <p class="fw-semibold mb-0">${data.provinsi?.name || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Kabupaten/Kota</label>
-                                            <p class="fw-semibold mb-0">${data.kabupaten?.name || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Jabatan</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.jabatan || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Pangkat/Golongan</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.pangkat || '-'} ${kepegawaian?.golongan_ruang ? '/ ' + kepegawaian.golongan_ruang : ''}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Nomor SK CPNS</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.nomor_sk_cpns || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Tanggal SK CPNS</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.tanggal_sk_cpns || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Email Kantor</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.email_kantor || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Alamat Kantor</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.alamat_kantor || '-'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="text-muted small">Nomor Telepon Kantor</label>
-                                            <p class="fw-semibold mb-0">${kepegawaian?.nomor_telepon_kantor || '-'}</p>
-                                        </div>
-                                    </div>
-
-
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Generate Dokumen HTML - SEMUA DISATUKAN
-                function generateDokumenHTML(data) {
-                    const peserta = data.peserta;
-                    const kepegawaian = data.kepegawaian;
-                    const pendaftaran = data.pendaftaran;
-
-                    // Dokumen dengan ikon yang lebih jelas
-                    const dokumenList = [
-                        {
-                            title: 'KTP',
-                            icon: 'fa-id-card',
-                            color: 'success',
-                            file: peserta.file_ktp,
-                            description: 'Kartu Tanda Penduduk yang masih berlaku'
-                        },
-                        {
-                            title: 'Pasfoto',
-                            icon: 'fa-camera',
-                            color: 'primary',
-                            file: peserta.file_pas_foto,
-                            description: 'Foto terbaru ukuran 4x6 dengan background merah'
-                        },
-                        {
-                            title: 'SK CPNS',
-                            icon: 'fa-file-alt',
-                            color: 'success',
-                            file: kepegawaian?.file_sk_cpns,
-                            description: 'Surat Keputusan CPNS yang masih berlaku'
-                        },
-                        {
-                            title: 'SPMT',
-                            icon: 'fa-award',
-                            color: 'warning',
-                            file: kepegawaian?.file_spmt,
-                            description: 'Surat Pernyataan Melaksanakan Tugas'
-                        },
-                        {
-                            title: 'SKP',
-                            icon: 'fa-handshake',
-                            color: 'info',
-                            file: kepegawaian?.file_skp,
-                            description: 'Sasaran Kinerja Pegawai'
-                        },
-                        {
-                            title: 'Surat Tugas',
-                            icon: 'fa-tasks',
-                            color: 'primary',
-                            file: pendaftaran.file_surat_tugas,
-                            description: 'Surat tugas dari instansi asal'
-                        },
-                        {
-                            title: 'Surat Kesediaan',
-                            icon: 'fa-graduation-cap',
-                            color: 'success',
-                            file: pendaftaran.file_surat_kesediaan,
-                            description: 'Surat kesediaan mengikuti pelatihan'
-                        },
-                        {
-                            title: 'Surat Sehat',
-                            icon: 'fa-heartbeat',
-                            color: 'warning',
-                            file: pendaftaran.file_surat_sehat,
-                            description: 'Surat keterangan sehat dari dokter'
-                        },
-                    ];
-
-                    // Hitung statistik dokumen
-                    const totalDokumen = dokumenList.length;
-                    const dokumenTersedia = dokumenList.filter(d => d.file).length;
-                    const dokumenBelum = totalDokumen - dokumenTersedia;
-                    const persentaseKelengkapan = dokumenTersedia > 0 ? Math.round((dokumenTersedia / totalDokumen) * 100) : 0;
-
-                    return `
-                        <div class="dokumen-container">
-                            <!-- Statistik Dokumen -->
-                            <div class="row mb-4">
-                                <div class="col-md-6 col-lg-3">
-                                    <div class="stat-card card border-0 shadow-sm">
-                                        <div class="card-body text-center p-3">
-                                            <div class="stat-icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
-                                                <i class="fas fa-folder-open fa-xl text-primary"></i>
-                                            </div>
-                                            <h3 class="fw-bold text-primary mb-1">${totalDokumen}</h3>
-                                            <p class="text-muted small mb-0">Total Dokumen</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-lg-3">
-                                    <div class="stat-card card border-0 shadow-sm">
-                                        <div class="card-body text-center p-3">
-                                            <div class="stat-icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
-                                                <i class="fas fa-check-circle fa-xl text-success"></i>
-                                            </div>
-                                            <h3 class="fw-bold text-success mb-1">${dokumenTersedia}</h3>
-                                            <p class="text-muted small mb-0">Dokumen Tersedia</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-lg-3">
-                                    <div class="stat-card card border-0 shadow-sm">
-                                        <div class="card-body text-center p-3">
-                                            <div class="stat-icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
-                                                <i class="fas fa-clock fa-xl text-warning"></i>
-                                            </div>
-                                            <h3 class="fw-bold text-warning mb-1">${dokumenBelum}</h3>
-                                            <p class="text-muted small mb-0">Belum Diunggah</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-lg-3">
-                                    <div class="stat-card card border-0 shadow-sm">
-                                        <div class="card-body text-center p-3">
-                                            <div class="stat-icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 mx-auto mb-2">
-                                                <i class="fas fa-chart-line fa-xl text-info"></i>
-                                            </div>
-                                            <h3 class="fw-bold text-info mb-1">${persentaseKelengkapan}%</h3>
-                                            <p class="text-muted small mb-0">Kelengkapan</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Progress Bar Kelengkapan -->
-                            <div class="card border-0 shadow-sm mb-4">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="fw-bold mb-0">Kelengkapan Dokumen</h6>
-                                        <span class="badge bg-primary">${persentaseKelengkapan}%</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" 
-                                             style="width: ${persentaseKelengkapan}%" 
-                                             aria-valuenow="${persentaseKelengkapan}" 
-                                             aria-valuemin="0" 
-                                             aria-valuemax="100">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Header -->
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h5 class="fw-bold mb-0 d-flex align-items-center">
-                                    <div class="icon-wrapper bg-primary bg-opacity-10 p-2 rounded-3 me-3">
-                                        <i class="fas fa-folder-open text-primary"></i>
-                                    </div>
-                                    <span>Semua Dokumen Peserta</span>
-                                </h5>
-                                <div class="text-muted small">
-                                    <i class="fas fa-check-circle text-success me-1"></i>
-                                    ${dokumenTersedia} dari ${totalDokumen} dokumen tersedia
-                                </div>
-                            </div>
-
-                            <!-- Grid Dokumen -->
-                            <div class="row g-4">
-                                ${dokumenList.map(dokumen => dokumenCard(dokumen)).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Dokumen Card Component
-                function dokumenCard(dokumen) {
-                    if (dokumen.file) {
-                        const fileSize = getFileSize(dokumen.file);
-                        return `
-                            <div class="col-xl-4 col-lg-6 col-md-6">
-                                <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-available">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="dokumen-icon-wrapper bg-${dokumen.color} bg-opacity-10 p-3 rounded-3 me-3">
-                                                <i class="fas ${dokumen.icon} fa-2x text-${dokumen.color}"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
-                                                <p class="text-muted small mb-2">${dokumen.description}</p>
-                                                <div class="d-flex align-items-center flex-wrap gap-2">
-                                                    <span class="badge bg-success bg-opacity-10 text-success">
-                                                        <i class="fas fa-check-circle me-1"></i>Tersedia
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-${dokumen.color} view-document" 
-                                                    data-path="${dokumen.file}" data-title="${dokumen.title}">
-                                                <i class="fas fa-eye me-1"></i> Lihat
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        return `
-                            <div class="col-xl-4 col-lg-6 col-md-6">
-                                <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-missing">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="dokumen-icon-wrapper bg-secondary bg-opacity-10 p-3 rounded-3 me-3">
-                                                <i class="fas ${dokumen.icon} fa-2x text-secondary"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
-                                                <p class="text-muted small mb-2">${dokumen.description}</p>
-                                                <div class="d-flex align-items-center">
-                                                    <span class="badge bg-danger bg-opacity-10 text-danger">
-                                                        <i class="fas fa-times-circle me-1"></i>Belum diunggah
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="text-center">
-                                            <small class="text-muted">
-                                                <i class="fas fa-info-circle me-1"></i>
-                                                Dokumen belum diunggah oleh peserta
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-
-                // Helper function untuk ukuran file
-                function getFileSize(fileUrl) {
-                    // Simulasi ukuran file
-                    const sizes = ['2.1 MB', '1.8 MB', '3.2 MB', '1.5 MB', '2.4 MB', '1.9 MB', '2.7 MB', '2.3 MB', '1.6 MB'];
-                    const randomIndex = Math.floor(Math.random() * sizes.length);
-                    return sizes[randomIndex];
-                }
-
-                // Generate Mentor HTML
-                function generateMentorHTML(data) {
-                    const mentor = data.mentor;
-                    const angkatan = data.angkatan;
-
-                    if (!mentor) {
-                        return `
-                            <div class="mentor-content text-center py-5">
-                                <div class="empty-state">
-                                    <div class="empty-state-icon mb-4">
-                                        <i class="fas fa-chalkboard-teacher fa-4x" style="color: #e9ecef;"></i>
-                                    </div>
-                                    <h4 class="text-muted mb-3">Belum Ditugaskan Mentor</h4>
-                                    <p class="text-muted mb-4">Peserta ini belum memiliki mentor yang ditugaskan</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    return `
-                        <div class="mentor-content">
-                            <!-- Mentor Profile -->
-                            <div class="mentor-profile card border-0 shadow-sm mb-4">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-8">
-                                            <h4 class="fw-bold text-primary mb-2">${mentor.nama_mentor}</h4>
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <label class="text-muted small">NIP/NRP</label>
-                                                        <p class="fw-semibold mb-0">${mentor.nip_mentor || '-'}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <label class="text-muted small">NPWP</label>
-                                                        <p class="fw-semibold mb-0">${mentor.npwp_mentor || '-'}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <label class="text-muted small">Jabatan</label>
-                                                        <p class="fw-semibold mb-0">${mentor.jabatan_mentor || '-'}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <label class="text-muted small">Nomor Rekening</label>
-                                                        <p class="fw-semibold mb-0">${mentor.nomor_rekening || '-'}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <label class="text-muted small">Email</label>
-                                                        <p class="fw-semibold mb-0">${mentor.email_mentor || '-'}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <label class="text-muted small">Telepon</label>
-                                                        <p class="fw-semibold mb-0">${mentor.nomor_hp_mentor || '-'}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <label class="text-muted small">Golongan Ruang</label>
-                                                        <p class="fw-semibold mb-0">${mentor.golongan || '-'}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <label class="text-muted small">Pangkat</label>
-                                                        <p class="fw-semibold mb-0">${mentor.pangkat || '-'}</p>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4 text-md-end">
-                                            <div class="mentor-badge bg-primary bg-opacity-10 rounded-3 p-3 d-inline-block">
-                                                <i class="fas fa-chalkboard-teacher fa-3x text-primary"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                        </div>
-                    `;
-                }
-
-                // Helper Functions untuk Status
-                function getStatusIcon(status) {
-                    const statusLower = status.toLowerCase();
-                    const icons = {
-                        'menunggu verifikasi': 'fa-clock',
-                        'diterima': 'fa-check-circle',
-                        'ditolak': 'fa-times-circle',
-                        'lulus': 'fa-graduation-cap'
-                    };
-                    return icons[statusLower] || 'fa-question-circle';
-                }
-
-                function getStatusColor(status) {
-                    const statusLower = status.toLowerCase();
-                    const colors = {
-                        'menunggu verifikasi': 'status-warning',
-                        'diterima': 'status-info',
-                        'ditolak': 'status-danger',
-                        'lulus': 'status-success'
-                    };
-                    return colors[statusLower] || 'status-secondary';
-                }
-
-                function formatStatusText(status) {
-                    const statusLower = status.toLowerCase();
-                    const texts = {
-                        'menunggu verifikasi': 'Menunggu Verifikasi',
-                        'diterima': 'Diterima',
-                        'ditolak': 'Ditolak',
-                        'lulus': 'Lulus'
-                    };
-                    return texts[statusLower] || status;
-                }
-
-                function updateStatusBadge(status) {
-                    const badge = document.getElementById('detailStatusBadge');
-                    const statusText = formatStatusText(status);
-                    const statusColor = getStatusColor(status);
-                    const statusIcon = getStatusIcon(status);
-
-                    badge.className = `badge custom-badge ${statusColor}`;
-                    badge.innerHTML = `<i class="fas ${statusIcon} me-1"></i>${statusText}`;
-                }
-
-                function getAngkatanStatusBadge(status) {
-                    const badges = {
-                        'aktif': 'bg-success',
-                        'selesai': 'bg-primary',
-                        'rencana': 'bg-warning',
-                        'dibatalkan': 'bg-danger'
-                    };
-                    return badges[status?.toLowerCase()] || 'bg-secondary';
-                }
-
-                function formatDate(dateString) {
-                    if (!dateString) return '-';
-                    try {
-                        const date = new Date(dateString);
-                        return date.toLocaleDateString('id-ID', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric'
-                        });
-                    } catch (e) {
-                        return '-';
-                    }
-                }
-
-                function formatDateTime(date) {
-                    return date.toLocaleDateString('id-ID', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                }
-
-                function showAlert(type, message) {
-                    // Hapus alert lama
-                    const oldAlerts = document.querySelectorAll('.alert-container .alert');
-                    oldAlerts.forEach(alert => {
-                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-                        bsAlert.close();
-                    });
-
-                    // Buat alert baru
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow-sm d-flex align-items-center`;
-
-                    const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-                    const title = type === 'success' ? 'Sukses!' : 'Error!';
-
-                    alertDiv.innerHTML = `
-                        <div class="alert-icon flex-shrink-0">
-                            <i class="fas ${iconClass} fa-lg"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <strong>${title}</strong> ${message}
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-
-                    document.querySelector('.alert-container').prepend(alertDiv);
-
-                    // Auto close setelah 5 detik
-                    setTimeout(() => {
-                        if (alertDiv.parentNode) {
-                            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
-                            bsAlert.close();
-                        }
-                    }, 5000);
-                }
-
-                function showDetailError() {
-                    const content = document.getElementById('dataPesertaContent');
-                    content.innerHTML = `
-                        <div class="text-center py-5">
-                            <div class="empty-state-icon mb-3">
-                                <i class="fas fa-exclamation-circle fa-4x" style="color: #e9ecef;"></i>
-                            </div>
-                            <h5 class="text-muted mb-2">Gagal memuat data</h5>
-                            <p class="text-muted">Silakan coba lagi</p>
-                        </div>
-                    `;
-                }
-
-                // Document Viewer
-                function openDocumentViewer(url, title) {
-                    const cleanUrl = url.startsWith('uploads/') ? '/' + url : url;
-                    window.open(cleanUrl, '_blank');
-
-                    // Show notification
-                    showToast('info', `Membuka dokumen: ${title}`);
-                }
-
-                function showToast(type, message) {
-                    const toast = document.createElement('div');
-                    toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
-                    toast.innerHTML = `
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="fas fa-info-circle me-2"></i>${message}
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                        </div>
-                    `;
-
-                    document.body.appendChild(toast);
-                    const bsToast = new bootstrap.Toast(toast);
-                    bsToast.show();
-
-                    toast.addEventListener('hidden.bs.toast', function () {
-                        toast.remove();
-                    });
-                }
-
-                // Initialize search
-                // initializeSearch();
-
-                // Auto-hide alerts
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
-                    setTimeout(() => {
-                        if (alert.classList.contains('show')) {
-                            bootstrap.Alert.getOrCreateInstance(alert).close();
-                        }
-                    }, 5000);
-                });
-
-                // Add hover effects to table rows
-                const tableRows = document.querySelectorAll('.peserta-row');
-                tableRows.forEach(row => {
-                    row.addEventListener('mouseenter', function () {
-                        this.style.transform = 'translateY(-2px)';
-                        this.style.transition = 'transform 0.2s ease';
-                    });
-
-                    row.addEventListener('mouseleave', function () {
-                        this.style.transform = 'translateY(0)';
-                    });
-                });
+        try {
+            const formData = new FormData(this);
+            const response = await fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: formData
             });
 
-            // Search Functionality
-            // function initializeSearch() {
-            //     const searchInput = document.getElementById('searchInput');
-            //     const clearSearchBtn = document.getElementById('clearSearch');
-            //     const pesertaTable = document.getElementById('pesertaTable');
-            //     const tbody = pesertaTable.querySelector('tbody');
+            const result = await response.json();
 
-            //     searchInput.addEventListener('input', function () {
-            //         const term = this.value.trim();
+            if (result.success) {
+                statusSubmitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Berhasil!';
+                statusSubmitBtn.classList.remove('btn-primary');
+                statusSubmitBtn.classList.add('btn-success');
 
-            //         if (term !== '') {
-            //             clearSearchBtn.style.display = 'block';
-            //         } else {
-            //             clearSearchBtn.style.display = 'none';
-            //         }
+                showAlert('success', result.message);
 
-            //         performSearch(term);
-            //     });
-
-            //     clearSearchBtn.addEventListener('click', function () {
-            //         searchInput.value = '';
-            //         this.style.display = 'none';
-            //         performSearch('');
-            //     });
-
-            //     function performSearch(searchTerm) {
-            //         const term = searchTerm.toLowerCase().trim();
-            //         const allRows = Array.from(tbody.querySelectorAll('tr.peserta-row'));
-
-            //         // SELALU hapus pesan no-result di awal
-            //         removeNoResultsMessage();
-
-            //         allRows.forEach(row => {
-            //             const nameText = row.querySelector('.peserta-name')?.textContent.toLowerCase() || '';
-            //             const nipText = row.querySelector('.text-muted')?.textContent.toLowerCase() || '';
-            //             const instansiText = row.querySelector('.peserta-instansi')?.textContent.toLowerCase() || '';
-
-            //             if (term === '') {
-            //                 // Input kosong → tampilkan semua data
-            //                 row.style.display = '';
-            //             } else if (
-            //                 nameText.includes(term) ||
-            //                 nipText.includes(term) ||
-            //                 instansiText.includes(term)
-            //             ) {
-            //                 row.style.display = '';
-            //             } else {
-            //                 row.style.display = 'none';
-            //             }
-            //         });
-
-            //         // Kalau term kosong → jangan tampilkan pesan apa pun
-            //         if (term === '') {
-            //             return;
-            //         }
-
-            //         // Cek apakah masih ada row yang terlihat
-            //         const anyVisible = allRows.some(row => row.style.display !== 'none');
-
-            //         if (!anyVisible) {
-            //             showNoResultsMessage(tbody, term);
-            //         }
-            //     }
-
-            //     function showNoResultsMessage(tbody, term) {
-            //         removeNoResultsMessage();
-
-            //         const noResultsRow = document.createElement('tr');
-            //         noResultsRow.className = 'no-results-row';
-            //         noResultsRow.innerHTML = `
-            //         <td colspan="6" class="text-center py-4">
-            //             <div class="text-muted">
-            //                 <i class="fas fa-search me-2"></i>
-            //                 Tidak ditemukan peserta dengan kata kunci "${term}"
-            //             </div>
-            //         </td>
-            //     `;
-            //         tbody.appendChild(noResultsRow);
-            //     }
-
-            //     function removeNoResultsMessage() {
-            //         const existing = tbody.querySelector('.no-results-row');
-            //         if (existing) {
-            //             existing.remove();
-            //         }
-            //     }
-            // }
-
-            function clearSearch() {
-                const searchInput = document.getElementById('searchInput');
-                const clearSearchBtn = document.getElementById('clearSearch');
-
-                searchInput.value = '';
-                clearSearchBtn.style.display = 'none';
-
-                const event = new Event('input');
-                searchInput.dispatchEvent(event);
+                if (result.wa_link) {
+                    setTimeout(() => {
+                        statusModal.hide();
+                        showWhatsAppModal(result.wa_link, result.peserta_name);
+                    }, 1500);
+                } else {
+                    setTimeout(() => {
+                        statusModal.hide();
+                        setTimeout(() => window.location.reload(), 500);
+                    }, 1500);
+                }
+            } else {
+                statusSubmitBtn.removeAttribute('data-submitting');
+                statusSubmitBtn.disabled  = false;
+                statusCancelBtn.disabled  = false;
+                statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+                showAlert('error', result.message || 'Terjadi kesalahan');
             }
-        </script>
+        } catch (error) {
+            statusSubmitBtn.removeAttribute('data-submitting');
+            statusSubmitBtn.disabled  = false;
+            statusCancelBtn.disabled  = false;
+            statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+            showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+            console.error('Error:', error);
+        }
+    });
 
-        <style>
+    // Reset tombol ketika status modal ditutup
+    document.getElementById('statusModal').addEventListener('hidden.bs.modal', function () {
+        statusSubmitBtn.removeAttribute('data-submitting');
+        statusSubmitBtn.disabled = false;
+        statusSubmitBtn.classList.remove('btn-success');
+        statusSubmitBtn.classList.add('btn-primary');
+        statusSubmitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan';
+    });
 
+    // ================================================================
+    // WHATSAPP MODAL
+    // ================================================================
+    function showWhatsAppModal(waLink, pesertaName) {
+        const oldModal = document.getElementById('whatsappModal');
+        if (oldModal) oldModal.remove();
 
-            /* CUSTOM STATUS BADGES (CSS Custom - Tidak bergantung pada Bootstrap) */
-            /* SIMPLE FIX FOR TOOLTIP POSITION */
-    .tooltip {
-        position: fixed !important;
-        z-index: 9999 !important;
+        document.body.insertAdjacentHTML('beforeend', `
+            <div class="modal fade" id="whatsappModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header border-0 bg-success text-white">
+                            <h5 class="modal-title fw-bold">
+                                <i class="fab fa-whatsapp me-2"></i>Kirim Informasi via WhatsApp
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center p-4">
+                            <div class="wa-icon mb-3">
+                                <i class="fab fa-whatsapp fa-5x text-success"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3">Status Berhasil Diperbarui!</h5>
+                            <p class="text-muted mb-4">
+                                Klik tombol di bawah untuk mengirim informasi akun ke <strong>${pesertaName}</strong> via WhatsApp.
+                            </p>
+                            <div class="d-grid gap-2">
+                                <a href="${waLink}" target="_blank" class="btn btn-success btn-lg" id="openWhatsAppBtn">
+                                    <i class="fab fa-whatsapp me-2"></i>Buka WhatsApp
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                    Nanti Saja
+                                </button>
+                            </div>
+                            <small class="text-muted mt-3 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Pesan akan otomatis terisi, Anda tinggal klik kirim
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+
+        const whatsappModal = new bootstrap.Modal(document.getElementById('whatsappModal'));
+        whatsappModal.show();
+
+        document.getElementById('openWhatsAppBtn').addEventListener('click', function () {
+            setTimeout(() => {
+                whatsappModal.hide();
+                window.location.reload();
+            }, 1000);
+        });
+
+        document.getElementById('whatsappModal').addEventListener('hidden.bs.modal', function () {
+            setTimeout(() => window.location.reload(), 300);
+        });
     }
 
-    /* Pastikan tombol memiliki posisi relative */
-    .btn-action {
-        position: relative !important;
+    // ================================================================
+    // RESEND ACCOUNT INFO
+    // ================================================================
+    document.querySelectorAll('.resend-account-info').forEach(button => {
+        button.addEventListener('click', function () {
+            const pendaftaranId = this.getAttribute('data-id');
+            const pesertaName   = this.getAttribute('data-name');
+
+            if (confirm(`Kirim ulang informasi akun ke ${pesertaName}?\n\nPassword baru akan di-generate dan dikirim via WhatsApp.`)) {
+                resendAccountInfo(pendaftaranId, pesertaName);
+            }
+        });
+    });
+
+    async function resendAccountInfo(pendaftaranId, pesertaName) {
+        const button       = document.querySelector(`.resend-account-info[data-id="${pendaftaranId}"]`);
+        const originalHTML = button.innerHTML;
+        button.disabled    = true;
+        button.innerHTML   = '<i class="fas fa-spinner fa-spin me-1"></i> Mengirim...';
+
+        try {
+            const response = await fetch(`/peserta/resend-account-info/${pendaftaranId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                button.innerHTML = '<i class="fas fa-check me-1"></i> Terkirim!';
+                button.classList.remove('btn-outline-success');
+                button.classList.add('btn-success');
+
+                showAlert('success', result.message);
+
+                if (result.wa_link) {
+                    setTimeout(() => showWhatsAppModal(result.wa_link, pesertaName), 1000);
+                }
+
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.disabled  = false;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-success');
+                }, 3000);
+
+            } else {
+                button.innerHTML = originalHTML;
+                button.disabled  = false;
+                showAlert('error', result.message || 'Gagal mengirim informasi akun');
+            }
+        } catch (error) {
+            showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+            console.error('Error:', error);
+            button.innerHTML = originalHTML;
+            button.disabled  = false;
+        }
     }
 
-    /* Hilangkan efek transform pada hover jika mengganggu */
-    .btn-action:hover {
-        transform: none !important;
+    // ================================================================
+    // LOAD ALL DETAIL DATA
+    // ================================================================
+    async function loadAllDetailData(pendaftaranId) {
+        try {
+            const response = await fetch(`/peserta/detail/${pendaftaranId}`);
+            const result   = await response.json();
+
+            if (result.success) {
+                const data = result.data;
+
+                document.getElementById('detailModalSubtitle').textContent =
+                    `${data.peserta.nip_nrp || 'NIP/NRP tidak tersedia'} • ${data.angkatan?.nama_angkatan || ''}`;
+
+                updateStatusBadge(data.pendaftaran.status_pendaftaran);
+
+                document.getElementById('detailTimestamp').textContent =
+                    `Terakhir diperbarui: ${formatDateTime(new Date())}`;
+
+                loadDataPesertaContent(data);
+                loadDokumenContent(data);
+                loadMentorContent(data);
+                loadAksiContent(data);
+            } else {
+                showDetailError();
+            }
+        } catch (error) {
+            showDetailError();
+            console.error('Error loading detail:', error);
+        }
     }
 
-    /* Perbaikan untuk tabel */
-    .table-responsive {
-        overflow-x: auto;
-        overflow-y: visible !important;
+    function loadDataPesertaContent(data) {
+        document.getElementById('dataPesertaContent').innerHTML = generateDataPesertaHTML(data);
     }
 
-    .table {
-        margin-bottom: 0;
+    function loadDokumenContent(data) {
+        const content = document.getElementById('dokumenContent');
+        content.innerHTML = generateDokumenHTML(data);
+
+        content.querySelectorAll('.view-document').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const path = this.getAttribute('data-path');
+                if (path) window.open(`/preview-drive?path=${encodeURIComponent(path)}`, '_blank');
+            });
+        });
     }
 
-    /* Force tooltip to be visible */
-    .bs-tooltip-top {
-        margin-top: -10px !important;
+    function loadAksiContent(data) {
+        const content = document.getElementById('aksiContent');
+        content.innerHTML = generateAksiHTML(data);
+
+        content.querySelectorAll('.view-aksi-document').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const path = this.getAttribute('data-path');
+                if (path) window.open(`/preview-drive?path=${encodeURIComponent(path)}`, '_blank');
+            });
+        });
     }
 
-    .bs-tooltip-bottom {
-        margin-top: 10px !important;
+    function loadMentorContent(data) {
+        document.getElementById('mentorContent').innerHTML = generateMentorHTML(data);
     }
-            .custom-badge {
-                border-radius: 8px;
-                font-weight: 500;
-                letter-spacing: 0.3px;
-                padding: 0.5rem 0.75rem;
-                border: none;
-                font-size: 0.85rem;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.3s ease;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
 
-            .custom-badge:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            }
-
-            .status-warning {
-                background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
-                color: #212529 !important;
-            }
-
-            .status-info {
-                background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
-                color: white !important;
-            }
-
-            .status-danger {
-                background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
-                color: white !important;
-            }
-
-            .status-success {
-                background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
-                color: white !important;
-            }
-
-            .status-secondary {
-                background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
-                color: white !important;
-            }
-
-            /* Page Header */
-            .page-header {
-                padding: 2rem;
-                margin-bottom: 1.5rem;
-                border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(40, 84, 150, 0.15);
-            }
-
-            .icon-wrapper {
-                width: 60px;
-                height: 60px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            /* Stats Cards */
-            .stat-card {
-                border-radius: 12px;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-                border: 1px solid #e9ecef;
-            }
-
-            .stat-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-            }
-
-            .stat-icon {
-                width: 48px;
-                height: 48px;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.25rem;
-            }
-
-            .btn-filter-primary {
-                background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);
-                border: none;
-                color: white;
-                transition: all 0.3s ease;
-            }
-
-            .btn-filter-primary:hover {
-                background: linear-gradient(135deg, #1e3d6f 0%, #2d5499 100%);
-                transform: translateY(-2px);
-                color: white;
-                box-shadow: 0 8px 25px rgba(40, 84, 150, 0.4);
-            }
-
-            /* User Avatar */
-            .user-avatar {
-                width: 44px;
-                height: 44px;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 1.1rem;
-                box-shadow: 0 4px 8px rgba(40, 84, 150, 0.2);
-            }
-
-            /* Action Buttons */
-            .btn-action {
-                border-radius: 8px;
-                padding: 0.375rem 0.75rem;
-                margin: 0 2px;
-                transition: all 0.2s ease;
-                border-width: 2px;
-            }
-
-            .btn-action:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-
-            .btn-lift {
-                transition: transform 0.2s ease;
-            }
-
-            .btn-lift:hover {
-                transform: translateY(-2px);
-            }
-
-            /* Table Styling */
-            .table th {
-                border-bottom: 2px solid var(--primary-light);
-                font-weight: 600;
-                color: #285496;
-                background-color: #f8fafc;
-                padding: 1rem;
-            }
-
-            .table td {
-                padding: 1rem;
-                vertical-align: middle;
-                border-bottom: 1px solid #e9ecef;
-            }
-
-            .peserta-row:hover {
-                background-color: rgba(40, 84, 150, 0.03) !important;
-            }
-
-            /* Pagination */
-            .pagination .page-link {
-                color: #285496;
-                border: 1px solid #dee2e6;
-                border-radius: 6px;
-                margin: 0 2px;
-                font-weight: 500;
-            }
-
-            .pagination .page-link:hover {
-                background-color: rgba(40, 84, 150, 0.1);
-                border-color: #285496;
-            }
-
-            .pagination .page-item.active .page-link {
-                background-color: #285496;
-                border-color: #285496;
-                color: white;
-            }
-
-            .pagination .page-item.disabled .page-link {
-                color: #6c757d;
-                pointer-events: none;
-                background-color: #f8f9fa;
-            }
-
-            /* Loading Indicator in Status Modal */
-            #statusLoading {
-                padding: 2rem;
-                border-radius: 10px;
-                background-color: rgba(255, 255, 255, 0.95);
-                margin: 1.5rem 0;
-                text-align: center;
-                animation: fadeIn 0.3s ease;
-            }
-
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-
-            #statusLoading .spinner-border {
-                width: 3rem;
-                height: 3rem;
-                border-width: 0.25rem;
-            }
-
-            /* Button Colors */
-            .btn-primary {
-                background-color: #285496 !important;
-                border-color: #285496 !important;
-            }
-
-            .btn-success {
-                background-color: #28a745 !important;
-                border-color: #28a745 !important;
-            }
-
-            .btn-warning {
-                background-color: #ffc107 !important;
-                border-color: #ffc107 !important;
-                color: #212529 !important;
-            }
-
-            .btn-info {
-                background-color: #17a2b8 !important;
-                border-color: #17a2b8 !important;
-            }
-
-            .btn-danger {
-                background-color: #dc3545 !important;
-                border-color: #dc3545 !important;
-            }
-
-            /* DOKUMEN STYLING */
-            .dokumen-container .stat-card {
-                border-radius: 10px;
-                transition: all 0.3s ease;
-                height: 100%;
-            }
-
-            .dokumen-container .stat-card:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important;
-            }
-
-            .stat-icon-wrapper {
-                width: 70px;
-                height: 70px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .dokumen-container h3 {
-                font-size: 1.75rem;
-                font-weight: 700;
-            }
-
-            /* Progress Bar */
-            .progress {
-                background-color: #e9ecef;
-                border-radius: 4px;
-                overflow: hidden;
-            }
-
-            .progress-bar {
-                background: linear-gradient(90deg, #285496, #3a6bc7);
-                transition: width 0.6s ease;
-            }
-
-            /* Dokumen Cards */
-            .dokumen-card {
-                transition: all 0.3s ease;
-                border-radius: 12px;
-                overflow: hidden;
-                border: 1px solid #e9ecef;
-                height: 100%;
-            }
-
-            .dokumen-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
-                border-color: #285496;
-            }
-
-            .dokumen-available {
-                border-left: 4px solid #28a745;
-            }
-
-            .dokumen-missing {
-                border-left: 4px solid #6c757d;
-                opacity: 0.8;
-            }
-
-            .dokumen-card:hover.dokumen-missing {
-                opacity: 1;
-                border-color: #6c757d;
-            }
-
-            .dokumen-icon-wrapper {
-                width: 60px;
-                height: 60px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.3s ease;
-                flex-shrink: 0;
-            }
-
-            .dokumen-card:hover .dokumen-icon-wrapper {
-                transform: scale(1.1);
-            }
-
-            /* Badge Styling */
-            .badge.bg-success.bg-opacity-10 {
-                background-color: rgba(40, 167, 69, 0.1) !important;
-                color: #28a745 !important;
-                border: 1px solid rgba(40, 167, 69, 0.2);
-            }
-
-            .badge.bg-danger.bg-opacity-10 {
-                background-color: rgba(220, 53, 69, 0.1) !important;
-                color: #dc3545 !important;
-                border: 1px solid rgba(220, 53, 69, 0.2);
-            }
-
-            .badge.bg-primary {
-                background-color: #285496 !important;
-                color: white !important;
-            }
-
-            /* Responsive Design */
-            @media (max-width: 768px) {
-                .custom-badge {
-                    padding: 0.35rem 0.5rem;
-                    font-size: 0.75rem;
-                }
-
-                .modal-dialog.modal-xl {
-                    margin: 0.5rem;
-                }
-
-                .nav-tabs {
-                    flex-wrap: nowrap;
-                    overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
-                }
-
-                .nav-tabs .nav-link {
-                    white-space: nowrap;
-                    font-size: 0.85rem;
-                    padding: 0.75rem 1rem;
-                }
-
-                .dokumen-container .row>.col-xl-4 {
-                    flex: 0 0 100%;
-                    max-width: 100%;
-                }
-
-                .dokumen-icon-wrapper {
-                    width: 50px;
-                    height: 50px;
-                }
-
-                .dokumen-icon-wrapper i {
-                    font-size: 1.5rem !important;
-                }
-
-                .modal-footer .btn-group {
-                    flex-direction: column;
-                    width: 100%;
-                }
-
-                .modal-footer .btn {
-                    width: 100%;
-                    margin-bottom: 0.5rem;
-                }
-
-                .stat-icon-wrapper {
-                    width: 50px;
-                    height: 50px;
-                }
-
-                .stat-icon-wrapper i {
-                    font-size: 1.25rem !important;
-                }
-
-                .dokumen-container h3 {
-                    font-size: 1.5rem;
-                }
-            }
-
-            @media (min-width: 769px) and (max-width: 992px) {
-                .dokumen-container .row>.col-xl-4 {
-                    flex: 0 0 50%;
-                    max-width: 50%;
-                }
-            }
-
-            @media (max-width: 576px) {
-                .custom-badge {
-                    padding: 0.25rem 0.4rem;
-                    font-size: 0.7rem;
-                }
-
-                .modal-header {
-                    padding: 1rem;
-                }
-
-                .modal-body {
-                    padding: 0;
-                }
-
-                .nav-tabs .nav-link {
-                    font-size: 0.8rem;
-                    padding: 0.5rem 0.75rem;
-                }
-
-                .dokumen-card .card-body {
-                    padding: 1rem !important;
-                }
-
-                .btn-sm {
-                    padding: 0.25rem 0.5rem;
-                    font-size: 0.8rem;
-                }
-
-                .table th,
-                .table td {
-                    padding: 0.75rem 0.5rem;
-                    font-size: 0.85rem;
-                }
-
-                .btn-action {
-                    padding: 0.25rem 0.5rem;
-                    margin: 1px;
-                }
-
-                .pagination .page-link {
-                    padding: 0.25rem 0.5rem;
-                    font-size: 0.8rem;
-                    margin: 1px;
-                }
-
-                .dokumen-container .row>.col-xl-4 {
-                    margin-bottom: 1rem;
-                }
-            }
-
-            /* Aksi Perubahan Styling */
-.aksi-card {
-    transition: all 0.3s ease;
-    border-radius: 12px;
-    border-left: 4px solid #ffc107;
-}
-
-.aksi-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
-    border-color: #ffc107;
-}
-
-.badge-number {
-    flex-shrink: 0;
-}
-
-.badge-number .badge {
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.abstrak-section {
-    background-color: #f8f9fa;
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 8px;
-}
-
-.dokumen-item, .link-item {
-    transition: all 0.2s ease;
-    background-color: #f8f9fa;
-}
-
-.dokumen-item:hover, .link-item:hover {
-    background-color: #e9ecef;
-    transform: translateY(-2px);
-}
-
-.dokumen-icon, .link-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .aksi-card {
-        margin-bottom: 1rem;
+    // ================================================================
+    // GENERATE HTML — DATA PESERTA
+    // ================================================================
+    function generateDataPesertaHTML(data) {
+        const peserta     = data.peserta;
+        const kepegawaian = data.kepegawaian;
+
+        return `
+            <div class="detail-content">
+                <div class="profile-header mb-4 pb-4 border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="fw-bold text-primary mb-2">${peserta.nama_lengkap}</h4>
+                            <h6 class="fw-bold mb-3 pb-2 border-bottom">
+                                <i class="fas fa-id-card me-2 text-primary"></i>Informasi Pribadi
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Nama Panggilan</label><p class="fw-semibold mb-0">${peserta.nama_panggilan || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">NIP/NRP</label><p class="fw-semibold mb-0">${peserta.nip_nrp || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Jenis Kelamin</label><p class="fw-semibold mb-0">${peserta.jenis_kelamin || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Tempat/Tanggal Lahir</label><p class="fw-semibold mb-0">${peserta.tempat_lahir || '-'}, ${formatDate(peserta.tanggal_lahir)}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Agama</label><p class="fw-semibold mb-0">${peserta.agama || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Status</label><p class="fw-semibold mb-0">${peserta.status_perkawinan || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Nama Pasangan</label><p class="fw-semibold mb-0">${peserta.nama_pasangan || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Alamat Rumah</label><p class="fw-semibold mb-0">${peserta.alamat_rumah || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Email Pribadi</label><p class="fw-semibold mb-0">${peserta.email_pribadi || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Nomor HP/WhatsApp</label><p class="fw-semibold mb-0">${peserta.nomor_hp || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Olahraga/Hobi</label><p class="fw-semibold mb-0">${peserta.olahraga_hobi || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Merokok</label><p class="fw-semibold mb-0">${peserta.perokok || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Pendidikan Terakhir</label><p class="fw-semibold mb-0">${peserta.pendidikan_terakhir || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Bidang Studi</label><p class="fw-semibold mb-0">${peserta.bidang_studi || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Bidang Keahlian</label><p class="fw-semibold mb-0">${peserta.bidang_keahlian || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Ukuran Baju Kaos</label><p class="fw-semibold mb-0">${peserta.ukuran_kaos || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Ukuran Baju Taktikal</label><p class="fw-semibold mb-0">${peserta.ukuran_training || '-'}</p></div></div>
+                                <div class="col-md-4"><div class="info-item"><label class="text-muted small">Ukuran Celana</label><p class="fw-semibold mb-0">${peserta.ukuran_celana || '-'}</p></div></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="avatar-placeholder rounded-3 bg-primary bg-opacity-10 p-4 d-inline-flex flex-column align-items-center">
+                                <i class="fas fa-user fa-4x text-primary mb-2"></i>
+                                <label class="text-muted small mt-2">NDH</label>
+                                <p class="fw-semibold mb-0 text-center">${peserta.ndh ?? '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section mb-4">
+                    <h6 class="fw-bold mb-3 pb-2 border-bottom">
+                        <i class="fas fa-building me-2 text-primary"></i>Informasi Kepegawaian
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Asal Instansi</label><p class="fw-semibold mb-0">${kepegawaian?.asal_instansi || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Unit Kerja/Detail Instansi</label><p class="fw-semibold mb-0">${kepegawaian?.unit_kerja || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Provinsi</label><p class="fw-semibold mb-0">${data.provinsi?.name || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Kabupaten/Kota</label><p class="fw-semibold mb-0">${data.kabupaten?.name || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Jabatan</label><p class="fw-semibold mb-0">${kepegawaian?.jabatan || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Pangkat/Golongan</label><p class="fw-semibold mb-0">${kepegawaian?.pangkat || '-'} ${kepegawaian?.golongan_ruang ? '/ ' + kepegawaian.golongan_ruang : ''}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Nomor SK CPNS</label><p class="fw-semibold mb-0">${kepegawaian?.nomor_sk_cpns || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Tanggal SK CPNS</label><p class="fw-semibold mb-0">${kepegawaian?.tanggal_sk_cpns || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Email Kantor</label><p class="fw-semibold mb-0">${kepegawaian?.email_kantor || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Alamat Kantor</label><p class="fw-semibold mb-0">${kepegawaian?.alamat_kantor || '-'}</p></div></div>
+                        <div class="col-md-6"><div class="info-item"><label class="text-muted small">Nomor Telepon Kantor</label><p class="fw-semibold mb-0">${kepegawaian?.nomor_telepon_kantor || '-'}</p></div></div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
-    
-    .dokumen-item, .link-item {
-        margin-bottom: 0.5rem;
+
+    // ================================================================
+    // GENERATE HTML — DOKUMEN
+    // ================================================================
+    function generateDokumenHTML(data) {
+        const peserta     = data.peserta;
+        const kepegawaian = data.kepegawaian;
+        const pendaftaran = data.pendaftaran;
+
+        const dokumenList = [
+            { title: 'KTP',             icon: 'fa-id-card',       color: 'success', file: peserta.file_ktp,                   description: 'Kartu Tanda Penduduk yang masih berlaku' },
+            { title: 'Pasfoto',         icon: 'fa-camera',        color: 'primary', file: peserta.file_pas_foto,               description: 'Foto terbaru ukuran 4x6 dengan background merah' },
+            { title: 'SK CPNS',         icon: 'fa-file-alt',      color: 'success', file: kepegawaian?.file_sk_cpns,           description: 'Surat Keputusan CPNS yang masih berlaku' },
+            { title: 'SPMT',            icon: 'fa-award',         color: 'warning', file: kepegawaian?.file_spmt,              description: 'Surat Pernyataan Melaksanakan Tugas' },
+            { title: 'SKP',             icon: 'fa-handshake',     color: 'info',    file: kepegawaian?.file_skp,               description: 'Sasaran Kinerja Pegawai' },
+            { title: 'Surat Tugas',     icon: 'fa-tasks',         color: 'primary', file: pendaftaran.file_surat_tugas,        description: 'Surat tugas dari instansi asal' },
+            { title: 'Surat Kesediaan', icon: 'fa-graduation-cap',color: 'success', file: pendaftaran.file_surat_kesediaan,    description: 'Surat kesediaan mengikuti pelatihan' },
+            { title: 'Surat Sehat',     icon: 'fa-heartbeat',     color: 'warning', file: pendaftaran.file_surat_sehat,        description: 'Surat keterangan sehat dari dokter' },
+        ];
+
+        const totalDokumen    = dokumenList.length;
+        const dokumenTersedia = dokumenList.filter(d => d.file).length;
+        const dokumenBelum    = totalDokumen - dokumenTersedia;
+        const persentase      = dokumenTersedia > 0 ? Math.round((dokumenTersedia / totalDokumen) * 100) : 0;
+
+        return `
+            <div class="dokumen-container">
+                <div class="row mb-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card card border-0 shadow-sm"><div class="card-body text-center p-3">
+                            <div class="stat-icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 mx-auto mb-2"><i class="fas fa-folder-open fa-xl text-primary"></i></div>
+                            <h3 class="fw-bold text-primary mb-1">${totalDokumen}</h3><p class="text-muted small mb-0">Total Dokumen</p>
+                        </div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card card border-0 shadow-sm"><div class="card-body text-center p-3">
+                            <div class="stat-icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 mx-auto mb-2"><i class="fas fa-check-circle fa-xl text-success"></i></div>
+                            <h3 class="fw-bold text-success mb-1">${dokumenTersedia}</h3><p class="text-muted small mb-0">Dokumen Tersedia</p>
+                        </div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card card border-0 shadow-sm"><div class="card-body text-center p-3">
+                            <div class="stat-icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 mx-auto mb-2"><i class="fas fa-clock fa-xl text-warning"></i></div>
+                            <h3 class="fw-bold text-warning mb-1">${dokumenBelum}</h3><p class="text-muted small mb-0">Belum Diunggah</p>
+                        </div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card card border-0 shadow-sm"><div class="card-body text-center p-3">
+                            <div class="stat-icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 mx-auto mb-2"><i class="fas fa-chart-line fa-xl text-info"></i></div>
+                            <h3 class="fw-bold text-info mb-1">${persentase}%</h3><p class="text-muted small mb-0">Kelengkapan</p>
+                        </div></div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold mb-0">Kelengkapan Dokumen</h6>
+                            <span class="badge bg-primary">${persentase}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: ${persentase}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 d-flex align-items-center">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                            <i class="fas fa-folder-open text-primary"></i>
+                        </div>
+                        <span>Semua Dokumen Peserta</span>
+                    </h5>
+                    <div class="text-muted small">
+                        <i class="fas fa-check-circle text-success me-1"></i>
+                        ${dokumenTersedia} dari ${totalDokumen} dokumen tersedia
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    ${dokumenList.map(dokumen => dokumenCard(dokumen)).join('')}
+                </div>
+            </div>
+        `;
     }
-}
-/* Compact Pagination */
-.pagination-sm {
-    gap: 0.25rem;
-}
 
-.pagination-sm .page-link {
-    padding: 0.375rem 0.625rem;
-    font-size: 0.875rem;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-    color: #285496;
-    transition: all 0.2s ease;
-}
-
-.pagination-sm .page-link:hover {
-    background-color: rgba(40, 84, 150, 0.1);
-    border-color: #285496;
-}
-
-.pagination-sm .page-item.active .page-link {
-    background-color: #285496;
-    border-color: #285496;
-    color: white;
-    font-weight: 600;
-}
-
-.pagination-sm .page-item.disabled .page-link {
-    background-color: #f8f9fa;
-    border-color: #dee2e6;
-    color: #6c757d;
-}
-
-/* Mobile Optimization for Pagination */
-@media (max-width: 576px) {
-    .pagination-sm .page-link {
-        padding: 0.3rem 0.5rem;
-        font-size: 0.8rem;
+    function dokumenCard(dokumen) {
+        if (dokumen.file) {
+            return `
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-available">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="dokumen-icon-wrapper bg-${dokumen.color} bg-opacity-10 p-3 rounded-3 me-3">
+                                    <i class="fas ${dokumen.icon} fa-2x text-${dokumen.color}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
+                                    <p class="text-muted small mb-2">${dokumen.description}</p>
+                                    <span class="badge bg-success bg-opacity-10 text-success">
+                                        <i class="fas fa-check-circle me-1"></i>Tersedia
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-${dokumen.color} view-document"
+                                        data-path="${dokumen.file}" data-title="${dokumen.title}">
+                                    <i class="fas fa-eye me-1"></i> Lihat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <div class="dokumen-card card border-0 shadow-sm h-100 dokumen-missing">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="dokumen-icon-wrapper bg-secondary bg-opacity-10 p-3 rounded-3 me-3">
+                                    <i class="fas ${dokumen.icon} fa-2x text-secondary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-1 text-dark">${dokumen.title}</h6>
+                                    <p class="text-muted small mb-2">${dokumen.description}</p>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger">
+                                        <i class="fas fa-times-circle me-1"></i>Belum diunggah
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Dokumen belum diunggah oleh peserta
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
     }
-    
-    .pagination-sm {
-        gap: 0.15rem;
+
+    // ================================================================
+    // GENERATE HTML — AKSI PERUBAHAN
+    // ================================================================
+    function fileNameFromPath(path) {
+        if (!path) return '';
+        return path.split('?')[0].split('/').pop() || 'file.pdf';
     }
-}
 
-/* WhatsApp Modal Styling */
-#whatsappModal .modal-header {
-    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-}
-
-#whatsappModal .wa-icon i {
-    animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
+    function normalizeUrl(url) {
+        if (!url) return null;
+        if (/^https?:\/\//i.test(url)) return url;
+        return `https://${url}`;
     }
-    40% {
-        transform: translateY(-20px);
+
+    function generateAksiHTML(data) {
+        const aksi = Array.isArray(data.aksi_perubahan)
+            ? (data.aksi_perubahan[0] || null)
+            : (data.aksi_perubahan || null);
+
+        if (!aksi) {
+            return `
+                <div class="aksi-content text-center py-5">
+                    <div class="empty-state">
+                        <div class="empty-state-icon mb-4">
+                            <i class="fas fa-lightbulb fa-4x" style="color: #e9ecef;"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">Belum Ada Aksi Perubahan</h4>
+                        <p class="text-muted mb-4">Peserta ini belum mengirimkan aksi perubahan</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const kategoriMap = {
+            'pilihan1': { color: 'success', icon: 'fa-bolt', text: 'Pilihan 1' },
+            'pilihan2': { color: 'info',    icon: 'fa-tag',  text: 'Pilihan 2' }
+        };
+        const kategori = kategoriMap[aksi.kategori_aksatika] || {
+            color: 'secondary', icon: 'fa-question', text: aksi.kategori_aksatika || '-'
+        };
+
+        const videoUrl   = normalizeUrl(aksi.link_video);
+        const majalahUrl = normalizeUrl(aksi.link_laporan_majalah);
+
+        return `
+            <div class="aksi-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 d-flex align-items-center">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 p-2 rounded-3 me-3">
+                            <i class="fas fa-lightbulb text-warning"></i>
+                        </div>
+                        <span>Aksi Perubahan</span>
+                    </h5>
+                </div>
+                <div class="row g-4">
+                    <div class="col-xl-6 col-lg-12">
+                        <div class="aksi-card card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="badge-number me-3">
+                                        <span class="badge bg-primary rounded-circle p-2"
+                                            style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+                                            1
+                                        </span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-2 text-dark">${aksi.judul || 'Aksi Perubahan'}</h6>
+                                        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                            <span class="badge bg-${kategori.color} bg-opacity-10 text-${kategori.color}">
+                                                <i class="fas ${kategori.icon} me-1"></i>${kategori.text}
+                                            </span>
+                                        </div>
+                                        ${aksi.abstrak ? `
+                                            <div class="abstrak-section mb-3">
+                                                <label class="text-muted small">Abstrak</label>
+                                                <p class="mb-0 text-dark" style="line-height:1.5;">${aksi.abstrak}</p>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    ${aksi.file ? `
+                                        <div class="col-md-6">
+                                            <div class="dokumen-item d-flex align-items-center p-2 border rounded">
+                                                <div class="dokumen-icon bg-primary bg-opacity-10 rounded p-2 me-2">
+                                                    <i class="fas fa-file-pdf text-primary"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <small class="text-muted d-block">Laporan Lengkap</small>
+                                                    <small class="fw-semibold">${fileNameFromPath(aksi.file)}</small>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-aksi-document"
+                                                        data-path="${aksi.file}" data-title="Laporan Lengkap">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    ${aksi.lembar_pengesahan ? `
+                                        <div class="col-md-6">
+                                            <div class="dokumen-item d-flex align-items-center p-2 border rounded">
+                                                <div class="dokumen-icon bg-success bg-opacity-10 rounded p-2 me-2">
+                                                    <i class="fas fa-file-signature text-success"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <small class="text-muted d-block">Lembar Pengesahan</small>
+                                                    <small class="fw-semibold">${fileNameFromPath(aksi.lembar_pengesahan)}</small>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-success view-aksi-document"
+                                                        data-path="${aksi.lembar_pengesahan}" data-title="Lembar Pengesahan">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    ${videoUrl ? `
+                                        <div class="col-md-6">
+                                            <div class="link-item d-flex align-items-center p-2 border rounded">
+                                                <div class="link-icon bg-danger bg-opacity-10 rounded p-2 me-2">
+                                                    <i class="fab fa-youtube text-danger"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <small class="text-muted d-block">Video Presentasi</small>
+                                                    <small class="fw-semibold">Buka Link</small>
+                                                </div>
+                                                <a href="${videoUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    ${majalahUrl ? `
+                                        <div class="col-md-6">
+                                            <div class="link-item d-flex align-items-center p-2 border rounded">
+                                                <div class="link-icon bg-info bg-opacity-10 rounded p-2 me-2">
+                                                    <i class="fas fa-newspaper text-info"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <small class="text-muted d-block">Laporan Majalah</small>
+                                                    <small class="fw-semibold">Buka Link</small>
+                                                </div>
+                                                <a href="${majalahUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
-    60% {
-        transform: translateY(-10px);
+
+    // ================================================================
+    // GENERATE HTML — MENTOR
+    // ================================================================
+    function generateMentorHTML(data) {
+        const mentor = data.mentor;
+
+        if (!mentor) {
+            return `
+                <div class="mentor-content text-center py-5">
+                    <div class="empty-state">
+                        <div class="empty-state-icon mb-4">
+                            <i class="fas fa-chalkboard-teacher fa-4x" style="color: #e9ecef;"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">Belum Ditugaskan Mentor</h4>
+                        <p class="text-muted mb-4">Peserta ini belum memiliki mentor yang ditugaskan</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="mentor-content">
+                <div class="mentor-profile card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="fw-bold text-primary mb-2">${mentor.nama_mentor}</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-6"><div class="info-item"><label class="text-muted small">NIP/NRP</label><p class="fw-semibold mb-0">${mentor.nip_mentor || '-'}</p></div></div>
+                                    <div class="col-md-6"><div class="info-item"><label class="text-muted small">NPWP</label><p class="fw-semibold mb-0">${mentor.npwp_mentor || '-'}</p></div></div>
+                                    <div class="col-md-6"><div class="info-item"><label class="text-muted small">Jabatan</label><p class="fw-semibold mb-0">${mentor.jabatan_mentor || '-'}</p></div></div>
+                                    <div class="col-md-6"><div class="info-item"><label class="text-muted small">Nomor Rekening</label><p class="fw-semibold mb-0">${mentor.nomor_rekening || '-'}</p></div></div>
+                                    <div class="col-md-6"><div class="info-item"><label class="text-muted small">Email</label><p class="fw-semibold mb-0">${mentor.email_mentor || '-'}</p></div></div>
+                                    <div class="col-md-6"><div class="info-item"><label class="text-muted small">Telepon</label><p class="fw-semibold mb-0">${mentor.nomor_hp_mentor || '-'}</p></div></div>
+                                    <div class="col-md-6"><div class="info-item"><label class="text-muted small">Golongan Ruang</label><p class="fw-semibold mb-0">${mentor.golongan || '-'}</p></div></div>
+                                    <div class="col-md-6"><div class="info-item"><label class="text-muted small">Pangkat</label><p class="fw-semibold mb-0">${mentor.pangkat || '-'}</p></div></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <div class="mentor-badge bg-primary bg-opacity-10 rounded-3 p-3 d-inline-block">
+                                    <i class="fas fa-chalkboard-teacher fa-3x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
-}
 
-#whatsappModal .btn-success {
-    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-    border: none;
-    transition: all 0.3s ease;
-}
+    // ================================================================
+    // STATUS HELPER FUNCTIONS
+    // ================================================================
+    function getStatusIcon(status) {
+        const icons = {
+            'menunggu verifikasi': 'fa-clock',
+            'diterima':            'fa-check-circle',
+            'ditolak':             'fa-times-circle',
+            'lulus':               'fa-graduation-cap'
+        };
+        return icons[status.toLowerCase()] || 'fa-question-circle';
+    }
 
-#whatsappModal .btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
-}
-/* Button Kirim Info Akun */
-.btn-outline-success.resend-account-info {
-    border-color: #25D366;
-    color: #25D366;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-}
+    function getStatusColor(status) {
+        const colors = {
+            'menunggu verifikasi': 'status-warning',
+            'diterima':            'status-info',
+            'ditolak':             'status-danger',
+            'lulus':               'status-success'
+        };
+        return colors[status.toLowerCase()] || 'status-secondary';
+    }
 
-.btn-outline-success.resend-account-info:hover {
-    background-color: #25D366;
-    border-color: #25D366;
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
-}
+    function formatStatusText(status) {
+        const texts = {
+            'menunggu verifikasi': 'Menunggu Verifikasi',
+            'diterima':            'Diterima',
+            'ditolak':             'Ditolak',
+            'lulus':               'Lulus'
+        };
+        return texts[status.toLowerCase()] || status;
+    }
 
-.btn-outline-success.resend-account-info:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
+    function updateStatusBadge(status) {
+        const badge     = document.getElementById('detailStatusBadge');
+        badge.className = `badge custom-badge ${getStatusColor(status)}`;
+        badge.innerHTML = `<i class="fas ${getStatusIcon(status)} me-1"></i>${formatStatusText(status)}`;
+    }
 
-.btn-success.resend-account-info {
-    background-color: #25D366;
-    border-color: #25D366;
-    color: white;
-}
-        </style>
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        try {
+            return new Date(dateString).toLocaleDateString('id-ID', {
+                day: '2-digit', month: 'long', year: 'numeric'
+            });
+        } catch (e) { return '-'; }
+    }
+
+    function formatDateTime(date) {
+        return date.toLocaleDateString('id-ID', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    // ================================================================
+    // ✅ SHOW ALERT — expose ke window supaya bisa diakses dari mana saja
+    // ================================================================
+    function showAlert(type, message) {
+        const oldAlerts = document.querySelectorAll('.alert-container .alert');
+        oldAlerts.forEach(alert => {
+            try { bootstrap.Alert.getOrCreateInstance(alert).close(); } catch (e) {}
+        });
+
+        const alertDiv  = document.createElement('div');
+        const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        const bsType    = type === 'success' ? 'success' : 'danger';
+        const title     = type === 'success' ? 'Sukses!' : 'Error!';
+
+        alertDiv.className = `alert alert-${bsType} alert-dismissible fade show shadow-sm d-flex align-items-center`;
+        alertDiv.setAttribute('role', 'alert');
+        alertDiv.innerHTML = `
+            <div class="alert-icon flex-shrink-0">
+                <i class="fas ${iconClass} fa-lg"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+                <strong>${title}</strong> ${message}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+        document.querySelector('.alert-container').prepend(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                try { bootstrap.Alert.getOrCreateInstance(alertDiv).close(); } catch (e) {}
+            }
+        }, 6000);
+    }
+
+    // ✅ Wajib: expose ke window agar bisa dipanggil dari luar DOMContentLoaded
+    window.showAlert = showAlert;
+
+    function showDetailError() {
+        document.getElementById('dataPesertaContent').innerHTML = `
+            <div class="text-center py-5">
+                <div class="empty-state-icon mb-3">
+                    <i class="fas fa-exclamation-circle fa-4x" style="color: #e9ecef;"></i>
+                </div>
+                <h5 class="text-muted mb-2">Gagal memuat data</h5>
+                <p class="text-muted">Silakan coba lagi</p>
+            </div>
+        `;
+    }
+
+    // ================================================================
+    // AUTO-HIDE SESSION ALERTS
+    // ================================================================
+    document.querySelectorAll('.alert').forEach(alert => {
+        setTimeout(() => {
+            if (alert.classList.contains('show')) {
+                try { bootstrap.Alert.getOrCreateInstance(alert).close(); } catch (e) {}
+            }
+        }, 5000);
+    });
+
+    // ================================================================
+    // HOVER EFFECTS TABLE ROWS
+    // ================================================================
+    document.querySelectorAll('.peserta-row').forEach(row => {
+        row.addEventListener('mouseenter', function () {
+            if (!this.classList.contains('row-selected')) {
+                this.style.transform  = 'translateY(-2px)';
+                this.style.transition = 'transform 0.2s ease';
+            }
+        });
+        row.addEventListener('mouseleave', function () {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // ================================================================
+    // ✅ MULTI DELETE — semua di dalam DOMContentLoaded agar showAlert
+    //    bisa langsung dipanggil tanpa window.showAlert
+    // ================================================================
+    const selectAllCheckbox    = document.getElementById('selectAll');
+    const bulkActionToolbar    = document.getElementById('bulkActionToolbar');
+    const selectedCountBadge   = document.getElementById('selectedCount');
+    const bulkDeleteCountSpan  = document.getElementById('bulkDeleteCount');
+    const bulkDeleteBtn        = document.getElementById('bulkDeleteBtn');
+    const cancelSelection      = document.getElementById('cancelSelection');
+    const confirmBulkDeleteBtn = document.getElementById('confirmBulkDelete');
+
+    function getAllCheckboxes() {
+        return document.querySelectorAll('.peserta-checkbox');
+    }
+
+    function getSelectedCheckboxes() {
+        return document.querySelectorAll('.peserta-checkbox:checked');
+    }
+
+    function updateBulkToolbar() {
+        const selected = getSelectedCheckboxes();
+        const count    = selected.length;
+        const all      = getAllCheckboxes();
+
+        if (count > 0) {
+            bulkActionToolbar.classList.remove('d-none');
+            selectedCountBadge.textContent  = count;
+            bulkDeleteCountSpan.textContent = count;
+            const countModal = document.getElementById('bulkDeleteCountModal');
+            if (countModal) countModal.textContent = count;
+        } else {
+            bulkActionToolbar.classList.add('d-none');
+        }
+
+        if (selectAllCheckbox && all.length > 0) {
+            selectAllCheckbox.checked       = count === all.length;
+            selectAllCheckbox.indeterminate = count > 0 && count < all.length;
+        }
+    }
+
+    // Select All
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            getAllCheckboxes().forEach(cb => {
+                cb.checked = this.checked;
+                const row  = cb.closest('.peserta-row');
+                if (row) row.classList.toggle('row-selected', this.checked);
+            });
+            updateBulkToolbar();
+        });
+    }
+
+    // Individual checkbox (event delegation)
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('peserta-checkbox')) {
+            const row = e.target.closest('.peserta-row');
+            if (row) row.classList.toggle('row-selected', e.target.checked);
+            updateBulkToolbar();
+        }
+    });
+
+    // Batal pilihan
+    if (cancelSelection) {
+        cancelSelection.addEventListener('click', function () {
+            getAllCheckboxes().forEach(cb => {
+                cb.checked = false;
+                const row  = cb.closest('.peserta-row');
+                if (row) row.classList.remove('row-selected');
+            });
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked       = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+            updateBulkToolbar();
+        });
+    }
+
+    // Buka modal konfirmasi
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', function () {
+            const selected = getSelectedCheckboxes();
+            if (selected.length === 0) return;
+
+            const preview = document.getElementById('bulkDeletePreview');
+            if (preview) {
+                preview.innerHTML = '';
+                selected.forEach((cb, i) => {
+                    const name = cb.getAttribute('data-name') || 'Peserta';
+                    const item = document.createElement('div');
+                    item.className = 'preview-item';
+                    item.innerHTML = `
+                        <i class="fas fa-user-times text-danger"></i>
+                        <span><strong>${i + 1}.</strong> ${name}</span>
+                    `;
+                    preview.appendChild(item);
+                });
+            }
+
+            bulkDeleteModal.show();
+        });
+    }
+
+    // ✅ Eksekusi hapus massal
+    if (confirmBulkDeleteBtn) {
+        confirmBulkDeleteBtn.addEventListener('click', async function () {
+            const selected = getSelectedCheckboxes();
+            if (selected.length === 0) return;
+
+            const ids    = Array.from(selected).map(cb => cb.value);
+            const jenis  = selected[0].getAttribute('data-jenis');
+            const jumlah = ids.length;
+
+            // Loading state
+            confirmBulkDeleteBtn.disabled  = true;
+            confirmBulkDeleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menghapus...';
+
+            try {
+                const response = await fetch(`/peserta/${jenis}/bulk-delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':     'application/json',
+                        'X-CSRF-TOKEN':     document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ ids })
+                });
+
+                const result = await response.json();
+
+                // Tutup modal dulu
+                bulkDeleteModal.hide();
+
+                if (result.success) {
+                    // Animasi hapus baris dari tabel
+                    selected.forEach(cb => {
+                        const row = cb.closest('tr');
+                        if (row) {
+                            row.style.transition = 'all 0.35s ease';
+                            row.style.opacity    = '0';
+                            row.style.transform  = 'translateX(-30px)';
+                            row.style.background = '#fff5f5';
+                            setTimeout(() => row.remove(), 350);
+                        }
+                    });
+
+                    // Reset checkbox & toolbar
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.checked       = false;
+                        selectAllCheckbox.indeterminate = false;
+                    }
+                    updateBulkToolbar();
+
+                    // ✅ Tampilkan notifikasi sukses
+                    setTimeout(() => {
+                        showAlert('success', result.message || `${jumlah} peserta berhasil dihapus.`);
+
+                        if (result.failed > 0) {
+                            setTimeout(() => {
+                                showAlert('error', `${result.failed} peserta gagal dihapus.`);
+                            }, 600);
+                        }
+                    }, 400);
+
+                    // Reload setelah 2.5 detik
+                    setTimeout(() => window.location.reload(), 2500);
+
+                } else {
+                    // ✅ Tampilkan notifikasi error
+                    showAlert('error', result.message || 'Gagal menghapus peserta. Silakan coba lagi.');
+                }
+
+            } catch (error) {
+                bulkDeleteModal.hide();
+                showAlert('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+                console.error('Bulk delete error:', error);
+            } finally {
+                confirmBulkDeleteBtn.disabled  = false;
+                confirmBulkDeleteBtn.innerHTML = '<i class="fas fa-trash-alt me-2"></i> Ya, Hapus Semua';
+            }
+        });
+    }
+
+    // Reset tombol saat modal bulk delete ditutup
+    document.getElementById('bulkDeleteModal').addEventListener('hidden.bs.modal', function () {
+        if (confirmBulkDeleteBtn) {
+            confirmBulkDeleteBtn.disabled  = false;
+            confirmBulkDeleteBtn.innerHTML = '<i class="fas fa-trash-alt me-2"></i> Ya, Hapus Semua';
+        }
+    });
+
+}); // akhir DOMContentLoaded
+</script>
+
+<style>
+    /* ================================================================
+       TOOLTIP FIX
+    ================================================================ */
+    .tooltip { position: fixed !important; z-index: 9999 !important; }
+    .btn-action { position: relative !important; }
+    .btn-action:hover { transform: none !important; }
+    .table-responsive { overflow-x: auto; overflow-y: visible !important; }
+    .table { margin-bottom: 0; }
+
+    /* ================================================================
+       CUSTOM STATUS BADGES
+    ================================================================ */
+    .custom-badge {
+        border-radius: 8px; font-weight: 500; letter-spacing: 0.3px;
+        padding: 0.5rem 0.75rem; border: none; font-size: 0.85rem;
+        display: inline-flex; align-items: center; justify-content: center;
+        transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .custom-badge:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+    .status-warning  { background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important; color: #212529 !important; }
+    .status-info     { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important; color: white !important; }
+    .status-danger   { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; color: white !important; }
+    .status-success  { background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important; color: white !important; }
+    .status-secondary{ background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important; color: white !important; }
+
+    /* ================================================================
+       PAGE HEADER
+    ================================================================ */
+    .page-header { padding: 2rem; margin-bottom: 1.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(40,84,150,0.15); }
+    .icon-wrapper { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+
+    /* ================================================================
+       STAT CARDS
+    ================================================================ */
+    .stat-card { border-radius: 12px; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid #e9ecef; }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important; }
+    .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+
+    /* ================================================================
+       FILTER BUTTON
+    ================================================================ */
+    .btn-filter-primary { background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%); border: none; color: white; transition: all 0.3s ease; }
+    .btn-filter-primary:hover { background: linear-gradient(135deg, #1e3d6f 0%, #2d5499 100%); transform: translateY(-2px); color: white; box-shadow: 0 8px 25px rgba(40,84,150,0.4); }
+
+    /* ================================================================
+       USER AVATAR & ACTION BUTTONS
+    ================================================================ */
+    .user-avatar { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; box-shadow: 0 4px 8px rgba(40,84,150,0.2); }
+    .btn-action { border-radius: 8px; padding: 0.375rem 0.75rem; margin: 0 2px; transition: all 0.2s ease; border-width: 2px; }
+    .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .btn-lift { transition: transform 0.2s ease; }
+    .btn-lift:hover { transform: translateY(-2px); }
+
+    /* ================================================================
+       TABLE
+    ================================================================ */
+    .table th { border-bottom: 2px solid var(--primary-light); font-weight: 600; color: #285496; background-color: #f8fafc; padding: 1rem; }
+    .table td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid #e9ecef; }
+    .peserta-row:hover { background-color: rgba(40,84,150,0.03) !important; }
+
+    /* ================================================================
+       PAGINATION
+    ================================================================ */
+    .pagination .page-link { color: #285496; border: 1px solid #dee2e6; border-radius: 6px; margin: 0 2px; font-weight: 500; }
+    .pagination .page-link:hover { background-color: rgba(40,84,150,0.1); border-color: #285496; }
+    .pagination .page-item.active .page-link { background-color: #285496; border-color: #285496; color: white; }
+    .pagination .page-item.disabled .page-link { color: #6c757d; pointer-events: none; background-color: #f8f9fa; }
+    .pagination-sm { gap: 0.25rem; }
+    .pagination-sm .page-link { padding: 0.375rem 0.625rem; font-size: 0.875rem; border-radius: 6px; }
+
+    /* ================================================================
+       BUTTON COLORS
+    ================================================================ */
+    .btn-primary { background-color: #285496 !important; border-color: #285496 !important; }
+    .btn-success { background-color: #28a745 !important; border-color: #28a745 !important; }
+    .btn-warning { background-color: #ffc107 !important; border-color: #ffc107 !important; color: #212529 !important; }
+    .btn-info    { background-color: #17a2b8 !important; border-color: #17a2b8 !important; }
+    .btn-danger  { background-color: #dc3545 !important; border-color: #dc3545 !important; }
+
+    /* ================================================================
+       STATUS LOADING ANIMATION
+    ================================================================ */
+    #statusLoading { padding: 2rem; border-radius: 10px; background-color: rgba(255,255,255,0.95); margin: 1.5rem 0; text-align: center; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ================================================================
+       DOKUMEN CARDS
+    ================================================================ */
+    .stat-icon-wrapper { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+    .progress { background-color: #e9ecef; border-radius: 4px; overflow: hidden; }
+    .progress-bar { background: linear-gradient(90deg, #285496, #3a6bc7); transition: width 0.6s ease; }
+    .dokumen-card { transition: all 0.3s ease; border-radius: 12px; overflow: hidden; border: 1px solid #e9ecef; height: 100%; }
+    .dokumen-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; border-color: #285496; }
+    .dokumen-available { border-left: 4px solid #28a745; }
+    .dokumen-missing { border-left: 4px solid #6c757d; opacity: 0.8; }
+    .dokumen-card:hover.dokumen-missing { opacity: 1; border-color: #6c757d; }
+    .dokumen-icon-wrapper { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; flex-shrink: 0; }
+    .dokumen-card:hover .dokumen-icon-wrapper { transform: scale(1.1); }
+    .badge.bg-success.bg-opacity-10 { background-color: rgba(40,167,69,0.1) !important; color: #28a745 !important; border: 1px solid rgba(40,167,69,0.2); }
+    .badge.bg-danger.bg-opacity-10  { background-color: rgba(220,53,69,0.1) !important;  color: #dc3545 !important; border: 1px solid rgba(220,53,69,0.2); }
+    .badge.bg-primary { background-color: #285496 !important; color: white !important; }
+
+    /* ================================================================
+       AKSI PERUBAHAN
+    ================================================================ */
+    .aksi-card { transition: all 0.3s ease; border-radius: 12px; border-left: 4px solid #ffc107; }
+    .aksi-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; }
+    .badge-number .badge { font-size: 0.9rem; font-weight: 600; }
+    .abstrak-section { background-color: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 8px; }
+    .dokumen-item, .link-item { transition: all 0.2s ease; background-color: #f8f9fa; }
+    .dokumen-item:hover, .link-item:hover { background-color: #e9ecef; transform: translateY(-2px); }
+    .dokumen-icon, .link-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+
+    /* ================================================================
+       WHATSAPP MODAL
+    ================================================================ */
+    #whatsappModal .wa-icon i { animation: bounce 2s infinite; }
+    @keyframes bounce {
+        0%,20%,50%,80%,100% { transform: translateY(0); }
+        40% { transform: translateY(-20px); }
+        60% { transform: translateY(-10px); }
+    }
+
+    /* ================================================================
+       RESEND ACCOUNT INFO BUTTON
+    ================================================================ */
+    .btn-outline-success.resend-account-info { border-color: #25D366; color: #25D366; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+    .btn-outline-success.resend-account-info:hover { background-color: #25D366; border-color: #25D366; color: white; transform: translateY(-1px); }
+    .btn-outline-success.resend-account-info:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-success.resend-account-info { background-color: #25D366; border-color: #25D366; color: white; }
+
+    /* ================================================================
+       ✅ BULK ACTION / MULTI DELETE
+    ================================================================ */
+    .bulk-toolbar { animation: slideDown 0.3s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .bulk-toolbar .card { background: linear-gradient(135deg, #fff5f5 0%, #fff 100%); }
+
+    .form-check-input { width: 1.1em; height: 1.1em; cursor: pointer; border: 2px solid #ced4da; transition: all 0.2s ease; }
+    .form-check-input:checked { background-color: #285496; border-color: #285496; }
+    .form-check-input:focus { border-color: #285496; box-shadow: 0 0 0 0.2rem rgba(40,84,150,0.25); }
+    .select-all-checkbox { width: 1.2em; height: 1.2em; }
+
+    .peserta-row.row-selected { background-color: rgba(40,84,150,0.06) !important; border-left: 3px solid #285496; transition: all 0.2s ease; }
+
+    #bulkDeletePreview .preview-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid #e9ecef; }
+    #bulkDeletePreview .preview-item:last-child { border-bottom: none; }
+    #bulkDeletePreview .preview-item i { color: #dc3545; flex-shrink: 0; }
+
+    /* ================================================================
+       RESPONSIVE
+    ================================================================ */
+    @media (max-width: 768px) {
+        .custom-badge { padding: 0.35rem 0.5rem; font-size: 0.75rem; }
+        .modal-dialog.modal-xl { margin: 0.5rem; }
+        .nav-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .nav-tabs .nav-link { white-space: nowrap; font-size: 0.85rem; padding: 0.75rem 1rem; }
+        .dokumen-container .row>.col-xl-4 { flex: 0 0 100%; max-width: 100%; }
+        .dokumen-icon-wrapper { width: 50px; height: 50px; }
+        .stat-icon-wrapper { width: 50px; height: 50px; }
+        .aksi-card { margin-bottom: 1rem; }
+        .modal-footer .btn-group { flex-direction: column; width: 100%; }
+        .modal-footer .btn { width: 100%; margin-bottom: 0.5rem; }
+        .pagination-sm .page-link { padding: 0.3rem 0.5rem; font-size: 0.8rem; }
+        .pagination-sm { gap: 0.15rem; }
+    }
+    @media (min-width: 769px) and (max-width: 992px) {
+        .dokumen-container .row>.col-xl-4 { flex: 0 0 50%; max-width: 50%; }
+    }
+    @media (max-width: 576px) {
+        .custom-badge { padding: 0.25rem 0.4rem; font-size: 0.7rem; }
+        .modal-header { padding: 1rem; }
+        .dokumen-card .card-body { padding: 1rem !important; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        .table th, .table td { padding: 0.75rem 0.5rem; font-size: 0.85rem; }
+        .btn-action { padding: 0.25rem 0.5rem; margin: 1px; }
+        .pagination .page-link { padding: 0.25rem 0.5rem; font-size: 0.8rem; margin: 1px; }
+    }
+</style>
 @endsection

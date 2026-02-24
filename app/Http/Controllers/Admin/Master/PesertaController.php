@@ -2561,4 +2561,200 @@ public function edit(Request $request, $jenis, $id)
             ], 500);
         }
     }
+
+    public function bulkDelete(Request $request, $jenis)
+{
+    $request->validate([
+        'ids'   => 'required|array|min:1|max:100', // batasi max 100 sekaligus
+        'ids.*' => 'required|integer|exists:pendaftaran,id',
+    ]);
+
+    $jenisData        = $this->getJenisData($jenis);
+    $jenisPelatihanId = $jenisData['id'];
+    $ids              = $request->ids;
+
+    $deleted = 0;
+    $failed  = 0;
+    $errors  = [];
+
+    foreach ($ids as $id) {
+        try {
+            DB::transaction(function () use ($id, $jenisPelatihanId, &$deleted) {
+
+                // =========================================
+                // 1. AMBIL DATA LENGKAP (eager load semua)
+                // =========================================
+                $pendaftaran = Pendaftaran::with([
+                    'peserta',
+                    'peserta.kepegawaianPeserta',
+                    'pesertaMentor',
+                    'angkatan',
+                    'jenisPelatihan',
+                    'aksiPerubahan', // relasi ke tabel aksi_perubahan
+                ])->lockForUpdate()->findOrFail($id);
+
+                // Verifikasi jenis pelatihan
+                if ((int) $pendaftaran->id_jenis_pelatihan !== (int) $jenisPelatihanId) {
+                    throw new \Exception("Data #{$id} tidak termasuk jenis pelatihan yang dipilih.");
+                }
+
+                $peserta        = $pendaftaran->peserta;
+                $kepegawaian    = $peserta?->kepegawaianPeserta;
+                $angkatan       = $pendaftaran->angkatan;
+                $jenisPelatihan = $pendaftaran->jenisPelatihan;
+
+                // =========================================
+                // 2. KUMPULKAN SEMUA PATH FILE DARI DATABASE
+                //    (JANGAN rekonstruksi path - ambil dari DB)
+                // =========================================
+                $filesToDelete = [];
+
+                // File peserta
+                if ($peserta) {
+                    $filesToDelete[] = $peserta->file_ktp;
+                    $filesToDelete[] = $peserta->file_pas_foto;
+                }
+
+                // File kepegawaian
+                if ($kepegawaian) {
+                    $filesToDelete[] = $kepegawaian->file_sk_jabatan;
+                    $filesToDelete[] = $kepegawaian->file_sk_pangkat;
+                    $filesToDelete[] = $kepegawaian->file_sk_cpns;
+                    $filesToDelete[] = $kepegawaian->file_spmt;
+                    $filesToDelete[] = $kepegawaian->file_skp;
+                }
+
+                // File pendaftaran
+                $pendaftaranFileFields = [
+                    'file_surat_tugas',
+                    'file_surat_kesediaan',
+                    'file_pakta_integritas',
+                    'file_surat_komitmen',
+                    'file_surat_kelulusan_seleksi',
+                    'file_surat_sehat',
+                    'file_surat_bebas_narkoba',
+                    'file_surat_pernyataan_administrasi',
+                    'file_sertifikat_penghargaan',
+                    'file_persetujuan_mentor',
+                ];
+                foreach ($pendaftaranFileFields as $field) {
+                    $filesToDelete[] = $pendaftaran->$field ?? null;
+                }
+
+                // File aksi perubahan (laporan + lembar pengesahan)
+                $aksiList = $pendaftaran->aksiPerubahan ?? collect();
+                foreach ($aksiList as $aksi) {
+                    $filesToDelete[] = $aksi->file ?? null;
+                    $filesToDelete[] = $aksi->lembar_pengesahan ?? null;
+                }
+
+                // Bersihkan null/empty
+                $filesToDelete = array_filter($filesToDelete);
+
+                // =========================================
+                // 3. HAPUS FILE GOOGLE DRIVE SETELAH COMMIT
+                // =========================================
+                $pesertaNama = $peserta?->nama_lengkap ?? "ID #{$id}";
+
+                DB::afterCommit(function () use ($filesToDelete, $pesertaNama) {
+                    foreach ($filesToDelete as $path) {
+                        try {
+                            if (\Illuminate\Support\Facades\Storage::disk('google')->exists($path)) {
+                                \Illuminate\Support\Facades\Storage::disk('google')->delete($path);
+                                \Log::info("Bulk delete: file dihapus [{$pesertaNama}]: {$path}");
+                            }
+                        } catch (\Throwable $e) {
+                            \Log::warning("Bulk delete: gagal hapus file [{$pesertaNama}]", [
+                                'file' => $path,
+                                'err'  => $e->getMessage(),
+                            ]);
+                        }
+                    }
+
+                    // Coba hapus folder jika kosong
+                    // (opsional - Google Drive tidak mendukung "hapus folder kosong" secara otomatis
+                    //  lewat Flysystem, jadi kita skip untuk menghindari error)
+                });
+
+                // =========================================
+                // 4. HAPUS RELASI DI DATABASE (urutan penting!)
+                // =========================================
+
+                // a. Aksi perubahan
+                if ($pendaftaran->aksiPerubahan && $pendaftaran->aksiPerubahan->count() > 0) {
+                    $pendaftaran->aksiPerubahan()->delete();
+                }
+
+                // b. Peserta-Mentor
+                PesertaMentor::where('id_pendaftaran', $pendaftaran->id)->delete();
+
+                // c. Kepegawaian peserta
+                if ($kepegawaian) {
+                    $kepegawaian->delete();
+                }
+
+                // Simpan peserta_id sebelum hapus pendaftaran
+                $pesertaId = $peserta?->id;
+
+                // d. Hapus pendaftaran
+                $pendaftaran->delete();
+
+                // e. Hapus peserta + user jika tidak punya pendaftaran lain
+                if ($pesertaId) {
+                    $sisaPendaftaran = Pendaftaran::where('id_peserta', $pesertaId)->count();
+
+                    if ($sisaPendaftaran === 0) {
+                        User::where('peserta_id', $pesertaId)->delete();
+                        Peserta::where('id', $pesertaId)->delete();
+                    }
+                }
+
+                // =========================================
+                // 5. LOG AKTIVITAS
+                // =========================================
+                $jenisPelatihanNama = $jenisPelatihan?->nama_pelatihan ?? '-';
+                $angkatanNama       = $angkatan?->nama_angkatan ?? '-';
+
+                aktifitas(
+                    "Hapus Massal - Peserta {$jenisPelatihanNama} - {$angkatanNama}: {$pesertaNama}",
+                    $peserta
+                );
+
+                $deleted++;
+            });
+
+        } catch (\Throwable $e) {
+            $failed++;
+            $pesertaLabel = "Pendaftaran ID #{$id}";
+            $errors[] = "{$pesertaLabel}: " . $e->getMessage();
+
+            \Log::error("Bulk delete error for pendaftaran #{$id}", [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
+    // =========================================
+    // 6. SUSUN RESPONSE
+    // =========================================
+    if ($failed === 0) {
+        $message = "{$deleted} peserta berhasil dihapus beserta seluruh data dan dokumennya.";
+        $httpStatus = 200;
+    } elseif ($deleted === 0) {
+        $message = "Semua penghapusan gagal ({$failed} peserta). Silakan coba lagi.";
+        $httpStatus = 500;
+    } else {
+        $message = "{$deleted} peserta berhasil dihapus, {$failed} gagal.";
+        $httpStatus = 207; // Multi-Status
+    }
+
+    return response()->json([
+        'success' => $deleted > 0,
+        'message' => $message,
+        'deleted' => $deleted,
+        'failed'  => $failed,
+        'errors'  => $errors,
+    ], $httpStatus);
+}
 }
