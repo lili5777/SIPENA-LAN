@@ -2055,7 +2055,7 @@ public function edit(Request $request, $jenis, $id)
 
     public function showSwapForm(Request $request, $jenis, $id)
     {
-        if (auth()->user()->role->name !== 'admin') {
+        if (!in_array(auth()->user()->role->name, ['admin', 'pic'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -2094,7 +2094,7 @@ public function edit(Request $request, $jenis, $id)
      */
     public function getPesertaAngkatan(Request $request, $jenis = null)
     {
-        if (auth()->user()->role->name !== 'admin') {
+        if (!in_array(auth()->user()->role->name, ['admin', 'pic'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'
