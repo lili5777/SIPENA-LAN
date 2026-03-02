@@ -328,48 +328,97 @@ public function cleanupDuplicates(Request $request)
 public function getPeserta($id)
 {
     try {
-        $mentor = Mentor::with([
-            'pesertaMentor.pendaftaran.peserta.kepegawaianPeserta',
-            'pesertaMentor.pendaftaran.angkatan'
-        ])->findOrFail($id);
-        
-        $pesertaList = $mentor->pesertaMentor->map(function ($pesertaMentor) {
-            // Ambil data peserta melalui pendaftaran
-            $peserta = $pesertaMentor->pendaftaran->peserta ?? null;
-            $angkatan = $pesertaMentor->pendaftaran->angkatan ?? null;
-            $kepegawaian = $peserta ? $peserta->kepegawaianPeserta : null;
-            
-            if (!$peserta) {
-                return null; // Skip jika peserta tidak ditemukan
+        $mentor = Mentor::findOrFail($id);
+
+        $pesertaMentorList = DB::select("
+            SELECT
+                peserta.nama_lengkap,
+                peserta.nip_nrp,
+                peserta.email_pribadi,
+                peserta.nomor_hp,
+                peserta.ndh,
+                kepegawaian_peserta.asal_instansi,
+                angkatan.id        AS angkatan_id,
+                angkatan.nama_angkatan,
+                angkatan.tahun     AS angkatan_tahun,
+                angkatan.id_gelombang AS angkatan_id_gelombang,
+                g.id               AS gelombang_id,
+                g.nama_gelombang,
+                g.tahun            AS gelombang_tahun,
+                peserta_mentor.status_mentoring,
+                peserta_mentor.tanggal_penunjukan
+            FROM peserta_mentor
+            INNER JOIN pendaftaran   ON peserta_mentor.id_pendaftaran = pendaftaran.id
+            INNER JOIN peserta       ON pendaftaran.id_peserta = peserta.id
+            INNER JOIN angkatan      ON pendaftaran.id_angkatan = angkatan.id
+            LEFT  JOIN gelombang g   ON angkatan.id_gelombang = g.id
+            LEFT  JOIN kepegawaian_peserta ON kepegawaian_peserta.id_peserta = peserta.id
+            WHERE peserta_mentor.id_mentor = ?
+        ", [$id]);
+
+        $grouped = [];
+
+        foreach ($pesertaMentorList as $row) {
+            $gelombangKey = $row->gelombang_id
+                ? $row->gelombang_id
+                : 'tanpa_gelombang';
+
+            $gelombangLabel = $row->nama_gelombang
+                ? $row->nama_gelombang . ' ' . $row->gelombang_tahun
+                : 'Tanpa Gelombang';
+
+            $angkatanKey = $row->angkatan_id;
+
+            if (!isset($grouped[$gelombangKey])) {
+                $grouped[$gelombangKey] = [
+                    'gelombang_id'   => $row->gelombang_id,
+                    'nama_gelombang' => $gelombangLabel,
+                    'tahun'          => $row->gelombang_tahun,
+                    'total'          => 0,
+                    'angkatan'       => [],
+                ];
             }
-            
-            return [
-                'nama' => $peserta->nama_lengkap ?? '-',
-                'nip' => $peserta->nip_nrp ?? '-',
-                'ndh' => $peserta->ndh ?? '-',
-                'email' => $peserta->email_pribadi ?? '-',
-                'nomor_hp' => $peserta->nomor_hp ?? '-',
-                'instansi' => $kepegawaian->asal_instansi ?? '-',
-                'angkatan' => $angkatan->nama_angkatan ?? '-',
-                'tahun' => $angkatan->tahun ?? '-',
-                'status_mentoring' => $pesertaMentor->status_mentoring ?? '-',
-                'tanggal_penunjukan' => $pesertaMentor->tanggal_penunjukan 
-                    ? \Carbon\Carbon::parse($pesertaMentor->tanggal_penunjukan)->format('d/m/Y') 
+
+            if (!isset($grouped[$gelombangKey]['angkatan'][$angkatanKey])) {
+                $grouped[$gelombangKey]['angkatan'][$angkatanKey] = [
+                    'nama_angkatan' => $row->nama_angkatan,
+                    'tahun'         => $row->angkatan_tahun,
+                    'peserta'       => [],
+                ];
+            }
+
+            $grouped[$gelombangKey]['angkatan'][$angkatanKey]['peserta'][] = [
+                'nama'               => $row->nama_lengkap,
+                'nip'                => $row->nip_nrp ?? '-',
+                'ndh'                => $row->ndh ?? '-',
+                'email'              => $row->email_pribadi ?? '-',
+                'nomor_hp'           => $row->nomor_hp ?? '-',
+                'instansi'           => $row->asal_instansi ?? '-',
+                'status_mentoring'   => $row->status_mentoring ?? '-',
+                'tanggal_penunjukan' => $row->tanggal_penunjukan
+                    ? \Carbon\Carbon::parse($row->tanggal_penunjukan)->format('d/m/Y')
                     : '-',
             ];
-        })->filter()->values(); // Filter null values dan reset keys
-        
+
+            $grouped[$gelombangKey]['total']++;
+        }
+
+        $result = array_values(array_map(function ($gelombang) {
+            $gelombang['angkatan'] = array_values($gelombang['angkatan']);
+            return $gelombang;
+        }, $grouped));
+
         return response()->json([
             'success' => true,
-            'mentor' => [
-                'nama' => $mentor->nama_mentor,
-                'nip' => $mentor->nip_mentor,
+            'mentor'  => [
+                'nama'    => $mentor->nama_mentor,
+                'nip'     => $mentor->nip_mentor,
                 'jabatan' => $mentor->jabatan_mentor,
             ],
-            'peserta' => $pesertaList,
-            'total' => $pesertaList->count()
+            'grouped' => $result,
+            'total'   => count($pesertaMentorList),
         ]);
-        
+
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,

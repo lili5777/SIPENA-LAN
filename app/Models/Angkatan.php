@@ -14,6 +14,7 @@ class Angkatan extends Model
 
     protected $fillable = [
         'id_jenis_pelatihan',
+        'id_gelombang',
         'nama_angkatan',
         'tahun',
         'tanggal_mulai',
@@ -51,6 +52,11 @@ class Angkatan extends Model
     public function picPesertas()
     {
         return $this->hasMany(PicPeserta::class, 'angkatan_id');
+    }
+
+    public function gelombang()
+    {
+        return $this->belongsTo(Gelombang::class, 'id_gelombang');
     }
 
     

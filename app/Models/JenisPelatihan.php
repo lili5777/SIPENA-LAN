@@ -37,4 +37,9 @@ class JenisPelatihan extends Model
     {
         return $this->hasMany(PicPeserta::class, 'jenispelatihan_id');
     }
+
+    public function gelombang()
+    {
+        return $this->hasMany(Gelombang::class, 'id_jenis_pelatihan');
+    }
 }

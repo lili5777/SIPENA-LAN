@@ -73,6 +73,9 @@ $labelMenu = match ($kodePelatihan) {
                                 <a href="{{ route('mentor.index') }}" class="submenu-link">
                                     <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
                                 </a>
+                                <a href="{{ route('gelombang.index') }}" class="submenu-link">
+                                    <i class="fas fa-layer-group me-2"></i> Gelombang
+                                </a>
                             @endif
                             @if (auth()->user()->role->name != "pic" )
                                 <a href="{{ route('visi-misi.index') }}" class="submenu-link">

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\VisiMisiController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AksiPerubahanController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GelombangController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PendaftaranController;
@@ -199,6 +200,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/sertifikat/pdf', [ExportController::class, 'exportSertifikat'])
             ->name('sertifikat');
     });
+
+    Route::resource('gelombang', GelombangController::class);
+    Route::get('gelombang/{gelombang}/kelola-angkatan', [GelombangController::class, 'kelolaAngkatan'])->name('gelombang.kelola-angkatan');
+    Route::post('gelombang/{gelombang}/tambah-angkatan', [GelombangController::class, 'tambahAngkatan'])->name('gelombang.tambah-angkatan');
+    Route::post('gelombang/{gelombang}/lepas-angkatan', [GelombangController::class, 'lepasAngkatan'])->name('gelombang.lepas-angkatan');
+
     
     // Export Jadwal Seminar
     Route::get('/export/jadwal-seminar', [ExportController::class, 'indexJadwalSeminar'])

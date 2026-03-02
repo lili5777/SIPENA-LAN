@@ -425,78 +425,58 @@
     </div>
 
     <!-- Detail Peserta Modal -->
-    <div class="modal fade" id="pesertaModal" tabindex="-1" aria-labelledby="pesertaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-gradient-primary text-white border-0" 
-                    style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
-                    <div>
-                        <h5 class="modal-title fw-bold mb-1" id="pesertaModalLabel">
-                            <i class="fas fa-users me-2"></i>
-                            Detail Peserta Mentor
-                        </h5>
-                        <p class="mb-0 small opacity-75" id="mentorInfo"></p>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Detail Peserta Modal -->
+<div class="modal fade" id="pesertaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white border-0"
+                style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%);">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1">
+                        <i class="fas fa-users me-2"></i> Detail Peserta Mentor
+                    </h5>
+                    <p class="mb-0 small opacity-75" id="mentorInfo"></p>
                 </div>
-                <div class="modal-body p-0">
-                    <!-- Loading State -->
-                    <div id="loadingPeserta" class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="text-muted mt-3">Memuat data peserta...</p>
-                    </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
-                    <!-- Error State -->
-                    <div id="errorPeserta" class="alert alert-danger m-4" style="display: none;">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <span id="errorMessage"></span>
-                    </div>
-
-                    <!-- Table Container -->
-                    <div id="pesertaTableContainer" style="display: none;">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0" id="pesertaTable">
-                                <thead class="table-light sticky-top">
-                                    <tr>
-                                        <th width="5%" class="ps-4">No</th>
-                                        <th width="20%">Nama Peserta</th>
-                                        <th width="15%">NIP/NRP</th>
-                                        <th width="20%">Instansi</th>
-                                        <th width="15%">Kontak</th>
-                                        <th width="15%">Angkatan</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pesertaTableBody">
-                                    <!-- Data will be populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Empty State -->
-                    <div id="emptyPeserta" class="text-center py-5" style="display: none;">
-                        <div class="empty-state-icon mb-3">
-                            <i class="fas fa-user-slash fa-4x" style="color: #e9ecef;"></i>
-                        </div>
-                        <h5 class="text-muted mb-2">Belum ada peserta</h5>
-                        <p class="text-muted">Mentor ini belum memiliki peserta yang terdaftar</p>
-                    </div>
+            <div class="modal-body p-0">
+                <!-- Loading -->
+                <div id="loadingPeserta" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted mt-3">Memuat data peserta...</p>
                 </div>
-                <div class="modal-footer border-0 bg-light">
-                    <div class="w-100 d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Total: <strong id="totalPeserta">0</strong> peserta
-                        </span>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-2"></i>Tutup
-                        </button>
-                    </div>
+
+                <!-- Error -->
+                <div id="errorPeserta" class="alert alert-danger m-4" style="display:none;">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span id="errorMessage"></span>
+                </div>
+
+                <!-- Empty -->
+                <div id="emptyPeserta" class="text-center py-5" style="display:none;">
+                    <i class="fas fa-user-slash fa-4x mb-3" style="color:#e9ecef;"></i>
+                    <h5 class="text-muted mb-2">Belum ada peserta</h5>
+                    <p class="text-muted">Mentor ini belum memiliki peserta yang terdaftar</p>
+                </div>
+
+                <!-- Content: grouped by gelombang -->
+                <div id="pesertaContent" class="p-4" style="display:none;"></div>
+            </div>
+
+            <div class="modal-footer border-0 bg-light">
+                <div class="w-100 d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">
+                        <i class="fas fa-users me-1"></i>
+                        Total keseluruhan: <strong id="totalPeserta">0</strong> peserta
+                    </span>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Tutup
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 </div>
 
     <!-- Delete Confirmation Modal -->
@@ -944,98 +924,150 @@ document.addEventListener('DOMContentLoaded', function () {
     // 🆕 PESERTA MODAL HANDLER
     // ============================================
     const pesertaModal = new bootstrap.Modal(document.getElementById('pesertaModal'));
-    
+
     document.querySelectorAll('.view-peserta').forEach(button => {
-        button.addEventListener('click', function() {
-            const mentorId = this.getAttribute('data-mentor-id');
-            const mentorName = this.getAttribute('data-mentor-name');
-            
-            // Reset modal state
-            document.getElementById('loadingPeserta').style.display = 'block';
-            document.getElementById('errorPeserta').style.display = 'none';
-            document.getElementById('pesertaTableContainer').style.display = 'none';
-            document.getElementById('emptyPeserta').style.display = 'none';
-            
-            // Show modal
+        button.addEventListener('click', function () {
+            const mentorId   = this.dataset.mentorId;
+            const mentorName = this.dataset.mentorName;
+
+            // Reset state
+            document.getElementById('loadingPeserta').style.display   = 'block';
+            document.getElementById('errorPeserta').style.display     = 'none';
+            document.getElementById('emptyPeserta').style.display     = 'none';
+            document.getElementById('pesertaContent').style.display   = 'none';
+            document.getElementById('pesertaContent').innerHTML       = '';
+            document.getElementById('totalPeserta').textContent       = '0';
+
             pesertaModal.show();
-            
-            // Fetch data
+
             fetch(`/mentor/${mentorId}/peserta`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     document.getElementById('loadingPeserta').style.display = 'none';
-                    
-                    if (data.success) {
-                        // Update modal header info
-                        document.getElementById('mentorInfo').innerHTML = `
-                            <i class="fas fa-user-tie me-1"></i> ${data.mentor.nama}
-                            ${data.mentor.nip ? ' | NIP: ' + data.mentor.nip : ''}
-                            ${data.mentor.jabatan ? ' | ' + data.mentor.jabatan : ''}
-                        `;
-                        
-                        document.getElementById('totalPeserta').textContent = data.total;
-                        
-                        if (data.peserta && data.peserta.length > 0) {
-                            // Populate table
-                            const tbody = document.getElementById('pesertaTableBody');
-                            tbody.innerHTML = '';
-                            
-                            data.peserta.forEach((peserta, index) => {
-                                const row = `
-                                    <tr>
-                                        <td class="ps-4 fw-semibold">${index + 1}</td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-2"
-                                                    style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-user"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold">${peserta.nama}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-light text-dark border">
-                                                <i class="fas fa-id-badge me-1"></i>
-                                                ${peserta.nip}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <i class="fas fa-building me-1 text-muted"></i>
-                                            <small>${peserta.instansi}</small>
-                                        </td>
-                                        <td>
-                                            <div class="small">
-                                                ${peserta.email ? `<div class="mb-1"><i class="fas fa-envelope me-1 text-muted"></i>${peserta.email}</div>` : ''}
-                                                ${peserta.nomor_hp ? `<div><i class="fas fa-phone me-1 text-muted"></i>${peserta.nomor_hp}</div>` : ''}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info bg-opacity-10 text-info">
-                                                <i class="fas fa-graduation-cap me-1"></i>
-                                                ${peserta.angkatan} - ${peserta.tahun}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                `;
-                                tbody.innerHTML += row;
-                            });
-                            
-                            document.getElementById('pesertaTableContainer').style.display = 'block';
-                        } else {
-                            document.getElementById('emptyPeserta').style.display = 'block';
-                        }
-                    } else {
+
+                    if (!data.success) {
                         document.getElementById('errorPeserta').style.display = 'block';
-                        document.getElementById('errorMessage').textContent = data.message || 'Terjadi kesalahan saat memuat data';
+                        document.getElementById('errorMessage').textContent   = data.message;
+                        return;
                     }
+
+                    document.getElementById('mentorInfo').innerHTML =
+                        `<i class="fas fa-user-tie me-1"></i> ${data.mentor.nama}
+                        ${data.mentor.nip     ? ' | NIP: ' + data.mentor.nip         : ''}
+                        ${data.mentor.jabatan ? ' | '      + data.mentor.jabatan      : ''}`;
+
+                    document.getElementById('totalPeserta').textContent = data.total;
+
+                    if (!data.grouped || data.grouped.length === 0) {
+                        document.getElementById('emptyPeserta').style.display = 'block';
+                        return;
+                    }
+
+                    const container = document.getElementById('pesertaContent');
+                    let html = '';
+
+                    data.grouped.forEach(gelombang => {
+                        // ── Header gelombang ──
+                        html += `
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-3 mb-3 p-3 rounded-3"
+                                style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-left:4px solid #285496;">
+                                <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
+                                    style="width:44px;height:44px;color:#285496;">
+                                    <i class="fas fa-layer-group fa-lg"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold" style="color:#285496;">${gelombang.nama_gelombang}</h6>
+                                </div>
+                                <span class="badge px-3 py-2 fw-semibold"
+                                    style="background:#285496;color:white;font-size:0.85rem;">
+                                    <i class="fas fa-users me-1"></i>${gelombang.total} Peserta
+                                </span>
+                            </div>`;
+
+                        // ── Loop per angkatan ──
+                        gelombang.angkatan.forEach(angkatan => {
+                            html += `
+                            <div class="ms-3 mb-3">
+                                <div class="d-flex align-items-center gap-2 mb-2 py-2 px-3 rounded"
+                                    style="background:#f8fafc;border-left:3px solid #3a6bc7;">
+                                    <i class="fas fa-users text-primary"></i>
+                                    <span class="fw-semibold text-primary">${angkatan.nama_angkatan}</span>
+                                    <span class="text-muted small">· Tahun ${angkatan.tahun}</span>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary ms-auto">
+                                        ${angkatan.peserta.length} peserta
+                                    </span>
+                                </div>
+
+                                <div class="table-responsive ms-2">
+                                    <table class="table table-sm table-hover mb-0"
+                                        style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+                                        <thead style="background:#f1f5f9;">
+                                            <tr>
+                                                <th class="ps-3" width="4%">No</th>
+                                                <th width="22%">Nama</th>
+                                                <th width="16%">NIP/NRP</th>
+                                                <th width="20%">Instansi</th>
+                                                <th width="18%">Kontak</th>
+                                                <th width="20%">Status Mentoring</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+
+                            angkatan.peserta.forEach((p, idx) => {
+                                html += `
+                                            <tr>
+                                                <td class="ps-3 text-muted fw-semibold">${idx + 1}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                                                            style="width:30px;height:30px;font-size:0.75rem;">
+                                                            <i class="fas fa-user"></i>
+                                                        </div>
+                                                        <span class="fw-semibold">${p.nama}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark border">
+                                                        <i class="fas fa-id-badge me-1 text-muted"></i>${p.nip}
+                                                    </span>
+                                                </td>
+                                                <td><small class="text-muted">${p.instansi}</small></td>
+                                                <td>
+                                                    <div class="small">
+                                                        ${p.email !== '-' ? `<div><i class="fas fa-envelope me-1 text-muted"></i>${p.email}</div>` : ''}
+                                                        ${p.nomor_hp !== '-' ? `<div><i class="fas fa-phone me-1 text-muted"></i>${p.nomor_hp}</div>` : ''}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge ${p.status_mentoring === 'Selesai' ? 'bg-success' : p.status_mentoring === 'Berjalan' ? 'bg-primary' : 'bg-secondary'} bg-opacity-10 
+                                                        ${p.status_mentoring === 'Selesai' ? 'text-success' : p.status_mentoring === 'Berjalan' ? 'text-primary' : 'text-secondary'}">
+                                                        ${p.status_mentoring}
+                                                    </span>
+                                                    <div class="small text-muted mt-1">
+                                                        <i class="fas fa-calendar me-1"></i>${p.tanggal_penunjukan}
+                                                    </div>
+                                                </td>
+                                            </tr>`;
+                            });
+
+                            html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>`;
+                        });
+
+                        html += `</div><hr class="my-3">`;
+                    });
+
+                    container.innerHTML = html;
+                    container.style.display = 'block';
                 })
-                .catch(error => {
+                .catch(() => {
                     document.getElementById('loadingPeserta').style.display = 'none';
-                    document.getElementById('errorPeserta').style.display = 'block';
-                    document.getElementById('errorMessage').textContent = 'Gagal memuat data peserta. Silakan coba lagi.';
-                    console.error('Error:', error);
+                    document.getElementById('errorPeserta').style.display   = 'block';
+                    document.getElementById('errorMessage').textContent     = 'Gagal memuat data peserta. Silakan coba lagi.';
                 });
         });
     });
