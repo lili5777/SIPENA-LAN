@@ -255,11 +255,6 @@
                         <img src="{{ $badge1 }}" alt="Badge 1">
                     </div>
                 @endif
-                @if(!empty($badge2))
-                    <div class="badge">
-                        <img src="{{ $badge2 }}" alt="Badge 2">
-                    </div>
-                @endif
             </div>
 
             <!-- Angkatan -->
@@ -290,8 +285,6 @@
                 </div>
             </div>
 
-            <!-- Bottom Number -->
-            <div class="bottom-number">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</div>
         </div>
     @endforeach
 </body>

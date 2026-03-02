@@ -434,7 +434,7 @@ $isPKN = $jenis === 'pkn';
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Ukuran Baju Taktikal</label>
+                                    <label class="form-label">Ukuran Baju Kaos</label>
                                     <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="S" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'S') || old('ukuran_kaos') == 'S' ? 'selected' : '' }}>S</option>
@@ -449,7 +449,7 @@ $isPKN = $jenis === 'pkn';
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Ukuran Kaos Olahraga</label>
+                                    <label class="form-label">Ukuran Baju Taktikal</label>
                                     <select name="ukuran_training" class="form-select @error('ukuran_training') error @enderror">
                                         <option value="">Pilih</option>
                                         <option value="S" {{ ($pesertaData && $pesertaData->ukuran_training == 'S') || old('ukuran_training') == 'S' ? 'selected' : '' }}>S</option>

@@ -922,7 +922,10 @@ class ExportController extends Controller
 
     // Generate PDF dengan orientasi landscape
     $pdf = Pdf::loadView('admin.export.templatesertifikat', $data);
-    $pdf->setPaper('A4', 'landscape');
+    $width  = 285 * 2.8346; // ≈ 808 pt
+    $height = 90  * 2.8346; // ≈ 255 pt
+
+    $pdf->setPaper([0, 0, $width, $height], 'landscape');
 
     // Set options untuk performance
     $pdf->setOptions([
