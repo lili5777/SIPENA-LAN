@@ -323,12 +323,25 @@
                 <select name="angkatan" class="form-select">
                     <option value="">Semua Angkatan</option>
                     @php
-                        $romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
-                                   'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'];
+                        function intToRoman(int $num): string {
+                            $map = [
+                                1000=>'M', 900=>'CM', 500=>'D', 400=>'CD',
+                                100=>'C',  90=>'XC',  50=>'L',  40=>'XL',
+                                10=>'X',   9=>'IX',   5=>'V',   4=>'IV', 1=>'I'
+                            ];
+                            $result = '';
+                            foreach ($map as $val => $sym) {
+                                while ($num >= $val) {
+                                    $result .= $sym;
+                                    $num -= $val;
+                                }
+                            }
+                            return $result;
+                        }
                     @endphp
-                    @foreach($romawi as $rom)
-                        <option value="Angkatan {{ $rom }}">Angkatan {{ $rom }}</option>
-                    @endforeach
+                    @for($i = 1; $i <= 70; $i++)
+                        <option value="Angkatan {{ intToRoman($i) }}">Angkatan {{ intToRoman($i) }}</option>
+                    @endfor
                 </select>
             </div>
 
