@@ -53,61 +53,52 @@ class ExportController extends Controller
     public function exportJadwalSeminar(Request $request)
     {
         $jenisPelatihan = $request->jenis_pelatihan;
-        $angkatan = $request->angkatan;
-        $tahun = $request->tahun;
-        $kategori = $request->kategori;
-        $wilayah = $request->wilayah;
+        $angkatan       = $request->angkatan;
+        $tahun          = $request->tahun;
+        $kategori       = $request->kategori;
+        $wilayah        = $request->wilayah;
 
-        // Validasi data kosong
-        $query = Pendaftaran::where('status_pendaftaran', 'Diterima');
+        // Validasi: cek apakah ada kelompok yang sesuai filter
+        $kelompokQuery = \App\Models\Kelompok::query();
 
         if ($jenisPelatihan) {
-            $query->whereHas('jenisPelatihan', fn($q) => $q->where('nama_pelatihan', $jenisPelatihan));
+            $kelompokQuery->whereHas('jenisPelatihan', fn($q) => $q->where('nama_pelatihan', $jenisPelatihan));
         }
-
         if ($angkatan) {
-            $query->whereHas('angkatan', fn($q) => $q->where('nama_angkatan', $angkatan));
+            $kelompokQuery->whereHas('angkatan', fn($q) => $q->where('nama_angkatan', $angkatan));
         }
-
         if ($tahun) {
-            $query->whereHas('angkatan', fn($q) => $q->where('tahun', $tahun));
+            $kelompokQuery->where('tahun', $tahun);
         }
-
         if ($kategori === 'PNBP') {
-            $query->whereHas('angkatan', fn($q) => $q->where('kategori', 'PNBP'));
+            $kelompokQuery->whereHas('angkatan', fn($q) => $q->where('kategori', 'PNBP'));
         } elseif ($kategori === 'FASILITASI') {
-            $query->whereHas('angkatan', function ($q) use ($wilayah) {
+            $kelompokQuery->whereHas('angkatan', function ($q) use ($wilayah) {
                 $q->where('kategori', 'FASILITASI');
                 if ($wilayah && trim($wilayah) !== '') {
                     $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
                 }
             });
-        } else if ($kategori === 'SEMUA') {
-            if ($wilayah && trim($wilayah) !== '') {
-                $query->whereHas('angkatan', fn($q) => $q->where('wilayah', 'like', '%' . trim($wilayah) . '%'));
-            }
         }
 
-        if (!$query->exists()) {
-            return back()->with('error', 'Data peserta tidak ditemukan sesuai filter yang dipilih.');
+        if (!$kelompokQuery->exists()) {
+            return back()->with('error', 'Tidak ada data kelompok ditemukan sesuai filter yang dipilih.');
         }
 
         // Buat nama file
         $fileNameParts = ['JADWAL_SEMINAR'];
-
         if ($jenisPelatihan) $fileNameParts[] = strtoupper(str_replace(' ', '_', $jenisPelatihan));
-        if ($angkatan) $fileNameParts[] = strtoupper(str_replace(' ', '_', $angkatan));
-        if ($tahun) $fileNameParts[] = $tahun;
+        if ($angkatan)       $fileNameParts[] = strtoupper(str_replace(' ', '_', $angkatan));
+        if ($tahun)          $fileNameParts[] = $tahun;
         if ($kategori && $kategori !== 'SEMUA') $fileNameParts[] = $kategori;
-        if ($wilayah) $fileNameParts[] = strtoupper(str_replace(' ', '_', $wilayah));
-
+        if ($wilayah)        $fileNameParts[] = strtoupper(str_replace(' ', '_', $wilayah));
         $fileNameParts[] = now()->format('Ymd_His');
         $fileName = implode('_', $fileNameParts) . '.xlsx';
 
-        aktifitas('Mengekspor Jadwal Seminar Peserta');
+        aktifitas('Mengekspor Jadwal Seminar Peserta Per Kelompok');
 
         return Excel::download(
-            new JadwalSeminar($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
+            new \App\Exports\JadwalSeminar($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
             $fileName
         );
     }

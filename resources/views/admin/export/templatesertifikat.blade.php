@@ -59,7 +59,7 @@
             border-radius: 2px;
         }
 
-        /* Logo di kiri atas */
+        /* Logo LAN di kiri atas */
         .logo-section {
             position: absolute;
             top: 18mm;
@@ -81,23 +81,22 @@
             object-fit: contain;
         }
 
-        /* Top Right Badges */
-        .badges {
+        /* Badge dipindah: samping kanan logo LAN
+           Logo: left=22mm, width=260px≈92mm → badge mulai di 22mm + 92mm + 3mm = ~117mm
+           Tinggi badge sama dengan logo = 60px≈21mm, top sama = 18mm */
+        .badge-section {
             position: absolute;
             top: 18mm;
-            right: 22mm;
+            left: 95mm;
         }
 
         .badge {
-            width: 52px;
-            height: 52px;
-            background: #f1f5f9;
+            width: 90px;
+            height: 90px;
+            background: transparent;
             border-radius: 50%;
-            padding: 4px;
-            display: inline-block;
-            margin-left: 8px;
-            vertical-align: top;
-            border: 1px solid #e2e8f0;
+            padding: 0;
+            border: none;
         }
 
         .badge img {
@@ -135,7 +134,7 @@
         /* Konten Kiri (NDH, Nama, Kabupaten) */
         .left-content {
             position: absolute;
-            top: 88mm;
+            top: 82mm;
             left: 22mm;
             width: 48%;
         }
@@ -239,7 +238,7 @@
             <div class="frame-outer"></div>
             <div class="frame-inner"></div>
 
-            <!-- Logo di kiri atas -->
+            <!-- Logo LAN di kiri atas -->
             <div class="logo-section">
                 <div class="logo-box">
                     @if(!empty($logo))
@@ -248,14 +247,14 @@
                 </div>
             </div>
 
-            <!-- Top Right Badges -->
-            <div class="badges">
-                @if(!empty($badge1))
+            <!-- Badge di samping kanan Logo LAN -->
+            @if(!empty($badge1))
+                <div class="badge-section">
                     <div class="badge">
                         <img src="{{ $badge1 }}" alt="Badge 1">
                     </div>
-                @endif
-            </div>
+                </div>
+            @endif
 
             <!-- Angkatan -->
             <div class="angkatan-section">

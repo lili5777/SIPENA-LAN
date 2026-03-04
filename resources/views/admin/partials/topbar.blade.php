@@ -41,26 +41,26 @@
                     <h6 class="mb-0 text-white fw-bold"><i class="fas fa-rocket me-2"></i>Update Sistem</h6>
                     <small class="text-white opacity-75">Fitur terbaru telah tersedia</small>
                 </div>
-                <span class="badge bg-white text-primary fw-bold" style="font-size: 0.75rem;">2 Baru</span>
+                <span class="badge bg-white text-primary fw-bold" style="font-size: 0.75rem;">5 Baru</span>
             </div>
 
             <!-- Notif Items -->
             <div class="notif-body" style="max-height: 340px; overflow-y: auto;">
 
                 <!-- Item 1 -->
-                <div class="notif-item d-flex align-items-start px-3 py-3 notif-unread" data-id="1">
+                <div class="notif-item d-flex align-items-start px-3 py-3 notif-unread" data-id="3">
                     <div class="notif-icon-wrap me-3 flex-shrink-0">
-                        <div class="notif-icon-circle" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
-                            <i class="fas fa-trash-alt text-white" style="font-size: 0.9rem;"></i>
+                        <div class="notif-icon-circle" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
+                            <i class="fas fa-layer-group text-white" style="font-size: 0.9rem;"></i>
                         </div>
                     </div>
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="fw-bold" style="font-size: 0.88rem; color: #2d3436;">Multi Delete Peserta</span>
+                            <span class="fw-bold" style="font-size: 0.88rem; color: #2d3436;">Gelombang Angkatan</span>
                             <span class="notif-dot"></span>
                         </div>
                         <p class="mb-1 text-muted" style="font-size: 0.82rem; line-height: 1.4;">
-                            PIC kini dapat <strong>menghapus lebih dari 1 peserta sekaligus</strong> dengan fitur multi-select delete yang lebih cepat dan efisien.
+                            Fitur <strong>Gelombang Angkatan</strong> kini tersedia — kelola angkatan pelatihan berdasarkan gelombang dengan lebih terstruktur dan mudah.
                         </p>
                         <small class="text-primary fw-semibold" style="font-size: 0.75rem;">
                             <i class="fas fa-clock me-1"></i>Baru saja
@@ -71,19 +71,88 @@
                 <div class="notif-divider mx-3"></div>
 
                 <!-- Item 2 -->
-                <div class="notif-item d-flex align-items-start px-3 py-3 notif-unread" data-id="2">
+                <div class="notif-item d-flex align-items-start px-3 py-3 notif-unread" data-id="4">
                     <div class="notif-icon-wrap me-3 flex-shrink-0">
-                        <div class="notif-icon-circle" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
-                            <i class="fas fa-code-branch text-white" style="font-size: 0.9rem;"></i>
+                        <div class="notif-icon-circle" style="background: linear-gradient(135deg, #00b894, #00cec9);">
+                            <i class="fas fa-chalkboard-teacher text-white" style="font-size: 0.9rem;"></i>
                         </div>
                     </div>
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="fw-bold" style="font-size: 0.88rem; color: #2d3436;">Merge Mentor Duplikat</span>
+                            <span class="fw-bold" style="font-size: 0.88rem; color: #2d3436;">Master Coach</span>
                             <span class="notif-dot"></span>
                         </div>
                         <p class="mb-1 text-muted" style="font-size: 0.82rem; line-height: 1.4;">
-                            Di halaman <strong>Master Mentor</strong> kini tersedia tombol <strong>&ldquo;Rapikan Duplikat&rdquo;</strong> &mdash; sistem akan menemukan mentor yang sama, lalu memindahkan seluruh peserta dari mentor duplikat ke <strong>1 mentor utama</strong> secara otomatis.
+                            Halaman <strong>Master Coach</strong> kini hadir — tambah, edit, dan kelola data coach dengan validasi NIP & email agar tidak ada duplikat.
+                        </p>
+                        <small class="text-primary fw-semibold" style="font-size: 0.75rem;">
+                            <i class="fas fa-clock me-1"></i>Baru saja
+                        </small>
+                    </div>
+                </div>
+
+                <div class="notif-divider mx-3"></div>
+
+                <!-- Item 3 -->
+                <div class="notif-item d-flex align-items-start px-3 py-3 notif-unread" data-id="5">
+                    <div class="notif-icon-wrap me-3 flex-shrink-0">
+                        <div class="notif-icon-circle" style="background: linear-gradient(135deg, #e17055, #d63031);">
+                            <i class="fas fa-user-check text-white" style="font-size: 0.9rem;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="fw-bold" style="font-size: 0.88rem; color: #2d3436;">Master Penguji</span>
+                            <span class="notif-dot"></span>
+                        </div>
+                        <p class="mb-1 text-muted" style="font-size: 0.82rem; line-height: 1.4;">
+                            Halaman <strong>Master Penguji</strong> kini tersedia — kelola data penguji lengkap dengan status aktif, NIP unik, dan informasi jabatan.
+                        </p>
+                        <small class="text-primary fw-semibold" style="font-size: 0.75rem;">
+                            <i class="fas fa-clock me-1"></i>Baru saja
+                        </small>
+                    </div>
+                </div>
+
+                <div class="notif-divider mx-3"></div>
+
+                <!-- Item 4 -->
+                <div class="notif-item d-flex align-items-start px-3 py-3 notif-unread" data-id="6">
+                    <div class="notif-icon-wrap me-3 flex-shrink-0">
+                        <div class="notif-icon-circle" style="background: linear-gradient(135deg, #fdcb6e, #e67e22);">
+                            <i class="fas fa-clipboard-check text-white" style="font-size: 0.9rem;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="fw-bold" style="font-size: 0.88rem; color: #2d3436;">Master Evaluator</span>
+                            <span class="notif-dot"></span>
+                        </div>
+                        <p class="mb-1 text-muted" style="font-size: 0.82rem; line-height: 1.4;">
+                            Halaman <strong>Master Evaluator</strong> kini hadir — tambah dan kelola data evaluator dengan validasi duplikat NIP & email secara otomatis.
+                        </p>
+                        <small class="text-primary fw-semibold" style="font-size: 0.75rem;">
+                            <i class="fas fa-clock me-1"></i>Baru saja
+                        </small>
+                    </div>
+                </div>
+
+                <div class="notif-divider mx-3"></div>
+
+                <!-- Item 5 -->
+                <div class="notif-item d-flex align-items-start px-3 py-3 notif-unread" data-id="7">
+                    <div class="notif-icon-wrap me-3 flex-shrink-0">
+                        <div class="notif-icon-circle" style="background: linear-gradient(135deg, #74b9ff, #0984e3);">
+                            <i class="fas fa-users text-white" style="font-size: 0.9rem;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="fw-bold" style="font-size: 0.88rem; color: #2d3436;">Kelompok & Peserta</span>
+                            <span class="notif-dot"></span>
+                        </div>
+                        <p class="mb-1 text-muted" style="font-size: 0.82rem; line-height: 1.4;">
+                            Fitur <strong>Kelompok Peserta</strong> kini hadir — buat kelompok, assign coach/penguji/evaluator, dan kelola peserta per kelompok dengan urutan NDH otomatis.
                         </p>
                         <small class="text-primary fw-semibold" style="font-size: 0.75rem;">
                             <i class="fas fa-clock me-1"></i>Baru saja
@@ -96,7 +165,7 @@
             <!-- Footer -->
             <div class="notif-footer px-4 py-2 d-flex align-items-center justify-content-between"
                 style="border-top: 1px solid #f0f0f0; background: #fafafa;">
-                <small class="text-muted">v2.1.0 — 24 Feb 2026</small>
+                <small class="text-muted">v2.2.0 — 04 Mar 2026</small>
                 <button class="btn btn-sm btn-link text-primary p-0 fw-semibold" id="markAllRead"
                     style="font-size: 0.8rem; text-decoration: none;">
                     <i class="fas fa-check-double me-1"></i>Tandai Dibaca

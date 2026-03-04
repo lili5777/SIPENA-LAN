@@ -1,0 +1,259 @@
+@extends('admin.partials.layout')
+
+@section('title', 'Kelola Peserta - ' . $kelompok->nama_kelompok)
+
+@section('content')
+    <div class="page-header rounded-3 mb-4"
+        style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%); padding: 2rem;">
+        <div class="d-flex align-items-center">
+            <div class="icon-wrapper bg-white rounded-circle p-3 me-3 shadow">
+                <i class="fas fa-users-cog fa-lg" style="color: #285496;"></i>
+            </div>
+            <div>
+                <h1 class="text-white mb-1">Kelola Peserta Kelompok</h1>
+                <p class="text-white-50 mb-0">
+                    <span class="me-2">{{ $kelompok->nama_kelompok }}</span>
+                    <span class="badge bg-white" style="color:#285496">{{ $kelompok->jenisPelatihan->nama_pelatihan ?? '-' }}</span>
+                    <span class="badge bg-white ms-1" style="color:#285496">{{ $kelompok->angkatan->nama_angkatan ?? '-' }}</span>
+                </p>
+            </div>
+            <div class="ms-auto">
+                <a href="{{ route('kelompok.index') }}" class="btn btn-light shadow-sm">
+                    <i class="fas fa-arrow-left me-2"></i> Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert">
+            <i class="fas fa-check-circle fa-lg me-3"></i>
+            <div class="flex-grow-1"><strong>Sukses!</strong> {{ session('success') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert">
+            <i class="fas fa-exclamation-circle fa-lg me-3"></i>
+            <div class="flex-grow-1"><strong>Error!</strong> {{ session('error') }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <!-- Info Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <div class="row g-3 text-center">
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Mentor</div>
+                    <div class="fw-semibold">{{ $kelompok->mentor->nama_mentor ?? '-' }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Coach</div>
+                    <div class="fw-semibold">{{ $kelompok->coach->nama ?? '-' }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Penguji</div>
+                    <div class="fw-semibold">{{ $kelompok->penguji->nama ?? '-' }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Evaluator</div>
+                    <div class="fw-semibold">{{ $kelompok->evaluator->nama ?? '-' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Kolom Kiri: Peserta Tersedia -->
+        <div class="col-md-5">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-inbox me-2 text-secondary"></i>
+                        Peserta Tersedia
+                        <span class="badge bg-secondary ms-1">{{ $pesertaTersedia->count() }}</span>
+                    </h5>
+                    <small class="text-muted">Peserta di angkatan ini yang belum masuk kelompok manapun</small>
+                </div>
+                <div class="card-body p-0">
+                    @if($pesertaTersedia->isEmpty())
+                        <div class="text-center py-5 px-3">
+                            <i class="fas fa-check-circle fa-3x mb-3" style="color: #e9ecef;"></i>
+                            <p class="text-muted mb-0">Semua peserta sudah terhubung ke kelompok</p>
+                        </div>
+                    @else
+                        <form action="{{ route('kelompok.tambah-peserta', $kelompok) }}" method="POST">
+                            @csrf
+                            <div class="p-3 border-bottom">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="searchTersedia"
+                                        placeholder="Cari nama, NIP, atau NDH...">
+                                </div>
+                            </div>
+                            <div class="peserta-list" style="max-height: 400px; overflow-y: auto;">
+                                @foreach($pesertaTersedia as $peserta)
+                                    <div class="peserta-item d-flex align-items-center p-3 border-bottom hover-bg"
+                                        data-search="{{ strtolower($peserta->nama_lengkap . ' ' . $peserta->nip_nrp . ' ' . $peserta->ndh) }}">
+                                        <div class="form-check mb-0 me-2">
+                                            <input class="form-check-input" type="checkbox"
+                                                name="peserta_ids[]" value="{{ $peserta->id }}"
+                                                id="tersedia_{{ $peserta->id }}">
+                                        </div>
+                                        <label class="form-check-label w-100" for="tersedia_{{ $peserta->id }}" style="cursor:pointer">
+                                            <div class="fw-semibold small">
+                                                <span class="badge bg-primary me-1">NDH {{ $peserta->ndh ?? '-' }}</span>
+                                                {{ $peserta->nama_lengkap }}
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ $peserta->nip_nrp }}
+                                                @if($peserta->kepegawaian)
+                                                    · {{ Str::limit($peserta->kepegawaian->instansi_asal ?? '', 30) }}
+                                                @endif
+                                            </small>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="p-3 border-top">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <small class="text-muted">
+                                        Terpilih: <span id="countTerpilih" class="fw-bold text-primary">0</span>
+                                    </small>
+                                    <button type="button" id="selectAll" class="btn btn-link btn-sm p-0">Pilih Semua</button>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-arrow-right me-2"></i> Tambahkan ke Kelompok
+                                </button>
+                            </div>
+                        </form>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Ikon Tengah -->
+        <div class="col-md-2 d-none d-md-flex align-items-center justify-content-center">
+            <div class="text-center text-muted">
+                <i class="fas fa-exchange-alt fa-2x mb-2" style="color: #285496;"></i>
+                <p class="small mb-0">Kelola<br>Peserta</p>
+            </div>
+        </div>
+
+        <!-- Kolom Kanan: Peserta Terhubung -->
+        <div class="col-md-5">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-link me-2 text-success"></i>
+                        Peserta Kelompok Ini
+                        <span class="badge bg-success ms-1">{{ $pesertaTerhubung->count() }}</span>
+                    </h5>
+                    <small class="text-muted">Anggota dari {{ $kelompok->nama_kelompok }}</small>
+                </div>
+                <div class="card-body p-0">
+                    @if($pesertaTerhubung->isEmpty())
+                        <div class="text-center py-5 px-3">
+                            <i class="fas fa-users fa-3x mb-3" style="color: #e9ecef;"></i>
+                            <p class="text-muted mb-0">Belum ada peserta di kelompok ini</p>
+                            <small class="text-muted">Tambahkan dari daftar tersedia di sebelah kiri</small>
+                        </div>
+                    @else
+                        <div class="p-3 border-bottom">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0" id="searchTerhubung"
+                                    placeholder="Cari nama, NIP, atau NDH...">
+                            </div>
+                        </div>
+                        <div class="peserta-list" style="max-height: 450px; overflow-y: auto;">
+                            @foreach($pesertaTerhubung as $peserta)
+                                <div class="terhubung-item d-flex align-items-center p-3 border-bottom hover-bg"
+                                    data-search="{{ strtolower($peserta->nama_lengkap . ' ' . $peserta->nip_nrp . ' ' . $peserta->ndh) }}">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small">
+                                            <span class="badge bg-success me-1">NDH {{ $peserta->ndh ?? '-' }}</span>
+                                            {{ $peserta->nama_lengkap }}
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ $peserta->nip_nrp }}
+                                            @if($peserta->kepegawaian)
+                                                · {{ Str::limit($peserta->kepegawaian->instansi_asal ?? '', 30) }}
+                                            @endif
+                                        </small>
+                                    </div>
+                                    <form action="{{ route('kelompok.lepas-peserta', $kelompok) }}" method="POST"
+                                        class="d-inline" onsubmit="return confirm('Lepas peserta ini dari kelompok?')">
+                                        @csrf
+                                        <input type="hidden" name="peserta_id" value="{{ $peserta->id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger ms-2"
+                                            data-bs-toggle="tooltip" title="Lepas dari kelompok">
+                                            <i class="fas fa-unlink"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    document.querySelectorAll('.alert').forEach(alert => {
+        setTimeout(() => bootstrap.Alert.getOrCreateInstance(alert)?.close(), 5000);
+    });
+
+    document.getElementById('searchTersedia')?.addEventListener('input', function () {
+        const term = this.value.toLowerCase();
+        document.querySelectorAll('.peserta-item').forEach(item => {
+            item.style.display = item.dataset.search.includes(term) ? '' : 'none';
+        });
+    });
+
+    document.getElementById('searchTerhubung')?.addEventListener('input', function () {
+        const term = this.value.toLowerCase();
+        document.querySelectorAll('.terhubung-item').forEach(item => {
+            item.style.display = item.dataset.search.includes(term) ? '' : 'none';
+        });
+    });
+
+    document.querySelectorAll('input[name="peserta_ids[]"]').forEach(cb => {
+        cb.addEventListener('change', updateCount);
+    });
+
+    function updateCount() {
+        const count = document.querySelectorAll('input[name="peserta_ids[]"]:checked').length;
+        const el = document.getElementById('countTerpilih');
+        if (el) el.textContent = count;
+    }
+
+    document.getElementById('selectAll')?.addEventListener('click', function () {
+        const checkboxes = document.querySelectorAll('input[name="peserta_ids[]"]');
+        const allChecked = [...checkboxes].every(cb => cb.checked);
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        this.textContent = allChecked ? 'Pilih Semua' : 'Batal Pilih';
+        updateCount();
+    });
+});
+</script>
+
+<style>
+    .hover-bg:hover { background-color: rgba(40,84,150,.03); }
+    .peserta-list::-webkit-scrollbar { width: 6px; }
+    .peserta-list::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+    .form-check-input { width: 1.1rem; height: 1.1rem; cursor: pointer; }
+    .form-check-input:checked { background-color: #285496; border-color: #285496; }
+    .icon-wrapper { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+</style>
+@endsection

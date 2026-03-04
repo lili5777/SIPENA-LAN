@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\Angkatan\AngkatanController;
 use App\Http\Controllers\Admin\BeritaController;
+use App\Http\Controllers\CoachController;
+use App\Http\Controllers\EvaluatorController;
+use App\Http\Controllers\PengujiController;
 use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Admin\Master\PesertaController;
@@ -13,6 +16,7 @@ use App\Http\Controllers\AksiPerubahanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GelombangController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\RoleController;
@@ -151,6 +155,25 @@ Route::middleware('auth')->group(function () {
         });
     });
 
+    // Master Kelompok Routes
+    Route::prefix('kelompok')->name('kelompok.')->group(function () {
+        Route::get('/', [KelompokController::class, 'index'])->name('index');
+        Route::get('/create', [KelompokController::class, 'create'])->name('create');
+        Route::post('/', [KelompokController::class, 'store'])->name('store');
+        Route::get('/{kelompok}', [KelompokController::class, 'show'])->name('show');
+        Route::get('/{kelompok}/edit', [KelompokController::class, 'edit'])->name('edit');
+        Route::put('/{kelompok}', [KelompokController::class, 'update'])->name('update');
+        Route::delete('/{kelompok}', [KelompokController::class, 'destroy'])->name('destroy');
+
+        // Kelola Peserta
+        Route::get('/{kelompok}/kelola-peserta', [KelompokController::class, 'kelolaPeserta'])->name('kelola-peserta');
+        Route::post('/{kelompok}/tambah-peserta', [KelompokController::class, 'tambahPeserta'])->name('tambah-peserta');
+        Route::post('/{kelompok}/lepas-peserta', [KelompokController::class, 'lepasPeserta'])->name('lepas-peserta');
+
+        // API Helper
+        Route::get('/api/angkatan-by-jenis', [KelompokController::class, 'getAngkatanByJenis'])->name('angkatan-by-jenis');
+    });
+
 
     // Master Angkatan Routes
     Route::prefix('angkatan')->name('angkatan.')->group(function () {
@@ -162,7 +185,35 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [AngkatanController::class, 'destroy'])->name('destroy')->middleware('permission:angkatan.delete');
     });
         
+    // Master Coach Routes
+    Route::prefix('coach')->name('coach.')->group(function () {
+        Route::get('/', [CoachController::class, 'index'])->name('index');
+        Route::get('/create', [CoachController::class, 'create'])->name('create');
+        Route::post('/', [CoachController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [CoachController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [CoachController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CoachController::class, 'destroy'])->name('destroy');
+    });
 
+    // Master Penguji Routes
+    Route::prefix('penguji')->name('penguji.')->group(function () {
+        Route::get('/', [PengujiController::class, 'index'])->name('index');
+        Route::get('/create', [PengujiController::class, 'create'])->name('create');
+        Route::post('/', [PengujiController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [PengujiController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [PengujiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PengujiController::class, 'destroy'])->name('destroy');
+    });
+
+    // Master Evaluator Routes
+    Route::prefix('evaluator')->name('evaluator.')->group(function () {
+        Route::get('/', [EvaluatorController::class, 'index'])->name('index');
+        Route::get('/create', [EvaluatorController::class, 'create'])->name('create');
+        Route::post('/', [EvaluatorController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [EvaluatorController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [EvaluatorController::class, 'update'])->name('update');
+        Route::delete('/{id}', [EvaluatorController::class, 'destroy'])->name('destroy');
+    });
 
     // Master Mentor Routes
     Route::middleware('permission:mentor.create')->group(function () {
