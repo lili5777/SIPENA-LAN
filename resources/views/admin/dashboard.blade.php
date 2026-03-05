@@ -1290,6 +1290,7 @@
 @endsection
 
 @section('content')
+@include('admin.modal')
     <!-- Welcome Card -->
     <div class="welcome-card">
         <div class="welcome-header">
@@ -1471,7 +1472,7 @@
             @endif
         </div>
     @endif
-
+    
 
 
     <!-- Data Peserta Section -->
