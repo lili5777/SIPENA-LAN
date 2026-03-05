@@ -571,6 +571,8 @@ public function create(Request $request, $jenis = null)
             ];
         }
     }
+    $daftarInstansi = config('instansi', []);
+    // dd($daftarInstansi);
 
     // =====================
     // FLAG VIEW
@@ -592,6 +594,7 @@ public function create(Request $request, $jenis = null)
             'provinsiList' => $provinsiList,
             'kabupatenList' => $kabupatenList,
             'picDataByAngkatan' => $picDataByAngkatan, // Tambahkan ini
+            'daftarInstansi' => $daftarInstansi
         ]);
     }
 
@@ -607,6 +610,7 @@ public function create(Request $request, $jenis = null)
         'jenis',
         'kunci_judul',
         'aksiPerubahan',
+        'daftarInstansi',
         'picDataByAngkatan' // Tambahkan ini
     ));
 }

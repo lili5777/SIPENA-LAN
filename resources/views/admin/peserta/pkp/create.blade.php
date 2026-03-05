@@ -1218,7 +1218,7 @@ $isPKN = $jenis === 'pkn';
 
                             <div class="form-group">
     <label class="form-label">Upload Pasfoto peserta berwarna</label>
-    <div class="form-hint">Format JPG/PNG, maksimal 1MB. Ukuran rekomendasi: 3x4 cm</div>
+    <div class="form-hint">Format JPG/PNG, maksimal 1MB.</div>
     
     <!-- Layout baris untuk upload dan contoh foto -->
     <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 15px;">
@@ -1244,10 +1244,10 @@ $isPKN = $jenis === 'pkn';
 
         <!-- Contoh foto -->
         <div style="text-align: center;">
-            <p style="margin: 0 0 8px 0; font-size: 0.9em; color: #666;"><strong>Contoh Foto 3×4:</strong></p>
+            <p style="margin: 0 0 8px 0; font-size: 0.9em; color: #666;"><strong>Contoh Foto :</strong></p>
             <div style="width: 90px; height: 120px; border: 2px solid #ddd; overflow: hidden; border-radius: 4px;">
                 <img src="{{ asset('gambar/contohfoto.jpeg') }}" 
-                     alt="Contoh Foto 3x4"
+                     alt="Contoh Foto"
                      style="width: 100%; height: 100%; object-fit: cover;"
                      onerror="this.src='https://via.placeholder.com/90x120?text=Contoh+Foto'">
             </div>
@@ -1268,7 +1268,7 @@ $isPKN = $jenis === 'pkn';
                     <div class="preview-image-container">
                         <div id="preview" style="width: 150px; height: 200px; overflow: hidden; margin: 0 auto;"></div>
                     </div>
-                    <div class="preview-hint">Ukuran: 3x4 cm</div>
+                    {{-- <div class="preview-hint">Ukuran: 3x4 cm</div> --}}
                 </div>
             </div>
         </div>

@@ -1015,7 +1015,7 @@
 
         <!-- Preview hasil crop -->
         <div id="crop-preview-container" style="margin: 15px 0; display: none;">
-            <p><strong>Preview Foto 3×4:</strong></p>
+            <p><strong>Preview Foto :</strong></p>
             <div id="crop-preview" style="width: 150px; height: 200px; border: 1px solid #ddd; overflow: hidden;">
                 <img id="cropped-preview" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
@@ -1035,7 +1035,7 @@
             <label class="form-file-label" for="file_pas_foto">
                 <i class="fas fa-cloud-upload-alt"></i><br>
                 Klik untuk mengunggah file JPG/PNG (maks. 1MB)<br>
-                <small style="font-size: 0.85em; color: #666;">Foto akan dipotong ke ukuran 3×4</small>
+                <small style="font-size: 0.85em; color: #666;">Foto akan dipotong </small>
             </label>
             <div class="form-file-name" id="file-name-display">
                 <span class="no-file">Belum ada file dipilih</span>
@@ -1054,7 +1054,7 @@
                 <label class="form-file-label" for="file_pas_foto">
                     <i class="fas fa-cloud-upload-alt"></i><br>
                     Klik untuk mengunggah file JPG/PNG (maks. 1MB)<br>
-                    <small style="font-size: 0.85em; color: #666;">Foto akan dipotong ke ukuran 3×4</small>
+                    <small style="font-size: 0.85em; color: #666;">Foto akan dipotong </small>
                 </label>
                 <div class="form-file-name" id="file-name-display">
                     <span class="no-file">Belum ada file dipilih</span>
@@ -1063,10 +1063,10 @@
 
             <!-- Contoh foto -->
             <div style="text-align: center;">
-                <p style="margin: 0 0 8px 0; font-size: 0.9em; color: #666;"><strong>Contoh Foto 3×4:</strong></p>
+                <p style="margin: 0 0 8px 0; font-size: 0.9em; color: #666;"><strong>Contoh Foto :</strong></p>
                 <div style="width: 90px; height: 120px; border: 2px solid #ddd; overflow: hidden; border-radius: 4px;">
-                    <img src="{{ asset('gambar/contohfoto.jpeg') }}" 
-                         alt="Contoh Foto 3x4"
+                    <img src="{{ asset('gambar/contohfoto2.jpeg') }}" 
+                         alt="Contoh Foto"
                          style="width: 100%; height: 100%; object-fit: cover;"
                          onerror="this.src='https://via.placeholder.com/90x120?text=Contoh+Foto'">
                 </div>
@@ -1106,7 +1106,7 @@
 
         <!-- Preview hasil crop -->
         <div id="crop-preview-container" style="margin: 15px 0; display: none;">
-            <p><strong>Preview Foto 3×4:</strong></p>
+            <p><strong>Preview Foto :</strong></p>
             <div id="crop-preview" style="width: 150px; height: 200px; border: 1px solid #ddd; overflow: hidden;">
                 <img id="cropped-preview" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
