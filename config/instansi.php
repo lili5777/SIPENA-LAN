@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'Kementerian Pendidikan Tinggi, Sains, Dan Teknologi',
     'Kementerian Luar Negeri',
     'Kementerian Dalam Negeri',
     'Kementerian Pertahanan',

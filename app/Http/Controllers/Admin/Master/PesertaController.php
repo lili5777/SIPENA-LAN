@@ -680,7 +680,7 @@ public function edit(Request $request, $jenis, $id)
             ];
         }
     }
-
+   $daftarInstansi = config('instansi', []);
     $isEdit = true;
 
     return view("admin.peserta.{$jenis}.create", compact(
@@ -692,6 +692,7 @@ public function edit(Request $request, $jenis, $id)
         'isEdit',
         'jenis',
         'kunci_judul',
+        'daftarInstansi',
         'aksiPerubahan',
         'picData', // Data PIC untuk angkatan yang dipilih (edit mode)
         'picDataByAngkatan' // Data PIC untuk semua angkatan

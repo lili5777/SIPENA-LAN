@@ -390,10 +390,6 @@
         {{-- Footer sticky di luar area scroll --}}
         <div class="in-footer-wrap">
             <div class="in-footer">
-                <div class="in-dont-show">
-                    <input type="checkbox" id="in-suppress-check">
-                    <label for="in-suppress-check">Jangan tampilkan lagi hari ini</label>
-                </div>
                 <button class="in-btn-close" id="in-close-btn" onclick="closeInstansiNotice()">
                     <i class="fas fa-check"></i>
                     Mengerti, Tutup
@@ -455,13 +451,11 @@
         if (e.key === 'Escape') closeInstansiNotice();
     });
 
-    // Tampilkan setelah halaman siap
-    if (shouldShow()) {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => setTimeout(openModal, 600));
-        } else {
-            setTimeout(openModal, 600);
-        }
+    // Tampilkan setiap kali halaman dimuat
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(openModal, 600));
+    } else {
+        setTimeout(openModal, 600);
     }
 })();
 </script>
