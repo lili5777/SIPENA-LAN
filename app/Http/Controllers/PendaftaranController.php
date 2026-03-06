@@ -212,140 +212,121 @@ public function getAvailableNdh(Request $request)
         }
     }
 
+
     /**
      * Menyimpan data pembaruan peserta (UPDATE data peserta yang sudah ada)
      */
     public function updateData(Request $request)
     {
-        set_time_limit(600); // tambah ini
+        set_time_limit(600);
         ini_set('max_execution_time', 600);
+
         try {
+            // ============================================
             // 1. VALIDASI DASAR
-            $validated = $request->validate([
-                'id_jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
-                'peserta_id' => 'required|exists:peserta,id',
-                'pendaftaran_id' => 'required|exists:pendaftaran,id',
-                'nama_lengkap' => 'required|string|max:200',
-                'nip_nrp' => 'required|string|max:50',
-                'nama_panggilan' => 'nullable|string|max:100',
-                'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-                'agama' => 'required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Kristen Protestan',
-                'tempat_lahir' => 'required|string|max:100',
-                'tanggal_lahir' => 'required|date',
-                'alamat_rumah' => 'required|string',
-                'email_pribadi' => 'required|email|max:100',
-                'nomor_hp' => 'required|string|max:20',
+            // ============================================
+            $request->validate([
+                'id_jenis_pelatihan'  => 'required|exists:jenis_pelatihan,id',
+                'peserta_id'          => 'required|exists:peserta,id',
+                'pendaftaran_id'      => 'required|exists:pendaftaran,id',
+                'nama_lengkap'        => 'required|string|max:200',
+                'nip_nrp'             => 'required|string|max:50',
+                'nama_panggilan'      => 'nullable|string|max:100',
+                'jenis_kelamin'       => 'required|in:Laki-laki,Perempuan',
+                'agama'               => 'required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Kristen Protestan',
+                'tempat_lahir'        => 'required|string|max:100',
+                'tanggal_lahir'       => 'required|date',
+                'alamat_rumah'        => 'required|string',
+                'email_pribadi'       => 'required|email|max:100',
+                'nomor_hp'            => 'required|string|max:20',
                 'pendidikan_terakhir' => 'required|in:SD,SMP,SMU,D3,D4,S1,S2,S3',
-                'bidang_studi' => 'nullable|string|max:100',
-                'bidang_keahlian' => 'nullable|string|max:100',
-                'status_perkawinan' => 'nullable|in:Belum Menikah,Menikah,Duda,Janda',
-                'nama_pasangan' => 'nullable|string|max:200',
-                'olahraga_hobi' => 'nullable|string|max:100',
-                'perokok' => 'required|in:Ya,Tidak',
-                'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                'ukuran_celana' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                'kondisi_peserta' => 'nullable|string',
-                'file_ktp' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1024',
-                // 'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
-                'file_pas_foto_cropped' => 'nullable|string', // Base64 dari hasil crop // File asli sebelum crop
-                'crop_data' => 'nullable|string', // Data crop JSON
-                'asal_instansi' => 'required|string|max:200',
-                'unit_kerja' => 'nullable|string|max:200',
-                'id_provinsi' => 'required',
-                'id_kabupaten_kota' => 'nullable',
-                'alamat_kantor' => 'required|string',
-                'nomor_telepon_kantor' => 'nullable|string|max:20',
-                'email_kantor' => 'nullable|email|max:100',
-                'jabatan' => 'required|string|max:200',
-                'pangkat' => 'nullable|string|max:50',
-                'golongan_ruang' => 'required|string|max:50',
-                'eselon' => 'nullable|string|max:50',
-                'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
-                'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024',
-                'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
-                'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
-                'file_sertifikat_penghargaan' => 'nullable|file|mimes:pdf|max:1024',
-                'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
-                'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
-                'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+                'bidang_studi'        => 'nullable|string|max:100',
+                'bidang_keahlian'     => 'nullable|string|max:100',
+                'status_perkawinan'   => 'nullable|in:Belum Menikah,Menikah,Duda,Janda',
+                'nama_pasangan'       => 'nullable|string|max:200',
+                'olahraga_hobi'       => 'nullable|string|max:100',
+                'perokok'             => 'required|in:Ya,Tidak',
+                'ukuran_kaos'         => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                'ukuran_celana'       => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                'ukuran_training'     => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                'kondisi_peserta'     => 'nullable|string',
+                'file_ktp'            => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
+                'file_pas_foto_cropped' => 'nullable|string',
+                'crop_data'           => 'nullable|string',
+                'asal_instansi'       => 'required|string|max:200',
+                'unit_kerja'          => 'nullable|string|max:200',
+                'id_provinsi'         => 'required',
+                'id_kabupaten_kota'   => 'nullable',
+                'alamat_kantor'       => 'nullable|string',
+                'nomor_telepon_kantor'=> 'nullable|string|max:20',
+                'email_kantor'        => 'nullable|email|max:100',
+                'jabatan'             => 'required|string|max:200',
+                'pangkat'             => 'nullable|string|max:50',
+                'golongan_ruang'      => 'required|string|max:50',
+                'eselon'              => 'nullable|string|max:50',
+                'file_sk_jabatan'     => 'nullable|file|mimes:pdf|max:1024',
+                'file_sk_pangkat'     => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_tugas'    => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_sehat'    => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_bebas_narkoba'          => 'nullable|file|mimes:pdf|max:1024',
+                'file_pakta_integritas'             => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_kesediaan'              => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_komitmen'               => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_kelulusan_seleksi'      => 'nullable|file|mimes:pdf|max:1024',
+                'file_surat_pernyataan_administrasi'=> 'nullable|file|mimes:pdf|max:1024',
+                'file_sertifikat_penghargaan'       => 'nullable|file|mimes:pdf|max:1024',
+                'file_sk_cpns'        => 'nullable|file|mimes:pdf|max:1024',
+                'file_spmt'           => 'nullable|file|mimes:pdf|max:1024',
+                'file_skp'            => 'nullable|file|mimes:pdf|max:1024',
                 'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
-                'nomor_sk_cpns' => 'nullable|string|max:100',
-                'nomor_sk_terakhir' => 'nullable|string|max:100',
-                'tanggal_sk_cpns' => 'nullable|date',
-                'tanggal_sk_jabatan' => 'nullable|date',
+                'nomor_sk_cpns'       => 'nullable|string|max:100',
+                'nomor_sk_terakhir'   => 'nullable|string|max:100',
+                'tanggal_sk_cpns'     => 'nullable|date',
+                'tanggal_sk_jabatan'  => 'nullable|date',
                 'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
-                'nama_mentor' => 'nullable|string|max:200',
-                'nip_mentor' => 'nullable|string|max:200',
-                'jabatan_mentor' => 'nullable|string|max:200',
-                'nomor_rekening_mentor' => 'nullable|string|max:200',
-                'npwp_mentor' => 'nullable|string|max:50',
-                'has_mentor' => 'nullable|in:Ya,Tidak',
-                'sudah_ada_mentor' => 'nullable|in:Ya,Tidak',
-                'mentor_mode' => 'nullable|in:pilih,tambah',
-                'id_mentor' => 'nullable|exists:mentor,id',
-                'nama_mentor_baru' => 'nullable|string|max:200',
-                'nip_mentor_baru' => 'nullable|string|max:200',
+                'sudah_ada_mentor'    => 'nullable|in:Ya,Tidak',
+                'mentor_mode'         => 'nullable|in:pilih,tambah',
+                'id_mentor'           => 'nullable|exists:mentor,id',
+                'nama_mentor_baru'    => 'nullable|string|max:200',
+                'nip_mentor_baru'     => 'nullable|string|max:200',
                 'jabatan_mentor_baru' => 'nullable|string|max:200',
-                'nomor_rekening_mentor_baru' => 'nullable|string|max:200',
-                'npwp_mentor_baru' => 'nullable|string|max:50',
-                'ndh' => 'required|max:50',
                 'golongan_mentor_baru'=> 'nullable|string|max:50',
                 'pangkat_mentor_baru' => 'nullable|string|max:100',
+                'nomor_rekening_mentor_baru' => 'nullable|string|max:255',
+                'npwp_mentor_baru'    => 'nullable|string|max:50',
+                'nomor_hp_mentor_baru'=> 'nullable|string|max:20',
+                'nomor_rekening_mentor' => 'nullable|string|max:200',
+                'npwp_mentor'         => 'nullable|string|max:50',
+                'ndh'                 => 'required|max:50',
             ], [
-                'nama_lengkap.required' => 'Nama lengkap wajib diisi',
-                'nama_lengkap.max' => 'Nama lengkap maksimal 200 karakter',
-                'nip_nrp.required' => 'NIP/NRP wajib diisi',
-                'nip_nrp.max' => 'NIP/NRP maksimal 50 karakter',
-                'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih',
-                'jenis_kelamin.in' => 'Jenis kelamin tidak valid',
-                'agama.required' => 'Agama wajib dipilih',
-                'agama.in' => 'Agama yang dipilih tidak valid',
-                'tempat_lahir.required' => 'Tempat lahir wajib diisi',
-                'tanggal_lahir.required' => 'Tanggal lahir wajib diisi',
-                'tanggal_lahir.date' => 'Format tanggal lahir tidak valid',
-                'alamat_rumah.required' => 'Alamat rumah wajib diisi',
-                'email_pribadi.required' => 'Email pribadi wajib diisi',
-                'email_pribadi.email' => 'Format email pribadi tidak valid',
-                'nomor_hp.required' => 'Nomor HP wajib diisi',
+                'nama_lengkap.required'        => 'Nama lengkap wajib diisi',
+                'nama_lengkap.max'             => 'Nama lengkap maksimal 200 karakter',
+                'nip_nrp.required'             => 'NIP/NRP wajib diisi',
+                'jenis_kelamin.required'       => 'Jenis kelamin wajib dipilih',
+                'agama.required'               => 'Agama wajib dipilih',
+                'tempat_lahir.required'        => 'Tempat lahir wajib diisi',
+                'tanggal_lahir.required'       => 'Tanggal lahir wajib diisi',
+                'tanggal_lahir.date'           => 'Format tanggal lahir tidak valid',
+                'alamat_rumah.required'        => 'Alamat rumah wajib diisi',
+                'email_pribadi.required'       => 'Email pribadi wajib diisi',
+                'email_pribadi.email'          => 'Format email pribadi tidak valid',
+                'nomor_hp.required'            => 'Nomor HP wajib diisi',
                 'pendidikan_terakhir.required' => 'Pendidikan terakhir wajib dipilih',
-                'pendidikan_terakhir.in' => 'Pendidikan terakhir tidak valid',
-                'perokok.required' => 'Status perokok wajib dipilih',
-                'perokok.in' => 'Status perokok tidak valid',
-                'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
-                'file_ktp.max' => 'Ukuran file KTP maksimal 1MB',
-                // 'file_pas_foto.mimes' => 'File pas foto harus berformat JPG, JPEG, atau PNG',
-                // 'file_pas_foto.max' => 'Ukuran file pas foto maksimal 1MB',
-                'file_pas_foto_cropped.max' => 'Ukuran foto hasil crop terlalu besar',
-                'asal_instansi.required' => 'Asal instansi wajib diisi',
-                'id_provinsi.required' => 'Provinsi wajib dipilih',
-                'alamat_kantor.required' => 'Alamat kantor wajib diisi',
-                'email_kantor.email' => 'Format email kantor tidak valid',
-                'jabatan.required' => 'Jabatan wajib diisi',
-                'golongan_ruang.required' => 'Golongan ruang wajib diisi',
-                'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
-                'file_sk_jabatan.max' => 'Ukuran file SK Jabatan maksimal 1MB',
-                'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
-                'file_sk_pangkat.max' => 'Ukuran file SK Pangkat maksimal 1MB',
-                'file_surat_tugas.mimes' => 'File Surat Tugas harus berformat PDF',
-                'file_surat_tugas.max' => 'Ukuran file Surat Tugas maksimal 1MB',
-                'file_surat_sehat.mimes' => 'File Surat Sehat harus berformat PDF',
-                'file_surat_sehat.max' => 'Ukuran file Surat Sehat maksimal 1MB',
-                'file_surat_bebas_narkoba.mimes' => 'File Surat Bebas Narkoba harus berformat PDF',
-                'file_surat_bebas_narkoba.max' => 'Ukuran file Surat Bebas Narkoba maksimal 1MB',
-                'peserta_id.exists' => 'Data peserta tidak ditemukan',
-                'pendaftaran_id.exists' => 'Data pendaftaran tidak ditemukan',
-                'id_jenis_pelatihan.exists' => 'Jenis pelatihan tidak ditemukan',
-                'id_mentor.exists' => 'Data mentor tidak ditemukan',
+                'perokok.required'             => 'Status perokok wajib dipilih',
+                'asal_instansi.required'       => 'Asal instansi wajib diisi',
+                'id_provinsi.required'         => 'Provinsi wajib dipilih',
+                'jabatan.required'             => 'Jabatan wajib diisi',
+                'golongan_ruang.required'      => 'Golongan ruang wajib diisi',
+                'email_kantor.email'           => 'Format email kantor tidak valid',
+                'peserta_id.exists'            => 'Data peserta tidak ditemukan',
+                'pendaftaran_id.exists'        => 'Data pendaftaran tidak ditemukan',
+                'id_jenis_pelatihan.exists'    => 'Jenis pelatihan tidak ditemukan',
+                'id_mentor.exists'             => 'Data mentor tidak ditemukan',
             ]);
 
-            // 2. CEK KESESUAIAN DATA PESERTA DENGAN PENDAFTARAN
+            // ============================================
+            // 2. CEK KESESUAIAN DATA PESERTA & PENDAFTARAN
+            // ============================================
             $peserta = Peserta::find($request->peserta_id);
             if (!$peserta) {
                 throw ValidationException::withMessages([
@@ -360,7 +341,6 @@ public function getAvailableNdh(Request $request)
                 ]);
             }
 
-            // Verifikasi bahwa peserta benar-benar terdaftar pada pelatihan ini
             if (
                 $pendaftaran->id_peserta != $peserta->id ||
                 $pendaftaran->id_jenis_pelatihan != $request->id_jenis_pelatihan
@@ -370,367 +350,188 @@ public function getAvailableNdh(Request $request)
                 ]);
             }
 
-            // Validasi ukuran base64 foto hasil crop
+            // Validasi ukuran base64 foto
             if ($request->filled('file_pas_foto_cropped')) {
-                // Base64 string biasanya sekitar 30% lebih besar dari file asli
-                $base64Length = strlen($request->file_pas_foto_cropped);
-                if ($base64Length > 2_000_000) { // ~1.5MB file asli
+                if (strlen($request->file_pas_foto_cropped) > 2_000_000) {
                     throw ValidationException::withMessages([
-                        'file_pas_foto_cropped' => 'Ukuran foto hasil crop terlalu besar. Maksimal 1.5MB.'
+                        'file_pas_foto_cropped' => ['Ukuran foto hasil crop terlalu besar. Maksimal 1.5MB.']
                     ]);
                 }
             }
 
-            // 3. VALIDASI BERDASARKAN JENIS PELATIHAN
+            // ============================================
+            // 3. VALIDASI TAMBAHAN BERDASARKAN JENIS PELATIHAN
+            // ============================================
             $jenisPelatihan = JenisPelatihan::find($request->id_jenis_pelatihan);
-            $kode = $jenisPelatihan->kode_pelatihan;
-            $additionalRules = [];
+            $kode           = $jenisPelatihan->kode_pelatihan;
+            $kepegawaian    = $peserta->kepegawaian;
+            $additionalRules    = [];
             $additionalMessages = [];
 
-            // Cek apakah file sudah ada di database
-            $kepegawaian = $peserta->kepegawaian;
-
+            // ---- PKN TK II ----
             if ($kode === 'PKN_TK_II') {
-                $additionalRules = [
-                    'eselon' => 'required|string|max:50',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_surat_komitmen' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_surat_sehat' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_surat_bebas_narkoba' => 'nullable|file|mimes:pdf|max:1024',
-                ];
+                $additionalRules['eselon'] = 'required|string|max:50';
+                $additionalMessages['eselon.required'] = 'Eselon wajib diisi untuk pelatihan PKN TK II';
 
-                if (!$kepegawaian->file_sk_jabatan) {
+                if (!$kepegawaian || !$kepegawaian->file_sk_jabatan) {
                     $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_sk_jabatan.required'] = 'File SK Jabatan wajib diunggah';
                 }
-
-                if (!$kepegawaian->file_sk_pangkat) {
+                if (!$kepegawaian || !$kepegawaian->file_sk_pangkat) {
                     $additionalRules['file_sk_pangkat'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_sk_pangkat.required'] = 'File SK Pangkat wajib diunggah';
                 }
-
                 if (!$pendaftaran->file_pakta_integritas) {
                     $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_pakta_integritas.required'] = 'File Pakta Integritas wajib diunggah';
                 }
-
                 if (!$pendaftaran->file_surat_sehat) {
                     $additionalRules['file_surat_sehat'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_surat_sehat.required'] = 'File Surat Sehat wajib diunggah';
                 }
-
                 if (!$pendaftaran->file_surat_bebas_narkoba) {
                     $additionalRules['file_surat_bebas_narkoba'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_surat_bebas_narkoba.required'] = 'File Surat Bebas Narkoba wajib diunggah';
                 }
-
-                $additionalMessages = [
-                    'eselon.required' => 'Eselon wajib diisi untuk pelatihan PKN TK II',
-                    'eselon.string' => 'Eselon harus berupa teks',
-                    'eselon.max' => 'Eselon maksimal 50 karakter',
-                    'file_pakta_integritas.required' => 'File Pakta Integritas wajib diunggah',
-                    'file_pakta_integritas.file' => 'File Pakta Integritas harus berupa file',
-                    'file_pakta_integritas.mimes' => 'File Pakta Integritas harus berformat PDF',
-                    'file_pakta_integritas.max' => 'File Pakta Integritas maksimal 1MB',
-                    'file_surat_kelulusan_seleksi.file' => 'File Surat Kelulusan Seleksi harus berupa file',
-                    'file_surat_kelulusan_seleksi.mimes' => 'File Surat Kelulusan Seleksi harus berformat PDF',
-                    'file_surat_kelulusan_seleksi.max' => 'File Surat Kelulusan Seleksi maksimal 1MB',
-                    'file_sk_jabatan.required' => 'File SK Jabatan wajib diunggah',
-                    'file_sk_jabatan.file' => 'File SK Jabatan harus berupa file',
-                    'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
-                    'file_sk_jabatan.max' => 'File SK Jabatan maksimal 1MB',
-                    'file_sk_pangkat.required' => 'File SK Pangkat wajib diunggah',
-                    'file_sk_pangkat.file' => 'File SK Pangkat harus berupa file',
-                    'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
-                    'file_sk_pangkat.max' => 'File SK Pangkat maksimal 1MB',
-                    'file_surat_komitmen.file' => 'File Surat Komitmen harus berupa file',
-                    'file_surat_komitmen.mimes' => 'File Surat Komitmen harus berformat PDF',
-                    'file_surat_komitmen.max' => 'File Surat Komitmen maksimal 1MB',
-                    'file_surat_sehat.required' => 'File Surat Sehat wajib diunggah',
-                    'file_surat_sehat.file' => 'File Surat Sehat harus berupa file',
-                    'file_surat_sehat.mimes' => 'File Surat Sehat harus berformat PDF',
-                    'file_surat_sehat.max' => 'File Surat Sehat maksimal 1MB',
-                    'file_surat_bebas_narkoba.required' => 'File Surat Bebas Narkoba wajib diunggah',
-                    'file_surat_bebas_narkoba.file' => 'File Surat Bebas Narkoba harus berupa file',
-                    'file_surat_bebas_narkoba.mimes' => 'File Surat Bebas Narkoba harus berformat PDF',
-                    'file_surat_bebas_narkoba.max' => 'File Surat Bebas Narkoba maksimal 1MB',
-                ];
             }
 
-            // Validasi khusus untuk foto pas (cropped atau original)
-            if (!$peserta->file_pas_foto) {
-                // Jika tidak ada file pas foto di database, wajib upload
-                $additionalRules['file_pas_foto_cropped'] = 'required_without:file_pas_foto_original|string';
-
-                $additionalMessages['file_pas_foto_cropped.required_without'] = 'Foto pas 3×4 wajib diupload (setelah proses crop)';
-            }
-
+            // ---- LATSAR ----
             if ($kode === 'LATSAR') {
-                $additionalRules = [
-                    'nomor_sk_cpns' => 'required|string|max:100',
-                    'tanggal_sk_cpns' => 'required|date',
-                    'pangkat' => 'required|string|max:50',
-                    'sudah_ada_mentor' => 'required|in:Ya,Tidak',
-                    'nomor_rekening_mentor' => 'nullable|string|max:200',
-                    'npwp_mentor' => 'nullable|string|max:50',
-                ];
+                $additionalRules['nomor_sk_cpns']    = 'required|string|max:100';
+                $additionalRules['tanggal_sk_cpns']  = 'required|date';
+                $additionalRules['pangkat']           = 'required|string|max:50';
+                $additionalRules['sudah_ada_mentor']  = 'required|in:Ya,Tidak';
 
+                $additionalMessages['nomor_sk_cpns.required']   = 'Nomor SK CPNS wajib diisi';
+                $additionalMessages['tanggal_sk_cpns.required'] = 'Tanggal SK CPNS wajib diisi';
+                $additionalMessages['tanggal_sk_cpns.date']     = 'Format tanggal SK CPNS tidak valid';
+                $additionalMessages['pangkat.required']         = 'Pangkat wajib diisi';
+                $additionalMessages['sudah_ada_mentor.required']= 'Status mentor wajib dipilih';
+
+                if (!$peserta->file_ktp) {
+                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
+                    $additionalMessages['file_ktp.required'] = 'File KTP wajib diunggah';
+                }
                 if (!$kepegawaian || !$kepegawaian->file_sk_cpns) {
                     $additionalRules['file_sk_cpns'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_sk_cpns.required'] = 'File SK CPNS wajib diunggah';
                 }
-
                 if (!$kepegawaian || !$kepegawaian->file_spmt) {
                     $additionalRules['file_spmt'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_spmt.required'] = 'File SPMT wajib diunggah';
                 }
-
-                if (!$pendaftaran || !$pendaftaran->file_surat_kesediaan) {
-                    $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:1024';
-                }
-
-                if (!$peserta->file_ktp) {
-                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
-                }
-
-                
-
-
-                $additionalMessages = [
-                    'nomor_sk_cpns.required' => 'Nomor SK CPNS wajib diisi untuk pelatihan LATSAR',
-                    'nomor_sk_cpns.max' => 'Nomor SK CPNS maksimal 100 karakter',
-                    'tanggal_sk_cpns.required' => 'Tanggal SK CPNS wajib diisi untuk pelatihan LATSAR',
-                    'tanggal_sk_cpns.date' => 'Format tanggal SK CPNS tidak valid',
-                    'file_sk_cpns.required' => 'File SK CPNS wajib diupload',
-                    'file_sk_cpns.file' => 'File SK CPNS harus berupa file',
-                    'file_sk_cpns.mimes' => 'File SK CPNS harus berformat PDF',
-                    'file_sk_cpns.max' => 'File SK CPNS maksimal 1MB',
-                    'file_spmt.required' => 'File SPMT wajib diupload',
-                    'file_spmt.file' => 'File SPMT harus berupa file',
-                    'file_spmt.mimes' => 'File SPMT harus berformat PDF',
-                    'file_spmt.max' => 'File SPMT maksimal 1MB',
-                    'file_surat_kesediaan.required' => 'File Surat Kesediaan wajib diupload',
-                    'file_surat_kesediaan.file' => 'File Surat Kesediaan harus berupa file',
-                    'file_surat_kesediaan.mimes' => 'File Surat Kesediaan harus berformat PDF',
-                    'file_surat_kesediaan.max' => 'File Surat Kesediaan maksimal 1MB',
-                    'pangkat.required' => 'Pangkat wajib diisi untuk pelatihan LATSAR',
-                    'pangkat.max' => 'Pangkat maksimal 50 karakter',
-                    'sudah_ada_mentor.required' => 'Status mentor wajib dipilih untuk pelatihan LATSAR',
-                    'sudah_ada_mentor.in' => 'Status mentor tidak valid (Ya/Tidak)',
-                    'nomor_rekening_mentor.max' => 'Nomor rekening mentor maksimal 200 karakter',
-                    'npwp_mentor.max' => 'NPWP mentor maksimal 50 karakter',
-                    'file_ktp.required' => 'File KTP wajib diupload',
-                    'file_ktp.file' => 'File KTP harus berupa file',
-                    'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
-                    'file_ktp.max' => 'File KTP maksimal 1MB',
-                ];
-            }
-
-            if ($kode === 'PKA' || $kode === 'PKP') {
-                $additionalRules = [
-                    'eselon' => 'required|string|max:50',
-                    'tanggal_sk_jabatan' => 'required|date',
-                    'tahun_lulus_pkp_pim_iv' => 'nullable|integer',
-                    'file_surat_kesediaan' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_pakta_integritas' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_surat_pernyataan_administrasi' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_surat_kelulusan_seleksi' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
-                    'sudah_ada_mentor' => 'required|in:Ya,Tidak',
-                    'nomor_sk_terakhir' => 'required|string|max:100',
-                    'file_sk_jabatan' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_sk_pangkat' => 'nullable|file|mimes:pdf|max:1024',
-                    'file_surat_tugas' => 'nullable|file|mimes:pdf|max:1024',
-                    // HAPUS validasi untuk file_pas_foto dan ganti dengan file_pas_foto_cropped
-                    'file_pas_foto_cropped' => 'nullable|string',
-                    'crop_data' => 'nullable|string',
-                ];
-
                 if (!$pendaftaran->file_surat_kesediaan) {
                     $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_surat_kesediaan.required'] = 'File Surat Kesediaan wajib diunggah';
                 }
-                if (!$peserta->file_ktp) {
-                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
-                }
-
-                // PERUBAHAN DI SINI: Ganti validasi file_pas_foto menjadi file_pas_foto_cropped
                 if (!$peserta->file_pas_foto) {
                     $additionalRules['file_pas_foto_cropped'] = 'required|string';
+                    $additionalMessages['file_pas_foto_cropped.required'] = 'Foto peserta wajib diunggah ';
                 }
+            }
 
-                if (!$kepegawaian->file_sk_jabatan) {
-                    $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:1024';
+            // ---- PKA / PKP ----
+            if ($kode === 'PKA' || $kode === 'PKP') {
+                $additionalRules['eselon']            = 'required|string|max:50';
+                $additionalRules['tanggal_sk_jabatan']= 'required|date';
+                $additionalRules['nomor_sk_terakhir'] = 'required|string|max:100';
+                $additionalRules['sudah_ada_mentor']  = 'required|in:Ya,Tidak';
+
+                $additionalMessages['eselon.required']             = 'Eselon wajib diisi untuk pelatihan ' . $kode;
+                $additionalMessages['tanggal_sk_jabatan.required'] = 'Tanggal SK Jabatan wajib diisi';
+                $additionalMessages['tanggal_sk_jabatan.date']     = 'Format tanggal SK Jabatan tidak valid';
+                $additionalMessages['nomor_sk_terakhir.required']  = 'Nomor SK Jabatan Terakhir wajib diisi';
+                $additionalMessages['sudah_ada_mentor.required']   = 'Status mentor wajib dipilih';
+
+                if (!$peserta->file_ktp) {
+                    $additionalRules['file_ktp'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:1024';
+                    $additionalMessages['file_ktp.required'] = 'File KTP wajib diunggah';
                 }
-                if (!$kepegawaian->file_sk_pangkat) {
+                if (!$peserta->file_pas_foto) {
+                    $additionalRules['file_pas_foto_cropped'] = 'required|string';
+                    $additionalMessages['file_pas_foto_cropped.required'] = 'Foto peserta wajib diunggah';
+                }
+                if (!$kepegawaian || !$kepegawaian->file_sk_jabatan) {
+                    $additionalRules['file_sk_jabatan'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_sk_jabatan.required'] = 'File SK Jabatan wajib diunggah';
+                }
+                if (!$kepegawaian || !$kepegawaian->file_sk_pangkat) {
                     $additionalRules['file_sk_pangkat'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_sk_pangkat.required'] = 'File SK Pangkat wajib diunggah';
+                }
+                if (!$pendaftaran->file_surat_kesediaan) {
+                    $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_surat_kesediaan.required'] = 'File Surat Kesediaan wajib diunggah';
                 }
                 if (!$pendaftaran->file_pakta_integritas) {
                     $additionalRules['file_pakta_integritas'] = 'required|file|mimes:pdf|max:1024';
+                    $additionalMessages['file_pakta_integritas.required'] = 'File Pakta Integritas wajib diunggah';
                 }
-                if (!$pendaftaran->file_surat_tugas) {
-                    $additionalRules['file_surat_tugas'] = 'nullable|file|mimes:pdf|max:1024';
-                }
-
-                $additionalMessages = [
-                    // Validasi untuk eselon
-                    'eselon.required' => 'Eselon wajib diisi untuk pelatihan ' . $kode,
-                    'eselon.string' => 'Eselon harus berupa teks',
-                    'eselon.max' => 'Eselon maksimal 50 karakter',
-
-                    // Validasi untuk tanggal SK jabatan
-                    'tanggal_sk_jabatan.required' => 'Tanggal SK Jabatan wajib diisi untuk pelatihan ' . $kode,
-                    'tanggal_sk_jabatan.date' => 'Format tanggal SK Jabatan tidak valid',
-
-                    // Validasi untuk tahun lulus PKP/PIM IV
-                    'tahun_lulus_pkp_pim_iv.integer' => 'Tahun lulus PKP/PIM IV harus berupa angka',
-
-                    // Validasi untuk status mentor
-                    'sudah_ada_mentor.required' => 'Status mentor wajib dipilih untuk pelatihan ' . $kode,
-                    'sudah_ada_mentor.in' => 'Status mentor tidak valid (Ya/Tidak)',
-
-                    // Validasi untuk nomor SK terakhir
-                    'nomor_sk_terakhir.required' => 'Nomor SK Jabatan Terakhir wajib diisi untuk pelatihan ' . $kode,
-                    'nomor_sk_terakhir.string' => 'Nomor SK Jabatan Terakhir harus berupa teks',
-                    'nomor_sk_terakhir.max' => 'Nomor SK Jabatan Terakhir maksimal 100 karakter',
-
-                    // Validasi untuk file SK jabatan
-                    'file_sk_jabatan.required' => 'File SK Jabatan Terakhir wajib diunggah untuk pelatihan ' . $kode,
-                    'file_sk_jabatan.file' => 'File SK Jabatan harus berupa file',
-                    'file_sk_jabatan.mimes' => 'File SK Jabatan harus berformat PDF',
-                    'file_sk_jabatan.max' => 'Ukuran file SK Jabatan maksimal 1MB',
-
-                    // Validasi untuk file SK pangkat
-                    'file_sk_pangkat.required' => 'File SK Pangkat/Golongan Ruang wajib diunggah untuk pelatihan ' . $kode,
-                    'file_sk_pangkat.file' => 'File SK Pangkat harus berupa file',
-                    'file_sk_pangkat.mimes' => 'File SK Pangkat harus berformat PDF',
-                    'file_sk_pangkat.max' => 'Ukuran file SK Pangkat maksimal 1MB',
-
-                    // Validasi untuk file KTP
-                    'file_ktp.required' => 'Foto KTP wajib diunggah untuk pelatihan ' . $kode,
-                    'file_ktp.file' => 'File KTP harus berupa file',
-                    'file_ktp.mimes' => 'File KTP harus berformat PDF, JPG, JPEG, atau PNG',
-                    'file_ktp.max' => 'Ukuran file KTP maksimal 1MB',
-
-                    // Validasi untuk file surat kesediaan
-                    'file_surat_kesediaan.required' => 'File Formulir Kesediaan wajib diunggah untuk pelatihan ' . $kode,
-                    'file_surat_kesediaan.file' => 'File Formulir Kesediaan harus berupa file',
-                    'file_surat_kesediaan.mimes' => 'File Formulir Kesediaan harus berformat PDF',
-                    'file_surat_kesediaan.max' => 'Ukuran file Formulir Kesediaan maksimal 1MB',
-
-                    // Validasi untuk file pakta integritas
-                    'file_pakta_integritas.required' => 'File Pakta Integritas wajib diunggah untuk pelatihan ' . $kode,
-                    'file_pakta_integritas.file' => 'File Pakta Integritas harus berupa file',
-                    'file_pakta_integritas.mimes' => 'File Pakta Integritas harus berformat PDF',
-                    'file_pakta_integritas.max' => 'Ukuran file Pakta Integritas maksimal 1MB',
-
-                    // Validasi untuk file surat tugas
-                    'file_surat_tugas.file' => 'File Surat Tugas harus berupa file',
-                    'file_surat_tugas.mimes' => 'File Surat Tugas harus berformat PDF',
-                    'file_surat_tugas.max' => 'Ukuran file Surat Tugas maksimal 1MB',
-
-                    // Validasi untuk file surat pernyataan administrasi
-                    'file_surat_pernyataan_administrasi.file' => 'File Surat Pernyataan Administrasi harus berupa file',
-                    'file_surat_pernyataan_administrasi.mimes' => 'File Surat Pernyataan Administrasi harus berformat PDF',
-                    'file_surat_pernyataan_administrasi.max' => 'Ukuran file Surat Pernyataan Administrasi maksimal 1MB',
-
-                    // Validasi untuk file surat kelulusan seleksi
-                    'file_surat_kelulusan_seleksi.file' => 'File Kelulusan Seleksi/Sertifikat harus berupa file',
-                    'file_surat_kelulusan_seleksi.mimes' => 'File Kelulusan Seleksi/Sertifikat harus berformat PDF',
-                    'file_surat_kelulusan_seleksi.max' => 'Ukuran file Kelulusan Seleksi/Sertifikat maksimal 1MB',
-
-                    // Validasi untuk file persetujuan mentor
-                    'file_persetujuan_mentor.file' => 'File Persetujuan Mentor harus berupa file',
-                    'file_persetujuan_mentor.mimes' => 'File Persetujuan Mentor harus berformat PDF',
-                    'file_persetujuan_mentor.max' => 'Ukuran file Persetujuan Mentor maksimal 1MB',
-
-                    // Validasi untuk file pas foto CROPPED (PERUBAHAN DI SINI)
-                    'file_pas_foto_cropped.required' => 'Foto pas 3×4 wajib diunggah ',
-                    'file_pas_foto_cropped.string' => 'Foto pas harus berupa string base64 yang valid',
-                ];
             }
 
-            // Validasi mentor jika sudah ada mentor
-            // Di dalam method updateData(), sekitar baris validasi mentor
+            // ---- VALIDASI FOTO (semua jenis pelatihan) ----
+            if (!$peserta->file_pas_foto && !isset($additionalRules['file_pas_foto_cropped'])) {
+                $additionalRules['file_pas_foto_cropped'] = 'required|string';
+                $additionalMessages['file_pas_foto_cropped.required'] = 'Foto pas peserta wajib diunggah ';
+            }
+
+            // ---- VALIDASI MENTOR ----
             if ($request->sudah_ada_mentor === 'Ya') {
                 $additionalRules['mentor_mode'] = 'required|in:pilih,tambah';
-                $additionalMessages['mentor_mode.required'] = 'Pilih mode mentor (Pilih dari daftar atau Tambah baru)';
-                $additionalMessages['mentor_mode.in'] = 'Mode mentor tidak valid';
+                $additionalMessages['mentor_mode.required'] = 'Pilih mode mentor (dari daftar atau tambah baru)';
+                $additionalMessages['mentor_mode.in']       = 'Mode mentor tidak valid';
 
                 if ($request->mentor_mode === 'pilih') {
                     $additionalRules['id_mentor'] = 'required|exists:mentor,id';
                     $additionalMessages['id_mentor.required'] = 'Pilih mentor dari daftar';
+                    $additionalMessages['id_mentor.exists']   = 'Mentor yang dipilih tidak ditemukan';
+
                 } elseif ($request->mentor_mode === 'tambah') {
-                    // VALIDASI BARU: Normalisasi NIP (hapus spasi dan titik)
-                    $additionalRules['nama_mentor_baru'] = 'required|string|max:200';
-                    $additionalRules['nip_mentor_baru'] = [
+                    $additionalRules['nama_mentor_baru']           = 'required|string|max:200';
+                    $additionalRules['nip_mentor_baru']            = [
                         'required',
                         'string',
                         'max:200',
                         function ($attribute, $value, $fail) {
-                            // Normalisasi NIP: hapus spasi dan titik
                             $normalizedNip = preg_replace('/[\s\.]/', '', $value);
-                            
-                            // Cek apakah NIP sudah ada di database (dengan normalisasi)
                             $exists = Mentor::whereRaw(
                                 "REPLACE(REPLACE(nip_mentor, ' ', ''), '.', '') = ?",
                                 [$normalizedNip]
                             )->exists();
-                            
                             if ($exists) {
                                 $fail('NIP Mentor sudah terdaftar. Silakan pilih dari daftar mentor yang tersedia.');
                             }
                         }
                     ];
-                    $additionalRules['jabatan_mentor_baru'] = 'required|string|max:200';
-                    $additionalRules['nomor_hp_mentor_baru'] = 'nullable|string|max:20|regex:/^[0-9\-\+]+$/';
-                    
-                    $additionalMessages['nama_mentor_baru.required'] = 'Nama mentor baru wajib diisi';
-                    $additionalMessages['nip_mentor_baru.required'] = 'NIP mentor baru wajib diisi';
-                    $additionalMessages['nip_mentor_baru.max'] = 'NIP mentor baru maksimal 200 karakter';
-                    $additionalMessages['jabatan_mentor_baru.required'] = 'Jabatan mentor baru wajib diisi';
-                    $additionalMessages['nomor_hp_mentor_baru.max'] = 'Nomor HP mentor maksimal 20 karakter';
-                    $additionalMessages['nomor_hp_mentor_baru.regex'] = 'Format nomor HP mentor tidak valid';
+                    $additionalRules['jabatan_mentor_baru']        = 'required|string|max:200';
+                    $additionalRules['golongan_mentor_baru']       = 'required|string|max:50';
+                    $additionalRules['pangkat_mentor_baru']        = 'required|string|max:100';
+                    $additionalRules['nomor_rekening_mentor_baru'] = 'required|string|max:255';
+                    $additionalRules['npwp_mentor_baru']           = 'required|string|max:50';
+                    $additionalRules['nomor_hp_mentor_baru']       = 'nullable|string|max:20|regex:/^[0-9\-\+]+$/';
+
+                    $additionalMessages['nama_mentor_baru.required']           = 'Nama mentor baru wajib diisi';
+                    $additionalMessages['nip_mentor_baru.required']            = 'NIP mentor baru wajib diisi';
+                    $additionalMessages['jabatan_mentor_baru.required']        = 'Jabatan mentor baru wajib diisi';
+                    $additionalMessages['golongan_mentor_baru.required']       = 'Golongan ruang mentor wajib dipilih';
+                    $additionalMessages['pangkat_mentor_baru.required']        = 'Pangkat mentor wajib diisi';
+                    $additionalMessages['nomor_rekening_mentor_baru.required'] = 'Nomor rekening mentor wajib diisi';
+                    $additionalMessages['npwp_mentor_baru.required']           = 'NPWP mentor wajib diisi';
+                    $additionalMessages['nomor_hp_mentor_baru.regex']          = 'Format nomor HP mentor tidak valid';
                 }
             }
 
-            // Jalankan validasi tambahan
+            // Jalankan semua validasi tambahan SEKARANG — sebelum proses simpan apapun
             if (!empty($additionalRules)) {
                 $request->validate($additionalRules, $additionalMessages);
             }
 
-            // 4. SIMPAN FILE UPLOADS DENGAN STRUKTUR FOLDER: Berkas/Tahun/JenisPelatihan/Angkatan/NIP
-            $fileFields = [
-                'file_ktp',
-                'file_pas_foto',
-                'file_sk_jabatan',
-                'file_sk_pangkat',
-                'file_surat_tugas',
-                'file_surat_kesediaan',
-                'file_pakta_integritas',
-                'file_surat_komitmen',
-                'file_surat_kelulusan_seleksi',
-                'file_surat_sehat',
-                'file_surat_bebas_narkoba',
-                'file_surat_pernyataan_administrasi',
-                'file_sertifikat_penghargaan',
-                'file_sk_cpns',
-                'file_spmt',
-                'file_skp',
-                'file_persetujuan_mentor'
-            ];
-
-            // Ambil data untuk struktur folder
-            $tahun = date('Y');
-            $folderPath = null;
-
-            // Ambil data angkatan dari pendaftaran
-            $angkatan = null;
-            if ($pendaftaran && $pendaftaran->angkatan) {
-                $angkatan = $pendaftaran->angkatan;
-            }
-
-
-            // Cek apakah NDH sudah dipakai oleh peserta lain (kecuali peserta yang sedang update)
-            $ndhExists = Peserta::whereHas('pendaftaran', function($query) use ($pendaftaran) {
+            // ============================================
+            // 4. CEK NDH — sebelum proses file & simpan
+            // ============================================
+            $ndhExists = Peserta::whereHas('pendaftaran', function ($query) use ($pendaftaran) {
                     $query->where('id_angkatan', $pendaftaran->id_angkatan)
-                        ->where('id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan);
+                          ->where('id_jenis_pelatihan', $pendaftaran->id_jenis_pelatihan);
                 })
                 ->where('ndh', $request->ndh)
                 ->where('id', '!=', $request->peserta_id)
@@ -742,132 +543,108 @@ public function getAvailableNdh(Request $request)
                 ]);
             }
 
-            // Ambil kategori dan wilayah
-            $kategori = $pendaftaran->angkatan->kategori ?? 'PNBP';
-            $wilayah = $pendaftaran->angkatan->wilayah ?? null;
+            // ============================================
+            // 5. PROSES UPLOAD FILE
+            // ============================================
+            $fileFields = [
+                'file_ktp', 'file_pas_foto', 'file_sk_jabatan', 'file_sk_pangkat',
+                'file_surat_tugas', 'file_surat_kesediaan', 'file_pakta_integritas',
+                'file_surat_komitmen', 'file_surat_kelulusan_seleksi',
+                'file_surat_sehat', 'file_surat_bebas_narkoba',
+                'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan',
+                'file_sk_cpns', 'file_spmt', 'file_skp', 'file_persetujuan_mentor'
+            ];
+
+            $tahun      = date('Y');
+            $folderPath = null;
+            $angkatan   = $pendaftaran->angkatan ?? null;
+            $kategori   = $angkatan->kategori ?? 'PNBP';
+            $wilayah    = $angkatan->wilayah  ?? null;
 
             if ($jenisPelatihan && $angkatan) {
-                $kategoriFolder = strtoupper($kategori);
-                $kodeJenisPelatihan = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
-                $namaAngkatan = str_replace(' ', '_', $angkatan->nama_angkatan);
-                $nip = $request->nip_nrp;
+                $kategoriFolder      = strtoupper($kategori);
+                $kodeJenisPelatihan  = str_replace(' ', '_', $jenisPelatihan->kode_pelatihan);
+                $namaAngkatan        = str_replace(' ', '_', $angkatan->nama_angkatan);
+                $nip                 = $request->nip_nrp;
 
-                // Buat struktur folder berdasarkan kategori
                 if (strtoupper($kategori) === 'FASILITASI') {
-                    // Struktur untuk Fasilitasi: Berkas/Fasilitasi/Tahun/JenisPelatihan/Angkatan/Wilayah/NIP
                     $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
                     $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$wilayahFolder}/{$nip}";
                 } else {
-                    // Struktur untuk PNBP: Berkas/PNBP/Tahun/JenisPelatihan/Angkatan/NIP
                     $folderPath = "Berkas/{$kategoriFolder}/{$tahun}/{$kodeJenisPelatihan}/{$namaAngkatan}/{$nip}";
                 }
             }
 
             $files = [];
 
-            // ============================================
-            // PROSES KHUSUS UNTUK FOTO PAS CROPPED
-            // ============================================
+            // Proses foto pas cropped (base64)
             if ($request->filled('file_pas_foto_cropped')) {
                 try {
                     $base64Image = $request->file_pas_foto_cropped;
 
-                    // Validasi base64
                     if (!preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $base64Image)) {
                         throw ValidationException::withMessages([
-                            'file_pas_foto_cropped' => 'Format gambar tidak didukung. Gunakan JPG, JPEG, atau PNG.'
+                            'file_pas_foto_cropped' => ['Format gambar tidak didukung. Gunakan JPG, JPEG, atau PNG.']
                         ]);
                     }
 
-                    // Decode base64
                     $imageData = base64_decode(preg_replace('/^data:image\/\w+;base64,/', '', $base64Image));
 
                     if ($imageData === false) {
                         throw ValidationException::withMessages([
-                            'file_pas_foto_cropped' => 'Gagal mendecode gambar base64.'
+                            'file_pas_foto_cropped' => ['Gagal mendecode gambar base64.']
                         ]);
                     }
 
-                    // Validasi ukuran (base64 biasanya 30% lebih besar)
-                    if (strlen($imageData) > 1_500_000) { // ~1.1MB file asli
+                    if (strlen($imageData) > 1_500_000) {
                         throw ValidationException::withMessages([
-                            'file_pas_foto_cropped' => 'Ukuran foto terlalu besar. Maksimal 1.1MB setelah crop.'
+                            'file_pas_foto_cropped' => ['Ukuran foto terlalu besar. Maksimal 1.1MB setelah crop.']
                         ]);
                     }
 
-                    // Buat folder jika belum ada
                     if (!$folderPath) {
-                        if (strtoupper($kategori) === 'FASILITASI') {
-                            $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
-                            $folderPath = "Berkas/FASILITASI/{$tahun}/default/{$wilayahFolder}/{$request->nip_nrp}";
-                        } else {
-                            $folderPath = "Berkas/PNBP/{$tahun}/default/{$request->nip_nrp}";
-                        }
+                        $folderPath = strtoupper($kategori) === 'FASILITASI'
+                            ? "Berkas/FASILITASI/{$tahun}/default/" . ($wilayah ? str_replace(' ', '_', $wilayah) : 'Umum') . "/{$request->nip_nrp}"
+                            : "Berkas/PNBP/{$tahun}/default/{$request->nip_nrp}";
                     }
 
-                    // Buat nama file
-                    $fileName = 'pas_foto_3x4_' . time() . '.jpg';
+                    $fileName  = 'pas_foto_3x4_' . time() . '.jpg';
                     $drivePath = "{$folderPath}/{$fileName}";
 
-                    // Hapus file lama jika ada
                     $this->deleteOldFile($peserta, $pendaftaran, $kepegawaian, 'file_pas_foto');
-
-                    // Upload ke Google Drive
                     Storage::disk('google')->put($drivePath, $imageData);
-
                     $files['file_pas_foto'] = $drivePath;
 
-                    // Log::info('Foto crop berhasil diupload ke: ' . $drivePath);
-                    // Log::info('Ukuran file: ' . strlen($imageData) . ' bytes');
+                } catch (ValidationException $e) {
+                    throw $e;
                 } catch (\Exception $e) {
-                    // Log::error('Error processing cropped photo: ' . $e->getMessage());
                     throw ValidationException::withMessages([
-                        'file_pas_foto_cropped' => 'Gagal memproses foto: ' . $e->getMessage()
+                        'file_pas_foto_cropped' => ['Gagal memproses foto: ' . $e->getMessage()]
                     ]);
                 }
             }
-            // Jika tidak ada foto baru diupload, tapi wajib ada foto untuk LATSAR
-            elseif ($kode === 'LATSAR' && !$peserta->file_pas_foto) {
-                throw ValidationException::withMessages([
-                    'file_pas_foto_cropped' => 'Foto pas 3×4 wajib diupload untuk pelatihan LATSAR'
-                ]);
-            }
 
+            // Proses file-file lainnya
             foreach ($fileFields as $field) {
-                if ($field === 'file_pas_foto') {
-                    continue; // Sudah diproses di atas
-                }
+                if ($field === 'file_pas_foto') continue; // sudah diproses di atas
 
                 if ($request->hasFile($field)) {
                     try {
-                        
                         if (!$folderPath) {
-                            if (strtoupper($kategori) === 'FASILITASI') {
-                                $wilayahFolder = $wilayah ? str_replace(' ', '_', $wilayah) : 'Umum';
-                                $folderPath = "Berkas/FASILITASI/{$tahun}/default/{$wilayahFolder}/{$request->nip_nrp}";
-                            } else {
-                                $folderPath = "Berkas/PNBP/{$tahun}/default/{$request->nip_nrp}";
-                            }
+                            $folderPath = strtoupper($kategori) === 'FASILITASI'
+                                ? "Berkas/FASILITASI/{$tahun}/default/" . ($wilayah ? str_replace(' ', '_', $wilayah) : 'Umum') . "/{$request->nip_nrp}"
+                                : "Berkas/PNBP/{$tahun}/default/{$request->nip_nrp}";
                         }
 
                         $extension = $request->file($field)->getClientOriginalExtension();
                         $fieldName = str_replace('file_', '', $field);
-                        $fileName = $fieldName . '.' . $extension;
-
-                        // PATH DI GOOGLE DRIVE
+                        $fileName  = $fieldName . '.' . $extension;
                         $drivePath = "{$folderPath}/{$fileName}";
 
-                        // 🔥 HAPUS FILE LAMA DI DRIVE
                         $this->deleteOldFile($peserta, $pendaftaran, $kepegawaian, $field);
-
-                        // 🔥 UPLOAD KE GOOGLE DRIVE
-                        Storage::disk('google')->put(
-                            $drivePath,
-                            file_get_contents($request->file($field))
-                        );
-
-                        // SIMPAN PATH RELATIF KE DB
+                        Storage::disk('google')->put($drivePath, file_get_contents($request->file($field)));
                         $files[$field] = $drivePath;
+
                     } catch (\Exception $e) {
                         throw ValidationException::withMessages([
                             $field => ['Gagal upload file ke Google Drive: ' . $e->getMessage()]
@@ -876,89 +653,74 @@ public function getAvailableNdh(Request $request)
                 }
             }
 
-
-            // 5. UPDATE DATA PESERTA
+            // ============================================
+            // 6. UPDATE DATA PESERTA
+            // ============================================
             $pesertaUpdateData = [
-                'nama_lengkap' => $request->nama_lengkap,
-                'nip_nrp' => $request->nip_nrp,
-                'nama_panggilan' => $request->nama_panggilan,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'agama' => $request->agama,
-                'tempat_lahir' => $request->tempat_lahir,
-                'tanggal_lahir' => $request->tanggal_lahir,
-                'pendidikan_terakhir' => $request->pendidikan_terakhir,
-                'alamat_rumah' => $request->alamat_rumah,
-                'email_pribadi' => $request->email_pribadi,
-                'nomor_hp' => $request->nomor_hp,
-                'bidang_studi' => $request->bidang_studi,
-                'bidang_keahlian' => $request->bidang_keahlian,
+                'nama_lengkap'      => $request->nama_lengkap,
+                'nip_nrp'           => $request->nip_nrp,
+                'nama_panggilan'    => $request->nama_panggilan,
+                'jenis_kelamin'     => $request->jenis_kelamin,
+                'agama'             => $request->agama,
+                'tempat_lahir'      => $request->tempat_lahir,
+                'tanggal_lahir'     => $request->tanggal_lahir,
+                'pendidikan_terakhir'=> $request->pendidikan_terakhir,
+                'alamat_rumah'      => $request->alamat_rumah,
+                'email_pribadi'     => $request->email_pribadi,
+                'nomor_hp'          => $request->nomor_hp,
+                'bidang_studi'      => $request->bidang_studi,
+                'bidang_keahlian'   => $request->bidang_keahlian,
                 'status_perkawinan' => $request->status_perkawinan,
-                'nama_pasangan' => $request->nama_pasangan,
-                'olahraga_hobi' => $request->olahraga_hobi,
-                'perokok' => $request->perokok,
-                'ukuran_kaos' => $request->ukuran_kaos,
-                'ukuran_celana' => $request->ukuran_celana,
-                'ukuran_training' => $request->ukuran_training,
-                'kondisi_peserta' => $request->kondisi_peserta,
-                'ndh' => $request->ndh,
+                'nama_pasangan'     => $request->nama_pasangan,
+                'olahraga_hobi'     => $request->olahraga_hobi,
+                'perokok'           => $request->perokok,
+                'ukuran_kaos'       => $request->ukuran_kaos,
+                'ukuran_celana'     => $request->ukuran_celana,
+                'ukuran_training'   => $request->ukuran_training,
+                'kondisi_peserta'   => $request->kondisi_peserta,
+                'ndh'               => $request->ndh,
             ];
 
-            // Tambahkan file KTP dan pas foto jika ada
-            if (isset($files['file_ktp'])) {
-                $pesertaUpdateData['file_ktp'] = $files['file_ktp'];
-            }
-
-            if (isset($files['file_pas_foto'])) {
-                $pesertaUpdateData['file_pas_foto'] = $files['file_pas_foto'];
-            }
+            if (isset($files['file_ktp']))      $pesertaUpdateData['file_ktp']      = $files['file_ktp'];
+            if (isset($files['file_pas_foto'])) $pesertaUpdateData['file_pas_foto'] = $files['file_pas_foto'];
 
             $peserta->update($pesertaUpdateData);
 
-            // 6. UPDATE KEPEGAWAIAN PESERTA
+            // ============================================
+            // 7. UPDATE KEPEGAWAIAN PESERTA
+            // ============================================
             $provinsi = Provinsi::where('id', $request->id_provinsi)->first();
-            $kabupaten = $request->id_kabupaten_kota ?
-                Kabupaten::where('id', $request->id_kabupaten_kota)->first() :
-                null;
-
             if (!$provinsi) {
                 throw ValidationException::withMessages([
                     'id_provinsi' => ['Provinsi yang dipilih tidak ditemukan di database']
                 ]);
             }
 
-            // Persiapkan data update untuk kepegawaian
+            $kabupaten = $request->id_kabupaten_kota
+                ? Kabupaten::where('id', $request->id_kabupaten_kota)->first()
+                : null;
+
             $kepegawaianUpdateData = [
-                'asal_instansi' => $request->asal_instansi,
-                'unit_kerja' => $request->unit_kerja,
-                'id_provinsi' => $provinsi->id,
-                'id_kabupaten_kota' => $kabupaten?->id,
-                'alamat_kantor' => $request->alamat_kantor,
+                'asal_instansi'        => $request->asal_instansi,
+                'unit_kerja'           => $request->unit_kerja,
+                'id_provinsi'          => $provinsi->id,
+                'id_kabupaten_kota'    => $kabupaten?->id,
+                'alamat_kantor'        => $request->alamat_kantor,
                 'nomor_telepon_kantor' => $request->nomor_telepon_kantor,
-                'email_kantor' => $request->email_kantor,
-                'jabatan' => $request->jabatan,
-                'pangkat' => $request->pangkat,
-                'golongan_ruang' => $request->golongan_ruang,
-                'eselon' => $request->eselon,
-                'tanggal_sk_jabatan' => $request->tanggal_sk_jabatan,
-                'nomor_sk_cpns' => $request->nomor_sk_cpns,
-                'tanggal_sk_cpns' => $request->tanggal_sk_cpns,
+                'email_kantor'         => $request->email_kantor,
+                'jabatan'              => $request->jabatan,
+                'pangkat'              => $request->pangkat,
+                'golongan_ruang'       => $request->golongan_ruang,
+                'eselon'               => $request->eselon,
+                'tanggal_sk_jabatan'   => $request->tanggal_sk_jabatan,
+                'nomor_sk_cpns'        => $request->nomor_sk_cpns,
+                'tanggal_sk_cpns'      => $request->tanggal_sk_cpns,
                 'tahun_lulus_pkp_pim_iv' => $request->tahun_lulus_pkp_pim_iv,
-                'nomor_sk_terakhir' => $request->nomor_sk_terakhir,
+                'nomor_sk_terakhir'    => $request->nomor_sk_terakhir,
             ];
 
-            // Tambahkan file-field hanya jika ada file baru diupload
-            $kepegawaianFileFields = [
-                'file_sk_jabatan',
-                'file_sk_pangkat',
-                'file_sk_cpns',
-                'file_spmt',
-                'file_skp',
-            ];
-
-            foreach ($kepegawaianFileFields as $field) {
-                if (isset($files[$field])) {
-                    $kepegawaianUpdateData[$field] = $files[$field];
-                }
+            foreach (['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp'] as $field) {
+                if (isset($files[$field])) $kepegawaianUpdateData[$field] = $files[$field];
             }
 
             KepegawaianPeserta::updateOrCreate(
@@ -966,54 +728,50 @@ public function getAvailableNdh(Request $request)
                 $kepegawaianUpdateData
             );
 
-            // 7. UPDATE DOKUMEN PENDAFTARAN
+            // ============================================
+            // 8. UPDATE DOKUMEN PENDAFTARAN
+            // ============================================
             $pendaftaranUpdateData = [];
-
             $pendaftaranFileFields = [
-                'file_surat_tugas',
-                'file_surat_kesediaan',
-                'file_pakta_integritas',
-                'file_surat_komitmen',
-                'file_surat_kelulusan_seleksi',
-                'file_surat_sehat',
-                'file_surat_bebas_narkoba',
-                'file_surat_pernyataan_administrasi',
-                'file_sertifikat_penghargaan',
+                'file_surat_tugas', 'file_surat_kesediaan', 'file_pakta_integritas',
+                'file_surat_komitmen', 'file_surat_kelulusan_seleksi',
+                'file_surat_sehat', 'file_surat_bebas_narkoba',
+                'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan',
                 'file_persetujuan_mentor'
             ];
 
             foreach ($pendaftaranFileFields as $field) {
-                if (isset($files[$field])) {
-                    $pendaftaranUpdateData[$field] = $files[$field];
-                }
+                if (isset($files[$field])) $pendaftaranUpdateData[$field] = $files[$field];
             }
 
-            // Update pendaftaran hanya jika ada data baru
             if (!empty($pendaftaranUpdateData)) {
                 $pendaftaran->update($pendaftaranUpdateData);
             }
 
-            // 8. SIMPAN MENTOR JIKA ADA
-            // Di dalam method updateData(), bagian simpan mentor (sekitar baris 8)
+            // ============================================
+            // 9. SIMPAN MENTOR
+            // Validasi sudah dilakukan di step 3 — langsung proses simpan
+            // ============================================
             if ($request->sudah_ada_mentor === 'Ya') {
                 $mentor = null;
 
                 if ($request->mentor_mode === 'pilih' && $request->id_mentor) {
                     $mentor = Mentor::find($request->id_mentor);
+
                 } elseif ($request->mentor_mode === 'tambah') {
-                    // NORMALISASI NIP: Hapus spasi dan titik sebelum disimpan
+                    // Normalisasi NIP: hapus spasi dan titik
                     $nipMentorBersih = preg_replace('/[\s\.]/', '', $request->nip_mentor_baru);
-                    
+
                     $mentor = Mentor::create([
-                        'nama_mentor' => $request->nama_mentor_baru,
-                        'nip_mentor' => $nipMentorBersih, // Simpan NIP yang sudah dinormalisasi
-                        'jabatan_mentor' => $request->jabatan_mentor_baru,
-                        'golongan'       => $request->golongan_mentor_baru,
-                        'pangkat'        => $request->pangkat_mentor_baru, 
-                        'nomor_rekening' => $request->nomor_rekening_mentor_baru,
-                        'npwp_mentor' => $request->npwp_mentor_baru,
+                        'nama_mentor'     => $request->nama_mentor_baru,
+                        'nip_mentor'      => $nipMentorBersih,
+                        'jabatan_mentor'  => $request->jabatan_mentor_baru,
+                        'golongan'        => $request->golongan_mentor_baru,
+                        'pangkat'         => $request->pangkat_mentor_baru,
+                        'nomor_rekening'  => $request->nomor_rekening_mentor_baru,
+                        'npwp_mentor'     => $request->npwp_mentor_baru,
                         'nomor_hp_mentor' => $request->nomor_hp_mentor_baru,
-                        'status_aktif' => true,
+                        'status_aktif'    => true,
                     ]);
                 }
 
@@ -1021,25 +779,28 @@ public function getAvailableNdh(Request $request)
                     PesertaMentor::updateOrCreate(
                         ['id_pendaftaran' => $pendaftaran->id],
                         [
-                            'id_mentor' => $mentor->id,
+                            'id_mentor'          => $mentor->id,
                             'tanggal_penunjukan' => now(),
-                            'status_mentoring' => 'Ditugaskan',
+                            'status_mentoring'   => 'Ditugaskan',
                         ]
                     );
                 }
             }
 
-            $peserta->update([
-                'batasan' => true
-            ]);
+            // ============================================
+            // 10. TANDAI PESERTA SUDAH MENGISI FORM
+            // ============================================
+            $peserta->update(['batasan' => true]);
 
-            // 9. RESPONSE
+            // ============================================
+            // 11. RESPONSE
+            // ============================================
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Data peserta berhasil diperbarui!',
-                    'pendaftaran_id' => $pendaftaran->id,
-                    'redirect_url' => route('pendaftaran.success')
+                    'success'         => true,
+                    'message'         => 'Data peserta berhasil diperbarui!',
+                    'pendaftaran_id'  => $pendaftaran->id,
+                    'redirect_url'    => route('pendaftaran.success')
                 ], 200);
             }
 
@@ -1048,20 +809,21 @@ public function getAvailableNdh(Request $request)
             return redirect()->route('pendaftaran.success')
                 ->with('success', 'Data peserta berhasil diperbarui!')
                 ->with('pendaftaran_id', $pendaftaran->id);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+
+        } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Validasi gagal. Mohon periksa kembali data yang Anda masukkan.',
-                    'errors' => $e->errors()
+                    'errors'  => $e->errors()
                 ], 422);
             }
 
-            return redirect()
-                ->back()
+            return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput()
                 ->with('error', 'Validasi gagal. Mohon periksa kembali data yang Anda masukkan.');
+
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -1070,13 +832,11 @@ public function getAvailableNdh(Request $request)
                 ], 500);
             }
 
-            return redirect()
-                ->back()
+            return redirect()->back()
                 ->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi atau hubungi administrator.')
                 ->withInput();
         }
     }
-
     // FUNGSI HELPER UNTUK MENGHAPUS FILE LAMA
     private function deleteOldFile($peserta, $pendaftaran, $kepegawaian, $field)
     {

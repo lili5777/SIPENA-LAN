@@ -721,7 +721,7 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label class="form-label">Golongan Ruang Mentor</label>
+                <label class="form-label required">Golongan Ruang Mentor</label>
                 <select name="golongan_mentor_baru" id="golongan_mentor_baru"
                     class="form-select @error('golongan_mentor_baru') error @enderror">
                     <option value="">-- Pilih Golongan Ruang --</option>
@@ -737,7 +737,7 @@
                 @enderror
             </div>
             <div class="form-group">
-                <label class="form-label">Pangkat Mentor</label>
+                <label class=" required">Pangkat Mentor</label>
                 <input type="text" name="pangkat_mentor_baru" id="pangkat_mentor_baru"
                     class="form-input @error('pangkat_mentor_baru') error @enderror"
                     value="{{ $peserta['pangkat_mentor_baru'] ?? old('pangkat_mentor_baru') }}" readonly
@@ -753,7 +753,7 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label class="form-label">Nomor Rekening Mentor</label>
+                <label class="form-label required">Nomor Rekening Mentor</label>
                 <input type="text" name="nomor_rekening_mentor_baru" id="nomor_rekening_mentor_baru"
                     class="form-input @error('nomor_rekening_mentor_baru') error @enderror"
                     placeholder="Contoh: Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
@@ -763,7 +763,7 @@
                 @enderror
             </div>
             <div class="form-group">
-                <label class="form-label">NPWP Mentor</label>
+                <label class="form-label required">NPWP Mentor</label>
                 <input type="text" name="npwp_mentor_baru" id="npwp_mentor_baru"
                     class="form-input @error('npwp_mentor_baru') error @enderror"
                     value="{{ $peserta['npwp_mentor_baru'] ?? old('npwp_mentor_baru') }}"

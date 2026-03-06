@@ -850,6 +850,70 @@
             let verifiedPeserta   = null;
             let pendaftaranData   = null;
 
+            function fieldLabel(field) {
+                const labels = {
+                    'nama_lengkap'               : 'Nama Lengkap',
+                    'nip_nrp'                    : 'NIP/NRP',
+                    'nama_panggilan'             : 'Nama Panggilan',
+                    'jenis_kelamin'              : 'Jenis Kelamin',
+                    'agama'                      : 'Agama',
+                    'tempat_lahir'               : 'Tempat Lahir',
+                    'tanggal_lahir'              : 'Tanggal Lahir',
+                    'alamat_rumah'               : 'Alamat Rumah',
+                    'email_pribadi'              : 'Email Pribadi',
+                    'nomor_hp'                   : 'Nomor HP',
+                    'pendidikan_terakhir'        : 'Pendidikan Terakhir',
+                    'bidang_studi'               : 'Bidang Studi',
+                    'bidang_keahlian'            : 'Bidang Keahlian',
+                    'status_perkawinan'          : 'Status Perkawinan',
+                    'nama_pasangan'              : 'Nama Pasangan',
+                    'olahraga_hobi'              : 'Olahraga/Hobi',
+                    'perokok'                    : 'Status Perokok',
+                    'ukuran_kaos'                : 'Ukuran Kaos',
+                    'ukuran_celana'              : 'Ukuran Celana',
+                    'ukuran_training'            : 'Ukuran Baju Taktikal',
+                    'kondisi_peserta'            : 'Kondisi Peserta',
+                    'asal_instansi'              : 'Asal Instansi',
+                    'unit_kerja'                 : 'Unit Kerja',
+                    'id_provinsi'                : 'Provinsi',
+                    'id_kabupaten_kota'          : 'Kabupaten/Kota',
+                    'alamat_kantor'              : 'Alamat Kantor',
+                    'jabatan'                    : 'Jabatan',
+                    'pangkat'                    : 'Pangkat',
+                    'golongan_ruang'             : 'Golongan Ruang',
+                    'eselon'                     : 'Eselon',
+                    'nomor_sk_cpns'              : 'Nomor SK CPNS',
+                    'tanggal_sk_cpns'            : 'Tanggal SK CPNS',
+                    'nomor_sk_terakhir'          : 'Nomor SK Jabatan Terakhir',
+                    'tanggal_sk_jabatan'         : 'Tanggal SK Jabatan',
+                    'ndh'                        : 'NDH',
+                    'sudah_ada_mentor'           : 'Status Mentor',
+                    'mentor_mode'                : 'Mode Mentor',
+                    'id_mentor'                  : 'Pilih Mentor',
+                    'nama_mentor_baru'           : 'Nama Mentor Baru',
+                    'nip_mentor_baru'            : 'NIP Mentor Baru',
+                    'jabatan_mentor_baru'        : 'Jabatan Mentor Baru',
+                    'golongan_mentor_baru'       : 'Golongan Mentor Baru',
+                    'pangkat_mentor_baru'        : 'Pangkat Mentor Baru',
+                    'nomor_rekening_mentor_baru' : 'Nomor Rekening Mentor',
+                    'npwp_mentor_baru'           : 'NPWP Mentor',
+                    'file_ktp'                   : 'File KTP',
+                    'file_pas_foto_cropped'      : 'Foto Peserta',
+                    'file_sk_cpns'               : 'File SK CPNS',
+                    'file_spmt'                  : 'File SPMT',
+                    'file_skp'                   : 'File SKP',
+                    'file_sk_jabatan'            : 'File SK Jabatan',
+                    'file_sk_pangkat'            : 'File SK Pangkat',
+                    'file_surat_kesediaan'       : 'File Surat Kesediaan',
+                    'file_surat_tugas'           : 'File Surat Tugas',
+                    'file_pakta_integritas'      : 'File Pakta Integritas',
+                    'file_surat_sehat'           : 'File Surat Sehat',
+                    'file_surat_bebas_narkoba'   : 'File Surat Bebas Narkoba',
+                    'file_persetujuan_mentor'    : 'File Persetujuan Mentor',
+                };
+                return labels[field] || field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            }
+
             // ============================================
             // STEP 1: PILIH PELATIHAN
             // ============================================
@@ -1691,59 +1755,109 @@
 
                     clearTimeout(timeoutId);
                     this.classList.remove('submitting');
+                    hideLoadingOverlay();
+                    submitBtn.innerHTML = origText;
+                    submitBtn.disabled  = false;
 
-                    if (!response.ok) {
-                        const errMap = { 413: 'Ukuran file terlalu besar.', 422: 'Data tidak valid. Periksa kembali isian Anda.', 500: 'Kesalahan server (500). Hubungi administrator.' };
-                        showErrorMessage(errMap[response.status] || 'Terjadi kesalahan jaringan. Silakan coba lagi.');
-                        submitBtn.innerHTML = origText;
-                        submitBtn.disabled  = false;
-                        hideLoadingOverlay();
+                    // ✅ BACA JSON DULU APAPUN STATUS RESPONSENYA
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch(parseErr) {
+                        // Response bukan JSON (misal 500 HTML)
+                        const errMap = { 413: 'Ukuran file terlalu besar.', 500: 'Kesalahan server. Hubungi administrator.' };
+                        showErrorMessage(errMap[response.status] || 'Terjadi kesalahan. Silakan coba lagi.');
                         return;
                     }
 
-                    const data = await response.json();
-
                     if (data.success) {
-                        updateLoadingMessage('Data berhasil disimpan! Mengarahkan ke halaman detail...');
+                        // SUKSES
+                        showLoadingOverlay('Data berhasil disimpan! Mengarahkan ke halaman detail...');
                         setTimeout(() => {
                             hideLoadingOverlay();
                             showSuccessMessage('Data berhasil diperbarui!');
                             setTimeout(() => { window.location.href = data.redirect_url + '?id=' + data.pendaftaran_id; }, 1000);
                         }, 1500);
-                    } else {
-                        hideLoadingOverlay();
-                        submitBtn.innerHTML = origText;
-                        submitBtn.disabled  = false;
-                        document.querySelectorAll('.server-error').forEach(el => el.remove());
-                        document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-
-                        if (data.errors) {
-                            Object.keys(data.errors).forEach(field => {
-                                const input = document.querySelector(`[name="${field}"]`) || document.querySelector(`#${field}`);
-                                if (input) {
-                                    input.classList.add('error');
-                                    const fg = input.closest('.form-group');
-                                    if (fg) {
-                                        fg.querySelector('.server-error')?.remove();
-                                        const err = document.createElement('small');
-                                        err.className   = 'text-danger server-error';
-                                        err.textContent = data.errors[field][0];
-                                        fg.appendChild(err);
-                                    }
-                                }
-                            });
-                            setTimeout(() => document.querySelector('.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
-                        } else if (data.message) {
-                            showErrorMessage(data.message);
-                        }
+                        return;
                     }
+
+                    // GAGAL — tampilkan error
+                    document.querySelectorAll('.server-error').forEach(el => el.remove());
+                    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+                    document.getElementById('error-summary-box')?.remove();
+
+                    if (data.errors) {
+                        const errorList = [];
+                        let firstErrorEl = null;
+
+                        Object.keys(data.errors).forEach(field => {
+                            const errorMsg = data.errors[field][0];
+
+                            // Cari input — coba berbagai selector
+                            let input = document.querySelector(`[name="${field}"]`)
+                                    || document.querySelector(`#${field}`);
+
+                            if (input) {
+                                // Jika input di dalam container yang hidden, buka dulu
+                                let parent = input.closest('[style*="display: none"], [style*="display:none"]');
+                                if (parent) parent.style.display = 'block';
+
+                                input.classList.add('error');
+
+                                const fg = input.closest('.form-group');
+                                if (fg) {
+                                    fg.querySelector('.server-error')?.remove();
+                                    const err = document.createElement('small');
+                                    err.className = 'text-danger server-error';
+                                    err.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMsg}`;
+                                    fg.appendChild(err);
+                                    if (!firstErrorEl) firstErrorEl = fg;
+                                }
+                            }
+
+                            errorList.push({ field, message: errorMsg });
+                        });
+
+                        // Summary box merah di atas form
+                        const summary = document.createElement('div');
+                        summary.id = 'error-summary-box';
+                        summary.style.cssText = `
+                            background:#fff5f5; border:2px solid #fc8181; border-radius:8px;
+                            padding:16px 20px; margin-bottom:24px;
+                        `;
+                        summary.innerHTML = `
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                                <i class="fas fa-exclamation-triangle" style="color:#e53e3e;font-size:1.2rem;"></i>
+                                <strong style="color:#c53030;font-size:1rem;">
+                                    Terdapat ${errorList.length} kesalahan yang perlu diperbaiki:
+                                </strong>
+                            </div>
+                            <ul style="margin:0;padding-left:20px;color:#c53030;font-size:0.9rem;line-height:1.8;">
+                                ${errorList.map(e => `<li><strong>${fieldLabel(e.field)}:</strong> ${e.message}</li>`).join('')}
+                            </ul>
+                        `;
+
+                        // Sisipkan di atas step-navigation
+                        const navBar = document.querySelector('#step3-content .step-navigation');
+                        if (navBar) navBar.parentNode.insertBefore(summary, navBar);
+
+                        // Scroll ke summary
+                        setTimeout(() => {
+                            const target = document.getElementById('error-summary-box') || firstErrorEl;
+                            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 200);
+
+                    } else {
+                        showErrorMessage(data.message || 'Terjadi kesalahan. Silakan coba lagi.');
+                    }
+
                 } catch (error) {
                     this.classList.remove('submitting');
                     hideLoadingOverlay();
                     submitBtn.innerHTML = origText;
                     submitBtn.disabled  = false;
                     showErrorMessage(error.name === 'AbortError'
-                        ? 'Proses upload terlalu lama. Silakan coba lagi dengan file yang lebih kecil.'
+                        ? 'Proses upload terlalu lama. Coba lagi dengan file lebih kecil.'
                         : 'Terjadi kesalahan jaringan. Silakan coba lagi.');
                 }
             });
