@@ -759,9 +759,22 @@ public function getAvailableNdh(Request $request)
                     $mentor = Mentor::find($request->id_mentor);
 
                 } elseif ($request->mentor_mode === 'tambah') {
-                    // Normalisasi NIP: hapus spasi dan titik
                     $nipMentorBersih = preg_replace('/[\s\.]/', '', $request->nip_mentor_baru);
 
+                    // Cek dulu apakah NIP sudah ada di DB
+                    $mentor = Mentor::whereRaw(
+                        "REPLACE(REPLACE(nip_mentor, ' ', ''), '.', '') = ?",
+                        [$nipMentorBersih]
+                    )->first();
+
+                    // Jika sudah ada, tolak dengan pesan error
+                    if ($mentor) {
+                        throw ValidationException::withMessages([
+                            'nip_mentor_baru' => ['NIP Mentor sudah terdaftar. Silakan pilih dari daftar mentor yang tersedia.']
+                        ]);
+                    }
+
+                    // Jika belum ada, baru buat
                     $mentor = Mentor::create([
                         'nama_mentor'     => $request->nama_mentor_baru,
                         'nip_mentor'      => $nipMentorBersih,
