@@ -20,6 +20,7 @@ return [
     'Kementerian Agama',
     'Kementerian Ketenagakerjaan',
     'Kementerian Sekretariat Negara',
+    'Kementerian Imigrasi dan Pemasyarakatan',
     'Kejaksaan RI',
     'Markas Besar Tentara Nasional Indonesia (Mabes TNI)',
     'Kepolisian Negara Republik Indonesia (POLRI)',
