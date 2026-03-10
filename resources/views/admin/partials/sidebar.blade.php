@@ -72,22 +72,37 @@
                         <a href="{{ route('mentor.index') }}" class="submenu-link">
                             <i class="fas fa-chalkboard-teacher me-2"></i> Mentor
                         </a>
+                    @endif
+
+                    @if($user->hasPermission('coach.read'))
                         <a href="{{ route('coach.index') }}" class="submenu-link">
                             <i class="fas fa-user-tie me-2"></i> Coach
                         </a>
+                    @endif
+
+                    @if($user->hasPermission('penguji.read'))
                         <a href="{{ route('penguji.index') }}" class="submenu-link">
                             <i class="fas fa-user-check me-2"></i> Penguji
                         </a>
+                    @endif
+
+                    @if($user->hasPermission('evaluator.read'))
                         <a href="{{ route('evaluator.index') }}" class="submenu-link">
                             <i class="fas fa-user-graduate me-2"></i> Evaluator
                         </a>
+                    @endif
+
+                    @if($user->hasPermission('gelombang.read'))
                         <a href="{{ route('gelombang.index') }}" class="submenu-link">
                             <i class="fas fa-layer-group me-2"></i> Gelombang
                         </a>
+                    @endif
+
+                    @if($user->hasPermission('kelompok.read'))
                         <a href="{{ route('kelompok.index') }}" class="submenu-link">
                             <i class="fas fa-users me-2"></i> Kelompok
                         </a>
-                    @endif
+                    @endif               
 
                     @unless($isPic)
                         <a href="{{ route('visi-misi.index') }}" class="submenu-link">
