@@ -34,4 +34,9 @@ class Evaluator extends Model
     {
         return $this->hasMany(Kelompok::class, 'id_evaluator');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'evaluator_id');
+    }
 }

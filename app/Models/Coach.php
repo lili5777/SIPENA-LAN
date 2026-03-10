@@ -34,4 +34,9 @@ class Coach extends Model
     {
         return $this->hasMany(Kelompok::class, 'id_coach');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'coach_id');
+    }
 }

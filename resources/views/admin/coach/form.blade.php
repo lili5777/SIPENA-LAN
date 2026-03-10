@@ -76,7 +76,6 @@
 
                 <div class="row">
                     <div class="col-md-6">
-                        <!-- Nama -->
                         <div class="mb-4">
                             <label for="nama" class="form-label fw-semibold">
                                 <i class="fas fa-user me-1 text-primary"></i> Nama Coach <span class="text-danger">*</span>
@@ -89,7 +88,6 @@
                             <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>Nama lengkap sesuai dokumen resmi</small>
                         </div>
 
-                        <!-- NIP -->
                         <div class="mb-4">
                             <label for="nip" class="form-label fw-semibold">
                                 <i class="fas fa-id-card me-1 text-primary"></i> NIP Coach
@@ -101,7 +99,6 @@
                             @error('nip')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        <!-- Jabatan -->
                         <div class="mb-4">
                             <label for="jabatan" class="form-label fw-semibold">
                                 <i class="fas fa-briefcase me-1 text-primary"></i> Jabatan Coach
@@ -116,7 +113,6 @@
                     </div>
 
                     <div class="col-md-6">
-                        <!-- Golongan -->
                         <div class="mb-4">
                             <label for="golongan" class="form-label fw-semibold">
                                 <i class="fas fa-layer-group me-1 text-primary"></i> Golongan Ruang
@@ -133,7 +129,6 @@
                             @error('golongan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        <!-- Pangkat -->
                         <div class="mb-4">
                             <label for="pangkat" class="form-label fw-semibold">
                                 <i class="fas fa-medal me-1 text-primary"></i> Pangkat
@@ -146,7 +141,6 @@
                             <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>Terisi otomatis saat golongan dipilih</small>
                         </div>
 
-                        <!-- Status -->
                         <div class="mb-4">
                             <label for="status_aktif" class="form-label fw-semibold">
                                 <i class="fas fa-toggle-on me-1 text-primary"></i> Status Coach <span class="text-danger">*</span>
@@ -172,13 +166,18 @@
                         <div class="mb-4">
                             <label for="email" class="form-label fw-semibold">
                                 <i class="fas fa-envelope me-1 text-primary"></i> Email Coach
+                                @if($isEdit && optional($coach->user)->id)
+                                    <span class="text-danger">*</span>
+                                @endif
                             </label>
                             <input type="email" class="form-control @error('email') is-invalid @enderror"
                                 id="email" name="email"
                                 value="{{ old('email', $isEdit ? $coach->email : '') }}"
                                 placeholder="contoh@email.com">
                             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>Email aktif untuk komunikasi</small>
+                            <small class="text-muted mt-1 d-block" id="emailHint">
+                                <i class="fas fa-info-circle me-1"></i>Email aktif untuk komunikasi
+                            </small>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -230,6 +229,205 @@
                     </div>
                 </div>
 
+                {{-- AKUN LOGIN --}}
+                <div class="section-divider mb-4 mt-2">
+                    <span><i class="fas fa-user-lock me-2"></i>Akun Login</span>
+                </div>
+
+                @if(!$isEdit)
+                {{-- CREATE: Toggle untuk pilih buat akun atau tidak --}}
+                <div class="mb-4">
+                    <div class="form-check form-switch d-flex align-items-center gap-3" style="padding-left:0;">
+                        <div class="position-relative" style="padding-left: 2.5rem;">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                   id="buat_akun" name="buat_akun" value="1"
+                                   {{ old('buat_akun') == '1' ? 'checked' : '' }}
+                                   style="width:3rem;height:1.5rem;cursor:pointer;">
+                        </div>
+                        <label class="form-check-label fw-semibold fs-6" for="buat_akun" style="color:#285496;cursor:pointer;">
+                            Sekaligus buatkan akun login untuk Coach ini
+                        </label>
+                    </div>
+                    <small class="text-muted ms-1 d-block mt-1">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Aktifkan untuk memberikan akses login sistem. Email di atas akan digunakan sebagai username login.
+                    </small>
+                </div>
+
+                <div id="akunPanel" class="{{ old('buat_akun') == '1' ? '' : 'd-none' }}">
+                    <div class="card border border-primary-subtle rounded-3 mb-4" style="background:#f8fbff;">
+                        <div class="card-body pt-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label fw-semibold">
+                                            <i class="fas fa-lock me-1 text-primary"></i>
+                                            Password <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password"
+                                                   class="form-control @error('password') is-invalid @enderror"
+                                                   id="password" name="password"
+                                                   placeholder="Minimal 8 karakter"
+                                                   autocomplete="new-password">
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
+                                                <i class="fas fa-eye" id="eyeIcon"></i>
+                                            </button>
+                                            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                        </div>
+                                        <div class="mt-2" id="strengthWrapper" style="display:none;">
+                                            <div class="progress" style="height:5px;">
+                                                <div class="progress-bar" id="strengthBar" role="progressbar" style="width:0%;transition:width .3s;"></div>
+                                            </div>
+                                            <small id="strengthLabel" class="text-muted"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="password_confirmation" class="form-label fw-semibold">
+                                            <i class="fas fa-lock me-1 text-primary"></i>
+                                            Konfirmasi Password <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="password"
+                                               class="form-control"
+                                               id="password_confirmation" name="password_confirmation"
+                                               placeholder="Ulangi password"
+                                               autocomplete="new-password">
+                                        <div id="matchFeedback" class="mt-1" style="font-size:.85rem;display:none;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @else
+                {{-- EDIT: Langsung tampilkan panel password, tidak perlu toggle --}}
+                @if(optional($coach->user)->id)
+                {{-- Akun sudah ada — tampilkan panel ganti password --}}
+                <input type="hidden" name="buat_akun" value="1">
+                <div class="card border border-primary-subtle rounded-3 mb-4" style="background:#f8fbff;">
+                    <div class="card-body pt-4">
+                        <div class="alert alert-success d-flex align-items-center py-2 mb-4" role="alert">
+                            <i class="fas fa-check-circle me-2 flex-shrink-0"></i>
+                            <div>Akun login aktif dengan email <strong>{{ $coach->user->email }}</strong>.
+                            Kosongkan password di bawah jika tidak ingin mengubah password.</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label fw-semibold">
+                                        <i class="fas fa-lock me-1 text-primary"></i>
+                                        Password Baru <small class="text-muted fw-normal">(kosongkan jika tidak diubah)</small>
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="password"
+                                               class="form-control @error('password') is-invalid @enderror"
+                                               id="password" name="password"
+                                               placeholder="Kosongkan jika tidak diubah"
+                                               autocomplete="new-password">
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
+                                            <i class="fas fa-eye" id="eyeIcon"></i>
+                                        </button>
+                                        @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    </div>
+                                    <div class="mt-2" id="strengthWrapper" style="display:none;">
+                                        <div class="progress" style="height:5px;">
+                                            <div class="progress-bar" id="strengthBar" role="progressbar" style="width:0%;transition:width .3s;"></div>
+                                        </div>
+                                        <small id="strengthLabel" class="text-muted"></small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password_confirmation" class="form-label fw-semibold">
+                                        <i class="fas fa-lock me-1 text-primary"></i>
+                                        Konfirmasi Password Baru
+                                    </label>
+                                    <input type="password"
+                                           class="form-control"
+                                           id="password_confirmation" name="password_confirmation"
+                                           placeholder="Ulangi password baru"
+                                           autocomplete="new-password">
+                                    <div id="matchFeedback" class="mt-1" style="font-size:.85rem;display:none;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @else
+                {{-- Belum punya akun — toggle untuk buat akun baru --}}
+                <div class="mb-4">
+                    <div class="form-check form-switch d-flex align-items-center gap-3" style="padding-left:0;">
+                        <div class="position-relative" style="padding-left: 2.5rem;">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                   id="buat_akun" name="buat_akun" value="1"
+                                   {{ old('buat_akun') == '1' ? 'checked' : '' }}
+                                   style="width:3rem;height:1.5rem;cursor:pointer;">
+                        </div>
+                        <label class="form-check-label fw-semibold fs-6" for="buat_akun" style="color:#285496;cursor:pointer;">
+                            Buatkan akun login untuk Coach ini
+                        </label>
+                    </div>
+                    <small class="text-muted ms-1 d-block mt-1">
+                        <i class="fas fa-info-circle me-1"></i>Coach ini belum memiliki akun login. Aktifkan untuk membuatnya.
+                    </small>
+                </div>
+
+                <div id="akunPanel" class="{{ old('buat_akun') == '1' ? '' : 'd-none' }}">
+                    <div class="card border border-primary-subtle rounded-3 mb-4" style="background:#f8fbff;">
+                        <div class="card-body pt-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label fw-semibold">
+                                            <i class="fas fa-lock me-1 text-primary"></i>
+                                            Password <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password"
+                                                   class="form-control @error('password') is-invalid @enderror"
+                                                   id="password" name="password"
+                                                   placeholder="Minimal 8 karakter"
+                                                   autocomplete="new-password">
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
+                                                <i class="fas fa-eye" id="eyeIcon"></i>
+                                            </button>
+                                            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                        </div>
+                                        <div class="mt-2" id="strengthWrapper" style="display:none;">
+                                            <div class="progress" style="height:5px;">
+                                                <div class="progress-bar" id="strengthBar" role="progressbar" style="width:0%;transition:width .3s;"></div>
+                                            </div>
+                                            <small id="strengthLabel" class="text-muted"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="password_confirmation" class="form-label fw-semibold">
+                                            <i class="fas fa-lock me-1 text-primary"></i>
+                                            Konfirmasi Password <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="password"
+                                               class="form-control"
+                                               id="password_confirmation" name="password_confirmation"
+                                               placeholder="Ulangi password"
+                                               autocomplete="new-password">
+                                        <div id="matchFeedback" class="mt-1" style="font-size:.85rem;display:none;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @endif
+                {{-- END AKUN LOGIN --}}
+
                 <div class="alert alert-warning d-none" id="validationSummary">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-exclamation-triangle me-2"></i>
@@ -261,7 +459,7 @@
                 <div class="col-md-6">
                     <ul class="list-unstyled mb-0">
                         <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i><strong>Aktif:</strong> Coach dapat dipilih untuk kelompok baru</li>
-                        <li class="mb-2"><i class="fas fa-exclamation-circle text-warning me-2"></i>Data email harus unik dan tidak boleh duplikat</li>
+                        <li class="mb-2"><i class="fas fa-exclamation-circle text-warning me-2"></i>Email yang diisi akan sekaligus menjadi username login</li>
                     </ul>
                 </div>
                 <div class="col-md-6">
@@ -278,11 +476,17 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('coachForm');
+    const form    = document.getElementById('coachForm');
+    const passEl  = document.getElementById('password');
+    const confEl  = document.getElementById('password_confirmation');
+    const emailEl = document.getElementById('email');
 
     // Auto-hide alerts
     document.querySelectorAll('.alert').forEach(a => {
-        setTimeout(() => { if (a.classList.contains('show') && !a.classList.contains('alert-warning')) bootstrap.Alert.getOrCreateInstance(a).close(); }, 5000);
+        setTimeout(() => {
+            if (a.classList.contains('show') && !a.classList.contains('alert-warning'))
+                bootstrap.Alert.getOrCreateInstance(a).close();
+        }, 5000);
     });
 
     // Format NPWP
@@ -305,17 +509,97 @@ document.addEventListener('DOMContentLoaded', function () {
         e.target.value = v.substr(0, 15);
     });
 
+    // Toggle panel akun (hanya ada saat create, atau edit tanpa akun)
+    const toggle = document.getElementById('buat_akun');
+    const panel  = document.getElementById('akunPanel');
+
+    function syncPanel() {
+        if (!toggle || !panel) return; // edit dengan akun sudah ada: tidak ada toggle/panel
+        if (toggle.checked) {
+            panel.classList.remove('d-none');
+            const hint = document.getElementById('emailHint');
+            if (hint) hint.innerHTML = '<i class="fas fa-info-circle me-1"></i>Email ini juga digunakan sebagai username login. <strong>Wajib diisi.</strong>';
+        } else {
+            panel.classList.add('d-none');
+            if (passEl) passEl.value = '';
+            if (confEl) confEl.value = '';
+            const hint = document.getElementById('emailHint');
+            if (hint) hint.innerHTML = '<i class="fas fa-info-circle me-1"></i>Email aktif untuk komunikasi';
+        }
+    }
+    if (toggle) toggle.addEventListener('change', syncPanel);
+
+    // Tampilkan/sembunyikan password
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const isPass = passEl.type === 'password';
+        passEl.type  = isPass ? 'text' : 'password';
+        document.getElementById('eyeIcon').className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
+    });
+
+    // Password strength meter
+    passEl.addEventListener('input', function () {
+        const val     = passEl.value;
+        const wrapper = document.getElementById('strengthWrapper');
+        const bar     = document.getElementById('strengthBar');
+        const label   = document.getElementById('strengthLabel');
+        if (!val) { wrapper.style.display = 'none'; return; }
+        wrapper.style.display = 'block';
+        let score = 0;
+        if (val.length >= 8)          score++;
+        if (/[A-Z]/.test(val))        score++;
+        if (/[0-9]/.test(val))        score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+        const levels = [
+            { pct:25,  cls:'bg-danger',  txt:'Sangat lemah' },
+            { pct:50,  cls:'bg-warning', txt:'Lemah' },
+            { pct:75,  cls:'bg-info',    txt:'Cukup kuat' },
+            { pct:100, cls:'bg-success', txt:'Kuat' },
+        ];
+        const lvl = levels[score - 1] || levels[0];
+        bar.style.width   = lvl.pct + '%';
+        bar.className     = 'progress-bar ' + lvl.cls;
+        label.textContent = lvl.txt;
+    });
+
+    // Konfirmasi password
+    function checkMatch() {
+        const fb = document.getElementById('matchFeedback');
+        if (!confEl.value) { fb.style.display = 'none'; return; }
+        fb.style.display = 'block';
+        fb.innerHTML = passEl.value === confEl.value
+            ? '<i class="fas fa-check-circle text-success me-1"></i><span class="text-success">Password cocok</span>'
+            : '<i class="fas fa-times-circle text-danger me-1"></i><span class="text-danger">Password tidak cocok</span>';
+    }
+    passEl.addEventListener('input', checkMatch);
+    confEl.addEventListener('input', checkMatch);
+
     // Client-side validation
     form.addEventListener('submit', function (e) {
         let errors = [];
         document.getElementById('validationErrors').innerHTML = '';
         document.getElementById('validationSummary').classList.add('d-none');
 
-        const email = document.getElementById('email').value;
+        const email = emailEl.value;
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Format email tidak valid');
 
         const phone = document.getElementById('nomor_hp').value;
         if (phone && phone.replace(/\D/g,'').length < 10) errors.push('Nomor HP minimal 10 digit');
+
+        if (toggle && toggle.checked) {
+            // CREATE atau EDIT tanpa akun: toggle aktif
+            if (!email) errors.push('Email wajib diisi jika membuat akun login');
+            const pass     = passEl ? passEl.value : '';
+            const passConf = confEl ? confEl.value : '';
+            if (!pass) errors.push('Password wajib diisi');
+            if (pass && pass.length < 8) errors.push('Password minimal 8 karakter');
+            if (pass && pass !== passConf) errors.push('Konfirmasi password tidak cocok');
+        } else if (!toggle && passEl) {
+            // EDIT dengan akun sudah ada: panel password selalu tampil, password opsional
+            const pass     = passEl.value;
+            const passConf = confEl ? confEl.value : '';
+            if (pass && pass.length < 8) errors.push('Password minimal 8 karakter');
+            if (pass && pass !== passConf) errors.push('Konfirmasi password tidak cocok');
+        }
 
         if (errors.length > 0) {
             e.preventDefault();
@@ -329,14 +613,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Auto-fill Pangkat dari Golongan
     const golonganPangkat = {
-        'II/a' :'Pengatur Muda',       'II/b' :'Pengatur Muda Tingkat I',
-        'II/c' :'Pengatur',             'II/d' :'Pengatur Tingkat I',
-        'III/a':'Penata Muda',          'III/b':'Penata Muda Tingkat I',
-        'III/c':'Penata',               'III/d':'Penata Tingkat I',
-        'IV/a' :'Pembina',              'IV/b' :'Pembina Tingkat I',
-        'IV/c' :'Pembina Utama Muda',   'IV/d' :'Pembina Utama Madya',
+        'II/a':'Pengatur Muda','II/b':'Pengatur Muda Tingkat I',
+        'II/c':'Pengatur','II/d':'Pengatur Tingkat I',
+        'III/a':'Penata Muda','III/b':'Penata Muda Tingkat I',
+        'III/c':'Penata','III/d':'Penata Tingkat I',
+        'IV/a':'Pembina','IV/b':'Pembina Tingkat I',
+        'IV/c':'Pembina Utama Muda','IV/d':'Pembina Utama Madya',
     };
-    const golSel = document.getElementById('golongan');
+    const golSel       = document.getElementById('golongan');
     const pangkatInput = document.getElementById('pangkat');
     if (golSel.value) pangkatInput.value = golonganPangkat[golSel.value] || '';
     golSel.addEventListener('change', function () {

@@ -34,4 +34,9 @@ class Penguji extends Model
     {
         return $this->hasMany(Kelompok::class, 'id_penguji');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'penguji_id');
+    }
 }

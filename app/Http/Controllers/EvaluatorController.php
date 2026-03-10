@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Http\Controllers\Controller;
 use App\Models\Evaluator;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class EvaluatorController extends Controller
 {
@@ -45,7 +47,7 @@ class EvaluatorController extends Controller
             $evaluator = $query->paginate($perPage)->appends($request->except('page'));
         }
 
-        $all               = Evaluator::all();
+        $all           = Evaluator::all();
         $totalEvaluator    = $all->count();
         $aktifEvaluator    = $all->where('status_aktif', true)->count();
         $nonaktifEvaluator = $totalEvaluator - $aktifEvaluator;
@@ -60,7 +62,9 @@ class EvaluatorController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $buatAkun = $request->has('buat_akun');
+
+        $rules = [
             'nama'           => 'required|string|max:200',
             'nip'            => 'nullable|string|max:200|unique:evaluators,nip',
             'jabatan'        => 'nullable|string|max:200',
@@ -71,13 +75,25 @@ class EvaluatorController extends Controller
             'status_aktif'   => 'required|boolean',
             'golongan'       => 'nullable|string|max:50',
             'pangkat'        => 'nullable|string|max:100',
-        ], array_merge($this->messages('evaluator'), [
-            'nip.unique' => 'NIP "' . $request->nip . '" sudah terdaftar pada evaluator lain.',
+        ];
+
+        if ($buatAkun) {
+            $rules['email']    = 'required|email|max:100|unique:evaluators,email|unique:users,email';
+            $rules['password'] = 'required|string|min:8|confirmed';
+        }
+
+        $request->validate($rules, array_merge($this->messages('evaluator'), [
+            'nip.unique'       => 'NIP "' . $request->nip . '" sudah terdaftar pada evaluator lain.',
+            'email.unique'     => 'Email sudah digunakan, gunakan email lain.',
+            'password.required'   => 'Password wajib diisi jika membuat akun.',
+            'password.min'        => 'Password minimal 8 karakter.',
+            'password.confirmed'  => 'Konfirmasi password tidak cocok.',
         ]));
 
         try {
             DB::beginTransaction();
-            Evaluator::create([
+
+            $evaluator = Evaluator::create([
                 'nama'           => $request->nama,
                 'nip'            => $request->nip,
                 'jabatan'        => $request->jabatan,
@@ -90,6 +106,19 @@ class EvaluatorController extends Controller
                 'status_aktif'   => $request->status_aktif,
                 'dibuat_pada'    => now(),
             ]);
+
+            if ($buatAkun) {
+                $role = Role::where('name', 'evaluator')->firstOrFail();
+                User::create([
+                    'name'     => $request->nama,
+                    'email'    => $request->email,   // pakai email kontak
+                    'no_telp'  => $request->nomor_hp,
+                    'role_id'  => $role->id,
+                    'evaluator_id' => $evaluator->id,
+                    'password' => Hash::make($request->password),
+                ]);
+            }
+
             DB::commit();
             return redirect()->route('evaluator.index')->with('success', 'Evaluator berhasil ditambahkan!');
         } catch (\Exception $e) {
@@ -100,15 +129,16 @@ class EvaluatorController extends Controller
 
     public function edit($id)
     {
-        $evaluator = Evaluator::findOrFail($id);
+        $evaluator = Evaluator::with('user')->findOrFail($id);
         return view('admin.evaluator.form', ['evaluator' => $evaluator, 'isEdit' => true]);
     }
 
     public function update(Request $request, $id)
     {
-        $evaluator = Evaluator::findOrFail($id);
+        $evaluator    = Evaluator::with('user')->findOrFail($id);
+        $buatAkun = $request->has('buat_akun');
 
-        $request->validate([
+        $rules = [
             'nama'           => 'required|string|max:200',
             'nip'            => 'nullable|string|max:200|unique:evaluators,nip,' . $id,
             'jabatan'        => 'nullable|string|max:200',
@@ -119,12 +149,30 @@ class EvaluatorController extends Controller
             'status_aktif'   => 'required|boolean',
             'golongan'       => 'nullable|string|max:50',
             'pangkat'        => 'nullable|string|max:100',
-        ], array_merge($this->messages('evaluator'), [
-            'nip.unique' => 'NIP "' . $request->nip . '" sudah terdaftar pada evaluator lain.',
+        ];
+
+        if ($buatAkun) {
+            // Email harus unik di users, kecuali milik user yang sudah terhubung
+            $ignoreUserId = optional($evaluator->user)->id;
+            $rules['email'] = [
+                'required', 'email', 'max:100',
+                'unique:evaluators,email,' . $id,
+                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($ignoreUserId),
+            ];
+            // Password opsional saat edit (hanya wajib jika diisi)
+            $rules['password'] = 'nullable|string|min:8|confirmed';
+        }
+
+        $request->validate($rules, array_merge($this->messages('evaluator'), [
+            'nip.unique'      => 'NIP "' . $request->nip . '" sudah terdaftar pada evaluator lain.',
+            'email.unique'    => 'Email sudah digunakan, gunakan email lain.',
+            'password.min'       => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]));
 
         try {
             DB::beginTransaction();
+
             $evaluator->update([
                 'nama'           => $request->nama,
                 'nip'            => $request->nip,
@@ -137,6 +185,37 @@ class EvaluatorController extends Controller
                 'nomor_hp'       => $request->nomor_hp,
                 'status_aktif'   => $request->status_aktif,
             ]);
+
+            if ($buatAkun) {
+                $role = Role::where('name', 'evaluator')->firstOrFail();
+
+                if ($evaluator->user) {
+                    // Update akun yang sudah ada
+                    $updateData = [
+                        'name'    => $request->nama,
+                        'email'   => $request->email,
+                        'no_telp' => $request->nomor_hp,
+                    ];
+                    if ($request->filled('password')) {
+                        $updateData['password'] = Hash::make($request->password);
+                    }
+                    $evaluator->user->update($updateData);
+                } else {
+                    // Buat akun baru — password wajib jika belum punya akun
+                    if (!$request->filled('password')) {
+                        throw new \Exception('Password wajib diisi saat membuat akun baru.');
+                    }
+                    User::create([
+                        'name'     => $request->nama,
+                        'email'    => $request->email,
+                        'no_telp'  => $request->nomor_hp,
+                        'role_id'  => $role->id,
+                        'evaluator_id' => $evaluator->id,
+                        'password' => Hash::make($request->password),
+                    ]);
+                }
+            }
+
             DB::commit();
             return redirect()->route('evaluator.index')->with('success', 'Evaluator berhasil diperbarui!');
         } catch (\Exception $e) {
@@ -151,16 +230,15 @@ class EvaluatorController extends Controller
 
         if ($evaluator->kelompok()->count() > 0) {
             if (request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tidak dapat menghapus evaluator yang masih terhubung ke kelompok.'
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Tidak dapat menghapus evaluator yang masih terhubung ke kelompok.'], 400);
             }
-            return redirect()->route('evaluator.index')
-                ->with('error', 'Tidak dapat menghapus evaluator yang masih terhubung ke kelompok.');
+            return redirect()->route('evaluator.index')->with('error', 'Tidak dapat menghapus evaluator yang masih terhubung ke kelompok.');
         }
 
         try {
+            if ($evaluator->user) {
+                $evaluator->user->delete();
+            }
             $evaluator->delete();
             if (request()->ajax()) {
                 return response()->json(['success' => true, 'message' => 'Evaluator berhasil dihapus']);

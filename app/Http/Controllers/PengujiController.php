@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+
+
 use App\Http\Controllers\Controller;
 use App\Models\Penguji;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class PengujiController extends Controller
 {
@@ -45,7 +50,7 @@ class PengujiController extends Controller
             $penguji = $query->paginate($perPage)->appends($request->except('page'));
         }
 
-        $all             = Penguji::all();
+        $all           = Penguji::all();
         $totalPenguji    = $all->count();
         $aktifPenguji    = $all->where('status_aktif', true)->count();
         $nonaktifPenguji = $totalPenguji - $aktifPenguji;
@@ -60,7 +65,9 @@ class PengujiController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $buatAkun = $request->has('buat_akun');
+
+        $rules = [
             'nama'           => 'required|string|max:200',
             'nip'            => 'nullable|string|max:200|unique:pengujis,nip',
             'jabatan'        => 'nullable|string|max:200',
@@ -71,13 +78,25 @@ class PengujiController extends Controller
             'status_aktif'   => 'required|boolean',
             'golongan'       => 'nullable|string|max:50',
             'pangkat'        => 'nullable|string|max:100',
-        ], array_merge($this->messages('penguji'), [
-            'nip.unique' => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
+        ];
+
+        if ($buatAkun) {
+            $rules['email']    = 'required|email|max:100|unique:pengujis,email|unique:users,email';
+            $rules['password'] = 'required|string|min:8|confirmed';
+        }
+
+        $request->validate($rules, array_merge($this->messages('penguji'), [
+            'nip.unique'       => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
+            'email.unique'     => 'Email sudah digunakan, gunakan email lain.',
+            'password.required'   => 'Password wajib diisi jika membuat akun.',
+            'password.min'        => 'Password minimal 8 karakter.',
+            'password.confirmed'  => 'Konfirmasi password tidak cocok.',
         ]));
 
         try {
             DB::beginTransaction();
-            Penguji::create([
+
+            $penguji = Penguji::create([
                 'nama'           => $request->nama,
                 'nip'            => $request->nip,
                 'jabatan'        => $request->jabatan,
@@ -90,6 +109,19 @@ class PengujiController extends Controller
                 'status_aktif'   => $request->status_aktif,
                 'dibuat_pada'    => now(),
             ]);
+
+            if ($buatAkun) {
+                $role = Role::where('name', 'penguji')->firstOrFail();
+                User::create([
+                    'name'     => $request->nama,
+                    'email'    => $request->email,   // pakai email kontak
+                    'no_telp'  => $request->nomor_hp,
+                    'role_id'  => $role->id,
+                    'penguji_id' => $penguji->id,
+                    'password' => Hash::make($request->password),
+                ]);
+            }
+
             DB::commit();
             return redirect()->route('penguji.index')->with('success', 'Penguji berhasil ditambahkan!');
         } catch (\Exception $e) {
@@ -100,15 +132,16 @@ class PengujiController extends Controller
 
     public function edit($id)
     {
-        $penguji = Penguji::findOrFail($id);
+        $penguji = Penguji::with('user')->findOrFail($id);
         return view('admin.penguji.form', ['penguji' => $penguji, 'isEdit' => true]);
     }
 
     public function update(Request $request, $id)
     {
-        $penguji = Penguji::findOrFail($id);
+        $penguji    = Penguji::with('user')->findOrFail($id);
+        $buatAkun = $request->has('buat_akun');
 
-        $request->validate([
+        $rules = [
             'nama'           => 'required|string|max:200',
             'nip'            => 'nullable|string|max:200|unique:pengujis,nip,' . $id,
             'jabatan'        => 'nullable|string|max:200',
@@ -119,12 +152,30 @@ class PengujiController extends Controller
             'status_aktif'   => 'required|boolean',
             'golongan'       => 'nullable|string|max:50',
             'pangkat'        => 'nullable|string|max:100',
-        ], array_merge($this->messages('penguji'), [
-            'nip.unique' => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
+        ];
+
+        if ($buatAkun) {
+            // Email harus unik di users, kecuali milik user yang sudah terhubung
+            $ignoreUserId = optional($penguji->user)->id;
+            $rules['email'] = [
+                'required', 'email', 'max:100',
+                'unique:pengujis,email,' . $id,
+                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($ignoreUserId),
+            ];
+            // Password opsional saat edit (hanya wajib jika diisi)
+            $rules['password'] = 'nullable|string|min:8|confirmed';
+        }
+
+        $request->validate($rules, array_merge($this->messages('penguji'), [
+            'nip.unique'      => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
+            'email.unique'    => 'Email sudah digunakan, gunakan email lain.',
+            'password.min'       => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]));
 
         try {
             DB::beginTransaction();
+
             $penguji->update([
                 'nama'           => $request->nama,
                 'nip'            => $request->nip,
@@ -137,6 +188,37 @@ class PengujiController extends Controller
                 'nomor_hp'       => $request->nomor_hp,
                 'status_aktif'   => $request->status_aktif,
             ]);
+
+            if ($buatAkun) {
+                $role = Role::where('name', 'penguji')->firstOrFail();
+
+                if ($penguji->user) {
+                    // Update akun yang sudah ada
+                    $updateData = [
+                        'name'    => $request->nama,
+                        'email'   => $request->email,
+                        'no_telp' => $request->nomor_hp,
+                    ];
+                    if ($request->filled('password')) {
+                        $updateData['password'] = Hash::make($request->password);
+                    }
+                    $penguji->user->update($updateData);
+                } else {
+                    // Buat akun baru — password wajib jika belum punya akun
+                    if (!$request->filled('password')) {
+                        throw new \Exception('Password wajib diisi saat membuat akun baru.');
+                    }
+                    User::create([
+                        'name'     => $request->nama,
+                        'email'    => $request->email,
+                        'no_telp'  => $request->nomor_hp,
+                        'role_id'  => $role->id,
+                        'penguji_id' => $penguji->id,
+                        'password' => Hash::make($request->password),
+                    ]);
+                }
+            }
+
             DB::commit();
             return redirect()->route('penguji.index')->with('success', 'Penguji berhasil diperbarui!');
         } catch (\Exception $e) {
@@ -151,16 +233,15 @@ class PengujiController extends Controller
 
         if ($penguji->kelompok()->count() > 0) {
             if (request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tidak dapat menghapus penguji yang masih terhubung ke kelompok.'
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Tidak dapat menghapus penguji yang masih terhubung ke kelompok.'], 400);
             }
-            return redirect()->route('penguji.index')
-                ->with('error', 'Tidak dapat menghapus penguji yang masih terhubung ke kelompok.');
+            return redirect()->route('penguji.index')->with('error', 'Tidak dapat menghapus penguji yang masih terhubung ke kelompok.');
         }
 
         try {
+            if ($penguji->user) {
+                $penguji->user->delete();
+            }
             $penguji->delete();
             if (request()->ajax()) {
                 return response()->json(['success' => true, 'message' => 'Penguji berhasil dihapus']);

@@ -22,6 +22,9 @@ class User extends Authenticatable
         'email',
         'no_telp',
         'peserta_id',
+        'coach_id',
+        'penguji_id',
+        'evaluator_id',
         'role_id',
         'password',
     ];
@@ -65,6 +68,21 @@ class User extends Authenticatable
     public function peserta()
     {
         return $this->belongsTo(Peserta::class);
+    }
+
+    public function coach()
+    {
+        return $this->belongsTo(Coach::class);
+    }
+
+    public function evaluator()
+    {
+        return $this->belongsTo(Evaluator::class);
+    }
+
+    public function penguji()
+    {
+        return $this->belongsTo(Penguji::class);
     }
 
     public function picPesertas()
