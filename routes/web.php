@@ -19,6 +19,7 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PendaftaranController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
@@ -113,6 +114,15 @@ Route::middleware('auth')->group(function () {
         Route::get('users/{user}/pic-access', [UserController::class, 'getPicAccess'])->name('users.pic-access');
         Route::post('users/{user}/pic-access', [UserController::class, 'updatePicAccess'])->name('users.update-pic-access');
     });
+
+    Route::prefix('permissions')->name('permissions.')->group(function () {
+    Route::get('/',          [PermissionController::class, 'index'])->name('index');
+    Route::get('/create',    [PermissionController::class, 'create'])->name('create');
+    Route::post('/',         [PermissionController::class, 'store'])->name('store');
+    Route::get('/{permission}/edit', [PermissionController::class, 'edit'])->name('edit');
+    Route::put('/{permission}',      [PermissionController::class, 'update'])->name('update');
+    Route::delete('/{permission}',   [PermissionController::class, 'destroy'])->name('destroy');
+});
 
 
     // Data Pesrta (khusus Admin)
