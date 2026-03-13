@@ -20,10 +20,12 @@
             </div>
             <div class="col-auto">
                 <div class="d-flex align-items-center gap-2">
-                    <a href="{{ route('mentor.create') }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
-                        <i class="fas fa-plus me-2"></i>
-                        Tambah Mentor
-                    </a>
+                    @if(auth()->user()->hasPermission('mentor.create'))
+                        <a href="{{ route('mentor.create') }}" class="btn btn-light btn-hover-lift shadow-sm d-flex align-items-center">
+                            <i class="fas fa-plus me-2"></i>
+                            Tambah Mentor
+                        </a>
+                    @endif
                     <button type="button" id="btnPreviewDuplikat" 
                         class="btn btn-warning btn-hover-lift shadow-sm d-flex align-items-center"
                         data-bs-toggle="tooltip" title="Temukan dan hapus mentor yang terdaftar ganda">
@@ -338,18 +340,22 @@
                                 </td>
                                 <td class="text-center pe-4">
                                     <div class="btn-group" role="group">
-                                        <a href="{{ route('mentor.edit', $item->id) }}" 
-                                        class="btn btn-sm btn-outline-warning btn-action"
-                                        data-bs-toggle="tooltip" title="Edit Mentor">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-mentor"
-                                            data-id="{{ $item->id }}" 
-                                            data-name="{{ $item->nama_mentor }}"
-                                            data-peserta="{{ $jumlahPeserta }}"
-                                            data-bs-toggle="tooltip" title="Hapus Mentor">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                                        @if(auth()->user()->hasPermission('mentor.update'))
+                                            <a href="{{ route('mentor.edit', $item->id) }}" 
+                                            class="btn btn-sm btn-outline-warning btn-action"
+                                            data-bs-toggle="tooltip" title="Edit Mentor">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        @endif
+                                        @if(auth()->user()->hasPermission('mentor.delete'))
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-mentor"
+                                                data-id="{{ $item->id }}" 
+                                                data-name="{{ $item->nama_mentor }}"
+                                                data-peserta="{{ $jumlahPeserta }}"
+                                                data-bs-toggle="tooltip" title="Hapus Mentor">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

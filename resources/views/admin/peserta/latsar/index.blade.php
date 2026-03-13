@@ -422,23 +422,27 @@
                                                                                                                                                                 <i class="fas fa-eye"></i>
                                                                                                                                                             </button>
                                                                                                                                                             @if(auth()->user()->role->name === 'admin')
-                                                                                                                                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-action swap-angkatan"
-                                                                                                                                                                data-id="{{ $daftar->id }}" 
-                                                                                                                                                                data-jenis="{{ request()->route('jenis') }}"
-                                                                                                                                                                data-bs-toggle="tooltip" title="Swap/Tukar dengan Peserta Lain (NDH ikut angkatan)">
-                                                                                                                                                                <i class="fas fa-exchange-alt"></i>
-                                                                                                                                                            </button>
+                                                                                                                                                                <button type="button" class="btn btn-sm btn-outline-secondary btn-action swap-angkatan"
+                                                                                                                                                                    data-id="{{ $daftar->id }}" 
+                                                                                                                                                                    data-jenis="{{ request()->route('jenis') }}"
+                                                                                                                                                                    data-bs-toggle="tooltip" title="Swap/Tukar dengan Peserta Lain (NDH ikut angkatan)">
+                                                                                                                                                                    <i class="fas fa-exchange-alt"></i>
+                                                                                                                                                                </button>
                                                                                                                                                             @endif
-                                                                                                                                                            <a href="{{ route('peserta.edit', ['jenis' => request()->route('jenis'), 'id' => $daftar->id]) }}" class="btn btn-sm btn-outline-warning btn-action"
-                                                                                                                                                                data-bs-toggle="tooltip" title="Edit Peserta">
-                                                                                                                                                                <i class="fas fa-edit"></i>
-                                                                                                                                                            </a>
-                                                                                                                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-peserta"
-                                                                                                                                                                data-id="{{ $daftar->id }}" data-name="{{ $peserta->nama_lengkap }}"
-                                                                                                                                                                data-jenis="{{ request()->route('jenis') }}"
-                                                                                                                                                                data-bs-toggle="tooltip" title="Hapus Peserta">
-                                                                                                                                                                <i class="fas fa-trash-alt"></i>
-                                                                                                                                                            </button>
+                                                                                                                                                            @if(auth()->user()->hasPermission('peserta.update'))
+                                                                                                                                                                <a href="{{ route('peserta.edit', ['jenis' => request()->route('jenis'), 'id' => $daftar->id]) }}" class="btn btn-sm btn-outline-warning btn-action"
+                                                                                                                                                                    data-bs-toggle="tooltip" title="Edit Peserta">
+                                                                                                                                                                    <i class="fas fa-edit"></i>
+                                                                                                                                                                </a>
+                                                                                                                                                            @endif
+                                                                                                                                                            @if(auth()->user()->hasPermission('peserta.delete'))
+                                                                                                                                                                <button type="button" class="btn btn-sm btn-outline-danger btn-action delete-peserta"
+                                                                                                                                                                    data-id="{{ $daftar->id }}" data-name="{{ $peserta->nama_lengkap }}"
+                                                                                                                                                                    data-jenis="{{ request()->route('jenis') }}"
+                                                                                                                                                                    data-bs-toggle="tooltip" title="Hapus Peserta">
+                                                                                                                                                                    <i class="fas fa-trash-alt"></i>
+                                                                                                                                                                </button>
+                                                                                                                                                            @endif
                                                                                                                                                         </div>
                                                                                                                                                     </td>
                                                                                                                                                 </tr>
