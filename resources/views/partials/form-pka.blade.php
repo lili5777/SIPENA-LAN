@@ -386,37 +386,24 @@
 </div>
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label">Ukuran Baju Taktikal</label>
+        <label class="form-label">Ukuran Baju Kaos</label>
         <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'S' ? 'selected' : '' }}>S</option>
-            <option value="M" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'M' ? 'selected' : '' }}>M</option>
-            <option value="L" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'L' ? 'selected' : '' }}>L</option>
-            <option value="XL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XL' ? 'selected' : '' }}>XL</option>
-            <option value="XXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXL' ? 'selected' : '' }}>XXL
-            </option>
-            <option value="XXXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXXL' ? 'selected' : '' }}>XXXL
-            </option>
+            @foreach(['XS','S','M','L','XL','XXL','XXXL','XXXXL','XXXXXL','XXXXXXL','XXXXXXXL'] as $size)
+                <option value="{{ $size }}" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == $size ? 'selected' : '' }}>{{ $size }}</option>
+            @endforeach
         </select>
         @error('ukuran_kaos')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
-        <label class="form-label">Ukuran Kaos Olahraga</label>
+        <label class="form-label">Ukuran Baju Taktikal</label>
         <select name="ukuran_training" class="form-select @error('ukuran_training') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'S' ? 'selected' : '' }}>S
-            </option>
-            <option value="M" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'M' ? 'selected' : '' }}>M
-            </option>
-            <option value="L" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'L' ? 'selected' : '' }}>L
-            </option>
-            <option value="XL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XL' ? 'selected' : '' }}>XL
-            </option>
-            <option value="XXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXL' ? 'selected' : '' }}>
-                XXL</option>
-            <option value="XXXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+            @foreach(['XS','S','M','L','XL','XXL','XXXL','XXXXL','XXXXXL','XXXXXXL','XXXXXXXL'] as $size)
+                <option value="{{ $size }}" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == $size ? 'selected' : '' }}>{{ $size }}</option>
+            @endforeach
         </select>
         @error('ukuran_training')
             <small class="text-danger">{{ $message }}</small>
@@ -426,18 +413,9 @@
         <label class="form-label">Ukuran Celana</label>
         <select name="ukuran_celana" class="form-select @error('ukuran_celana') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'S' ? 'selected' : '' }}>S
-            </option>
-            <option value="M" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'M' ? 'selected' : '' }}>M
-            </option>
-            <option value="L" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'L' ? 'selected' : '' }}>L
-            </option>
-            <option value="XL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XL' ? 'selected' : '' }}>XL
-            </option>
-            <option value="XXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXL' ? 'selected' : '' }}>XXL
-            </option>
-            <option value="XXXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXXL' ? 'selected' : '' }}>
-                XXXL</option>
+            @foreach(['XS','S','M','L','XL','XXL','XXXL','XXXXL','XXXXXL','XXXXXXL','XXXXXXXL'] as $size)
+                <option value="{{ $size }}" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == $size ? 'selected' : '' }}>{{ $size }}</option>
+            @endforeach
         </select>
         @error('ukuran_celana')
             <small class="text-danger">{{ $message }}</small>

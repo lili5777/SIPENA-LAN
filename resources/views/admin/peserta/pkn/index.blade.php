@@ -592,7 +592,7 @@
                         </button>
                         <button class="nav-link px-4 py-3 rounded-top-3 fw-semibold" id="nav-aksi-tab" data-bs-toggle="tab"
                             data-bs-target="#nav-aksi" type="button" role="tab">
-                            <i class="fas fa-lightbulb me-2"></i>Aksi Perubahan
+                            <i class="fas fa-lightbulb me-2"></i>Proyek Perubahan
                         </button>
                     </div>
                 </nav>
@@ -645,7 +645,7 @@
                                 <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
-                                <p class="mt-3 text-muted">Memuat data aksi perubahan...</p>
+                                <p class="mt-3 text-muted">Memuat data proyek perubahan...</p>
                             </div>
                         </div>
                     </div>
@@ -1189,8 +1189,8 @@ function generateAksiHTML(data) {
           <div class="empty-state-icon mb-4">
             <i class="fas fa-lightbulb fa-4x" style="color: #e9ecef;"></i>
           </div>
-          <h4 class="text-muted mb-3">Belum Ada Aksi Perubahan</h4>
-          <p class="text-muted mb-4">Peserta ini belum mengirimkan aksi perubahan</p>
+          <h4 class="text-muted mb-3">Belum Ada Proyek Perubahan</h4>
+          <p class="text-muted mb-4">Peserta ini belum mengirimkan proyek perubahan</p>
         </div>
       </div>
     `;
@@ -1203,7 +1203,7 @@ function generateAksiHTML(data) {
           <div class="icon-wrapper bg-warning bg-opacity-10 p-2 rounded-3 me-3">
             <i class="fas fa-lightbulb text-warning"></i>
           </div>
-          <span>Aksi Perubahan</span>
+          <span>Proyek Perubahan</span>
         </h5>
       </div>
 
@@ -1245,7 +1245,7 @@ function aksiCard(aksi) {
             </div>
 
             <div class="flex-grow-1">
-              <h6 class="fw-bold mb-2 text-dark">${aksi.judul || 'Aksi Perubahan'}</h6>
+              <h6 class="fw-bold mb-2 text-dark">${aksi.judul || 'Proyek Perubahan'}</h6>
 
               <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
                 <span class="badge bg-${kategori.color} bg-opacity-10 text-${kategori.color}">
@@ -1457,13 +1457,13 @@ function aksiCard(aksi) {
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="info-item">
-                                                        <label class="text-muted small">Ukuran Baju Taktikal</label>
+                                                        <label class="text-muted small">Ukuran Baju Kaos</label>
                                                         <p class="fw-semibold mb-0">${peserta.ukuran_kaos || '-'}</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="info-item">
-                                                        <label class="text-muted small">Ukuran Kaos Training</label>
+                                                        <label class="text-muted small">Ukuran Baju Taktikal</label>
                                                         <p class="fw-semibold mb-0">${peserta.ukuran_training || '-'}</p>
                                                     </div>
                                                 </div>
@@ -1597,6 +1597,13 @@ function aksiCard(aksi) {
                                 color: 'warning',
                                 file: kepegawaian?.file_sk_pangkat,
                                 description: 'Surat Keputusan kenaikan pangkat/golongan'
+                            },
+                            {
+                                title: 'Sertifikat TOEFL',
+                                icon: 'fa-language',
+                                color: 'info',
+                                file: kepegawaian?.file_toefl,
+                                description: 'Sertifikat hasil tes TOEFL sebagai bukti kemampuan bahasa Inggris.'
                             },
                             {
                                 title: 'Surat Komitmen',

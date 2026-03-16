@@ -790,9 +790,9 @@ public function edit(Request $request, $jenis, $id)
                     'nama_pasangan' => 'nullable|string|max:200',
                     'olahraga_hobi' => 'nullable|string|max:100',
                     'perokok' => 'nullable|in:Ya,Tidak',
-                    'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                    'ukuran_celana' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                    'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                    'ukuran_kaos' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
+                    'ukuran_celana' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
+                    'ukuran_training' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
                     'kondisi_peserta' => 'nullable|string',
                     'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024',
                     'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
@@ -821,6 +821,7 @@ public function edit(Request $request, $jenis, $id)
                     'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
                     'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
                     'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_toefl' => 'nullable|file|mimes:pdf|max:1024',
                     'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
                     'nomor_sk_cpns' => 'nullable|string|max:100',
                     'nomor_sk_terakhir' => 'nullable|string|max:100',
@@ -990,6 +991,7 @@ public function edit(Request $request, $jenis, $id)
                 'file_sk_cpns',
                 'file_spmt',
                 'file_skp',
+                'file_toefl',
                 'file_persetujuan_mentor',
                 'file',
                 'lembar_pengesahan'
@@ -1158,6 +1160,7 @@ public function edit(Request $request, $jenis, $id)
                     'file_sk_cpns' => $files['file_sk_cpns'] ?? null,
                     'file_spmt' => $files['file_spmt'] ?? null,
                     'file_skp' => $files['file_skp'] ?? null,
+                    'file_toefl'=> $files['file_toefl'] ?? null,
                     'tahun_lulus_pkp_pim_iv' => $request->tahun_lulus_pkp_pim_iv ?? null,
                 ]
             );
@@ -1327,9 +1330,9 @@ public function edit(Request $request, $jenis, $id)
                     'nama_pasangan' => 'nullable|string|max:200',
                     'olahraga_hobi' => 'nullable|string|max:100',
                     'perokok' => 'nullable|in:Ya,Tidak',
-                    'ukuran_kaos' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                    'ukuran_celana' => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                    'ukuran_training' => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                    'ukuran_kaos' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
+                    'ukuran_celana' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
+                    'ukuran_training' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
                     'kondisi_peserta' => 'nullable|string',
                     'file_ktp' => 'nullable|file|mimes:pdf,jpg,png|max:1024',
                     'file_pas_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
@@ -1358,6 +1361,7 @@ public function edit(Request $request, $jenis, $id)
                     'file_sk_cpns' => 'nullable|file|mimes:pdf|max:1024',
                     'file_spmt' => 'nullable|file|mimes:pdf|max:1024',
                     'file_skp' => 'nullable|file|mimes:pdf|max:1024',
+                    'file_toefl' => 'nullable|file|mimes:pdf|max:1024',
                     'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
                     'nomor_sk_cpns' => 'nullable|string|max:100',
                     'nomor_sk_terakhir' => 'nullable|string|max:100',
@@ -1521,7 +1525,8 @@ public function edit(Request $request, $jenis, $id)
                 'file_skp',
                 'file_persetujuan_mentor',
                 'file',
-                'lembar_pengesahan'
+                'lembar_pengesahan',
+                'file_toefl',
             ];
 
             // Ambil data untuk struktur folder
@@ -1699,6 +1704,9 @@ public function edit(Request $request, $jenis, $id)
             }
             if (isset($files['file_skp'])) {
                 $kepegawaianData['file_skp'] = $files['file_skp'];
+            }
+            if (isset($files['file_toefl'])) {
+                $kepegawaianData['file_toefl'] = $files['file_toefl'];
             }
 
             KepegawaianPeserta::updateOrCreate(
@@ -1898,6 +1906,7 @@ public function edit(Request $request, $jenis, $id)
                         $k->file_sk_cpns,
                         $k->file_spmt,
                         $k->file_skp,
+                        $k->file_toefl,
                     ]);
                 }
 
@@ -2312,7 +2321,7 @@ public function edit(Request $request, $jenis, $id)
 
                 // Update kepegawaian files
                 if ($kepegawaian) {
-                    $kepegawaianFields = ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp'];
+                    $kepegawaianFields = ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp','file_toefl'];
                     foreach ($kepegawaianFields as $field) {
                         if ($kepegawaian->$field && strpos($kepegawaian->$field, $oldFolder) !== false) {
                             $kepegawaian->$field = str_replace($oldFolder, $newFolder, $kepegawaian->$field);
@@ -2627,6 +2636,7 @@ public function edit(Request $request, $jenis, $id)
                     $filesToDelete[] = $kepegawaian->file_sk_cpns;
                     $filesToDelete[] = $kepegawaian->file_spmt;
                     $filesToDelete[] = $kepegawaian->file_skp;
+                    $filesToDelete[] = $kepegawaian->file_toefl;
                 }
 
                 // File pendaftaran

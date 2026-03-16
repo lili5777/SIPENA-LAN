@@ -435,45 +435,62 @@ $isPKN = $jenis === 'pkn';
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Ukuran Baju Taktikal</label>
+                                    <label class="form-label">Ukuran Baju Kaos</label>
                                     <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
                                         <option value="">Pilih</option>
+                                        <option value="XS" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'XS') || old('ukuran_kaos') == 'XS' ? 'selected' : '' }}>XS</option>
                                         <option value="S" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'S') || old('ukuran_kaos') == 'S' ? 'selected' : '' }}>S</option>
                                         <option value="M" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'M') || old('ukuran_kaos') == 'M' ? 'selected' : '' }}>M</option>
                                         <option value="L" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'L') || old('ukuran_kaos') == 'L' ? 'selected' : '' }}>L</option>
                                         <option value="XL" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'XL') || old('ukuran_kaos') == 'XL' ? 'selected' : '' }}>XL</option>
                                         <option value="XXL" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'XXL') || old('ukuran_kaos') == 'XXL' ? 'selected' : '' }}>XXL</option>
                                         <option value="XXXL" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'XXXL') || old('ukuran_kaos') == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+                                        <option value="XXXXL" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'XXXXL') || old('ukuran_kaos') == 'XXXXL' ? 'selected' : '' }}>XXXXL</option>
+                                        <option value="XXXXXL" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'XXXXXL') || old('ukuran_kaos') == 'XXXXXL' ? 'selected' : '' }}>XXXXXL</option>
+                                        <option value="XXXXXXL" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'XXXXXXL') || old('ukuran_kaos') == 'XXXXXXL' ? 'selected' : '' }}>XXXXXXL</option>
+                                        <option value="XXXXXXXL" {{ ($pesertaData && $pesertaData->ukuran_kaos == 'XXXXXXXL') || old('ukuran_kaos') == 'XXXXXXXL' ? 'selected' : '' }}>XXXXXXXL</option>
                                     </select>
                                     @error('ukuran_kaos')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
                                 <div class="form-group">
-                                    <label class="form-label">Ukuran Kaos Olahraga</label>
+                                    <label class="form-label">Ukuran Baju Taktikal</label>
                                     <select name="ukuran_training" class="form-select @error('ukuran_training') error @enderror">
                                         <option value="">Pilih</option>
+                                        <option value="XS" {{ ($pesertaData && $pesertaData->ukuran_training == 'XS') || old('ukuran_training') == 'XS' ? 'selected' : '' }}>XS</option>
                                         <option value="S" {{ ($pesertaData && $pesertaData->ukuran_training == 'S') || old('ukuran_training') == 'S' ? 'selected' : '' }}>S</option>
                                         <option value="M" {{ ($pesertaData && $pesertaData->ukuran_training == 'M') || old('ukuran_training') == 'M' ? 'selected' : '' }}>M</option>
                                         <option value="L" {{ ($pesertaData && $pesertaData->ukuran_training == 'L') || old('ukuran_training') == 'L' ? 'selected' : '' }}>L</option>
                                         <option value="XL" {{ ($pesertaData && $pesertaData->ukuran_training == 'XL') || old('ukuran_training') == 'XL' ? 'selected' : '' }}>XL</option>
                                         <option value="XXL" {{ ($pesertaData && $pesertaData->ukuran_training == 'XXL') || old('ukuran_training') == 'XXL' ? 'selected' : '' }}>XXL</option>
                                         <option value="XXXL" {{ ($pesertaData && $pesertaData->ukuran_training == 'XXXL') || old('ukuran_training') == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+                                        <option value="XXXXL" {{ ($pesertaData && $pesertaData->ukuran_training == 'XXXXL') || old('ukuran_training') == 'XXXXL' ? 'selected' : '' }}>XXXXL</option>
+                                        <option value="XXXXXL" {{ ($pesertaData && $pesertaData->ukuran_training == 'XXXXXL') || old('ukuran_training') == 'XXXXXL' ? 'selected' : '' }}>XXXXXL</option>
+                                        <option value="XXXXXXL" {{ ($pesertaData && $pesertaData->ukuran_training == 'XXXXXXL') || old('ukuran_training') == 'XXXXXXL' ? 'selected' : '' }}>XXXXXXL</option>
+                                        <option value="XXXXXXXL" {{ ($pesertaData && $pesertaData->ukuran_training == 'XXXXXXXL') || old('ukuran_training') == 'XXXXXXXL' ? 'selected' : '' }}>XXXXXXXL</option>
                                     </select>
                                     @error('ukuran_training')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
                                 <div class="form-group">
                                     <label class="form-label">Ukuran Celana</label>
                                     <select name="ukuran_celana" class="form-select @error('ukuran_celana') error @enderror">
                                         <option value="">Pilih</option>
+                                        <option value="XS" {{ ($pesertaData && $pesertaData->ukuran_celana == 'XS') || old('ukuran_celana') == 'XS' ? 'selected' : '' }}>XS</option>
                                         <option value="S" {{ ($pesertaData && $pesertaData->ukuran_celana == 'S') || old('ukuran_celana') == 'S' ? 'selected' : '' }}>S</option>
                                         <option value="M" {{ ($pesertaData && $pesertaData->ukuran_celana == 'M') || old('ukuran_celana') == 'M' ? 'selected' : '' }}>M</option>
                                         <option value="L" {{ ($pesertaData && $pesertaData->ukuran_celana == 'L') || old('ukuran_celana') == 'L' ? 'selected' : '' }}>L</option>
                                         <option value="XL" {{ ($pesertaData && $pesertaData->ukuran_celana == 'XL') || old('ukuran_celana') == 'XL' ? 'selected' : '' }}>XL</option>
                                         <option value="XXL" {{ ($pesertaData && $pesertaData->ukuran_celana == 'XXL') || old('ukuran_celana') == 'XXL' ? 'selected' : '' }}>XXL</option>
                                         <option value="XXXL" {{ ($pesertaData && $pesertaData->ukuran_celana == 'XXXL') || old('ukuran_celana') == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+                                        <option value="XXXXL" {{ ($pesertaData && $pesertaData->ukuran_celana == 'XXXXL') || old('ukuran_celana') == 'XXXXL' ? 'selected' : '' }}>XXXXL</option>
+                                        <option value="XXXXXL" {{ ($pesertaData && $pesertaData->ukuran_celana == 'XXXXXL') || old('ukuran_celana') == 'XXXXXL' ? 'selected' : '' }}>XXXXXL</option>
+                                        <option value="XXXXXXL" {{ ($pesertaData && $pesertaData->ukuran_celana == 'XXXXXXL') || old('ukuran_celana') == 'XXXXXXL' ? 'selected' : '' }}>XXXXXXL</option>
+                                        <option value="XXXXXXXL" {{ ($pesertaData && $pesertaData->ukuran_celana == 'XXXXXXXL') || old('ukuran_celana') == 'XXXXXXXL' ? 'selected' : '' }}>XXXXXXXL</option>
                                     </select>
                                     @error('ukuran_celana')
                                         <small class="text-danger">{{ $message }}</small>

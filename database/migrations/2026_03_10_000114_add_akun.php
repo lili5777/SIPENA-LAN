@@ -13,10 +13,28 @@ return new class extends Migration
     {
         //
         Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('evaluator_id')->nullable()->after('peserta_id')->constrained('evaluators')->onDelete('cascade');
-            $table->foreignId('penguji_id')->nullable()->after('evaluator_id')->constrained('pengujis')->onDelete('cascade');
-            $table->foreignId('coach_id')->nullable()->after('penguji_id')->constrained('coaches')->onDelete('cascade');
-        });
+
+    if (!Schema::hasColumn('users', 'evaluator_id')) {
+        $table->unsignedBigInteger('evaluator_id')->nullable()->after('peserta_id');
+    }
+
+    if (!Schema::hasColumn('users', 'penguji_id')) {
+        $table->foreignId('penguji_id')
+              ->nullable()
+              ->after('evaluator_id')
+              ->constrained('pengujis')
+              ->cascadeOnDelete();
+    }
+
+    if (!Schema::hasColumn('users', 'coach_id')) {
+        $table->foreignId('coach_id')
+              ->nullable()
+              ->after('penguji_id')
+              ->constrained('coaches')
+              ->cascadeOnDelete();
+    }
+
+});
     }
 
     /**

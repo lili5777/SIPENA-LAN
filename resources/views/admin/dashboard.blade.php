@@ -2550,11 +2550,12 @@
             ['field' => 'file_sk_cpns', 'name' => 'SK CPNS', 'icon' => 'fa-file-signature', 'empty_icon' => 'fa-file'],
             ['field' => 'file_spmt', 'name' => 'SPMT', 'icon' => 'fa-handshake', 'empty_icon' => 'fa-file'],
             ['field' => 'file_skp', 'name' => 'SKP', 'icon' => 'fa-chart-line', 'empty_icon' => 'fa-file'],
+            ['field' => 'file_toefl', 'name' => 'Sertifikat TOEFL', 'icon' => 'fa-language', 'empty_icon' => 'fa-file']
         ];
 
         if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
             $dokumenKepegawaian = array_filter($dokumenKepegawaian, function ($dokumen) {
-                return !in_array($dokumen['field'], ['file_sk_jabatan', 'file_sk_pangkat']);
+                return !in_array($dokumen['field'], ['file_sk_jabatan', 'file_sk_pangkat','file_toefl']);
             });
         }
 
@@ -2566,7 +2567,7 @@
 
         if ((isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "PKA") || $jenisPelatihanData->kode_pelatihan == "PKP") {
             $dokumenKepegawaian = array_filter($dokumenKepegawaian, function ($dokumen) {
-                return !in_array($dokumen['field'], ['file_sk_cpns', 'file_spmt', 'file_skp']);
+                return !in_array($dokumen['field'], ['file_sk_cpns', 'file_spmt', 'file_skp','file_toefl']);
             });
         }
                                 @endphp

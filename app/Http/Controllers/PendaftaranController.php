@@ -246,9 +246,9 @@ public function getAvailableNdh(Request $request)
                 'nama_pasangan'       => 'nullable|string|max:200',
                 'olahraga_hobi'       => 'nullable|string|max:100',
                 'perokok'             => 'required|in:Ya,Tidak',
-                'ukuran_kaos'         => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                'ukuran_celana'       => 'nullable|in:S,M,L,XL,XXL,XXXL',
-                'ukuran_training'     => 'nullable|in:S,M,L,XL,XXL,XXXL',
+                'ukuran_kaos' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
+                'ukuran_celana' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
+                'ukuran_training' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
                 'kondisi_peserta'     => 'nullable|string',
                 'file_ktp'            => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
                 'file_pas_foto_cropped' => 'nullable|string',
@@ -278,6 +278,7 @@ public function getAvailableNdh(Request $request)
                 'file_sk_cpns'        => 'nullable|file|mimes:pdf|max:1024',
                 'file_spmt'           => 'nullable|file|mimes:pdf|max:1024',
                 'file_skp'            => 'nullable|file|mimes:pdf|max:1024',
+                'file_toefl' => 'nullable|file|mimes:pdf|max:1024',
                 'file_persetujuan_mentor' => 'nullable|file|mimes:pdf|max:1024',
                 'nomor_sk_cpns'       => 'nullable|string|max:100',
                 'nomor_sk_terakhir'   => 'nullable|string|max:100',
@@ -552,7 +553,7 @@ public function getAvailableNdh(Request $request)
                 'file_surat_komitmen', 'file_surat_kelulusan_seleksi',
                 'file_surat_sehat', 'file_surat_bebas_narkoba',
                 'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan',
-                'file_sk_cpns', 'file_spmt', 'file_skp', 'file_persetujuan_mentor'
+                'file_sk_cpns', 'file_spmt', 'file_skp', 'file_persetujuan_mentor','file_toefl'
             ];
 
             $tahun      = date('Y');
@@ -719,7 +720,7 @@ public function getAvailableNdh(Request $request)
                 'nomor_sk_terakhir'    => $request->nomor_sk_terakhir,
             ];
 
-            foreach (['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp'] as $field) {
+            foreach (['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp', 'file_toefl'] as $field) {
                 if (isset($files[$field])) $kepegawaianUpdateData[$field] = $files[$field];
             }
 
@@ -862,7 +863,7 @@ public function getAvailableNdh(Request $request)
             }
             // Kepegawaian
             elseif (
-                in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp'])
+                in_array($field, ['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp', 'file_toefl'])
                 && $kepegawaian && $kepegawaian->$field
             ) {
                 $oldFilePath = $kepegawaian->$field;

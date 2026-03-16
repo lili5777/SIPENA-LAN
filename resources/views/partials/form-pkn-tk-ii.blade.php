@@ -145,9 +145,6 @@
             <option value="Islam" {{ ($peserta['agama'] ?? old('agama')) == 'Islam' ? 'selected' : '' }}>Islam</option>
             <option value="Kristen" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen' ? 'selected' : '' }}>Kristen
             </option>
-            {{-- <option value="Kristen Protestan" {{ ($peserta['agama'] ?? old('agama')) == 'Kristen Protestan' ? 'selected' : '' }}>
-                Kristen Protestan
-            </option> --}}
             <option value="Katolik" {{ ($peserta['agama'] ?? old('agama')) == 'Katolik' ? 'selected' : '' }}>Katolik
             </option>
             <option value="Hindu" {{ ($peserta['agama'] ?? old('agama')) == 'Hindu' ? 'selected' : '' }}>Hindu</option>
@@ -225,37 +222,24 @@
 
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label">Ukuran Baju Taktikal</label>
+        <label class="form-label">Ukuran Baju Kaos</label>
         <select name="ukuran_kaos" class="form-select @error('ukuran_kaos') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'S' ? 'selected' : '' }}>S</option>
-            <option value="M" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'M' ? 'selected' : '' }}>M</option>
-            <option value="L" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'L' ? 'selected' : '' }}>L</option>
-            <option value="XL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XL' ? 'selected' : '' }}>XL</option>
-            <option value="XXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXL' ? 'selected' : '' }}>XXL
-            </option>
-            <option value="XXXL" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == 'XXXL' ? 'selected' : '' }}>XXXL
-            </option>
+            @foreach(['XS','S','M','L','XL','XXL','XXXL','XXXXL','XXXXXL','XXXXXXL','XXXXXXXL'] as $size)
+                <option value="{{ $size }}" {{ ($peserta['ukuran_kaos'] ?? old('ukuran_kaos')) == $size ? 'selected' : '' }}>{{ $size }}</option>
+            @endforeach
         </select>
         @error('ukuran_kaos')
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
     <div class="form-group">
-        <label class="form-label">Ukuran Kaos Olahraga</label>
+        <label class="form-label">Ukuran Baju Taktikal</label>
         <select name="ukuran_training" class="form-select @error('ukuran_training') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'S' ? 'selected' : '' }}>S
-            </option>
-            <option value="M" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'M' ? 'selected' : '' }}>M
-            </option>
-            <option value="L" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'L' ? 'selected' : '' }}>L
-            </option>
-            <option value="XL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XL' ? 'selected' : '' }}>XL
-            </option>
-            <option value="XXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXL' ? 'selected' : '' }}>
-                XXL</option>
-            <option value="XXXL" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == 'XXXL' ? 'selected' : '' }}>XXXL</option>
+            @foreach(['XS','S','M','L','XL','XXL','XXXL','XXXXL','XXXXXL','XXXXXXL','XXXXXXXL'] as $size)
+                <option value="{{ $size }}" {{ ($peserta['ukuran_training'] ?? old('ukuran_training')) == $size ? 'selected' : '' }}>{{ $size }}</option>
+            @endforeach
         </select>
         @error('ukuran_training')
             <small class="text-danger">{{ $message }}</small>
@@ -265,18 +249,9 @@
         <label class="form-label">Ukuran Celana</label>
         <select name="ukuran_celana" class="form-select @error('ukuran_celana') error @enderror">
             <option value="">Pilih</option>
-            <option value="S" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'S' ? 'selected' : '' }}>S
-            </option>
-            <option value="M" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'M' ? 'selected' : '' }}>M
-            </option>
-            <option value="L" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'L' ? 'selected' : '' }}>L
-            </option>
-            <option value="XL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XL' ? 'selected' : '' }}>XL
-            </option>
-            <option value="XXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXL' ? 'selected' : '' }}>XXL
-            </option>
-            <option value="XXXL" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == 'XXXL' ? 'selected' : '' }}>
-                XXXL</option>
+            @foreach(['XS','S','M','L','XL','XXL','XXXL','XXXXL','XXXXXL','XXXXXXL','XXXXXXXL'] as $size)
+                <option value="{{ $size }}" {{ ($peserta['ukuran_celana'] ?? old('ukuran_celana')) == $size ? 'selected' : '' }}>{{ $size }}</option>
+            @endforeach
         </select>
         @error('ukuran_celana')
             <small class="text-danger">{{ $message }}</small>
@@ -309,16 +284,71 @@
 </div>
 
 <div class="form-row">
+    {{-- ===== ASAL INSTANSI — SEARCHABLE SELECT ===== --}}
     <div class="form-group">
         <label class="form-label required">Asal Instansi</label>
-        <input type="text" name="asal_instansi" class="form-input capitalize @error('asal_instansi') error @enderror"
-            placeholder="Contoh: Kementerian Kesehatan Republik Indonesia"
-            value="{{ $peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') }}" required>
-        <small class="form-hint">Huruf akan otomatis kapital setiap kata</small>
+
+        {{-- Hidden input dikirim ke server --}}
+        <input type="hidden" name="asal_instansi" id="asal_instansi_hidden_pkn"
+            value="{{ $peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') ?? '' }}">
+
+        {{-- Custom select trigger --}}
+        <div class="instansi-select-wrapper-pkn" style="position:relative;">
+            <div id="instansi_trigger_pkn"
+                class="form-input @error('asal_instansi') error @enderror"
+                style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:50px; user-select:none;">
+                <span id="instansi_trigger_label_pkn" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+                      color:{{ ($peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') ?? '') ? 'var(--gray-800, #1f2937)' : 'var(--gray-400, #9ca3af)' }};">
+                    {{ ($peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') ?? '') ?: 'Pilih asal instansi...' }}
+                </span>
+                <span style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                    <span id="instansi_clear_btn_pkn"
+                        style="display:{{ ($peserta['kepegawaian']['asal_instansi'] ?? old('asal_instansi') ?? '') ? 'flex' : 'none' }};
+                               align-items:center; color:#ef4444; cursor:pointer; font-size:1rem; padding:2px 4px;"
+                        title="Hapus pilihan">
+                        <i class="fas fa-times-circle"></i>
+                    </span>
+                    <i class="fas fa-chevron-down" id="instansi_chevron_pkn"
+                       style="color:var(--gray-400, #9ca3af); font-size:0.85rem; transition:transform 0.2s;"></i>
+                </span>
+            </div>
+
+            {{-- Dropdown panel --}}
+            <div id="instansi_dropdown_pkn"
+                style="display:none; position:absolute; z-index:9999; width:100%;
+                       background:white; border:2px solid var(--primary-color, #1a3a6c); border-top:none;
+                       border-radius:0 0 10px 10px; box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+
+                {{-- Search box --}}
+                <div style="padding:10px 12px; border-bottom:1px solid var(--gray-200, #e5e7eb); background:var(--gray-50, #f9fafb); position:sticky; top:0; z-index:1;">
+                    <div style="position:relative;">
+                        <input type="text" id="asal_instansi_search_pkn"
+                            placeholder="Cari instansi..."
+                            autocomplete="off"
+                            style="width:100%; padding:9px 36px 9px 12px; border:1.5px solid var(--gray-300, #d1d5db);
+                                   border-radius:8px; font-size:0.9rem; outline:none; box-sizing:border-box; font-family:inherit;">
+                        <i class="fas fa-search" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--gray-400, #9ca3af); font-size:0.85rem; pointer-events:none;"></i>
+                    </div>
+                    <div id="instansi_count_pkn" style="font-size:0.75rem; color:var(--gray-400, #9ca3af); margin-top:5px; padding-left:2px;">
+                        Menampilkan {{ count(config('instansi')) }} instansi
+                    </div>
+                </div>
+
+                {{-- List instansi --}}
+                <div id="instansi_list_pkn" style="max-height:260px; overflow-y:auto;"></div>
+            </div>
+        </div>
+
         @error('asal_instansi')
-            <small class="text-danger">{{ $message }}</small>
+            <div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
         @enderror
+        <small class="form-hint">
+            <i class="fas fa-info-circle"></i>
+            Klik untuk memilih dari {{ count(config('instansi')) }} instansi. Gunakan pencarian untuk filter.
+        </small>
     </div>
+    {{-- ===== END ASAL INSTANSI ===== --}}
+
     <div class="form-group">
         <label class="form-label required">Unit Kerja Peserta</label>
         <input type="text" name="unit_kerja" class="form-input capitalize @error('unit_kerja') error @enderror"
@@ -534,7 +564,7 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label">Unggah Surat Pernyataan Komitmen (jika sudah ada dan di tandatangani pejabat pembuat komitmen, namun jika belum maka WAJIB disertakan saat registrasiulang di Puslatbang KMP)</label>
+    <label class="form-label">Unggah Surat Pernyataan Komitmen (jika sudah ada dan di tandatangani pejabat pembuat komitmen, namun jika belum maka WAJIB disertakan saat registrasiulang di Pusjar SKMP)</label>
     <div class="form-file">
         <input type="file" name="file_surat_komitmen" class="form-file-input @error('file_surat_komitmen') error @enderror" 
                accept=".pdf">
@@ -606,7 +636,7 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label ">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang (jika belum maka WAJIB disertakan saat registrasi ulang di Puslatbang KMP)</label>
+    <label class="form-label ">Unggah Scan Surat Tugas mengikuti pelatihan yang ditandatangani oleh pejabat yang berwenang (jika belum maka WAJIB disertakan saat registrasi ulang di Pusjar SKMP)</label>
     <div class="form-file">
         <input type="file" name="file_surat_tugas" class="form-file-input @error('file_surat_tugas') error @enderror" 
                accept=".pdf">
@@ -679,7 +709,7 @@
 
 <div class="form-row">
     <div class="form-group">
-        <label class="form-label required">Unggah Surat Keterangan Berbadan Sehat</label>
+        <label class="form-label required">Unggah Surat Keterangan Sehat</label>
         <div class="form-file">
             <input type="file" name="file_surat_sehat" class="form-file-input @error('file_surat_sehat') error @enderror" 
                    accept=".pdf">
@@ -748,43 +778,45 @@
             <small class="text-danger">{{ $message }}</small>
         @enderror
     </div>
+
+    
 </div>
 
-{{-- <div class="form-group">
-    <label class="form-label required">Upload Pasfoto peserta berwarna</label>
-    <div class="form-file">
-        <input type="file" name="file_pas_foto" class="form-file-input @error('file_pas_foto') error @enderror" 
-               accept=".jpg,.jpeg,.png">
-        <label class="form-file-label">
-            <i class="fas fa-cloud-upload-alt"></i><br>
-            Klik untuk mengunggah file JPG/PNG (maks. 1MB)
-        </label>
-        <div class="form-file-name">
-            @if(isset($peserta['file_pas_foto']) && $peserta['file_pas_foto'])
-                <div class="file-info">
-                    <i class="fas fa-check-circle text-success"></i>
-                    <span>File sudah diupload: {{ basename($peserta['file_pas_foto']) }}</span>
-                    <button type="button" class="btn-change-file" data-target="file_pas_foto">
-                        <i class="fas fa-exchange-alt"></i> Ganti File
-                    </button>
-                </div>
-            @elseif(old('file_pas_foto'))
-                <div class="file-info">
-                    <i class="fas fa-check-circle text-success"></i>
-                    <span>File sudah diupload sebelumnya</span>
-                    <button type="button" class="btn-change-file" data-target="file_pas_foto">
-                        <i class="fas fa-exchange-alt"></i> Ganti File
-                    </button>
-                </div>
-            @else
-                <span class="no-file">Belum ada file dipilih</span>
-            @endif
+<div class="form-group">
+        <label class="form-label">Unggah Sertifikat TOEFL / Kemampuan Bahasa Inggris</label>
+        <div class="form-file">
+            <input type="file" name="file_toefl" class="form-file-input @error('file_toefl') error @enderror"
+                accept=".pdf">
+            <label class="form-file-label">
+                <i class="fas fa-cloud-upload-alt"></i><br>
+                Klik untuk mengunggah file PDF (maks. 1MB)
+            </label>
+            <div class="form-file-name">
+                @if(isset($peserta['kepegawaian']['file_toefl']) && $peserta['kepegawaian']['file_toefl'])
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload: {{ basename($peserta['kepegawaian']['file_toefl']) }}</span>
+                        <button type="button" class="btn-change-file" data-target="file_toefl">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
+                @elseif(old('file_toefl'))
+                    <div class="file-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>File sudah diupload sebelumnya</span>
+                        <button type="button" class="btn-change-file" data-target="file_toefl">
+                            <i class="fas fa-exchange-alt"></i> Ganti File
+                        </button>
+                    </div>
+                @else
+                    <span class="no-file">Belum ada file dipilih</span>
+                @endif
+            </div>
         </div>
+        @error('file_toefl')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
     </div>
-    @error('file_pas_foto')
-        <small class="text-danger">{{ $message }}</small>
-    @enderror
-</div> --}}
 
 <!-- Pas Foto peserta dengan cropping (HANYA CROP) -->
 <div class="form-group">
@@ -887,8 +919,8 @@
             <div style="text-align: center;">
                 <p style="margin: 0 0 8px 0; font-size: 0.9em; color: #666;"><strong>Contoh Foto :</strong></p>
                 <div style="width: 90px; height: 120px; border: 2px solid #ddd; overflow: hidden; border-radius: 4px;">
-                    <img src="{{ asset('gambar/contohfoto.jpeg') }}" 
-                         alt="Contoh Foto "
+                    <img src="{{ asset('gambar/contohfotopkn.jpeg') }}" 
+                         alt="Contoh Foto"
                          style="width: 100%; height: 100%; object-fit: cover;"
                          onerror="this.src='https://via.placeholder.com/90x120?text=Contoh+Foto'">
                 </div>
@@ -1025,30 +1057,30 @@
     <!-- Form untuk memilih mentor yang sudah ada -->
     <div id="select-mentor-form"
         style="display: {{ ($peserta['mentor_mode'] ?? old('mentor_mode')) == 'pilih' ? 'block' : 'none' }};">
-        
+
         <!-- FITUR PENCARIAN MENTOR -->
         <div class="form-group" style="margin-bottom: 20px;">
             <label class="form-label">
                 <i class="fas fa-search"></i> Cari Mentor
             </label>
             <div style="position: relative;">
-                <input type="text" 
-                    id="search-mentor" 
-                    class="form-input" 
+                <input type="text"
+                    id="search-mentor"
+                    class="form-input"
                     placeholder="Ketik nama atau NIP mentor untuk mencari..."
                     style="padding-right: 40px;">
-                <i class="fas fa-search" 
+                <i class="fas fa-search"
                 style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
             </div>
             <small class="form-hint">
-                <i class="fas fa-info-circle"></i> 
+                <i class="fas fa-info-circle"></i>
                 Pencarian berdasarkan Nama atau NIP Mentor (Ketik nip mentor tanpa spasi)
             </small>
             <div id="search-info" style="margin-top: 8px; font-size: 0.9em; color: #666; display: none;">
                 <i class="fas fa-users"></i> <span id="search-result-count"></span>
             </div>
         </div>
-        
+
         <div class="form-group">
             <label class="form-label required">Pilih Mentor</label>
             <select name="id_mentor" id="id_mentor" class="form-select @error('id_mentor') error @enderror">
@@ -1098,6 +1130,29 @@
 
         <div class="form-row">
             <div class="form-group">
+                <label class="form-label">Golongan Mentor</label>
+                <input type="text" name="golongan_mentor" id="golongan_mentor_select"
+                    class="form-input @error('golongan_mentor') error @enderror"
+                    value="{{ $peserta['golongan_mentor'] ?? old('golongan_mentor') }}" readonly
+                    placeholder="Akan terisi otomatis saat memilih mentor">
+                @error('golongan_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pangkat Mentor</label>
+                <input type="text" name="pangkat_mentor" id="pangkat_mentor_select"
+                    class="form-input @error('pangkat_mentor') error @enderror"
+                    value="{{ $peserta['pangkat_mentor'] ?? old('pangkat_mentor') }}" readonly
+                    placeholder="Akan terisi otomatis saat memilih mentor">
+                @error('pangkat_mentor')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
                 <label class="form-label">Nama Bank & Nomor Rekening Mentor</label>
                 <input type="text" name="nomor_rekening_mentor" id="nomor_rekening_mentor_select"
                     class="form-input @error('nomor_rekening_mentor') error @enderror"
@@ -1117,7 +1172,7 @@
                 @enderror
             </div>
         </div>
-        
+
         <div class="form-row">
             <div class="form-group">
                 <label class="form-label">Nomor Telepon Mentor</label>
@@ -1154,14 +1209,14 @@
             </div>
             <div class="form-group">
                 <label class="form-label required">NIP Mentor</label>
-                <input type="text" 
-                    name="nip_mentor_baru" 
+                <input type="text"
+                    name="nip_mentor_baru"
                     id="nip_mentor_baru"
                     class="form-input nip-normalize @error('nip_mentor_baru') error @enderror"
                     value="{{ $peserta['nip_mentor_baru'] ?? old('nip_mentor_baru') }}"
                     placeholder="Contoh: 196512311989031001">
                 <small class="form-hint">
-                    <i class="fas fa-info-circle"></i> 
+                    <i class="fas fa-info-circle"></i>
                     Masukkan NIP tanpa spasi dan titik. Sistem akan otomatis menghapus spasi/titik yang Anda ketik.
                 </small>
                 @error('nip_mentor_baru')
@@ -1183,7 +1238,39 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label class="form-label">Nomor Rekening Mentor</label>
+                <label class="form-label required">Golongan Ruang Mentor</label>
+                <select name="golongan_mentor_baru" id="golongan_mentor_baru"
+                    class="form-select @error('golongan_mentor_baru') error @enderror">
+                    <option value="">-- Pilih Golongan Ruang --</option>
+                    @foreach(['II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d'] as $gol)
+                        <option value="{{ $gol }}"
+                            {{ ($peserta['golongan_mentor_baru'] ?? old('golongan_mentor_baru')) == $gol ? 'selected' : '' }}>
+                            {{ $gol }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('golongan_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Pangkat Mentor</label>
+                <input type="text" name="pangkat_mentor_baru" id="pangkat_mentor_baru"
+                    class="form-input @error('pangkat_mentor_baru') error @enderror"
+                    value="{{ $peserta['pangkat_mentor_baru'] ?? old('pangkat_mentor_baru') }}" readonly
+                    placeholder="Terisi otomatis berdasarkan golongan">
+                <small class="form-hint">
+                    <i class="fas fa-info-circle"></i> Terisi otomatis saat golongan dipilih
+                </small>
+                @error('pangkat_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Nomor Rekening Mentor</label>
                 <input type="text" name="nomor_rekening_mentor_baru" id="nomor_rekening_mentor_baru"
                     class="form-input @error('nomor_rekening_mentor_baru') error @enderror"
                     placeholder="Contoh: Bank Mandiri, 174xxxxxxxxx a.n Nanang Wijaya"
@@ -1193,7 +1280,7 @@
                 @enderror
             </div>
             <div class="form-group">
-                <label class="form-label">NPWP Mentor</label>
+                <label class="form-label required">NPWP Mentor</label>
                 <input type="text" name="npwp_mentor_baru" id="npwp_mentor_baru"
                     class="form-input @error('npwp_mentor_baru') error @enderror"
                     value="{{ $peserta['npwp_mentor_baru'] ?? old('npwp_mentor_baru') }}"
@@ -1202,19 +1289,16 @@
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
             </div>
-            <!-- Di dalam #add-mentor-form (sekitar line 487-528) -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Nomor Telepon Mentor</label>
-                    <input type="tel" name="nomor_hp_mentor_baru" id="nomor_hp_mentor_baru"
-                        class="form-input @error('nomor_hp_mentor_baru') error @enderror"
-                        placeholder="Contoh: 081234567890"
-                        value="{{ $peserta['nomor_hp_mentor_baru'] ?? old('nomor_hp_mentor_baru') }}">
-                    <small class="form-hint">Format: +62812-3456-7890 atau 081234567890</small>
-                    @error('nomor_hp_mentor_baru')
-                        <small class="text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
+            <div class="form-group">
+                <label class="form-label">Nomor Telepon Mentor</label>
+                <input type="tel" name="nomor_hp_mentor_baru" id="nomor_hp_mentor_baru"
+                    class="form-input @error('nomor_hp_mentor_baru') error @enderror"
+                    placeholder="Contoh: 081234567890"
+                    value="{{ $peserta['nomor_hp_mentor_baru'] ?? old('nomor_hp_mentor_baru') }}">
+                <small class="form-hint">Format: +62812-3456-7890 atau 081234567890</small>
+                @error('nomor_hp_mentor_baru')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
             </div>
         </div>
     </div>
@@ -1245,3 +1329,163 @@
         display: block;
     }
 </style>
+
+{{-- ===== SCRIPT INSTANSI SEARCHABLE SELECT — FORM PKN ===== --}}
+<script>
+(function () {
+    // Data instansi dari config Laravel — di-embed oleh Blade
+    const DAFTAR_INSTANSI_PKN = @json(config('instansi'));
+
+    const trigger      = document.getElementById('instansi_trigger_pkn');
+    const triggerLabel = document.getElementById('instansi_trigger_label_pkn');
+    const hiddenInput  = document.getElementById('asal_instansi_hidden_pkn');
+    const dropdown     = document.getElementById('instansi_dropdown_pkn');
+    const searchInput  = document.getElementById('asal_instansi_search_pkn');
+    const listEl       = document.getElementById('instansi_list_pkn');
+    const countEl      = document.getElementById('instansi_count_pkn');
+    const clearBtn     = document.getElementById('instansi_clear_btn_pkn');
+    const chevron      = document.getElementById('instansi_chevron_pkn');
+
+    if (!trigger || !hiddenInput) return;
+
+    let selectedValue = hiddenInput.value || '';
+    let isOpen = false;
+    let debounceTimer = null;
+
+    if (selectedValue) setTriggerSelected(selectedValue);
+
+    trigger.addEventListener('click', function (e) {
+        if (e.target.closest('#instansi_clear_btn_pkn')) return;
+        isOpen ? closeDropdown() : openDropdown();
+    });
+
+    function openDropdown() {
+        isOpen = true;
+        dropdown.style.display = 'block';
+        trigger.style.borderRadius = '10px 10px 0 0';
+        trigger.style.borderColor  = 'var(--primary-color, #1a3a6c)';
+        trigger.style.boxShadow    = '0 0 0 4px rgba(26,58,108,0.1)';
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+        renderList(DAFTAR_INSTANSI_PKN, '');
+        setTimeout(() => { if (searchInput) searchInput.focus(); }, 50);
+    }
+
+    function closeDropdown() {
+        isOpen = false;
+        dropdown.style.display = 'none';
+        trigger.style.borderRadius = '10px';
+        trigger.style.boxShadow    = selectedValue ? '0 0 0 4px rgba(26,58,108,0.1)' : '';
+        trigger.style.borderColor  = selectedValue ? 'var(--primary-color, #1a3a6c)' : '';
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+        if (searchInput) searchInput.value = '';
+        if (countEl) countEl.textContent = 'Menampilkan ' + DAFTAR_INSTANSI_PKN.length + ' instansi';
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const q = this.value.trim();
+                const filtered = q
+                    ? DAFTAR_INSTANSI_PKN.filter(i => i.toLowerCase().includes(q.toLowerCase()))
+                    : DAFTAR_INSTANSI_PKN;
+                renderList(filtered, q);
+            }, 150);
+        });
+
+        searchInput.addEventListener('keydown', function (e) {
+            const items  = listEl.querySelectorAll('.instansi-item-pkn');
+            const active = listEl.querySelector('.instansi-item-pkn.iactive');
+            let idx = active ? [...items].indexOf(active) : -1;
+            if (e.key === 'ArrowDown') { e.preventDefault(); idx = Math.min(idx + 1, items.length - 1); setActive(items, idx); }
+            else if (e.key === 'ArrowUp')   { e.preventDefault(); idx = Math.max(idx - 1, 0); setActive(items, idx); }
+            else if (e.key === 'Enter')      { e.preventDefault(); if (active) selectInstansi(active.dataset.value); }
+            else if (e.key === 'Escape')     { closeDropdown(); }
+        });
+
+        searchInput.addEventListener('click', e => e.stopPropagation());
+    }
+
+    function setActive(items, idx) {
+        items.forEach(el => { el.classList.remove('iactive'); el.style.background = ''; });
+        if (items[idx]) {
+            items[idx].classList.add('iactive');
+            items[idx].style.background = '#dbeafe';
+            items[idx].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function renderList(data, q) {
+        if (!listEl) return;
+        if (data.length === 0) {
+            listEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--gray-500,#6b7280);font-size:0.9rem;">
+                <i class="fas fa-search" style="font-size:1.5rem;margin-bottom:8px;display:block;opacity:0.4;"></i>
+                Tidak ditemukan untuk "<strong>${escH(q)}</strong>"
+            </div>`;
+            if (countEl) countEl.textContent = '0 instansi ditemukan';
+            return;
+        }
+        const regex = q ? new RegExp('(' + escR(q) + ')', 'gi') : null;
+        listEl.innerHTML = data.map(item => {
+            const hl   = regex ? item.replace(regex, '<mark style="background:#fef3c7;padding:0;border-radius:2px;">$1</mark>') : escH(item);
+            const isSel = item === selectedValue;
+            return `<div class="instansi-item-pkn${isSel ? ' iactive' : ''}" data-value="${escH(item)}"
+                style="padding:10px 16px;cursor:pointer;font-size:0.875rem;
+                       border-bottom:1px solid var(--gray-100,#f3f4f6);
+                       display:flex;align-items:center;gap:10px;transition:background 0.1s;
+                       background:${isSel ? '#eff6ff' : ''};"
+                onmouseover="this.style.background='#eff6ff';"
+                onmouseout="this.style.background='${isSel ? '#eff6ff' : ''}';">
+                <i class="fas fa-${isSel ? 'check-circle' : 'building'}"
+                   style="color:${isSel ? 'var(--success-color,#10b981)' : 'var(--primary-color,#1a3a6c)'};font-size:0.8rem;flex-shrink:0;"></i>
+                <span>${hl}</span>
+            </div>`;
+        }).join('');
+        if (countEl) countEl.textContent = q
+            ? (data.length + ' dari ' + DAFTAR_INSTANSI_PKN.length + ' instansi')
+            : ('Menampilkan ' + data.length + ' instansi');
+        const selEl = listEl.querySelector('.iactive');
+        if (selEl) setTimeout(() => selEl.scrollIntoView({ block: 'nearest' }), 10);
+        listEl.querySelectorAll('.instansi-item-pkn').forEach(el => {
+            el.addEventListener('click', () => selectInstansi(el.dataset.value));
+        });
+    }
+
+    function selectInstansi(value) {
+        selectedValue = value;
+        hiddenInput.value = value;
+        setTriggerSelected(value);
+        closeDropdown();
+        trigger.classList.remove('error');
+        const errMsg = trigger.closest('.form-group')?.querySelector('.error-message');
+        if (errMsg) errMsg.remove();
+    }
+
+    function setTriggerSelected(value) {
+        if (triggerLabel) { triggerLabel.textContent = value; triggerLabel.style.color = 'var(--gray-800,#1f2937)'; }
+        if (clearBtn)  clearBtn.style.display  = 'flex';
+        if (trigger)   trigger.style.borderColor = 'var(--primary-color,#1a3a6c)';
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            selectedValue = '';
+            hiddenInput.value = '';
+            triggerLabel.textContent = 'Pilih asal instansi...';
+            triggerLabel.style.color = 'var(--gray-400,#9ca3af)';
+            clearBtn.style.display   = 'none';
+            trigger.style.borderColor = '';
+            trigger.style.boxShadow   = '';
+            closeDropdown();
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        if (isOpen && !trigger.contains(e.target) && !dropdown.contains(e.target)) closeDropdown();
+    });
+
+    function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function escR(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+})();
+</script>

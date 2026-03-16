@@ -271,9 +271,9 @@ if ($user->role->name == 'pengawas') {
                 'status_perkawinan'   => 'required|in:Belum Menikah,Menikah,Duda,Janda',
                 'olahraga_hobi'       => 'nullable|string|max:100',
                 'perokok'             => 'required|in:Ya,Tidak',
-                'ukuran_kaos'         => 'required|in:S,M,L,XL,XXL,XXXL',
-                'ukuran_celana'       => 'required|in:S,M,L,XL,XXL,XXXL',
-                'ukuran_training'     => 'required|in:S,M,L,XL,XXL,XXXL',
+                'ukuran_kaos' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
+                'ukuran_celana' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
+                'ukuran_training' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,XXXXL,XXXXXL,XXXXXXL,XXXXXXXL',
                 'kondisi_peserta'     => 'nullable|string',
                 'file_ktp'            => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
                 'file_pas_foto'       => 'nullable',
@@ -293,6 +293,7 @@ if ($user->role->name == 'pengawas') {
                 'file_sk_cpns'         => 'nullable|file|mimes:pdf|max:5120',
                 'file_spmt'            => 'nullable|file|mimes:pdf|max:5120',
                 'file_skp'             => 'nullable|file|mimes:pdf|max:5120',
+                'file_toefl' => 'nullable|file|mimes:pdf|max:5120',
                 'file_surat_tugas'                   => 'nullable|file|mimes:pdf|max:5120',
                 'file_surat_sehat'                   => 'nullable|file|mimes:pdf|max:5120',
                 'file_surat_bebas_narkoba'           => 'nullable|file|mimes:pdf|max:5120',
@@ -599,6 +600,7 @@ if ($user->role->name == 'pengawas') {
                 'file_sk_cpns',
                 'file_spmt',
                 'file_skp',
+                'file_toefl',
                 'file_persetujuan_mentor',
             ];
 
@@ -681,7 +683,7 @@ if ($user->role->name == 'pengawas') {
                 'nomor_sk_terakhir'      => $request->nomor_sk_terakhir,
             ];
 
-            foreach (['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp'] as $field) {
+            foreach (['file_sk_jabatan', 'file_sk_pangkat', 'file_sk_cpns', 'file_spmt', 'file_skp', 'file_toefl'] as $field) {
                 if (isset($files[$field])) $kepegawaianUpdateData[$field] = $files[$field];
             }
 

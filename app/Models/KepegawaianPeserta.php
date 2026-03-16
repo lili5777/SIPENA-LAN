@@ -35,6 +35,7 @@ class KepegawaianPeserta extends Model
         'file_sk_cpns',
         'file_spmt',
         'file_skp',
+        'file_toefl',
         'tahun_lulus_pkp_pim_iv',
     ];
 

@@ -601,7 +601,7 @@
                             <label class="form-label required">{{ $label }}</label>
                             <select name="{{ $field }}" class="form-select @error($field) error @enderror">
                                 <option value="">-- Pilih Ukuran --</option>
-                                @foreach(['S','M','L','XL','XXL','XXXL'] as $size)
+                                @foreach(['XS','S','M','L','XL','XXL','XXXL','XXXXL','XXXXXL','XXXXXXL','XXXXXXXL'] as $size)
                                     <option value="{{ $size }}" {{ old($field, $peserta->$field) == $size ? 'selected' : '' }}>{{ $size }}</option>
                                 @endforeach
                             </select>
@@ -1223,7 +1223,7 @@
                         <div class="foto-example-section">
                             <div class="example-photo-label"><i class="fas fa-image"></i> Contoh Foto</div>
                             <div class="example-photo-container">
-                                <img src="{{ asset('gambar/contohfoto2.jpeg') }}" alt="Contoh Pas Foto">
+                                <img src="{{ asset('gambar/contohfotopkn.jpeg') }}" alt="Contoh Pas Foto">
                             </div>
                             <div class="example-photo-note">* Gunakan foto formal</div>
                         </div>
@@ -1242,6 +1242,7 @@
                             ['name' => 'file_sk_cpns',    'label' => 'SK CPNS',                                                'wajib' => 'required'],
                             ['name' => 'file_spmt',       'label' => 'Surat Pernyataan Melaksanakan Tugas (SPMT)',             'wajib' => 'required'],
                             ['name' => 'file_skp',        'label' => 'Sasaran Kinerja Pegawai (SKP)',                          'wajib' => '-'],
+                            ['name' => 'file_toefl',      'label' => 'Sertifikat TOEFL',                                      'wajib' => '-'],
                         ];
                         if ($jenisPelatihanData->kode_pelatihan == "LATSAR") {
                             $kepegawaianDocs = array_filter($kepegawaianDocs, fn($d) => !in_array($d['name'], ['file_sk_jabatan','file_sk_pangkat']));
