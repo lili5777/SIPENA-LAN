@@ -82,6 +82,7 @@
     .form-label i { color: var(--primary); margin-right: .35rem; }
     .badge-req  { background: var(--danger);  color:#fff; font-size:.65rem; padding:.15rem .4rem; border-radius:4px; margin-left:.3rem; vertical-align:middle; }
     .badge-opt  { background: var(--warning); color:#fff; font-size:.65rem; padding:.15rem .4rem; border-radius:4px; margin-left:.3rem; vertical-align:middle; }
+    .badge-cond { background: var(--info);    color:#fff; font-size:.65rem; padding:.15rem .4rem; border-radius:4px; margin-left:.3rem; vertical-align:middle; }
 
     .form-select,
     .form-control {
@@ -100,6 +101,11 @@
         background-repeat: no-repeat;
         background-position: right .75rem center;
     }
+    .form-control[list] {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23285496' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right .75rem center;
+    }
     .form-select:focus,
     .form-control:focus {
         outline: none;
@@ -112,6 +118,13 @@
         background-color: rgba(16,185,129,.04);
     }
     .form-select.is-required { border-color: var(--danger) !important; }
+
+    /* ── Wilayah field animasi masuk ─────────────────── */
+    #wilayahGroup {
+        display: none;
+        animation: fadeUp .3s ease both;
+    }
+    #wilayahGroup.show { display: block; }
 
     /* ── Preview info ────────────────────────────────── */
     .preview-box {
@@ -262,6 +275,53 @@
                         </select>
                     </div>
 
+                    {{-- Kategori (OPSIONAL) --}}
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-tag"></i> Kategori
+                            <span class="badge-opt">OPSIONAL</span>
+                        </label>
+                        <select name="kategori" id="kategori" class="form-select">
+                            <option value="">Semua Kategori</option>
+                            <option value="PNBP"       {{ request('kategori') == 'PNBP'       ? 'selected' : '' }}>PNBP</option>
+                            <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>FASILITASI</option>
+                        </select>
+                    </div>
+
+                    {{-- Wilayah (muncul hanya jika FASILITASI) --}}
+                    <div id="wilayahGroup" class="{{ request('kategori') == 'FASILITASI' ? 'show' : '' }}">
+                        <label class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Wilayah
+                            <span class="badge-cond">KONDISIONAL</span>
+                        </label>
+                        <input type="text"
+                               name="wilayah"
+                               id="wilayah"
+                               class="form-control {{ request('wilayah') ? 'is-active' : '' }}"
+                               list="wilayahList"
+                               placeholder="Ketik nama wilayah..."
+                               value="{{ request('wilayah') }}">
+                        <datalist id="wilayahList">
+                            <option value="DKI Jakarta">
+                            <option value="Jawa Barat">
+                            <option value="Jawa Tengah">
+                            <option value="Jawa Timur">
+                            <option value="Banten">
+                            <option value="Bali">
+                            <option value="Sumatera Utara">
+                            <option value="Sumatera Barat">
+                            <option value="Sumatera Selatan">
+                            <option value="Kalimantan Timur">
+                            <option value="Kalimantan Selatan">
+                            <option value="Sulawesi Selatan">
+                            <option value="Sulawesi Utara">
+                            <option value="Papua">
+                            <option value="Papua Barat">
+                            <option value="Nusa Tenggara Barat">
+                            <option value="Nusa Tenggara Timur">
+                        </datalist>
+                    </div>
+
                     {{-- Angkatan --}}
                     <div>
                         <label class="form-label">
@@ -323,12 +383,8 @@
                             placeholder="Nama atau NIP..." value="{{ request('search') }}">
                     </div>
 
-                    {{-- Preview info + tombol --}}
+                    {{-- Tombol --}}
                     <div class="full-row" style="display:flex; align-items:flex-end; justify-content:flex-end; gap:1rem; flex-wrap:wrap;">
-                        {{-- <button type="button" class="btn-export-main" id="previewBtn"
-                            style="background:linear-gradient(135deg,var(--primary-dk),var(--primary)); min-width:160px;">
-                            <i class="fas fa-eye"></i> Preview Kolom
-                        </button> --}}
                         <button type="submit" class="btn-export-main" id="exportBtn" disabled>
                             <i class="fas fa-file-excel"></i> Download Excel
                         </button>
@@ -392,8 +448,8 @@
                     <h6><i class="fas fa-filter"></i> Filter</h6>
                     <ul>
                         <li><strong>Jenis Pelatihan</strong> wajib dipilih sebelum export</li>
+                        <li><strong>Kategori FASILITASI</strong> memunculkan filter Wilayah</li>
                         <li>Filter lain bersifat opsional</li>
-                        <li>Klik <em>Preview Kolom</em> untuk melihat struktur Excel tanpa download</li>
                         <li>Nama file: <code>rekap-nilai-[jenis]-[tanggal].xlsx</code></li>
                     </ul>
                 </div>
@@ -474,14 +530,28 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const jenisSel  = document.getElementById('jenisPelatihan');
-    const exportBtn = document.getElementById('exportBtn');
-    const previewBtn= document.getElementById('previewBtn');
-    const previewBox= document.getElementById('previewBox');
-    const form      = document.getElementById('exportForm');
+    const jenisSel    = document.getElementById('jenisPelatihan');
+    const kategoriSel = document.getElementById('kategori');
+    const wilayahGrp  = document.getElementById('wilayahGroup');
+    const wilayahInp  = document.getElementById('wilayah');
+    const exportBtn   = document.getElementById('exportBtn');
+    const previewBox  = document.getElementById('previewBox');
+    const form        = document.getElementById('exportForm');
 
-    // Jenis nilai data dari server (jika sudah ada)
     const serverJenisNilai = @json($jenisNilaiList);
+
+    // ── Toggle wilayah field ──────────────────────────
+    function toggleWilayah() {
+        if (kategoriSel.value === 'FASILITASI') {
+            wilayahGrp.classList.add('show');
+        } else {
+            wilayahGrp.classList.remove('show');
+            wilayahInp.value = '';
+            wilayahInp.classList.remove('is-active');
+        }
+    }
+    toggleWilayah(); // jalankan saat load
+    kategoriSel.addEventListener('change', toggleWilayah);
 
     // ── Enable/disable export button ──────────────────
     function checkExportReady() {
@@ -500,8 +570,8 @@ document.addEventListener('DOMContentLoaded', function () {
         previewBox.classList.remove('show');
     });
 
-    // ── Highlight active filters ──────────────────────
-    ['angkatan','tahun','kelompok','search'].forEach(id => {
+    // ── Highlight filter aktif ────────────────────────
+    ['angkatan', 'tahun', 'kelompok', 'search', 'kategori'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         const check = () => {
@@ -513,100 +583,11 @@ document.addEventListener('DOMContentLoaded', function () {
         el.addEventListener('input', check);
     });
 
-    // ── Preview kolom (AJAX fetch jenis nilai) ────────
-    previewBtn.addEventListener('click', function () {
-        const jpId = jenisSel.value;
-        if (!jpId) {
-            jenisSel.classList.add('is-required');
-            jenisSel.focus();
-            return;
-        }
-
-        previewBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat...';
-        previewBtn.disabled  = true;
-
-        fetch(`{{ url('/admin/export/nilai-peserta/preview') }}?jenis_pelatihan=${jpId}`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-        })
-        .then(r => r.json())
-        .then(data => {
-            renderPreview(data.jenis_nilai_list ?? []);
-            previewBox.classList.add('show');
-        })
-        .catch(() => {
-            // Fallback: gunakan data server jika ada
-            if (serverJenisNilai.length > 0) {
-                renderPreview(serverJenisNilai);
-                previewBox.classList.add('show');
-            }
-        })
-        .finally(() => {
-            previewBtn.innerHTML = '<i class="fas fa-eye"></i> Preview Kolom';
-            previewBtn.disabled  = false;
-        });
+    // Highlight wilayah input secara terpisah
+    wilayahInp.addEventListener('input', function () {
+        if (this.value.trim()) this.classList.add('is-active');
+        else this.classList.remove('is-active');
     });
-
-    function renderPreview(list) {
-        if (!list || list.length === 0) {
-            document.getElementById('previewContent').innerHTML =
-                '<p class="mt-2 mb-0 text-muted"><i class="fas fa-exclamation-circle me-1"></i>Belum ada jenis nilai untuk pelatihan ini.</p>';
-            return;
-        }
-
-        const identityCols = ['No','NDH','Nama Peserta','NIP/NRP','Jabatan','Instansi','Pangkat','Golongan'];
-        let totalInd = list.reduce((s, jn) => s + (jn.indikator_nilai ? jn.indikator_nilai.length : (jn.indikator_nilai_count ?? 0)), 0);
-        let totalCols = identityCols.length + totalInd + 1;
-
-        // Pill list
-        let pills = identityCols.map(c =>
-            `<span class="preview-col-pill identity">${c}</span>`).join('');
-
-        list.forEach(jn => {
-            const inds = jn.indikator_nilai ?? [];
-            inds.forEach(ind => {
-                pills += `<span class="preview-col-pill">${ind.name} (${ind.bobot}%)</span>`;
-            });
-        });
-        pills += `<span class="preview-col-pill total">TOTAL</span>`;
-
-        // Mini table
-        let table = `<div class="excel-preview mt-2"><table>
-            <tr>
-                ${identityCols.map(c => `<th class="th-identity" rowspan="2">${c}</th>`).join('')}
-                ${list.map(jn => {
-                    const cnt = jn.indikator_nilai ? jn.indikator_nilai.length : (jn.indikator_nilai_count ?? 1);
-                    return `<th class="th-jenis" colspan="${cnt}">${jn.name} (${jn.bobot}%)</th>`;
-                }).join('')}
-                <th class="th-total" rowspan="2">TOTAL</th>
-            </tr>
-            <tr>
-                ${list.map(jn => {
-                    const inds = jn.indikator_nilai ?? [];
-                    return inds.map(ind =>
-                        `<th class="th-ind">${ind.name}<br><small>(${ind.bobot}%)</small></th>`
-                    ).join('');
-                }).join('')}
-            </tr>
-            <tr>
-                ${identityCols.map(() => `<td class="td-data">…</td>`).join('')}
-                ${list.map(jn => {
-                    const cnt = jn.indikator_nilai ? jn.indikator_nilai.length : (jn.indikator_nilai_count ?? 1);
-                    return Array(cnt).fill('<td class="td-data">0–100</td>').join('');
-                }).join('')}
-                <td class="td-data" style="background:#D1FAE5;color:#065F46;font-weight:700;">0–100</td>
-            </tr>
-        </table></div>`;
-
-        document.getElementById('previewContent').innerHTML = `
-            <div class="preview-col-list">${pills}</div>
-            <small class="d-block mt-1" style="color:#1D4ED8;">
-                <i class="fas fa-info-circle me-1"></i>
-                Total <strong>${totalCols} kolom</strong>
-                (${identityCols.length} identitas + ${totalInd} indikator + 1 total)
-            </small>
-            ${table}
-        `;
-    }
 
     // ── Form submit ───────────────────────────────────
     form.addEventListener('submit', function (e) {
@@ -615,6 +596,11 @@ document.addEventListener('DOMContentLoaded', function () {
             jenisSel.classList.add('is-required');
             jenisSel.focus();
             return false;
+        }
+
+        // Jika kategori bukan FASILITASI, pastikan wilayah dikosongkan
+        if (kategoriSel.value !== 'FASILITASI') {
+            wilayahInp.value = '';
         }
 
         exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';

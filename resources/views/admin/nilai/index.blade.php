@@ -102,7 +102,8 @@
             <form action="{{ route('nilai.index', ['jenis' => $jenis]) }}" method="GET">
                 <div class="row g-2 align-items-end">
 
-                    <div class="col-md-3 col-sm-6">
+                    {{-- Angkatan --}}
+                    <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-layer-group me-1"></i> Angkatan
                         </label>
@@ -116,6 +117,7 @@
                         </select>
                     </div>
 
+                    {{-- Tahun --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-calendar-alt me-1"></i> Tahun
@@ -130,6 +132,7 @@
                         </select>
                     </div>
 
+                    {{-- Kelompok --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-users me-1"></i> Kelompok
@@ -144,7 +147,40 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3 col-sm-8">
+                    {{-- Kategori --}}
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label small text-muted mb-1">
+                            <i class="fas fa-tag me-1"></i> Kategori
+                        </label>
+                        <select name="kategori" class="form-select form-select-sm" id="filterKategori">
+                            <option value="">Semua Kategori</option>
+                            <option value="PNBP"       {{ request('kategori') == 'PNBP'       ? 'selected' : '' }}>PNBP</option>
+                            <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>FASILITASI</option>
+                        </select>
+                    </div>
+
+                    {{-- Wilayah (muncul hanya jika FASILITASI) --}}
+                    <div class="col-md-2 col-sm-6" id="filterWilayahWrapper"
+                        style="{{ request('kategori') == 'FASILITASI' ? '' : 'display:none' }}">
+                        <label class="form-label small text-muted mb-1">
+                            <i class="fas fa-map-marker-alt me-1"></i> Wilayah
+                        </label>
+                        <input type="text"
+                            name="wilayah"
+                            id="filterWilayah"
+                            class="form-control form-control-sm"
+                            list="wilayahDatalistIndex"
+                            placeholder="Ketik wilayah..."
+                            value="{{ request('wilayah') }}">
+                        <datalist id="wilayahDatalistIndex">
+                            @foreach($wilayahList as $w)
+                                <option value="{{ $w }}">
+                            @endforeach
+                        </datalist>
+                    </div>
+
+                    {{-- Cari Peserta --}}
+                    <div class="col-md-2 col-sm-8">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-search me-1"></i> Cari Peserta
                         </label>
@@ -152,6 +188,7 @@
                             placeholder="Nama atau NIP..." value="{{ request('search') }}">
                     </div>
 
+                    {{-- Tombol --}}
                     <div class="col-md-2 col-sm-4">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary btn-sm flex-fill">
@@ -165,6 +202,29 @@
                     </div>
 
                 </div>
+
+                {{-- Badge filter aktif --}}
+                @php
+                    $activeFilters = array_filter([
+                        'Angkatan'  => request('angkatan')  ? 'Angkatan ' . request('angkatan')  : null,
+                        'Tahun'     => request('tahun'),
+                        'Kelompok'  => request('kelompok')  ? 'Kelompok ' . request('kelompok')  : null,
+                        'Kategori'  => request('kategori'),
+                        'Wilayah'   => request('wilayah'),
+                        'Cari'      => request('search'),
+                    ]);
+                @endphp
+                @if(count($activeFilters))
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                        @foreach($activeFilters as $label => $val)
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-normal" style="font-size:.78rem;">
+                                <i class="fas fa-check-circle me-1" style="font-size:.65rem;"></i>
+                                {{ $label }}: {{ $val }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+
             </form>
         </div>
     </div>
@@ -373,7 +433,6 @@
                         <p class="mt-3 text-muted">Memuat data penilaian...</p>
                     </div>
 
-                    {{-- State: tidak ada akses sama sekali --}}
                     <div id="nilaiNoAccess" class="d-none flex-grow-1 d-flex align-items-center justify-content-center">
                         <div class="text-center py-5 px-4">
                             <div class="mb-3" style="font-size:3rem;">🔒</div>
@@ -443,12 +502,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
+    // ── Toggle wilayah ────────────────────────────────────────
+    const filterKategori       = document.getElementById('filterKategori');
+    const filterWilayahWrapper = document.getElementById('filterWilayahWrapper');
+    const filterWilayah        = document.getElementById('filterWilayah');
+
+    if (filterKategori) {
+        filterKategori.addEventListener('change', function () {
+            if (this.value === 'FASILITASI') {
+                filterWilayahWrapper.style.display = '';
+            } else {
+                filterWilayahWrapper.style.display = 'none';
+                filterWilayah.value = '';
+            }
+        });
+    }
+
+    // ── Modal Nilai ───────────────────────────────────────────
     const modalNilai       = new bootstrap.Modal(document.getElementById('modalNilai'));
     let currentPesertaId   = null;
     let nilaiData          = {};
     let catatanData        = {};
     let activeJenisNilaiId = null;
-    let jenisNilaiCache    = [];  // hanya jenis nilai yang BISA diakses user
+    let jenisNilaiCache    = [];
     let pesertaMilikUser   = true;
 
     document.querySelectorAll('.btn-nilai').forEach(btn => {
@@ -456,7 +532,6 @@ document.addEventListener('DOMContentLoaded', function () {
             currentPesertaId = this.dataset.pesertaId;
             const nama       = this.dataset.pesertaNama;
 
-            // Reset state modal
             document.getElementById('modalNilaiTitle').textContent    = 'Nilai: ' + nama;
             document.getElementById('modalNilaiSubtitle').textContent = 'Memuat...';
             document.getElementById('nilaiLoading').classList.remove('d-none');
@@ -470,7 +545,6 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('totalProgressBar').style.width  = '0%';
             document.getElementById('totalNilaiLabel').textContent    = '0 / 100';
 
-            // Reset header ke default biru
             document.getElementById('modalHeader').style.background =
                 'linear-gradient(135deg, #285496 0%, #3a6bc7 100%)';
             document.getElementById('modalHeaderIcon').style.color = '#285496';
@@ -499,22 +573,16 @@ document.addEventListener('DOMContentLoaded', function () {
             catatanData      = data.existing_catatan || {};
             pesertaMilikUser = data.peserta_milik_user !== false;
 
-            // ============================================================
-            // FILTER: hanya tampilkan jenis nilai yang user punya akses
-            // Sebuah jenis nilai "bisa diakses" jika minimal 1 indikatornya
-            // user_dapat_nilai === true
-            // ============================================================
             const rawJenisNilai = data.jenis_nilai || [];
 
             jenisNilaiCache = rawJenisNilai
                 .map(jn => {
-                    // Filter indikator — hanya yang bisa dinilai user
                     const indikatorBisaDinilai = (jn.indikator_nilai || []).filter(
                         ind => ind.user_dapat_nilai !== false
                     );
                     return { ...jn, indikator_nilai: indikatorBisaDinilai };
                 })
-                .filter(jn => jn.indikator_nilai.length > 0); // buang jenis nilai yang kosong
+                .filter(jn => jn.indikator_nilai.length > 0);
 
             const loadingEl   = document.getElementById('nilaiLoading');
             const contentEl   = document.getElementById('nilaiContent');
@@ -523,7 +591,6 @@ document.addEventListener('DOMContentLoaded', function () {
             loadingEl.classList.add('d-none');
             loadingEl.style.display = 'none';
 
-            // Tidak ada satupun jenis nilai yang bisa diakses
             if (jenisNilaiCache.length === 0) {
                 noAccessEl.classList.remove('d-none');
                 noAccessEl.style.display = 'flex';
@@ -531,7 +598,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Ada akses — tampilkan konten normal
             contentEl.classList.remove('d-none');
             contentEl.style.display = 'flex';
 
@@ -551,16 +617,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ============================================================
-    // RENDER TAB JENIS NILAI
-    // indikator_nilai di sini sudah difilter — hanya yang bisa dinilai
-    // ============================================================
     function renderJenisNilaiTabs(list) {
         const container = document.getElementById('jenisNilaiTabs');
         container.innerHTML = '';
 
         list.forEach(jn => {
-            const indList = jn.indikator_nilai || []; // sudah difilter
+            const indList = jn.indikator_nilai || [];
             const terisi  = indList.filter(ind =>
                 nilaiData[ind.id] !== undefined &&
                 nilaiData[ind.id] !== null &&
@@ -605,14 +667,9 @@ document.addEventListener('DOMContentLoaded', function () {
         renderIndikatorPanel(jn);
     }
 
-    // ============================================================
-    // RENDER PANEL INDIKATOR
-    // Tidak ada lagi logika view-only — semua indikator yang muncul
-    // di sini sudah pasti bisa dinilai user
-    // ============================================================
     function renderIndikatorPanel(jn) {
         const container = document.getElementById('indikatorContent');
-        const indList   = jn.indikator_nilai || []; // sudah difilter
+        const indList   = jn.indikator_nilai || [];
 
         let html = `
             <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
@@ -709,7 +766,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Catatan — hanya tampil jika user adalah pemilik kelompok peserta
         if (pesertaMilikUser) {
             const catatanSaatIni = catatanData[jn.id] ?? '';
             html += `
@@ -913,6 +969,10 @@ document.addEventListener('DOMContentLoaded', function () {
     .btn-action:hover { transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,.1); }
     .pagination-sm .page-link { padding:.375rem .625rem; border-radius:6px; color:#285496; }
     .pagination-sm .page-item.active .page-link { background-color:#285496; border-color:#285496; }
+
+    /* Filter wilayah input */
+    #filterWilayahWrapper .form-control-sm { border-color: rgba(40,84,150,.35); }
+    #filterWilayahWrapper .form-control-sm:focus { border-color: #285496; box-shadow: 0 0 0 .15rem rgba(40,84,150,.15); }
 
     /* ===== MODAL LAYOUT ===== */
     #modalNilai .modal-content { max-height:90vh; display:flex; flex-direction:column; }

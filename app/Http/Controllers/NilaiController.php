@@ -70,6 +70,20 @@ class NilaiController extends Controller
     }
 
     // =========================================================
+    // HELPER — daftar wilayah statis
+    // =========================================================
+    private function getWilayahList(): array
+    {
+        return [
+            'DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur',
+            'Banten', 'Bali', 'Sumatera Utara', 'Sumatera Barat',
+            'Sumatera Selatan', 'Kalimantan Timur', 'Kalimantan Selatan',
+            'Sulawesi Selatan', 'Sulawesi Utara', 'Papua', 'Papua Barat',
+            'Nusa Tenggara Barat', 'Nusa Tenggara Timur',
+        ];
+    }
+
+    // =========================================================
     // HELPER — konteks user (role, kelompok, angkatan)
     // =========================================================
     private function getUserContext(int $jenisPelatihanId): array
@@ -134,6 +148,25 @@ class NilaiController extends Controller
     }
 
     // =========================================================
+    // HELPER PRIVATE — apply filter kategori & wilayah ke query
+    // Dipanggil setelah semua filter role/angkatan/tahun/kelompok
+    // =========================================================
+    private function applyKategoriWilayahFilter($query, Request $request): void
+    {
+        if ($request->filled('kategori')) {
+            $query->whereHas('pendaftaran.angkatan', fn($q) =>
+                $q->where('kategori', $request->kategori)
+            );
+        }
+
+        if ($request->filled('wilayah')) {
+            $query->whereHas('pendaftaran.angkatan', fn($q) =>
+                $q->where('wilayah', 'LIKE', "%{$request->wilayah}%")
+            );
+        }
+    }
+
+    // =========================================================
     // INDEX — Daftar peserta
     // =========================================================
     public function index(Request $request, $jenis)
@@ -146,9 +179,10 @@ class NilaiController extends Controller
         $roleName = $ctx['roleName'];
 
         // ── Filter statis ─────────────────────────────────────────
-        $angkatanRomawi = $this->getRomawList();   // ['I','II',...]
-        $tahunList      = $this->getTahunList();   // [2020, 2021, ...]
-        $kelompokList   = range(1, 10);            // [1,2,...,10]
+        $angkatanRomawi = $this->getRomawList();
+        $tahunList      = $this->getTahunList();
+        $kelompokList   = range(1, 10);
+        $wilayahList    = $this->getWilayahList();
 
         $totalIndikatorJenis = IndikatorNilai::whereHas('jenisNilai', function ($q) use ($jenisPelatihanId) {
             $q->where('id_jenis_pelatihan', $jenisPelatihanId);
@@ -169,7 +203,6 @@ class NilaiController extends Controller
         if (in_array($roleName, ['coach', 'penguji'])) {
             if ($ctx['kelompokIds']->isNotEmpty()) {
                 $kelompokTarget = $ctx['kelompokIds'];
-                // filter kelompok statis → LIKE nama_kelompok
                 if ($request->filled('kelompok')) {
                     $namaKelompok = 'Kelompok ' . $request->kelompok;
                     $query->whereHas('kelompok', fn($q) =>
@@ -185,14 +218,12 @@ class NilaiController extends Controller
                 $query->whereRaw('1 = 0');
             }
 
-            // filter angkatan → LIKE nama_angkatan
             if ($request->filled('angkatan')) {
                 $namaAngkatan = 'Angkatan ' . $request->angkatan;
                 $query->whereHas('pendaftaran.angkatan', fn($q) =>
                     $q->where('nama_angkatan', 'LIKE', "%{$namaAngkatan}%")
                 );
             }
-            // filter tahun
             if ($request->filled('tahun')) {
                 $query->whereHas('pendaftaran.angkatan', fn($q) =>
                     $q->where('tahun', 'LIKE', "%{$request->tahun}%")
@@ -247,6 +278,9 @@ class NilaiController extends Controller
                 );
             }
         }
+
+        // ── Filter kategori & wilayah (berlaku untuk semua role) ──
+        $this->applyKategoriWilayahFilter($query, $request);
 
         // ── Search ────────────────────────────────────────────────
         if ($request->filled('search')) {
@@ -304,7 +338,7 @@ class NilaiController extends Controller
         return view('admin.nilai.index', compact(
             'jenis', 'jenisPelatihan', 'peserta',
             'angkatanRomawi', 'tahunList', 'kelompokList',
-            'kelompokFilter'
+            'wilayahList', 'kelompokFilter'
         ));
     }
 
@@ -508,6 +542,7 @@ class NilaiController extends Controller
         $angkatanRomawi = $this->getRomawList();
         $tahunList      = $this->getTahunList();
         $kelompokList   = range(1, 10);
+        $wilayahList    = $this->getWilayahList();
 
         $jenisNilaiList = JenisNilai::where('id_jenis_pelatihan', $jenisPelatihanId)
             ->withCount('indikatorNilai')
@@ -604,6 +639,9 @@ class NilaiController extends Controller
             }
         }
 
+        // ── Filter kategori & wilayah (berlaku untuk semua role) ──
+        $this->applyKategoriWilayahFilter($query, $request);
+
         if ($request->filled('search')) {
             $term = $request->search;
             $query->where(fn($q) =>
@@ -684,7 +722,8 @@ class NilaiController extends Controller
 
         return view('admin.nilai.rekap', compact(
             'jenis', 'jenisPelatihan', 'rekapData',
-            'jenisNilaiList', 'angkatanRomawi', 'tahunList', 'kelompokList'
+            'jenisNilaiList', 'angkatanRomawi', 'tahunList', 'kelompokList',
+            'wilayahList'
         ));
     }
 }

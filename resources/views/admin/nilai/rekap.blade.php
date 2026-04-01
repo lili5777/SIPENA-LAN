@@ -36,8 +36,8 @@
             <form action="{{ route('nilai.rekap', ['jenis' => $jenis]) }}" method="GET">
                 <div class="row g-2 align-items-end">
 
-                    {{-- Filter Angkatan (romawi statis) --}}
-                    <div class="col-md-3 col-sm-6">
+                    {{-- Filter Angkatan --}}
+                    <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-layer-group me-1"></i> Angkatan
                         </label>
@@ -51,7 +51,7 @@
                         </select>
                     </div>
 
-                    {{-- Filter Tahun (statis 2020–sekarang) --}}
+                    {{-- Filter Tahun --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-calendar-alt me-1"></i> Tahun
@@ -66,7 +66,7 @@
                         </select>
                     </div>
 
-                    {{-- Filter Kelompok (statis 1–10) --}}
+                    {{-- Filter Kelompok --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-users me-1"></i> Kelompok
@@ -81,8 +81,40 @@
                         </select>
                     </div>
 
+                    {{-- Filter Kategori --}}
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label small text-muted mb-1">
+                            <i class="fas fa-tag me-1"></i> Kategori
+                        </label>
+                        <select name="kategori" class="form-select form-select-sm" id="filterKategori">
+                            <option value="">Semua Kategori</option>
+                            <option value="PNBP"       {{ request('kategori') == 'PNBP'       ? 'selected' : '' }}>PNBP</option>
+                            <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>FASILITASI</option>
+                        </select>
+                    </div>
+
+                    {{-- Filter Wilayah (muncul hanya jika FASILITASI) --}}
+                    <div class="col-md-2 col-sm-6" id="filterWilayahWrapper"
+                        style="{{ request('kategori') == 'FASILITASI' ? '' : 'display:none' }}">
+                        <label class="form-label small text-muted mb-1">
+                            <i class="fas fa-map-marker-alt me-1"></i> Wilayah
+                        </label>
+                        <input type="text"
+                            name="wilayah"
+                            id="filterWilayah"
+                            class="form-control form-control-sm"
+                            list="wilayahDatalistRekap"
+                            placeholder="Ketik wilayah..."
+                            value="{{ request('wilayah') }}">
+                        <datalist id="wilayahDatalistRekap">
+                            @foreach($wilayahList as $w)
+                                <option value="{{ $w }}">
+                            @endforeach
+                        </datalist>
+                    </div>
+
                     {{-- Cari --}}
-                    <div class="col-md-3 col-sm-8">
+                    <div class="col-md-2 col-sm-8">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-search me-1"></i> Cari
                         </label>
@@ -104,6 +136,29 @@
                     </div>
 
                 </div>
+
+                {{-- Badge filter aktif --}}
+                @php
+                    $activeFilters = array_filter([
+                        'Angkatan'  => request('angkatan')  ? 'Angkatan ' . request('angkatan')  : null,
+                        'Tahun'     => request('tahun'),
+                        'Kelompok'  => request('kelompok')  ? 'Kelompok ' . request('kelompok')  : null,
+                        'Kategori'  => request('kategori'),
+                        'Wilayah'   => request('wilayah'),
+                        'Cari'      => request('search'),
+                    ]);
+                @endphp
+                @if(count($activeFilters))
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                        @foreach($activeFilters as $label => $val)
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-normal" style="font-size:.78rem;">
+                                <i class="fas fa-check-circle me-1" style="font-size:.65rem;"></i>
+                                {{ $label }}: {{ $val }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+
             </form>
         </div>
     </div>
@@ -326,6 +381,23 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
+    // ── Toggle wilayah ────────────────────────────────────────
+    const filterKategori       = document.getElementById('filterKategori');
+    const filterWilayahWrapper = document.getElementById('filterWilayahWrapper');
+    const filterWilayah        = document.getElementById('filterWilayah');
+
+    if (filterKategori) {
+        filterKategori.addEventListener('change', function () {
+            if (this.value === 'FASILITASI') {
+                filterWilayahWrapper.style.display = '';
+            } else {
+                filterWilayahWrapper.style.display = 'none';
+                filterWilayah.value = '';
+            }
+        });
+    }
+
+    // ── Modal detail & total ──────────────────────────────────
     const modalDetail = new bootstrap.Modal(document.getElementById('modalDetail'));
     const modalTotal  = new bootstrap.Modal(document.getElementById('modalTotal'));
 
@@ -607,5 +679,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     .total-val   { color:white; font-size:1.75rem; font-weight:800; line-height:1.1; }
     .total-label { color:rgba(255,255,255,.75); font-size:.72rem; font-weight:600; letter-spacing:.5px; }
+
+    /* Filter wilayah input */
+    #filterWilayahWrapper .form-control-sm { border-color: rgba(40,84,150,.35); }
+    #filterWilayahWrapper .form-control-sm:focus { border-color: #285496; box-shadow: 0 0 0 .15rem rgba(40,84,150,.15); }
 </style>
 @endsection

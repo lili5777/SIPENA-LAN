@@ -49,12 +49,12 @@ class ExportNilaiController extends Controller
     // =========================================================
     public function index(Request $request)
     {
-        $angkatanRomawi  = $this->getRomawList();
-        $tahunList       = $this->getTahunList();
-        $kelompokList    = range(1, 10);
-        $jenisPelatihan  = JenisPelatihan::orderBy('nama_pelatihan')->get();
+        $angkatanRomawi = $this->getRomawList();
+        $tahunList      = $this->getTahunList();
+        $kelompokList   = range(1, 10);
+        $jenisPelatihan = JenisPelatihan::orderBy('nama_pelatihan')->get();
 
-        // Jika jenis_pelatihan sudah dipilih, ambil jenis nilai untuk preview info
+        // Jika jenis_pelatihan sudah dipilih, ambil jenis nilai untuk preview
         $jenisNilaiList = collect();
         if ($request->filled('jenis_pelatihan')) {
             $jp = JenisPelatihan::find($request->jenis_pelatihan);
@@ -76,6 +76,9 @@ class ExportNilaiController extends Controller
         ));
     }
 
+    // =========================================================
+    // PREVIEW — AJAX preview struktur kolom
+    // =========================================================
     public function preview(Request $request)
     {
         $jp = JenisPelatihan::find($request->jenis_pelatihan);
@@ -83,7 +86,8 @@ class ExportNilaiController extends Controller
 
         $list = JenisNilai::where('id_jenis_pelatihan', $jp->id)
             ->with(['indikatorNilai' => fn($q) => $q->orderBy('id')])
-            ->orderBy('id')->get();
+            ->orderBy('id')
+            ->get();
 
         return response()->json(['jenis_nilai_list' => $list]);
     }
@@ -107,10 +111,23 @@ class ExportNilaiController extends Controller
         $kelompok = $request->input('kelompok');
         $search   = $request->input('search');
 
+        // ── Filter baru ───────────────────────────────────────
+        $kategori = $request->input('kategori');
+        // wilayah hanya relevan saat kategori FASILITASI
+        $wilayah  = ($kategori === 'FASILITASI') ? $request->input('wilayah') : null;
+
         $fileName = 'rekap-nilai-' . str($jp->nama_pelatihan)->slug() . '-' . now()->format('Ymd-His') . '.xlsx';
 
         return Excel::download(
-            new NilaiPesertaExport($jp->id, $angkatan, $tahun, $kelompok, $search),
+            new NilaiPesertaExport(
+                $jp->id,
+                $angkatan,
+                $tahun,
+                $kelompok,
+                $search,
+                $kategori,   // ← baru
+                $wilayah     // ← baru
+            ),
             $fileName
         );
     }
