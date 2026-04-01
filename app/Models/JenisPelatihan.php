@@ -42,4 +42,9 @@ class JenisPelatihan extends Model
     {
         return $this->hasMany(Gelombang::class, 'id_jenis_pelatihan');
     }
+
+     public function jenisNilai()
+    {
+        return $this->hasMany(JenisNilai::class, 'id_jenis_pelatihan');
+    }
 }

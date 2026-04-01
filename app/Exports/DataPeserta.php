@@ -81,7 +81,8 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'peserta.kepegawaianPeserta.kabupaten',
             'angkatan',
             'pesertaMentor.mentor',
-            'jenisPelatihan'
+            'jenisPelatihan',
+            'aksiPerubahan',
         ])->where('status_pendaftaran', 'Diterima');
 
         // Apply filters jika ada - berdasarkan nama, bukan ID
@@ -157,6 +158,14 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
 
     public function headings(): array
     {
+        $jenis = strtoupper(trim($this->jenisPelatihan ?? ''));
+
+        $labelJudul = match(true) {
+            $jenis === 'PKN TK II'           => 'JUDUL PROYEK PERUBAHAN',
+            $jenis === 'LATSAR'              => 'JUDUL AKTUALISASI',
+            in_array($jenis, ['PKA', 'PKP']) => 'JUDUL AKSI PERUBAHAN',
+            default                          => 'JUDUL', // jika filter kosong / semua jenis
+        };
         return [
             'NO',
             'JENIS PELATIHAN',
@@ -206,6 +215,7 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             'PANGKAT MENTOR',
             'EMAIL MENTOR',
             'NOMOR HP MENTOR',
+            $labelJudul,
         ];
     }
 
@@ -268,9 +278,19 @@ class DataPeserta implements FromCollection, WithHeadings, WithMapping, WithStyl
             $mentor->pangkat ?? '-',
             $mentor->email_mentor ?? '-',
             $mentor->nomor_hp_mentor ?? '-',
+            $this->getJudulAksiPerubahan($pendaftaran), 
         ];
     }
 
+    private function getJudulAksiPerubahan($pendaftaran): string
+    {
+        $aksi = is_iterable($pendaftaran->aksiPerubahan)
+            ? $pendaftaran->aksiPerubahan->first()
+            : $pendaftaran->aksiPerubahan;
+
+        return $aksi->judul ?? '-';
+    }
+    
     public function columnFormats(): array
     {
         return [

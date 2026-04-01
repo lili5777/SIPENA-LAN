@@ -22,6 +22,7 @@ class Kelompok extends Model
         'id_penguji',
         'id_evaluator',
         'keterangan',
+        'link_laporan', // ✅ tambahan
     ];
 
     protected $casts = [

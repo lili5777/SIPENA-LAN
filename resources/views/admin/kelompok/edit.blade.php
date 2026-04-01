@@ -124,6 +124,8 @@
                                 </select>
                             </div>
 
+                            {{-- ✅ Penguji: hanya tampil untuk admin & evaluator --}}
+                            @if(in_array(auth()->user()->role->name ?? '', ['admin', 'evaluator']))
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Penguji</label>
                                 <select name="id_penguji" class="form-select">
@@ -135,6 +137,17 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @else
+                            {{-- Tampilkan nama penguji saja jika bukan admin/evaluator --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Penguji</label>
+                                <input type="text" class="form-control" readonly
+                                    value="{{ $kelompok->penguji?->nama ?? '-' }}">
+                                <small class="text-muted">Hanya admin/evaluator yang dapat mengubah penguji</small>
+                                {{-- Kirim nilai lama agar tidak berubah saat form disubmit --}}
+                                <input type="hidden" name="id_penguji" value="{{ $kelompok->id_penguji }}">
+                            </div>
+                            @endif
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Evaluator</label>
@@ -146,6 +159,39 @@
                                         </option>
                                     @endforeach
                                 </select>
+                            </div>
+
+                            <div class="col-12"><hr class="my-1"><p class="text-muted small fw-semibold mb-0">Dokumen</p></div>
+
+                            {{-- ✅ Field link_laporan --}}
+                            <div class="col-12">
+                                <label for="link_laporan" class="form-label fw-semibold">
+                                    <i class="fas fa-link me-1" style="color:#285496;"></i>
+                                    Link Laporan / Dokumen
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="fas fa-link text-muted"></i>
+                                    </span>
+                                    <input type="url" name="link_laporan" id="link_laporan"
+                                        class="form-control @error('link_laporan') is-invalid @enderror"
+                                        placeholder="https://drive.google.com/..."
+                                        value="{{ old('link_laporan', $kelompok->link_laporan) }}">
+                                    @error('link_laporan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                @if($kelompok->link_laporan)
+                                    <div class="mt-1">
+                                        <small class="text-muted">Link saat ini: </small>
+                                        <a href="{{ $kelompok->link_laporan }}" target="_blank" rel="noopener"
+                                            class="small text-primary">
+                                            <i class="fas fa-external-link-alt me-1"></i>
+                                            {{ Str::limit($kelompok->link_laporan, 60) }}
+                                        </a>
+                                    </div>
+                                @endif
+                                <small class="text-muted">
+                                    Opsional — link Google Drive, OneDrive, atau dokumen lainnya
+                                </small>
                             </div>
 
                             <div class="col-12">

@@ -66,4 +66,19 @@ class Peserta extends Model
     {
         return $this->hasMany(LogAktivitas::class, 'id_peserta');
     }
+
+    public function nilaiPeserta()
+    {
+        return $this->hasMany(NilaiPeserta::class, 'id_peserta');
+    }
+    
+    public function catatanNilai()
+    {
+        return $this->hasMany(CatatanNilai::class, 'id_peserta');
+    }
+    
+    public function kelompok()
+    {
+        return $this->belongsToMany(Kelompok::class, 'kelompok_pesertas', 'id_peserta', 'id_kelompok');
+    }
 }

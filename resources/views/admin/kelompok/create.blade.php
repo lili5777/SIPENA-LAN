@@ -44,7 +44,6 @@
                         @csrf
 
                         <div class="row g-3">
-                            <!-- Jenis Pelatihan -->
                             <div class="col-md-6">
                                 <label for="id_jenis_pelatihan" class="form-label fw-semibold">
                                     Jenis Pelatihan <span class="text-danger">*</span>
@@ -61,7 +60,6 @@
                                 @error('id_jenis_pelatihan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
-                            <!-- Angkatan -->
                             <div class="col-md-6">
                                 <label for="id_angkatan" class="form-label fw-semibold">
                                     Angkatan <span class="text-danger">*</span>
@@ -78,7 +76,6 @@
                                 @error('id_angkatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
-                            <!-- Nama Kelompok -->
                             <div class="col-md-8">
                                 <label for="nama_kelompok" class="form-label fw-semibold">
                                     Nama Kelompok <span class="text-danger">*</span>
@@ -90,7 +87,6 @@
                                 @error('nama_kelompok')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
-                            <!-- Tahun -->
                             <div class="col-md-4">
                                 <label for="tahun" class="form-label fw-semibold">
                                     Tahun <span class="text-danger">*</span>
@@ -104,7 +100,6 @@
 
                             <div class="col-12"><hr class="my-1"><p class="text-muted small fw-semibold mb-0">Pembimbing & Penguji</p></div>
 
-                            <!-- Mentor -->
                             <div class="col-md-6">
                                 <label for="id_mentor" class="form-label fw-semibold">Mentor</label>
                                 <select name="id_mentor" id="id_mentor" class="form-select @error('id_mentor') is-invalid @enderror">
@@ -118,7 +113,6 @@
                                 @error('id_mentor')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
-                            <!-- Coach -->
                             <div class="col-md-6">
                                 <label for="id_coach" class="form-label fw-semibold">Coach</label>
                                 <select name="id_coach" id="id_coach" class="form-select @error('id_coach') is-invalid @enderror">
@@ -132,7 +126,8 @@
                                 @error('id_coach')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
-                            <!-- Penguji -->
+                            {{-- ✅ Penguji: hanya tampil untuk admin & evaluator --}}
+                            @if(in_array(auth()->user()->role->name ?? '', ['admin', 'evaluator']))
                             <div class="col-md-6">
                                 <label for="id_penguji" class="form-label fw-semibold">Penguji</label>
                                 <select name="id_penguji" id="id_penguji" class="form-select @error('id_penguji') is-invalid @enderror">
@@ -145,8 +140,8 @@
                                 </select>
                                 @error('id_penguji')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
+                            @endif
 
-                            <!-- Evaluator -->
                             <div class="col-md-6">
                                 <label for="id_evaluator" class="form-label fw-semibold">Evaluator</label>
                                 <select name="id_evaluator" id="id_evaluator" class="form-select @error('id_evaluator') is-invalid @enderror">
@@ -160,7 +155,29 @@
                                 @error('id_evaluator')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
-                            <!-- Keterangan -->
+                            <div class="col-12"><hr class="my-1"><p class="text-muted small fw-semibold mb-0">Dokumen</p></div>
+
+                            {{-- ✅ Field link_laporan --}}
+                            <div class="col-12">
+                                <label for="link_laporan" class="form-label fw-semibold">
+                                    <i class="fas fa-link me-1" style="color:#285496;"></i>
+                                    Link Laporan / Dokumen
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="fas fa-link text-muted"></i>
+                                    </span>
+                                    <input type="url" name="link_laporan" id="link_laporan"
+                                        class="form-control @error('link_laporan') is-invalid @enderror"
+                                        placeholder="https://drive.google.com/..."
+                                        value="{{ old('link_laporan') }}">
+                                    @error('link_laporan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <small class="text-muted">
+                                    Opsional — link Google Drive, OneDrive, atau dokumen lainnya yang bisa diakses tim penilai
+                                </small>
+                            </div>
+
                             <div class="col-12">
                                 <label for="keterangan" class="form-label fw-semibold">Keterangan</label>
                                 <textarea name="keterangan" id="keterangan" rows="2"

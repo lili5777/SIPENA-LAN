@@ -21,4 +21,19 @@ class Role extends Model
     {
         return $this->belongsToMany(Permission::class, 'role_permissions');
     }
+
+    public function indikatorNilai()
+    {
+        return $this->belongsToMany(
+            IndikatorNilai::class,
+            'akses_penilaian',
+            'role_id',
+            'id_indikator_nilai'
+        )->withTimestamps();
+    }
+    
+    public function aksesPenilaian()
+    {
+        return $this->hasMany(AksesPenilaian::class, 'role_id');
+    }
 }

@@ -140,29 +140,26 @@ class ExportController extends Controller
     if ($jenisPelatihan) {
         $query->whereHas(
             'jenisPelatihan',
-            fn($q) =>
-            $q->where('nama_pelatihan', $jenisPelatihan)
+            fn($q) => $q->where('nama_pelatihan', $jenisPelatihan)
         );
     }
 
     if ($angkatan) {
         $query->whereHas(
             'angkatan',
-            fn($q) =>
-            $q->where('nama_angkatan', $angkatan)
+            fn($q) => $q->where('nama_angkatan', $angkatan)
         );
     }
 
     if ($tahun) {
         $query->whereHas(
             'angkatan',
-            fn($q) =>
-            $q->where('tahun', $tahun)
+            fn($q) => $q->where('tahun', $tahun)
         );
     }
 
     // =========================
-    // 🔥 FILTER KATEGORI & WILAYAH (OPSIONAL)
+    // 🔥 FILTER KATEGORI & WILAYAH
     // =========================
     if ($kategori === 'PNBP') {
         $query->whereHas('angkatan', function ($q) {
@@ -172,29 +169,61 @@ class ExportController extends Controller
         $query->whereHas('angkatan', function ($q) use ($wilayah) {
             $q->where('kategori', 'FASILITASI');
             if ($wilayah && trim($wilayah) !== '') {
-                // Gunakan LIKE untuk partial match
                 $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
             }
         });
-    } else if ($kategori === 'SEMUA') {
-        // Jika kategori SEMUA, kita tetap bisa filter wilayah jika dipilih
+    } elseif ($kategori === 'SEMUA') {
         if ($wilayah && trim($wilayah) !== '') {
             $query->whereHas('angkatan', function ($q) use ($wilayah) {
-                // Gunakan LIKE untuk partial match
                 $q->where('wilayah', 'like', '%' . trim($wilayah) . '%');
             });
         }
     }
 
     // =========================
-    // 🔥 VALIDASI DATA KOSONG (GLOBAL)
+    // 🔥 VALIDASI DATA KOSONG
     // =========================
     if (!$query->exists()) {
-        return back()->with(
-            'error',
-            'Data peserta tidak ditemukan sesuai filter yang dipilih.'
-        );
+        return back()->with('error', 'Data peserta tidak ditemukan sesuai filter yang dipilih.');
     }
+
+    // =========================
+    // 🔥 HELPER SORTING (dipakai kedua template)
+    // =========================
+    $sortingCallback = function ($a, $b) {
+        // --- Konversi romawi ke desimal ---
+        $romanToDecimal = function ($roman) {
+            $map = [
+                'I' => 1, 'V' => 5,  'X' => 10,  'L' => 50,
+                'C' => 100, 'D' => 500, 'M' => 1000
+            ];
+            $roman  = strtoupper(trim($roman));
+            $result = 0;
+            $prev   = 0;
+            for ($i = strlen($roman) - 1; $i >= 0; $i--) {
+                $cur     = $map[$roman[$i]] ?? 0;
+                $result += ($cur < $prev) ? -$cur : $cur;
+                $prev    = $cur;
+            }
+            return $result;
+        };
+
+        // 1️⃣ Angkatan (romawi ascending)
+        $angkatanA = $romanToDecimal($a->angkatan->nama_angkatan ?? '');
+        $angkatanB = $romanToDecimal($b->angkatan->nama_angkatan ?? '');
+        if ($angkatanA !== $angkatanB) return $angkatanA <=> $angkatanB;
+
+        // 2️⃣ Kategori: PNBP duluan, FASILITASI belakang
+        $kategoriOrder = ['PNBP' => 0, 'FASILITASI' => 1];
+        $katA = $kategoriOrder[strtoupper($a->angkatan->kategori ?? '')] ?? 9;
+        $katB = $kategoriOrder[strtoupper($b->angkatan->kategori ?? '')] ?? 9;
+        if ($katA !== $katB) return $katA <=> $katB;
+
+        // 3️⃣ NDH ascending, null/kosong paling akhir
+        $ndhA = is_numeric($a->peserta->ndh ?? null) ? (int) $a->peserta->ndh : 9999;
+        $ndhB = is_numeric($b->peserta->ndh ?? null) ? (int) $b->peserta->ndh : 9999;
+        return $ndhA <=> $ndhB;
+    };
 
     // =========================
     // 4️⃣ NAMA FILE
@@ -225,99 +254,40 @@ class ExportController extends Controller
             return back()->with('error', 'Template Smart Bangkom tidak ditemukan.');
         }
 
-        $data = $query->get();
-
-        // =========================
-        // 🔥 FUNGSI KONVERSI ANGKA ROMAWI KE DESIMAL
-        // =========================
-        $romanToDecimal = function ($roman) {
-            $romanNumerals = [
-                'I' => 1, 'V' => 5, 'X' => 10, 'L' => 50,
-                'C' => 100, 'D' => 500, 'M' => 1000
-            ];
-            
-            $result = 0;
-            $prevValue = 0;
-            
-            // Hapus spasi dan uppercase
-            $roman = strtoupper(trim($roman));
-            
-            for ($i = strlen($roman) - 1; $i >= 0; $i--) {
-                $currentValue = $romanNumerals[$roman[$i]] ?? 0;
-                
-                if ($currentValue < $prevValue) {
-                    $result -= $currentValue;
-                } else {
-                    $result += $currentValue;
-                }
-                
-                $prevValue = $currentValue;
-            }
-            
-            return $result;
-        };
-
-        // =========================
-        // 🔥 SORTING DATA
-        // =========================
-        $data = $data->sort(function ($a, $b) use ($romanToDecimal) {
-            // 1. Sorting berdasarkan angkatan (romawi terkecil)
-            $angkatanA = $romanToDecimal($a->angkatan->nama_angkatan ?? '');
-            $angkatanB = $romanToDecimal($b->angkatan->nama_angkatan ?? '');
-            
-            if ($angkatanA != $angkatanB) {
-                return $angkatanA <=> $angkatanB;
-            }
-            
-            // 2. Prioritaskan kategori PNBP
-            $kategoriA = strtoupper($a->angkatan->kategori ?? '');
-            $kategoriB = strtoupper($b->angkatan->kategori ?? '');
-            
-            if ($kategoriA === 'PNBP' && $kategoriB !== 'PNBP') {
-                return -1;
-            }
-            if ($kategoriA !== 'PNBP' && $kategoriB === 'PNBP') {
-                return 1;
-            }
-            
-            // 3. Sorting berdasarkan NIP/NRP terkecil
-            $nipA = $a->peserta->nip_nrp ?? '';
-            $nipB = $b->peserta->nip_nrp ?? '';
-            
-            return strcmp($nipA, $nipB);
-        });
+        // Ambil data lalu sort
+        $data = $query->get()->sort($sortingCallback)->values();
 
         $spreadsheet = IOFactory::load($templatePath);
-        $sheet = $spreadsheet->getActiveSheet();
+        $sheet       = $spreadsheet->getActiveSheet();
 
-        // mulai baris ke-3
+        // Mulai dari baris ke-3
         $row = 3;
 
         foreach ($data as $item) {
             $p = $item->peserta;
             $k = $p->kepegawaianPeserta;
 
-            $gender = match (strtolower($p->jenis_kelamin)) {
-                'perempuan', 'wanita' => 'Wanita',
-                'laki-laki', 'laki laki', 'pria' => 'Pria',
-                default => '',
+            $gender = match (strtolower($p->jenis_kelamin ?? '')) {
+                'perempuan', 'wanita'          => 'Wanita',
+                'laki-laki', 'laki laki','pria' => 'Pria',
+                default                         => '',
             };
 
-            // 🔥 NORMALISASI AGAMA
+            // Normalisasi agama
             $agama = match (strtolower(trim($p->agama ?? ''))) {
                 'kristen' => 'Kristen Protestan',
-                'katolik' => 'Kristen Katolik',
-                default => $p->agama,
+                'katolik'  => 'Kristen Katolik',
+                default    => $p->agama,
             };
 
-            // 🔥 GOLONGAN RUANG HURUF KAPITAL
+            // Golongan ruang huruf kapital
             $golonganRuang = strtoupper($k->golongan_ruang ?? '');
 
-            // 🔥 POLA PENYELENGGARAAN BERDASARKAN KATEGORI ANGKATAN
+            // Pola penyelenggaraan berdasarkan kategori angkatan
             $polaPenyelenggaraan = match (strtoupper($item->angkatan->kategori ?? '')) {
-                'PNBP' => 'Pengiriman/PNBP',
+                'PNBP'      => 'Pengiriman/PNBP',
                 'FASILITASI' => 'Fasilitasi',
-                default => 'Pengiriman/PNBP',
+                default      => 'Pengiriman/PNBP',
             };
 
             $sheet->setCellValue("A$row", $p->nama_lengkap);
@@ -362,8 +332,11 @@ class ExportController extends Controller
     // =========================
     aktifitas('Mengekspor Data Peserta - Template Form Registrasi');
 
+    // Ambil data lalu sort, kemudian lempar ke Export class
+    $data = $query->get()->sort($sortingCallback)->values();
+
     return Excel::download(
-        new DataPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah),
+        new DataPeserta($jenisPelatihan, $angkatan, $tahun, $kategori, $wilayah, $data),
         $fileName
     );
 }

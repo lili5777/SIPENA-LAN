@@ -5,26 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class DetailIndikator extends Model
+class AksesPenilaian extends Model
 {
     use HasFactory;
 
-    protected $table = 'detail_indikator';
+    protected $table = 'akses_penilaian';
 
     protected $fillable = [
         'id_indikator_nilai',
-        'level',
-        'uraian',
-        'range',
+        'role_id',
     ];
 
-    protected $casts = [
-        'level' => 'integer',
-    ];
-
-    // Relasi ke IndikatorNilai (belongsTo)
+    // Relasi ke IndikatorNilai
     public function indikatorNilai()
     {
         return $this->belongsTo(IndikatorNilai::class, 'id_indikator_nilai');
+    }
+
+    // Relasi ke Role
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 }

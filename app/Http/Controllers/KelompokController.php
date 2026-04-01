@@ -76,8 +76,10 @@ class KelompokController extends Controller
             'id_penguji'         => 'nullable|exists:pengujis,id',
             'id_evaluator'       => 'nullable|exists:evaluators,id',
             'keterangan'         => 'nullable|string',
+            'link_laporan'       => 'nullable|url|max:2048', // ✅ tambahan
         ], [
             'nama_kelompok.unique' => 'Nama kelompok "' . $request->nama_kelompok . '" sudah ada pada angkatan dan tahun yang sama.',
+            'link_laporan.url'     => 'Link laporan harus berupa URL yang valid (contoh: https://drive.google.com/...)',
         ]);
 
         Kelompok::create($validated);
@@ -123,8 +125,10 @@ class KelompokController extends Controller
             'id_penguji'         => 'nullable|exists:pengujis,id',
             'id_evaluator'       => 'nullable|exists:evaluators,id',
             'keterangan'         => 'nullable|string',
+            'link_laporan'       => 'nullable|url|max:2048', // ✅ tambahan
         ], [
             'nama_kelompok.unique' => 'Nama kelompok "' . $request->nama_kelompok . '" sudah ada pada angkatan dan tahun yang sama.',
+            'link_laporan.url'     => 'Link laporan harus berupa URL yang valid (contoh: https://drive.google.com/...)',
         ]);
 
         $kelompok->update($validated);

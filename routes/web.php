@@ -9,19 +9,27 @@ use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Admin\Master\PesertaController;
 use App\Http\Controllers\Admin\Mentor\MentorController;
+use App\Http\Controllers\NilaiController;
 use App\Http\Controllers\Admin\PejabatController;
 use App\Http\Controllers\Admin\VisiMisiController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AksesPenilaianController;
 use App\Http\Controllers\AksiPerubahanController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DetailIndikatorController;
+use App\Http\Controllers\ExportNilaiController;
 use App\Http\Controllers\GelombangController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\IndikatorNilaiController;
+use App\Http\Controllers\IndikatorPenilaianController;
+use App\Http\Controllers\JenisNilaiController;
 use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\UploadNilaiController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -74,6 +82,22 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/preview-drive', [AdminController::class, 'preview'])->name('drive.preview');
     Route::get('/download-drive', [AdminController::class, 'download'])->name('drive.download');
+
+    // ── Penilaian Mandiri (peserta) ───────────────────────────────
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/penilaian-mandiri',        [UploadNilaiController::class, 'index']) ->name('penilaian-mandiri.index');
+    Route::post('/penilaian-mandiri',       [UploadNilaiController::class, 'store']) ->name('penilaian-mandiri.store');
+    });
+ 
+    // ── Verifikasi Nilai (pic / evaluator / admin) ────────────────
+    Route::middleware(['auth'])->prefix('verifikasi-nilai')->name('verifikasi-nilai.')->group(function () {
+    Route::get('/',                [UploadNilaiController::class, 'indexVerifikasi'])->name('index');
+    Route::post('/{id}/approve',   [UploadNilaiController::class, 'approve'])        ->name('approve');
+    Route::post('/{id}/reject',    [UploadNilaiController::class, 'reject'])         ->name('reject');
+    Route::get('/{id}/file',       [UploadNilaiController::class, 'previewFile'])    ->name('file');
+    });
+
+    Route::get('/upload-nilai/{id}/file', [UploadNilaiController::class, 'getFile'])->name('upload-nilai.file');
 
 
     // Halaman form export foto
@@ -175,30 +199,22 @@ Route::middleware('auth')->group(function () {
     });
 
     // Master Kelompok Routes
-    Route::prefix('kelompok')->name('kelompok.')->group(function () {
+   Route::prefix('kelompok')->name('kelompok.')->group(function () {
 
-        // READ
+        // ✅ Static routes DULU (tanpa parameter)
         Route::get('/', [KelompokController::class, 'index'])->name('index')->middleware('permission:kelompok.read');
-        Route::get('/{kelompok}', [KelompokController::class, 'show'])->name('show')->middleware('permission:kelompok.read');
-
-        // CREATE
         Route::get('/create', [KelompokController::class, 'create'])->name('create')->middleware('permission:kelompok.create');
         Route::post('/', [KelompokController::class, 'store'])->name('store')->middleware('permission:kelompok.create');
+        Route::get('/api/angkatan-by-jenis', [KelompokController::class, 'getAngkatanByJenis'])->name('angkatan-by-jenis')->middleware('permission:kelompok.read');
 
-        // UPDATE
+        // ✅ Wildcard routes BELAKANGAN (dengan parameter {kelompok})
+        Route::get('/{kelompok}', [KelompokController::class, 'show'])->name('show')->middleware('permission:kelompok.read');
         Route::get('/{kelompok}/edit', [KelompokController::class, 'edit'])->name('edit')->middleware('permission:kelompok.update');
         Route::put('/{kelompok}', [KelompokController::class, 'update'])->name('update')->middleware('permission:kelompok.update');
-
-        // DELETE
         Route::delete('/{kelompok}', [KelompokController::class, 'destroy'])->name('destroy')->middleware('permission:kelompok.delete');
-
-        // Kelola Peserta
         Route::get('/{kelompok}/kelola-peserta', [KelompokController::class, 'kelolaPeserta'])->name('kelola-peserta')->middleware('permission:kelompok.update');
         Route::post('/{kelompok}/tambah-peserta', [KelompokController::class, 'tambahPeserta'])->name('tambah-peserta')->middleware('permission:kelompok.update');
         Route::post('/{kelompok}/lepas-peserta', [KelompokController::class, 'lepasPeserta'])->name('lepas-peserta')->middleware('permission:kelompok.update');
-
-        // API Helper
-        Route::get('/api/angkatan-by-jenis', [KelompokController::class, 'getAngkatanByJenis'])->name('angkatan-by-jenis')->middleware('permission:kelompok.read');
     });
 
 
@@ -255,9 +271,66 @@ Route::middleware('auth')->group(function () {
     Route::get('/mentor/{id}/peserta', [MentorController::class, 'getPeserta'])->name('mentor.peserta');
     Route::get('mentor/preview-duplicates', [MentorController::class, 'previewDuplicates'])->name('mentor.previewDuplicates');
     Route::post('mentor/cleanup-duplicates', [MentorController::class, 'cleanupDuplicates'])->name('mentor.cleanupDuplicates');
+
+
+    Route::prefix('indikator-penilaian')->name('indikator-penilaian.')->group(function () {
+
+    // Step 1: Pilih Jenis Pelatihan
+    Route::get('/', [IndikatorPenilaianController::class, 'index'])->name('index');
+
+    // Step 2: Jenis Nilai (nested under jenis pelatihan)
+    Route::prefix('{jenisPelatihan}/jenis-nilai')->name('jenis-nilai.')->group(function () {
+        Route::get('/',        [JenisNilaiController::class, 'index'])->name('index');
+        Route::post('/',       [JenisNilaiController::class, 'store'])->name('store');
+        Route::put('/{id}',    [JenisNilaiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [JenisNilaiController::class, 'destroy'])->name('destroy');
+    });
+
+    // Step 3: Indikator Nilai
+    Route::prefix('{jenisPelatihan}/jenis-nilai/{jenisNilai}/indikator')->name('indikator.')->group(function () {
+        Route::get('/',        [IndikatorNilaiController::class, 'index'])->name('index');
+        Route::post('/',       [IndikatorNilaiController::class, 'store'])->name('store');
+        Route::put('/{id}',    [IndikatorNilaiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [IndikatorNilaiController::class, 'destroy'])->name('destroy');
+    });
+
+    // Step 4: Detail Indikator
+    Route::prefix('{jenisPelatihan}/jenis-nilai/{jenisNilai}/indikator/{indikatorNilai}/detail')->name('detail-indikator.')->group(function () {
+        Route::get('/',        [DetailIndikatorController::class, 'index'])->name('index');
+        Route::post('/',       [DetailIndikatorController::class, 'store'])->name('store');
+        Route::put('/{id}',    [DetailIndikatorController::class, 'update'])->name('update');
+        Route::delete('/{id}', [DetailIndikatorController::class, 'destroy'])->name('destroy');
+    });
+
+    
+});
+
+    Route::prefix('nilai')->name('nilai.')->middleware(['auth'])->group(function () {
+    Route::get('/{jenis}',              [NilaiController::class, 'index'])        ->name('index');
+    Route::get('/{jenis}/rekap',        [NilaiController::class, 'rekap'])        ->name('rekap');
+    Route::get('/get-data/{pesertaId}', [NilaiController::class, 'getData'])      ->name('getData');
+    Route::post('/simpan',              [NilaiController::class, 'simpanNilai'])  ->name('simpan');
+    Route::post('/simpan-catatan',      [NilaiController::class, 'simpanCatatan'])->name('simpanCatatan');
+    });
+
+    Route::prefix('akses-penilaian')->name('akses-penilaian.')->middleware(['auth'])->group(function () {
+    Route::get('/',                         [AksesPenilaianController::class, 'index'])      ->name('index');
+    Route::get('/{jenisPelatihanId}',       [AksesPenilaianController::class, 'kelola'])     ->name('kelola');
+    Route::post('/{jenisPelatihanId}/bulk', [AksesPenilaianController::class, 'simpanBulk'])->name('simpan-bulk');
+    Route::post('/reset',                   [AksesPenilaianController::class, 'reset'])      ->name('reset');
+    Route::post('/simpan',                  [AksesPenilaianController::class, 'simpan'])     ->name('simpan');
+    });
     
 
     // Export routes
+
+    // Export Nilai Peserta
+    Route::get('/admin/export/nilai-peserta',          [ExportNilaiController::class, 'index'])
+        ->name('admin.export.nilaipeserta');
+    Route::get('/admin/export/nilai-peserta/download', [ExportNilaiController::class, 'export'])
+        ->name('admin.export.nilai.download');
+    Route::get('/admin/export/nilai-peserta/preview', [ExportNilaiController::class, 'preview'])
+        ->name('admin.export.nilai.preview');
     
     Route::prefix('admin/export')->name('admin.export.')->group(function () {
         Route::get('/data-peserta', [ExportController::class, 'index'])->name('datapeserta')->middleware('permission:export.data');

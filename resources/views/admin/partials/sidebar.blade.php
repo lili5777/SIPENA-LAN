@@ -17,8 +17,55 @@
         default      => null,
     };
 
-    $isAdmin = in_array($user->role->name, ['admin', 'super admin']);
-    $isPic   = $user->role->name === 'pic';
+    $isAdmin     = in_array($user->role->name, ['admin', 'super admin']);
+    $isEvaluator = $user->role->name === 'evaluator';
+    $isPic       = $user->role->name === 'pic';
+    $isCoach     = $user->role->name === 'coach';
+    $isPenguji   = $user->role->name === 'penguji';
+
+    // ── Tentukan jenis pelatihan mana yang boleh muncul di menu nilai ──
+    // Admin & Evaluator: semua tampil (null = tidak dibatasi)
+    // Coach, Penguji, PIC: hanya yang ada kaitannya
+
+    $jenisPelatihanNilai = null; // null = semua tampil (admin/evaluator)
+
+    if (!$isAdmin && !$isEvaluator) {
+
+        $jenisPelatihanNilai = collect();
+
+        if ($isCoach && $user->coach_id) {
+            // Coach: tampilkan jenis pelatihan dari kelompok yang dia pegang
+            $jpIds = \App\Models\Kelompok::where('id_coach', $user->coach_id)
+                ->whereNotNull('id_jenis_pelatihan')
+                ->pluck('id_jenis_pelatihan')
+                ->unique();
+            $jenisPelatihanNilai = $jenisPelatihanNilai->merge($jpIds);
+        }
+
+        if ($isPenguji && $user->penguji_id) {
+            // Penguji: tampilkan jenis pelatihan dari kelompok yang dia uji
+            $jpIds = \App\Models\Kelompok::where('id_penguji', $user->penguji_id)
+                ->whereNotNull('id_jenis_pelatihan')
+                ->pluck('id_jenis_pelatihan')
+                ->unique();
+            $jenisPelatihanNilai = $jenisPelatihanNilai->merge($jpIds);
+        }
+
+        if ($isPic) {
+            // PIC: tampilkan jenis pelatihan dari angkatan yang ditugaskan
+            $jpIds = $user->picPesertas->pluck('jenispelatihan_id')->unique();
+            $jenisPelatihanNilai = $jenisPelatihanNilai->merge($jpIds);
+        }
+
+        $jenisPelatihanNilai = $jenisPelatihanNilai->unique()->values();
+    }
+
+    // Helper: cek apakah jenis pelatihan X boleh tampil di menu nilai
+    // id: 1=PKN, 2=LATSAR, 3=PKA, 4=PKP
+    $bolehNilai = fn(int $id) => $jenisPelatihanNilai === null
+        || $jenisPelatihanNilai->contains($id);
+
+    $isPeserta = $user->role->name === 'user' && $user->peserta_id;
 @endphp
 
 <aside class="sidebar" id="sidebar">
@@ -102,7 +149,7 @@
                         <a href="{{ route('kelompok.index') }}" class="submenu-link">
                             <i class="fas fa-users me-2"></i> Kelompok
                         </a>
-                    @endif               
+                    @endif
 
                     @unless($isPic)
                         <a href="{{ route('visi-misi.index') }}" class="submenu-link">
@@ -180,6 +227,9 @@
                     <a href="{{ route('admin.export.komposisipeserta') }}" class="submenu-link">
                         <i class="fas fa-file-invoice me-2"></i> Komposisi Peserta
                     </a>
+                    <a href="{{ route('admin.export.nilaipeserta') }}" class="submenu-link">
+                        <i class="fas fa-star-half-alt me-2"></i>Nilai Peserta
+                    </a>
                     <a href="{{ route('admin.export.jadwal-seminar.index') }}" class="submenu-link">
                         <i class="fas fa-calendar-alt me-2"></i> Jadwal Seminar
                     </a>
@@ -193,13 +243,67 @@
             </div>
         @endif
 
+        @if($isPeserta)
+            <div class="menu-item">
+                <a href="{{ route('penilaian-mandiri.index') }}" class="menu-link">
+                    <i class="fas fa-user-edit menu-icon"></i>
+                    <span class="menu-text">Penilaian Saya</span>
+                </a>
+            </div>
+        @endif
+
         {{-- Penilaian --}}
         @if($user->hasPermission('menu.penilaian'))
-            <div class="menu-item">
+            <div class="menu-item has-submenu">
                 <a href="#" class="menu-link">
                     <i class="fas fa-clipboard-list menu-icon"></i>
                     <span class="menu-text">Penilaian</span>
+                    <i class="fas fa-chevron-right menu-arrow"></i>
                 </a>
+                <div class="submenu">
+
+                    {{-- Indikator & Akses: hanya admin & evaluator --}}
+                    @if($isAdmin || $isEvaluator)
+                        <a href="{{ route('indikator-penilaian.index') }}" class="submenu-link">
+                            <i class="fas fa-list-check me-2"></i> Indikator Penilaian
+                        </a>
+                        <a href="{{ route('akses-penilaian.index') }}" class="submenu-link">
+                            <i class="fas fa-shield-alt me-2"></i> Akses Penilaian
+                        </a>
+                    @endif
+
+                    @if(in_array(auth()->user()->role->name ?? '', ['admin', 'evaluator', 'pic']))
+                        <a href="{{ route('verifikasi-nilai.index') }}" class="submenu-link">
+                            <i class="fas fa-clipboard-check me-2"></i> Verifikasi Nilai
+                        </a>
+                    @endif
+
+                    {{-- Menu nilai per jenis pelatihan: tampil sesuai kaitan role --}}
+                    @if($bolehNilai(2))
+                        <a href="{{ route('nilai.index', ['jenis' => 'latsar']) }}" class="submenu-link">
+                            <i class="fas fa-star me-2"></i> Nilai LATSAR
+                        </a>
+                    @endif
+
+                    @if($bolehNilai(1))
+                        <a href="{{ route('nilai.index', ['jenis' => 'pkn']) }}" class="submenu-link">
+                            <i class="fas fa-star me-2"></i> Nilai PKN TK II
+                        </a>
+                    @endif
+
+                    @if($bolehNilai(3))
+                        <a href="{{ route('nilai.index', ['jenis' => 'pka']) }}" class="submenu-link">
+                            <i class="fas fa-star me-2"></i> Nilai PKA
+                        </a>
+                    @endif
+
+                    @if($bolehNilai(4))
+                        <a href="{{ route('nilai.index', ['jenis' => 'pkp']) }}" class="submenu-link">
+                            <i class="fas fa-star me-2"></i> Nilai PKP
+                        </a>
+                    @endif
+
+                </div>
             </div>
         @endif
 

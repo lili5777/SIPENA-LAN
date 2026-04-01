@@ -98,7 +98,7 @@
             display: table-header-group;
         }
 
-        tr {
+        tbody tr {
             page-break-inside: avoid;
         }
 
@@ -196,15 +196,11 @@
         .keterangan-value {
             flex: 1;
         }
-
-        .page-break {
-            page-break-after: always;
-        }
     </style>
 </head>
 
 <body>
-    <!-- Header akan muncul di setiap halaman -->
+    <!-- Header muncul di setiap halaman -->
     <div class="header">
         <div class="header-content">
             <div class="logo">
@@ -222,7 +218,7 @@
 
     <div class="content">
         <!-- Informasi Sesi -->
-         <div class="info-section">
+        <div class="info-section">
             <div class="info-row">
                 <span class="info-label">HARI/TANGGAL</span>
                 <span class="info-separator">:</span>
@@ -250,7 +246,7 @@
             </div>
         </div>
 
-        <!-- Tabel Peserta -->
+        <!-- Tabel Peserta — satu tabel penuh, DomPDF urus page break -->
         <table class="peserta">
             <thead>
                 <tr>
@@ -263,53 +259,19 @@
                 </tr>
             </thead>
             <tbody>
-                @php
-$perPage = 20;
-$totalPeserta = count($peserta);
-$totalPages = ceil($totalPeserta / $perPage);
-                @endphp
-
-                @for($page = 0; $page < $totalPages; $page++)
-                    @php
-    $start = $page * $perPage;
-    $end = min($start + $perPage, $totalPeserta);
-                    @endphp
-
-                    @for($i = $start; $i < $end; $i++)
-                        <tr>
-                            <td class="no">{{ $i + 1 }}</td>
-                            <td class="nama">
-                                {{ $peserta[$i]['nama'] ?? '' }}<br>
-                                <small>{{ $peserta[$i]['nip'] ?? '' }}</small>
-                            </td>
-                            <td class="ndh"><strong>{{ $peserta[$i]['ndh'] ?? str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</strong>
-                            </td>
-                            <td class="instansi">{{ $peserta[$i]['instansi'] ?? '' }}</td>
-                            <td class="ttd">{{ $i + 1 }}. ............................</td>
-                            <td class="ket"></td>
-                        </tr>
-                    @endfor
-
-                    @if($page < $totalPages - 1)
-                            </tbody>
-                        </table>
-                        <div class="page-break"></div>
-
-                        <!-- Tabel dilanjutkan di halaman berikutnya -->
-                        <table class="peserta">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama/NIP</th>
-                                    <th>NDH</th>
-                                    <th>Instansi</th>
-                                    <th>Tanda Tangan</th>
-                                    <th>Ket.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    @endif
-                @endfor
+                @foreach($peserta as $i => $p)
+                <tr>
+                    <td class="no">{{ $i + 1 }}</td>
+                    <td class="nama">
+                        {{ $p['nama'] ?? '' }}<br>
+                        <small>{{ $p['nip'] ?? '' }}</small>
+                    </td>
+                    <td class="ndh"><strong>{{ $p['ndh'] ?? str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</strong></td>
+                    <td class="instansi">{{ $p['instansi'] ?? '' }}</td>
+                    <td class="ttd">{{ $i + 1 }}. ............................</td>
+                    <td class="ket"></td>
+                </tr>
+                @endforeach
             </tbody>
         </table>
 
@@ -382,8 +344,7 @@ $totalPages = ceil($totalPeserta / $perPage);
                     <span class="keterangan-value">.............. orang</span>
                 </div>
                 <br>
-                <p><strong>Komposisi Peserta {{ $jenis_pelatihan }} Angkatan {{ $angkatan }} Tahun
-                        {{ $tahun }}:</strong></p>
+                <p><strong>Komposisi Peserta {{ $jenis_pelatihan }} Angkatan {{ $angkatan }} Tahun {{ $tahun }}:</strong></p>
                 <div class="keterangan-row">
                     <span class="keterangan-label">- Laki-Laki</span>
                     <span class="keterangan-separator">:</span>
