@@ -70,7 +70,10 @@
                                     @foreach($angkatanList as $ang)
                                         <option value="{{ $ang->id }}"
                                             {{ old('id_angkatan', $kelompok->id_angkatan) == $ang->id ? 'selected' : '' }}>
-                                            {{ $ang->nama_angkatan }} ({{ $ang->tahun }})
+                                            {{ $ang->nama_angkatan }} ({{ $ang->tahun }}) - {{ $ang->kategori }} 
+                                            @if ($ang->kategori == 'FASILITASI')
+                                                ({{ $ang->wilayah }})
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>
