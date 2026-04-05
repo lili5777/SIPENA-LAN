@@ -601,8 +601,15 @@ document.addEventListener('DOMContentLoaded', function () {
             contentEl.classList.remove('d-none');
             contentEl.style.display = 'flex';
 
-            document.getElementById('modalNilaiSubtitle').textContent =
-                jenisNilaiCache.length + ' Jenis Nilai';
+            const aksi = data.aksi_perubahan;
+            let subtitle = jenisNilaiCache.length + ' Jenis Nilai';
+            if (aksi && aksi.judul) {
+                subtitle += ' · 📄 ' + aksi.judul;
+                if (aksi.kategori_aksatika) {
+                    subtitle += ' (' + aksi.kategori_aksatika + ')';
+                }
+            }
+            document.getElementById('modalNilaiSubtitle').textContent = subtitle;
 
             renderJenisNilaiTabs(jenisNilaiCache);
             updateTotalNilai(jenisNilaiCache);

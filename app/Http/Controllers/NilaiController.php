@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AksiPerubahan;
 use App\Models\JenisPelatihan;
 use App\Models\JenisNilai;
 use App\Models\IndikatorNilai;
@@ -362,6 +363,9 @@ class NilaiController extends Controller
             }
 
             $jenisPelatihanId = $pendaftaran->id_jenis_pelatihan;
+            $aksiPerubahan = AksiPerubahan::where('id_pendaftar', $pendaftaran->id)
+            ->select('judul', 'kategori_aksatika')
+            ->first();
             $user             = Auth::user();
             $roleId           = $user->role_id;
             $roleName         = $user->role->name ?? '';
@@ -415,6 +419,7 @@ class NilaiController extends Controller
                 'existing_catatan'   => $existingCatatan,
                 'role_name'          => $roleName,
                 'peserta_milik_user' => $pesertaMilikUser,
+                'aksi_perubahan'     => $aksiPerubahan,
             ]);
 
         } catch (\Throwable $e) {
