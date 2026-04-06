@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
-
 use App\Http\Controllers\Controller;
 use App\Models\Penguji;
 use App\Models\Role;
@@ -11,6 +9,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PengujiExport;
 
 class PengujiController extends Controller
 {
@@ -50,7 +50,7 @@ class PengujiController extends Controller
             $penguji = $query->paginate($perPage)->appends($request->except('page'));
         }
 
-        $all           = Penguji::all();
+        $all             = Penguji::all();
         $totalPenguji    = $all->count();
         $aktifPenguji    = $all->where('status_aktif', true)->count();
         $nonaktifPenguji = $totalPenguji - $aktifPenguji;
@@ -82,14 +82,14 @@ class PengujiController extends Controller
 
         if ($buatAkun) {
             $rules['email']    = 'required|email|max:100|unique:pengujis,email|unique:users,email';
-            $rules['password'] = 'required|string|min:8|confirmed';
+            $rules['password'] = 'required|string|min:5|confirmed';
         }
 
         $request->validate($rules, array_merge($this->messages('penguji'), [
-            'nip.unique'       => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
-            'email.unique'     => 'Email sudah digunakan, gunakan email lain.',
+            'nip.unique'          => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
+            'email.unique'        => 'Email sudah digunakan, gunakan email lain.',
             'password.required'   => 'Password wajib diisi jika membuat akun.',
-            'password.min'        => 'Password minimal 8 karakter.',
+            'password.min'        => 'Password minimal 5 karakter.',
             'password.confirmed'  => 'Konfirmasi password tidak cocok.',
         ]));
 
@@ -113,12 +113,13 @@ class PengujiController extends Controller
             if ($buatAkun) {
                 $role = Role::where('name', 'penguji')->firstOrFail();
                 User::create([
-                    'name'     => $request->nama,
-                    'email'    => $request->email,   // pakai email kontak
-                    'no_telp'  => $request->nomor_hp,
-                    'role_id'  => $role->id,
-                    'penguji_id' => $penguji->id,
-                    'password' => Hash::make($request->password),
+                    'name'           => $request->nama,
+                    'email'          => $request->email,
+                    'no_telp'        => $request->nomor_hp,
+                    'role_id'        => $role->id,
+                    'penguji_id'     => $penguji->id,
+                    'password'       => Hash::make($request->password),
+                    'password_plain' => $request->password,
                 ]);
             }
 
@@ -138,7 +139,7 @@ class PengujiController extends Controller
 
     public function update(Request $request, $id)
     {
-        $penguji    = Penguji::with('user')->findOrFail($id);
+        $penguji  = Penguji::with('user')->findOrFail($id);
         $buatAkun = $request->has('buat_akun');
 
         $rules = [
@@ -155,21 +156,19 @@ class PengujiController extends Controller
         ];
 
         if ($buatAkun) {
-            // Email harus unik di users, kecuali milik user yang sudah terhubung
-            $ignoreUserId = optional($penguji->user)->id;
+            $ignoreUserId   = optional($penguji->user)->id;
             $rules['email'] = [
                 'required', 'email', 'max:100',
                 'unique:pengujis,email,' . $id,
                 \Illuminate\Validation\Rule::unique('users', 'email')->ignore($ignoreUserId),
             ];
-            // Password opsional saat edit (hanya wajib jika diisi)
-            $rules['password'] = 'nullable|string|min:8|confirmed';
+            $rules['password'] = 'nullable|string|min:5|confirmed';
         }
 
         $request->validate($rules, array_merge($this->messages('penguji'), [
-            'nip.unique'      => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
-            'email.unique'    => 'Email sudah digunakan, gunakan email lain.',
-            'password.min'       => 'Password minimal 8 karakter.',
+            'nip.unique'         => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
+            'email.unique'       => 'Email sudah digunakan, gunakan email lain.',
+            'password.min'       => 'Password minimal 5 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]));
 
@@ -193,28 +192,28 @@ class PengujiController extends Controller
                 $role = Role::where('name', 'penguji')->firstOrFail();
 
                 if ($penguji->user) {
-                    // Update akun yang sudah ada
                     $updateData = [
                         'name'    => $request->nama,
                         'email'   => $request->email,
                         'no_telp' => $request->nomor_hp,
                     ];
                     if ($request->filled('password')) {
-                        $updateData['password'] = Hash::make($request->password);
+                        $updateData['password']       = Hash::make($request->password);
+                        $updateData['password_plain'] = $request->password;
                     }
                     $penguji->user->update($updateData);
                 } else {
-                    // Buat akun baru — password wajib jika belum punya akun
                     if (!$request->filled('password')) {
                         throw new \Exception('Password wajib diisi saat membuat akun baru.');
                     }
                     User::create([
-                        'name'     => $request->nama,
-                        'email'    => $request->email,
-                        'no_telp'  => $request->nomor_hp,
-                        'role_id'  => $role->id,
-                        'penguji_id' => $penguji->id,
-                        'password' => Hash::make($request->password),
+                        'name'           => $request->nama,
+                        'email'          => $request->email,
+                        'no_telp'        => $request->nomor_hp,
+                        'role_id'        => $role->id,
+                        'penguji_id'     => $penguji->id,
+                        'password'       => Hash::make($request->password),
+                        'password_plain' => $request->password,
                     ]);
                 }
             }
@@ -253,6 +252,103 @@ class PengujiController extends Controller
             }
             return redirect()->route('penguji.index')->with('error', 'Gagal menghapus penguji: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Export data penguji ke Excel
+     */
+    public function export(Request $request)
+    {
+        $filename = 'data-penguji-' . date('Ymd-His') . '.xlsx';
+        return Excel::download(new PengujiExport($request->all()), $filename);
+    }
+
+    /**
+     * Generate link WhatsApp untuk kirim info akun
+     */
+    public function sendWhatsapp($id)
+    {
+        $penguji = Penguji::with('user')->findOrFail($id);
+
+        if (!$penguji->user) {
+            return response()->json(['success' => false, 'message' => 'Penguji belum memiliki akun login.'], 400);
+        }
+        if (!$penguji->nomor_hp) {
+            return response()->json(['success' => false, 'message' => 'Nomor HP penguji belum diisi.'], 400);
+        }
+
+        // Jika password_plain belum ada, minta generate dulu dari modal
+        if (!$penguji->user->password_plain) {
+            return response()->json([
+                'success'       => false,
+                'need_generate' => true,
+                'message'       => 'Password belum tersimpan. Silakan generate password terlebih dahulu.',
+            ]);
+        }
+
+        $phone  = $this->formatPhone($penguji->nomor_hp);
+        $pesan  = $this->buildWaMessage($penguji->nama, $penguji->user->email, $penguji->user->password_plain);
+        $waLink = 'https://wa.me/' . $phone . '?text=' . rawurlencode($pesan);
+
+        return response()->json(['success' => true, 'link' => $waLink]);
+    }
+
+    /**
+     * Generate password baru, simpan ke DB, lalu return link WA
+     */
+    public function generatePassword(Request $request, $id)
+    {
+        $penguji = Penguji::with('user')->findOrFail($id);
+
+        if (!$penguji->user) {
+            return response()->json(['success' => false, 'message' => 'Penguji belum memiliki akun login.'], 400);
+        }
+        if (!$penguji->nomor_hp) {
+            return response()->json(['success' => false, 'message' => 'Nomor HP penguji belum diisi.'], 400);
+        }
+
+        $request->validate(['password' => 'required|string|min:5']);
+
+        $password = $request->password;
+
+        $penguji->user->update([
+            'password'       => Hash::make($password),
+            'password_plain' => $password,
+        ]);
+
+        $phone  = $this->formatPhone($penguji->nomor_hp);
+        $pesan  = $this->buildWaMessage($penguji->nama, $penguji->user->email, $password);
+        $waLink = 'https://wa.me/' . $phone . '?text=' . rawurlencode($pesan);
+
+        return response()->json(['success' => true, 'link' => $waLink]);
+    }
+
+    private function formatPhone(string $phone): string
+    {
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        if (str_starts_with($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
+        }
+        if (!str_starts_with($phone, '62')) {
+            $phone = '62' . $phone;
+        }
+        return $phone;
+    }
+
+    private function buildWaMessage(string $nama, string $email, string $password): string
+    {
+        return "*AKUN ANDA TELAH DIBUAT*\n\n" .
+            "Yth. *{$nama}*\n" .
+            "Akun Anda telah siap digunakan.\n\n" .
+            "*DATA LOGIN*\n" .
+            "Email: {$email}\n" .
+            "Password: {$password}\n" .
+            "Link Login: https://simpel.pw/login\n\n" .
+            "*CATATAN PENTING*\n" .
+            "- Simpan data login Anda dengan aman\n" .
+            "- Segera ubah password setelah login pertama\n" .
+            "- Hubungi admin jika ada kendala\n\n" .
+            "Salam,\n*Tim LAN PUSJAR SKMP*";
     }
 
     private function messages(string $role): array

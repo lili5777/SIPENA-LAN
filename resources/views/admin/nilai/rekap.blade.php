@@ -81,6 +81,21 @@
                         </select>
                     </div>
 
+                    {{-- Filter Penguji (BARU) — Tom Select --}}
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label small text-muted mb-1">
+                            <i class="fas fa-user-tie me-1"></i> Penguji
+                        </label>
+                        <select name="penguji" id="filterPenguji" class="form-select form-select-sm">
+                            <option value="">Semua Penguji</option>
+                            @foreach($pengujiList as $pg)
+                                <option value="{{ $pg->id }}" {{ request('penguji') == $pg->id ? 'selected' : '' }}>
+                                    {{ $pg->nama }}{{ $pg->nip ? ' — ' . $pg->nip : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Filter Kategori --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
@@ -139,10 +154,16 @@
 
                 {{-- Badge filter aktif --}}
                 @php
+                    $pengujiNamaAktif = null;
+                    if (request('penguji')) {
+                        $pg = $pengujiList->firstWhere('id', request('penguji'));
+                        $pengujiNamaAktif = $pg ? $pg->nama : request('penguji');
+                    }
                     $activeFilters = array_filter([
                         'Angkatan'  => request('angkatan')  ? 'Angkatan ' . request('angkatan')  : null,
                         'Tahun'     => request('tahun'),
                         'Kelompok'  => request('kelompok')  ? 'Kelompok ' . request('kelompok')  : null,
+                        'Penguji'   => $pengujiNamaAktif,
                         'Kategori'  => request('kategori'),
                         'Wilayah'   => request('wilayah'),
                         'Cari'      => request('search'),
@@ -163,15 +184,40 @@
         </div>
     </div>
 
+    {{-- Info prioritas (tampil untuk penguji dan pic) --}}
+    @php $roleName = auth()->user()->role->name ?? ''; @endphp
+    @if($roleName === 'penguji')
+        <div class="alert alert-info d-flex align-items-center shadow-sm mb-3 py-2" role="alert">
+            <i class="fas fa-info-circle me-2 flex-shrink-0"></i>
+            <small>
+                Baris dengan strip <span class="badge bg-primary" style="font-size:.7rem;">Kelompok Anda</span>
+                adalah peserta dari kelompok yang Anda tangani, ditampilkan di bagian atas.
+                Peserta lainnya juga ditampilkan untuk referensi.
+            </small>
+        </div>
+    @elseif($roleName === 'pic')
+        <div class="alert alert-info d-flex align-items-center shadow-sm mb-3 py-2" role="alert">
+            <i class="fas fa-info-circle me-2 flex-shrink-0"></i>
+            <small>
+                Baris dengan strip <span class="badge bg-primary" style="font-size:.7rem;">Angkatan Anda</span>
+                adalah peserta dari angkatan yang Anda kelola, ditampilkan di bagian atas.
+                Peserta lainnya juga ditampilkan untuk referensi.
+            </small>
+        </div>
+    @endif
+
     <!-- Tabel Rekap -->
     <div class="card border-0 shadow-lg overflow-hidden">
         <div class="card-header bg-white py-3 border-0 d-flex align-items-center justify-content-between">
             <h5 class="card-title mb-0 fw-semibold">
                 <i class="fas fa-table me-2" style="color: #285496;"></i> Rekap Nilai Peserta
-                <span class="badge bg-primary ms-2">{{ count($rekapData) }}</span>
+                <span class="badge bg-primary ms-2">{{ $pesertaPaginated->total() }}</span>
             </h5>
             <small class="text-muted">
                 <i class="fas fa-hand-pointer me-1"></i> Klik angka untuk melihat detail
+                &nbsp;·&nbsp;
+                Menampilkan {{ $pesertaPaginated->firstItem() }}–{{ $pesertaPaginated->lastItem() }}
+                dari {{ $pesertaPaginated->total() }}
             </small>
         </div>
 
@@ -199,11 +245,26 @@
                     </thead>
                     <tbody>
                         @forelse($rekapData as $index => $row)
-                            <tr>
-                                <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
+                            <tr class="{{ $row['is_prioritas_user'] ? 'row-prioritas' : '' }}">
+                                <td class="ps-4 fw-semibold">
+                                    {{-- Nomor urut global berdasarkan paginasi --}}
+                                    {{ $pesertaPaginated->firstItem() + $index }}
+                                    @if($row['is_prioritas_user'])
+                                        {{-- Strip prioritas di kiri --}}
+                                    @endif
+                                </td>
                                 <td>
-                                    <div class="fw-bold small">{{ $row['nama'] }}</div>
-                                    <small class="text-muted">{{ $row['nip'] }}</small>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if($row['is_prioritas_user'])
+                                            <span class="badge bg-primary badge-prioritas" title="Kelompok Anda">
+                                                <i class="fas fa-star" style="font-size:.6rem;"></i>
+                                            </span>
+                                        @endif
+                                        <div>
+                                            <div class="fw-bold small">{{ $row['nama'] }}</div>
+                                            <small class="text-muted">{{ $row['nip'] }}</small>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark border">{{ $row['ndh'] ?? '-' }}</span>
@@ -298,19 +359,19 @@
                         @endforelse
                     </tbody>
 
-                    @if(count($rekapData) > 0)
+                    @if($rekapData->count() > 0)
                     <tfoot>
                         <tr class="table-light fw-semibold">
-                            <td colspan="4" class="ps-4 text-end text-muted small">Rata-rata:</td>
+                            <td colspan="4" class="ps-4 text-end text-muted small">Rata-rata halaman ini:</td>
                             @foreach($jenisNilaiList as $jn)
                                 @php
-                                    $avgJn = collect($rekapData)->avg(fn($r) => $r['nilai_per_jenis'][$jn->id]['sum_konversi'] ?? 0);
+                                    $avgJn = $rekapData->avg(fn($r) => $r['nilai_per_jenis'][$jn->id]['sum_konversi'] ?? 0);
                                 @endphp
                                 <td class="text-center">
                                     <span class="text-primary fw-bold">{{ number_format($avgJn, 2) }}</span>
                                 </td>
                             @endforeach
-                            @php $avgTotal = collect($rekapData)->avg('total_nilai'); @endphp
+                            @php $avgTotal = $rekapData->avg('total_nilai'); @endphp
                             <td class="text-center">
                                 <span class="badge bg-primary px-2 py-1">{{ number_format($avgTotal, 2) }}</span>
                             </td>
@@ -321,6 +382,85 @@
                 </table>
             </div>
         </div>
+
+        {{-- Pagination --}}
+        @if($pesertaPaginated->hasPages())
+            <div class="card-footer bg-white py-3 border-0">
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-2 mb-md-0">
+                        <small class="text-muted">
+                            Menampilkan <strong>{{ $pesertaPaginated->firstItem() }}</strong>
+                            sampai <strong>{{ $pesertaPaginated->lastItem() }}</strong>
+                            dari <strong>{{ $pesertaPaginated->total() }}</strong> peserta
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <nav>
+                            <ul class="pagination pagination-sm justify-content-md-end justify-content-center mb-0">
+                                {{-- Prev --}}
+                                @if($pesertaPaginated->onFirstPage())
+                                    <li class="page-item disabled">
+                                        <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                                    </li>
+                                @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $pesertaPaginated->previousPageUrl() }}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                @endif
+
+                                {{-- Window halaman --}}
+                                @php
+                                    $start = max($pesertaPaginated->currentPage() - 2, 1);
+                                    $end   = min($start + 4, $pesertaPaginated->lastPage());
+                                    $start = max($end - 4, 1);
+                                @endphp
+
+                                @if($start > 1)
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $pesertaPaginated->url(1) }}">1</a>
+                                    </li>
+                                    @if($start > 2)
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    @endif
+                                @endif
+
+                                @for($i = $start; $i <= $end; $i++)
+                                    <li class="page-item {{ $i == $pesertaPaginated->currentPage() ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $pesertaPaginated->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+
+                                @if($end < $pesertaPaginated->lastPage())
+                                    @if($end < $pesertaPaginated->lastPage() - 1)
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    @endif
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $pesertaPaginated->url($pesertaPaginated->lastPage()) }}">
+                                            {{ $pesertaPaginated->lastPage() }}
+                                        </a>
+                                    </li>
+                                @endif
+
+                                {{-- Next --}}
+                                @if($pesertaPaginated->hasMorePages())
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $pesertaPaginated->nextPageUrl() }}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="page-item disabled">
+                                        <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                                    </li>
+                                @endif
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- ===== MODAL DETAIL JENIS NILAI ===== --}}
@@ -378,8 +518,37 @@
 @endsection
 
 @section('scripts')
+{{-- Tom Select CDN --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Tom Select untuk filter Penguji ───────────────────────
+    const elPenguji = document.getElementById('filterPenguji');
+    if (elPenguji) {
+        new TomSelect(elPenguji, {
+            placeholder       : 'Cari penguji...',
+            allowEmptyOption  : true,
+            maxOptions        : null,
+            searchField       : ['text'],
+            render: {
+                option: function(data, escape) {
+                    return `<div class="d-flex flex-column py-1">
+                        <span class="fw-semibold">${escape(data.text.split(' — ')[0])}</span>
+                        ${data.text.includes(' — ')
+                            ? `<small class="text-muted" style="font-size:.75rem;">${escape(data.text.split(' — ')[1])}</small>`
+                            : ''}
+                    </div>`;
+                },
+                item: function(data, escape) {
+                    const parts = data.text.split(' — ');
+                    return `<div>${escape(parts[0])}</div>`;
+                },
+            },
+        });
+    }
 
     // ── Toggle wilayah ────────────────────────────────────────
     const filterKategori       = document.getElementById('filterKategori');
@@ -613,6 +782,19 @@ document.addEventListener('DOMContentLoaded', function () {
 <style>
     .page-header { box-shadow: 0 4px 20px rgba(40,84,150,.15); }
 
+    /* ── Baris prioritas penguji ── */
+    .row-prioritas {
+        background: linear-gradient(90deg, rgba(40,84,150,.06) 0%, transparent 100%) !important;
+        border-left: 3px solid #285496;
+    }
+    .row-prioritas td:first-child { padding-left: calc(1rem - 3px) !important; }
+    .badge-prioritas {
+        width: 20px; height: 20px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0; flex-shrink: 0;
+    }
+
+    /* ── Tabel rekap ── */
     .rekap-table th {
         border-bottom:2px solid rgba(40,84,150,.1); font-weight:600;
         color:#285496; background-color:#f8fafc;
@@ -680,8 +862,28 @@ document.addEventListener('DOMContentLoaded', function () {
     .total-val   { color:white; font-size:1.75rem; font-weight:800; line-height:1.1; }
     .total-label { color:rgba(255,255,255,.75); font-size:.72rem; font-weight:600; letter-spacing:.5px; }
 
+    /* Pagination */
+    .pagination-sm .page-link { padding:.375rem .625rem; border-radius:6px; color:#285496; }
+    .pagination-sm .page-item.active .page-link { background-color:#285496; border-color:#285496; }
+
     /* Filter wilayah input */
     #filterWilayahWrapper .form-control-sm { border-color: rgba(40,84,150,.35); }
     #filterWilayahWrapper .form-control-sm:focus { border-color: #285496; box-shadow: 0 0 0 .15rem rgba(40,84,150,.15); }
+
+    /* Tom Select styling selaras dengan Bootstrap 5 tema biru */
+    .ts-wrapper.form-select-sm .ts-control {
+        min-height: 36px !important;
+        font-size: .92rem !important;
+        border-color: #dee2e6;
+        padding: .25rem .5rem;
+    }
+    .ts-wrapper.form-select-sm .ts-control:focus,
+    .ts-wrapper.form-select-sm.focus .ts-control {
+        border-color: #285496 !important;
+        box-shadow: 0 0 0 .15rem rgba(40,84,150,.2) !important;
+    }
+    .ts-dropdown .option.selected,
+    .ts-dropdown .option:hover { background: rgba(40,84,150,.1) !important; color: #285496 !important; }
+    .ts-dropdown .option.active { background: #285496 !important; color: white !important; }
 </style>
 @endsection

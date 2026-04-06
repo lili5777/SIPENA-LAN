@@ -27,6 +27,7 @@ class User extends Authenticatable
         'evaluator_id',
         'role_id',
         'password',
+        'password_plain',
     ];
 
     /**

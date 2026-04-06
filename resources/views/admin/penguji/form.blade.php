@@ -108,7 +108,6 @@
                                 value="{{ old('jabatan', $isEdit ? $penguji->jabatan : '') }}"
                                 placeholder="Contoh: Senior Penguji, Konsultan, dll">
                             @error('jabatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>Jabatan atau posisi dalam organisasi</small>
                         </div>
                     </div>
 
@@ -151,7 +150,6 @@
                                 <option value="0" {{ old('status_aktif', $isEdit ? $penguji->status_aktif : '') == '0' ? 'selected' : '' }}>Nonaktif</option>
                             </select>
                             @error('status_aktif')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>Status menentukan apakah penguji masih aktif</small>
                         </div>
                     </div>
                 </div>
@@ -211,7 +209,6 @@
                                 value="{{ old('nomor_rekening', $isEdit ? $penguji->nomor_rekening : '') }}"
                                 placeholder="Contoh: Bank Mandiri - 1234567890">
                             @error('nomor_rekening')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>Nomor rekening untuk pembayaran honorarium</small>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -224,7 +221,6 @@
                                 value="{{ old('npwp', $isEdit ? $penguji->npwp : '') }}"
                                 placeholder="Contoh: 12.345.678.9-012.345">
                             @error('npwp')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>NPWP untuk keperluan perpajakan</small>
                         </div>
                     </div>
                 </div>
@@ -255,57 +251,13 @@
                 </div>
 
                 <div id="akunPanel" class="{{ old('buat_akun') == '1' ? '' : 'd-none' }}">
-                    <div class="card border border-primary-subtle rounded-3 mb-4" style="background:#f8fbff;">
-                        <div class="card-body pt-4">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="password" class="form-label fw-semibold">
-                                            <i class="fas fa-lock me-1 text-primary"></i>
-                                            Password <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <input type="password"
-                                                   class="form-control @error('password') is-invalid @enderror"
-                                                   id="password" name="password"
-                                                   placeholder="Minimal 8 karakter"
-                                                   autocomplete="new-password">
-                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
-                                                <i class="fas fa-eye" id="eyeIcon"></i>
-                                            </button>
-                                            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                        </div>
-                                        <div class="mt-2" id="strengthWrapper" style="display:none;">
-                                            <div class="progress" style="height:5px;">
-                                                <div class="progress-bar" id="strengthBar" role="progressbar" style="width:0%;transition:width .3s;"></div>
-                                            </div>
-                                            <small id="strengthLabel" class="text-muted"></small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="password_confirmation" class="form-label fw-semibold">
-                                            <i class="fas fa-lock me-1 text-primary"></i>
-                                            Konfirmasi Password <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="password"
-                                               class="form-control"
-                                               id="password_confirmation" name="password_confirmation"
-                                               placeholder="Ulangi password"
-                                               autocomplete="new-password">
-                                        <div id="matchFeedback" class="mt-1" style="font-size:.85rem;display:none;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @include('admin.penguji._password_fields', ['isEdit' => false, 'hasUser' => false])
                 </div>
 
                 @else
-                {{-- EDIT: Langsung tampilkan panel password, tidak perlu toggle --}}
+                {{-- EDIT --}}
                 @if(optional($penguji->user)->id)
-                {{-- Akun sudah ada — tampilkan panel ganti password --}}
+                {{-- Akun sudah ada --}}
                 <input type="hidden" name="buat_akun" value="1">
                 <div class="card border border-primary-subtle rounded-3 mb-4" style="background:#f8fbff;">
                     <div class="card-body pt-4">
@@ -314,52 +266,12 @@
                             <div>Akun login aktif dengan email <strong>{{ $penguji->user->email }}</strong>.
                             Kosongkan password di bawah jika tidak ingin mengubah password.</div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="password" class="form-label fw-semibold">
-                                        <i class="fas fa-lock me-1 text-primary"></i>
-                                        Password Baru <small class="text-muted fw-normal">(kosongkan jika tidak diubah)</small>
-                                    </label>
-                                    <div class="input-group">
-                                        <input type="password"
-                                               class="form-control @error('password') is-invalid @enderror"
-                                               id="password" name="password"
-                                               placeholder="Kosongkan jika tidak diubah"
-                                               autocomplete="new-password">
-                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
-                                            <i class="fas fa-eye" id="eyeIcon"></i>
-                                        </button>
-                                        @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                    </div>
-                                    <div class="mt-2" id="strengthWrapper" style="display:none;">
-                                        <div class="progress" style="height:5px;">
-                                            <div class="progress-bar" id="strengthBar" role="progressbar" style="width:0%;transition:width .3s;"></div>
-                                        </div>
-                                        <small id="strengthLabel" class="text-muted"></small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="password_confirmation" class="form-label fw-semibold">
-                                        <i class="fas fa-lock me-1 text-primary"></i>
-                                        Konfirmasi Password Baru
-                                    </label>
-                                    <input type="password"
-                                           class="form-control"
-                                           id="password_confirmation" name="password_confirmation"
-                                           placeholder="Ulangi password baru"
-                                           autocomplete="new-password">
-                                    <div id="matchFeedback" class="mt-1" style="font-size:.85rem;display:none;"></div>
-                                </div>
-                            </div>
-                        </div>
+                        @include('admin.penguji._password_fields', ['isEdit' => true, 'hasUser' => true])
                     </div>
                 </div>
 
                 @else
-                {{-- Belum punya akun — toggle untuk buat akun baru --}}
+                {{-- Belum punya akun --}}
                 <div class="mb-4">
                     <div class="form-check form-switch d-flex align-items-center gap-3" style="padding-left:0;">
                         <div class="position-relative" style="padding-left: 2.5rem;">
@@ -376,53 +288,8 @@
                         <i class="fas fa-info-circle me-1"></i>Penguji ini belum memiliki akun login. Aktifkan untuk membuatnya.
                     </small>
                 </div>
-
                 <div id="akunPanel" class="{{ old('buat_akun') == '1' ? '' : 'd-none' }}">
-                    <div class="card border border-primary-subtle rounded-3 mb-4" style="background:#f8fbff;">
-                        <div class="card-body pt-4">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="password" class="form-label fw-semibold">
-                                            <i class="fas fa-lock me-1 text-primary"></i>
-                                            Password <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <input type="password"
-                                                   class="form-control @error('password') is-invalid @enderror"
-                                                   id="password" name="password"
-                                                   placeholder="Minimal 8 karakter"
-                                                   autocomplete="new-password">
-                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
-                                                <i class="fas fa-eye" id="eyeIcon"></i>
-                                            </button>
-                                            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                        </div>
-                                        <div class="mt-2" id="strengthWrapper" style="display:none;">
-                                            <div class="progress" style="height:5px;">
-                                                <div class="progress-bar" id="strengthBar" role="progressbar" style="width:0%;transition:width .3s;"></div>
-                                            </div>
-                                            <small id="strengthLabel" class="text-muted"></small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="password_confirmation" class="form-label fw-semibold">
-                                            <i class="fas fa-lock me-1 text-primary"></i>
-                                            Konfirmasi Password <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="password"
-                                               class="form-control"
-                                               id="password_confirmation" name="password_confirmation"
-                                               placeholder="Ulangi password"
-                                               autocomplete="new-password">
-                                        <div id="matchFeedback" class="mt-1" style="font-size:.85rem;display:none;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @include('admin.penguji._password_fields', ['isEdit' => true, 'hasUser' => false])
                 </div>
                 @endif
                 @endif
@@ -509,12 +376,12 @@ document.addEventListener('DOMContentLoaded', function () {
         e.target.value = v.substr(0, 15);
     });
 
-    // Toggle panel akun (hanya ada saat create, atau edit tanpa akun)
+    // Toggle panel akun
     const toggle = document.getElementById('buat_akun');
     const panel  = document.getElementById('akunPanel');
 
     function syncPanel() {
-        if (!toggle || !panel) return; // edit dengan akun sudah ada: tidak ada toggle/panel
+        if (!toggle || !panel) return;
         if (toggle.checked) {
             panel.classList.remove('d-none');
             const hint = document.getElementById('emailHint');
@@ -529,49 +396,85 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (toggle) toggle.addEventListener('change', syncPanel);
 
-    // Tampilkan/sembunyikan password
-    document.getElementById('togglePassword').addEventListener('click', function () {
-        const isPass = passEl.type === 'password';
-        passEl.type  = isPass ? 'text' : 'password';
-        document.getElementById('eyeIcon').className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
-    });
+    // Toggle show/hide password
+    const togglePassBtn = document.getElementById('togglePassword');
+    if (togglePassBtn && passEl) {
+        togglePassBtn.addEventListener('click', function () {
+            const isPass = passEl.type === 'password';
+            passEl.type  = isPass ? 'text' : 'password';
+            document.getElementById('eyeIcon').className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
+        });
+    }
+
+    // Generate random password (tepat 5 karakter)
+    const genBtn = document.getElementById('generatePassword');
+    if (genBtn) {
+        genBtn.addEventListener('click', function () {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let password = '';
+            password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+            password += '0123456789'[Math.floor(Math.random() * 10)];
+            password += '0123456789'[Math.floor(Math.random() * 10)];
+            password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+            password += chars[Math.floor(Math.random() * chars.length)];
+            password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+            if (passEl) {
+                passEl.value = password;
+                passEl.type  = 'text'; // Show it
+                if (document.getElementById('eyeIcon')) document.getElementById('eyeIcon').className = 'fas fa-eye-slash';
+            }
+            if (confEl) confEl.value = password;
+
+            // Trigger strength check & match
+            if (passEl) passEl.dispatchEvent(new Event('input'));
+            if (confEl) confEl.dispatchEvent(new Event('input'));
+
+            // Toast notification
+            showToast('Password berhasil digenerate!');
+        });
+    }
 
     // Password strength meter
-    passEl.addEventListener('input', function () {
-        const val     = passEl.value;
-        const wrapper = document.getElementById('strengthWrapper');
-        const bar     = document.getElementById('strengthBar');
-        const label   = document.getElementById('strengthLabel');
-        if (!val) { wrapper.style.display = 'none'; return; }
-        wrapper.style.display = 'block';
-        let score = 0;
-        if (val.length >= 8)          score++;
-        if (/[A-Z]/.test(val))        score++;
-        if (/[0-9]/.test(val))        score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-        const levels = [
-            { pct:25,  cls:'bg-danger',  txt:'Sangat lemah' },
-            { pct:50,  cls:'bg-warning', txt:'Lemah' },
-            { pct:75,  cls:'bg-info',    txt:'Cukup kuat' },
-            { pct:100, cls:'bg-success', txt:'Kuat' },
-        ];
-        const lvl = levels[score - 1] || levels[0];
-        bar.style.width   = lvl.pct + '%';
-        bar.className     = 'progress-bar ' + lvl.cls;
-        label.textContent = lvl.txt;
-    });
+    if (passEl) {
+        passEl.addEventListener('input', function () {
+            const val     = passEl.value;
+            const wrapper = document.getElementById('strengthWrapper');
+            const bar     = document.getElementById('strengthBar');
+            const label   = document.getElementById('strengthLabel');
+            if (!wrapper) return;
+            if (!val) { wrapper.style.display = 'none'; return; }
+            wrapper.style.display = 'block';
+            let score = 0;
+            if (val.length >= 5)          score++;
+            if (/[A-Z]/.test(val))        score++;
+            if (/[0-9]/.test(val))        score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+            const levels = [
+                { pct:25,  cls:'bg-danger',  txt:'Sangat lemah' },
+                { pct:50,  cls:'bg-warning', txt:'Lemah' },
+                { pct:75,  cls:'bg-info',    txt:'Cukup kuat' },
+                { pct:100, cls:'bg-success', txt:'Kuat' },
+            ];
+            const lvl = levels[score - 1] || levels[0];
+            bar.style.width   = lvl.pct + '%';
+            bar.className     = 'progress-bar ' + lvl.cls;
+            label.textContent = lvl.txt;
+        });
+    }
 
-    // Konfirmasi password
+    // Konfirmasi password match
     function checkMatch() {
         const fb = document.getElementById('matchFeedback');
+        if (!fb || !confEl || !passEl) return;
         if (!confEl.value) { fb.style.display = 'none'; return; }
         fb.style.display = 'block';
         fb.innerHTML = passEl.value === confEl.value
             ? '<i class="fas fa-check-circle text-success me-1"></i><span class="text-success">Password cocok</span>'
             : '<i class="fas fa-times-circle text-danger me-1"></i><span class="text-danger">Password tidak cocok</span>';
     }
-    passEl.addEventListener('input', checkMatch);
-    confEl.addEventListener('input', checkMatch);
+    if (passEl) passEl.addEventListener('input', checkMatch);
+    if (confEl) confEl.addEventListener('input', checkMatch);
 
     // Client-side validation
     form.addEventListener('submit', function (e) {
@@ -579,25 +482,23 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('validationErrors').innerHTML = '';
         document.getElementById('validationSummary').classList.add('d-none');
 
-        const email = emailEl.value;
+        const email = emailEl ? emailEl.value : '';
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Format email tidak valid');
 
         const phone = document.getElementById('nomor_hp').value;
         if (phone && phone.replace(/\D/g,'').length < 10) errors.push('Nomor HP minimal 10 digit');
 
         if (toggle && toggle.checked) {
-            // CREATE atau EDIT tanpa akun: toggle aktif
             if (!email) errors.push('Email wajib diisi jika membuat akun login');
             const pass     = passEl ? passEl.value : '';
             const passConf = confEl ? confEl.value : '';
             if (!pass) errors.push('Password wajib diisi');
-            if (pass && pass.length < 8) errors.push('Password minimal 8 karakter');
+            if (pass && pass.length < 5) errors.push('Password minimal 5 karakter');
             if (pass && pass !== passConf) errors.push('Konfirmasi password tidak cocok');
         } else if (!toggle && passEl) {
-            // EDIT dengan akun sudah ada: panel password selalu tampil, password opsional
             const pass     = passEl.value;
             const passConf = confEl ? confEl.value : '';
-            if (pass && pass.length < 8) errors.push('Password minimal 8 karakter');
+            if (pass && pass.length < 5) errors.push('Password minimal 5 karakter');
             if (pass && pass !== passConf) errors.push('Konfirmasi password tidak cocok');
         }
 
@@ -626,6 +527,16 @@ document.addEventListener('DOMContentLoaded', function () {
     golSel.addEventListener('change', function () {
         pangkatInput.value = golonganPangkat[this.value] || '';
     });
+
+    // Toast helper
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.innerHTML = `<i class="fas fa-check-circle me-2 text-success"></i>${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
+    }
 });
 </script>
 
@@ -643,5 +554,14 @@ document.addEventListener('DOMContentLoaded', function () {
     .btn-outline-secondary { border:2px solid #6c757d;color:#6c757d; }
     .btn-outline-secondary:hover { background-color:#6c757d;border-color:#6c757d;color:white; }
     .btn-lift:hover { transform:translateY(-2px); }
+    .btn-hover-lift:hover { transform:translateY(-2px); }
+    /* Toast */
+    .toast-notification {
+        position:fixed;bottom:2rem;right:2rem;background:white;padding:.75rem 1.25rem;
+        border-radius:10px;box-shadow:0 8px 25px rgba(0,0,0,.15);z-index:9999;
+        font-size:.9rem;transform:translateY(20px);opacity:0;transition:all .3s;
+        border-left:4px solid #28a745;
+    }
+    .toast-notification.show { transform:translateY(0);opacity:1; }
 </style>
 @endsection

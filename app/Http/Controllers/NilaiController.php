@@ -13,6 +13,7 @@ use App\Models\Peserta;
 use App\Models\Pendaftaran;
 use App\Models\Angkatan;
 use App\Models\Kelompok;
+use App\Models\Penguji;
 use App\Models\PicPeserta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -136,6 +137,17 @@ class NilaiController extends Controller
                 ->pluck('id_peserta');
         }
 
+        // ── BARU: peserta dari angkatan yang dipegang PIC ─────────
+        $pesertaPicIds = collect();
+        if ($roleName === 'pic' && $angkatanIds->isNotEmpty()) {
+            $pesertaPicIds = Pendaftaran::where('id_jenis_pelatihan', $jenisPelatihanId)
+                ->whereIn('id_angkatan', $angkatanIds)
+                ->whereNotNull('id_peserta')
+                ->pluck('id_peserta')
+                ->unique()
+                ->values();
+        }
+
         return [
             'user'                => $user,
             'roleName'            => $roleName,
@@ -145,12 +157,12 @@ class NilaiController extends Controller
             'angkatanIds'         => $angkatanIds,
             'kelompokPicIds'      => $kelompokPicIds,
             'pesertaKelompokIds'  => $pesertaKelompokIds,
+            'pesertaPicIds'       => $pesertaPicIds,   // ← BARU
         ];
     }
 
     // =========================================================
     // HELPER PRIVATE — apply filter kategori & wilayah ke query
-    // Dipanggil setelah semua filter role/angkatan/tahun/kelompok
     // =========================================================
     private function applyKategoriWilayahFilter($query, Request $request): void
     {
@@ -168,7 +180,7 @@ class NilaiController extends Controller
     }
 
     // =========================================================
-    // INDEX — Daftar peserta
+    // INDEX — Daftar peserta (tidak berubah)
     // =========================================================
     public function index(Request $request, $jenis)
     {
@@ -179,7 +191,6 @@ class NilaiController extends Controller
         $ctx      = $this->getUserContext($jenisPelatihanId);
         $roleName = $ctx['roleName'];
 
-        // ── Filter statis ─────────────────────────────────────────
         $angkatanRomawi = $this->getRomawList();
         $tahunList      = $this->getTahunList();
         $kelompokList   = range(1, 10);
@@ -189,7 +200,6 @@ class NilaiController extends Controller
             $q->where('id_jenis_pelatihan', $jenisPelatihanId);
         })->count();
 
-        // ── Base query ────────────────────────────────────────────
         $query = Peserta::query()
             ->whereHas('pendaftaran', function ($q) use ($jenisPelatihanId) {
                 $q->where('id_jenis_pelatihan', $jenisPelatihanId)
@@ -200,7 +210,6 @@ class NilaiController extends Controller
             )
             ->with(['pendaftaran' => fn($q) => $q->where('id_jenis_pelatihan', $jenisPelatihanId)]);
 
-        // ── Filter role ───────────────────────────────────────────
         if (in_array($roleName, ['coach', 'penguji'])) {
             if ($ctx['kelompokIds']->isNotEmpty()) {
                 $kelompokTarget = $ctx['kelompokIds'];
@@ -260,7 +269,6 @@ class NilaiController extends Controller
             }
 
         } else {
-            // admin / evaluator
             if ($request->filled('angkatan')) {
                 $namaAngkatan = 'Angkatan ' . $request->angkatan;
                 $query->whereHas('pendaftaran.angkatan', fn($q) =>
@@ -280,10 +288,8 @@ class NilaiController extends Controller
             }
         }
 
-        // ── Filter kategori & wilayah (berlaku untuk semua role) ──
         $this->applyKategoriWilayahFilter($query, $request);
 
-        // ── Search ────────────────────────────────────────────────
         if ($request->filled('search')) {
             $term = $request->search;
             $query->where(fn($q) =>
@@ -295,7 +301,6 @@ class NilaiController extends Controller
         $query->orderBy('ndh');
         $pesertaRaw = $query->paginate(15)->withQueryString();
 
-        // ── Kelompok filter aktif (untuk info bar link laporan) ───
         $kelompokFilter = null;
         if ($request->filled('kelompok')) {
             $namaKelompok   = 'Kelompok ' . $request->kelompok;
@@ -304,7 +309,6 @@ class NilaiController extends Controller
                 ->first();
         }
 
-        // ── Metadata per peserta ──────────────────────────────────
         $peserta = $pesertaRaw->through(function ($p) use (
             $jenisPelatihanId, $totalIndikatorJenis, $ctx, $roleName
         ) {
@@ -364,8 +368,8 @@ class NilaiController extends Controller
 
             $jenisPelatihanId = $pendaftaran->id_jenis_pelatihan;
             $aksiPerubahan = AksiPerubahan::where('id_pendaftar', $pendaftaran->id)
-            ->select('judul', 'kategori_aksatika')
-            ->first();
+                ->select('judul', 'kategori_aksatika')
+                ->first();
             $user             = Auth::user();
             $roleId           = $user->role_id;
             $roleName         = $user->role->name ?? '';
@@ -549,6 +553,11 @@ class NilaiController extends Controller
         $kelompokList   = range(1, 10);
         $wilayahList    = $this->getWilayahList();
 
+        // ── Daftar penguji untuk filter dropdown ──────────────────
+        $pengujiList = Penguji::whereHas('kelompok', fn($q) =>
+            $q->where('id_jenis_pelatihan', $jenisPelatihanId)
+        )->orderBy('nama')->get(['id', 'nama', 'nip']);
+
         $jenisNilaiList = JenisNilai::where('id_jenis_pelatihan', $jenisPelatihanId)
             ->withCount('indikatorNilai')
             ->with(['indikatorNilai' => fn($q) => $q->orderBy('id')])
@@ -559,7 +568,7 @@ class NilaiController extends Controller
             $jn->id => $jn->indikator_nilai_count
         ]);
 
-        // ── Query peserta ─────────────────────────────────────────
+        // ── Base query — SEMUA peserta ────────────────────────────
         $query = Peserta::query()
             ->whereHas('pendaftaran', fn($q) =>
                 $q->where('id_jenis_pelatihan', $jenisPelatihanId)->whereNotNull('id_angkatan')
@@ -568,85 +577,42 @@ class NilaiController extends Controller
                 $q->where('id_jenis_pelatihan', $jenisPelatihanId)
             );
 
-        if (in_array($roleName, ['coach', 'penguji'])) {
-            if ($ctx['kelompokIds']->isNotEmpty()) {
-                $kelompokTarget = $ctx['kelompokIds'];
-                if ($request->filled('kelompok')) {
-                    $namaKelompok = 'Kelompok ' . $request->kelompok;
-                    $query->whereHas('kelompok', fn($q) =>
-                        $q->where('nama_kelompok', 'LIKE', "%{$namaKelompok}%")
-                          ->whereIn('kelompoks.id', $kelompokTarget)
-                    );
-                } else {
-                    $query->whereHas('kelompok', fn($q) =>
-                        $q->whereIn('kelompoks.id', $kelompokTarget)
-                    );
-                }
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-            if ($request->filled('angkatan')) {
-                $namaAngkatan = 'Angkatan ' . $request->angkatan;
-                $query->whereHas('pendaftaran.angkatan', fn($q) =>
-                    $q->where('nama_angkatan', 'LIKE', "%{$namaAngkatan}%")
-                );
-            }
-            if ($request->filled('tahun')) {
-                $query->whereHas('pendaftaran.angkatan', fn($q) =>
-                    $q->where('tahun', 'LIKE', "%{$request->tahun}%")
-                );
-            }
-
-        } elseif ($roleName === 'pic') {
-            if ($ctx['angkatanIds']->isNotEmpty()) {
-                $query->whereHas('pendaftaran', fn($q) =>
-                    $q->where('id_jenis_pelatihan', $jenisPelatihanId)
-                      ->whereIn('id_angkatan', $ctx['angkatanIds'])
-                );
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-            if ($request->filled('angkatan')) {
-                $namaAngkatan = 'Angkatan ' . $request->angkatan;
-                $query->whereHas('pendaftaran.angkatan', fn($q) =>
-                    $q->where('nama_angkatan', 'LIKE', "%{$namaAngkatan}%")
-                );
-            }
-            if ($request->filled('tahun')) {
-                $query->whereHas('pendaftaran.angkatan', fn($q) =>
-                    $q->where('tahun', 'LIKE', "%{$request->tahun}%")
-                );
-            }
-            if ($request->filled('kelompok')) {
-                $namaKelompok = 'Kelompok ' . $request->kelompok;
-                $query->whereHas('kelompok', fn($q) =>
-                    $q->where('nama_kelompok', 'LIKE', "%{$namaKelompok}%")
-                );
-            }
-
-        } else {
-            if ($request->filled('angkatan')) {
-                $namaAngkatan = 'Angkatan ' . $request->angkatan;
-                $query->whereHas('pendaftaran.angkatan', fn($q) =>
-                    $q->where('nama_angkatan', 'LIKE', "%{$namaAngkatan}%")
-                );
-            }
-            if ($request->filled('tahun')) {
-                $query->whereHas('pendaftaran.angkatan', fn($q) =>
-                    $q->where('tahun', 'LIKE', "%{$request->tahun}%")
-                );
-            }
-            if ($request->filled('kelompok')) {
-                $namaKelompok = 'Kelompok ' . $request->kelompok;
-                $query->whereHas('kelompok', fn($q) =>
-                    $q->where('nama_kelompok', 'LIKE', "%{$namaKelompok}%")
-                );
-            }
+        // ── Filter angkatan ───────────────────────────────────────
+        if ($request->filled('angkatan')) {
+            $namaAngkatan = 'Angkatan ' . $request->angkatan;
+            $query->whereHas('pendaftaran.angkatan', fn($q) =>
+                $q->where('nama_angkatan', 'LIKE', "%{$namaAngkatan}%")
+            );
         }
 
-        // ── Filter kategori & wilayah (berlaku untuk semua role) ──
+        // ── Filter tahun ──────────────────────────────────────────
+        if ($request->filled('tahun')) {
+            $query->whereHas('pendaftaran.angkatan', fn($q) =>
+                $q->where('tahun', 'LIKE', "%{$request->tahun}%")
+            );
+        }
+
+        // ── Filter kelompok ───────────────────────────────────────
+        if ($request->filled('kelompok')) {
+            $namaKelompok = 'Kelompok ' . $request->kelompok;
+            $query->whereHas('kelompok', fn($q) =>
+                $q->where('nama_kelompok', 'LIKE', "%{$namaKelompok}%")
+                  ->where('id_jenis_pelatihan', $jenisPelatihanId)
+            );
+        }
+
+        // ── Filter penguji ────────────────────────────────────────
+        if ($request->filled('penguji')) {
+            $query->whereHas('kelompok', fn($q) =>
+                $q->where('id_penguji', $request->penguji)
+                  ->where('id_jenis_pelatihan', $jenisPelatihanId)
+            );
+        }
+
+        // ── Filter kategori & wilayah ─────────────────────────────
         $this->applyKategoriWilayahFilter($query, $request);
 
+        // ── Search ────────────────────────────────────────────────
         if ($request->filled('search')) {
             $term = $request->search;
             $query->where(fn($q) =>
@@ -655,22 +621,71 @@ class NilaiController extends Controller
             );
         }
 
-        $pesertaList = $query->orderBy('ndh')->get();
+        // ── Sorting dengan prioritas per role ─────────────────────
+        //
+        // Penguji → peserta kelompoknya muncul duluan
+        // PIC     → peserta angkatannya muncul duluan
+        // Lainnya → urut NDH biasa
+        //
+        if ($roleName === 'penguji' && $ctx['pesertaKelompokIds']->isNotEmpty()) {
 
-        $rekapData = $pesertaList->map(function ($p) use (
-            $jenisPelatihanId, $jenisNilaiList, $indikatorPerJenis
+            $prioritasIds = $ctx['pesertaKelompokIds']->toArray();
+            $query->selectRaw(
+                'peserta.*, CASE WHEN peserta.id IN (' .
+                implode(',', array_map('intval', $prioritasIds)) .
+                ') THEN 0 ELSE 1 END AS prioritas_urut'
+            )->orderBy('prioritas_urut')->orderBy('ndh');
+
+        } elseif ($roleName === 'pic' && $ctx['pesertaPicIds']->isNotEmpty()) {
+
+            $prioritasIds = $ctx['pesertaPicIds']->toArray();
+            $query->selectRaw(
+                'peserta.*, CASE WHEN peserta.id IN (' .
+                implode(',', array_map('intval', $prioritasIds)) .
+                ') THEN 0 ELSE 1 END AS prioritas_urut'
+            )->orderBy('prioritas_urut')->orderBy('ndh');
+
+        } else {
+            $query->orderBy('ndh');
+        }
+
+        // ── Pagination (20 per halaman) ───────────────────────────
+        $pesertaPaginated = $query->paginate(20)->withQueryString();
+
+        // ── Kumpulkan ID peserta halaman ini saja ─────────────────
+        $pesertaIds = $pesertaPaginated->pluck('id');
+
+        // ── Ambil semua nilai & catatan sekaligus ─────────────────
+        $semuaNilai = NilaiPeserta::with('indikatorNilai.jenisNilai')
+            ->whereIn('id_peserta', $pesertaIds)
+            ->whereHas('indikatorNilai.jenisNilai', fn($q) => $q->where('id_jenis_pelatihan', $jenisPelatihanId))
+            ->get()
+            ->groupBy('id_peserta');
+
+        $semuaCatatan = CatatanNilai::whereIn('id_peserta', $pesertaIds)
+            ->whereHas('jenisNilai', fn($q) => $q->where('id_jenis_pelatihan', $jenisPelatihanId))
+            ->get()
+            ->groupBy('id_peserta');
+
+        $semuaKelompok = DB::table('kelompok_pesertas')
+            ->join('kelompoks', 'kelompoks.id', '=', 'kelompok_pesertas.id_kelompok')
+            ->whereIn('kelompok_pesertas.id_peserta', $pesertaIds)
+            ->where('kelompoks.id_jenis_pelatihan', $jenisPelatihanId)
+            ->select('kelompok_pesertas.id_peserta', 'kelompoks.id', 'kelompoks.nama_kelompok', 'kelompoks.id_penguji')
+            ->get()
+            ->keyBy('id_peserta');
+
+        // ── Susun rekapData per halaman ───────────────────────────
+        $rekapData = $pesertaPaginated->map(function ($p) use (
+            $jenisPelatihanId, $jenisNilaiList, $indikatorPerJenis,
+            $semuaNilai, $semuaCatatan, $semuaKelompok,
+            $ctx, $roleName
         ) {
-            $kelompok = Kelompok::whereHas('peserta', fn($q) => $q->where('peserta.id', $p->id))
-                ->where('id_jenis_pelatihan', $jenisPelatihanId)->first();
-
-            $nilaiList = NilaiPeserta::where('id_peserta', $p->id)
-                ->with('indikatorNilai.jenisNilai')
-                ->whereHas('indikatorNilai.jenisNilai', fn($q) => $q->where('id_jenis_pelatihan', $jenisPelatihanId))
-                ->get();
-
-            $catatanList = CatatanNilai::where('id_peserta', $p->id)
-                ->whereHas('jenisNilai', fn($q) => $q->where('id_jenis_pelatihan', $jenisPelatihanId))
-                ->get()->keyBy('id_jenis_nilai')->map(fn($c) => $c->catatan);
+            $kelompokRow = $semuaKelompok->get($p->id);
+            $nilaiList   = $semuaNilai->get($p->id, collect());
+            $catatanList = $semuaCatatan->get($p->id, collect())
+                ->keyBy('id_jenis_nilai')
+                ->map(fn($c) => $c->catatan);
 
             $nilaiPerJenis  = [];
             $totalNilai     = 0;
@@ -711,24 +726,32 @@ class NilaiController extends Controller
                 $totalIndikator += ($indikatorPerJenis[$jn->id] ?? 0);
             }
 
+            // ── Flag prioritas per role ───────────────────────────
+            $isPrioritasUser = match ($roleName) {
+                'penguji' => $ctx['pesertaKelompokIds']->contains($p->id),
+                'pic'     => $ctx['pesertaPicIds']->contains($p->id),
+                default   => false,
+            };
+
             return [
-                'peserta_id'      => $p->id,
-                'nama'            => $p->nama_lengkap,
-                'nip'             => $p->nip_nrp,
-                'ndh'             => $p->ndh,
-                'kelompok'        => $kelompok?->nama_kelompok,
-                'nilai_per_jenis' => $nilaiPerJenis,
-                'catatan'         => $catatanList,
-                'total_nilai'     => round($totalNilai, 2),
-                'kelengkapan'     => $totalIndikator > 0
+                'peserta_id'        => $p->id,
+                'nama'              => $p->nama_lengkap,
+                'nip'               => $p->nip_nrp,
+                'ndh'               => $p->ndh,
+                'kelompok'          => $kelompokRow?->nama_kelompok,
+                'nilai_per_jenis'   => $nilaiPerJenis,
+                'catatan'           => $catatanList,
+                'total_nilai'       => round($totalNilai, 2),
+                'kelengkapan'       => $totalIndikator > 0
                     ? round(($totalTerisi / $totalIndikator) * 100) : 0,
+                'is_prioritas_user' => $isPrioritasUser,
             ];
         });
 
         return view('admin.nilai.rekap', compact(
             'jenis', 'jenisPelatihan', 'rekapData',
             'jenisNilaiList', 'angkatanRomawi', 'tahunList', 'kelompokList',
-            'wilayahList'
+            'wilayahList', 'pengujiList', 'pesertaPaginated'
         ));
     }
 }

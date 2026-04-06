@@ -238,6 +238,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [CoachController::class, 'destroy'])->name('destroy')->middleware('permission:coach.delete');
     });
 
+
+    // Route tambahan untuk Penguji
+    Route::get('penguji/export', [PengujiController::class, 'export'])->name('penguji.export');
+    Route::get('penguji/{id}/whatsapp', [PengujiController::class, 'sendWhatsapp'])->name('penguji.whatsapp');
+    Route::post('penguji/{id}/generate-password', [PengujiController::class, 'generatePassword'])->name('penguji.generate-password');
     // Master Penguji Routes
     Route::prefix('penguji')->name('penguji.')->group(function () {
         Route::get('/', [PengujiController::class, 'index'])->name('index')->middleware('permission:penguji.read');
