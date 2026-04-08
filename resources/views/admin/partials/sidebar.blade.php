@@ -151,7 +151,7 @@
                         </a>
                     @endif
 
-                    @unless($isPic)
+                    @unless($isPic || $isEvaluator)
                         <a href="{{ route('visi-misi.index') }}" class="submenu-link">
                             <i class="fas fa-bullseye me-2"></i> Visi & Misi
                         </a>
