@@ -85,6 +85,7 @@
                                 value="{{ old('nama', $isEdit ? $coach->nama : '') }}"
                                 placeholder="Masukkan nama lengkap coach" required>
                             @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div id="namaFeedback" class="mt-1" style="font-size:.85rem;display:none;"></div>
                             <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>Nama lengkap sesuai dokumen resmi</small>
                         </div>
 
@@ -488,6 +489,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 bootstrap.Alert.getOrCreateInstance(a).close();
         }, 5000);
     });
+
+    // Cek duplikat nama via AJAX
+const namaEl       = document.getElementById('nama');
+const namaFeedback = document.getElementById('namaFeedback');
+const coachId      = {{ $isEdit ? $coach->id : 'null' }};
+
+let namaTimer;
+namaEl.addEventListener('input', function () {
+    clearTimeout(namaTimer);
+    const val = namaEl.value.trim();
+    if (val.length < 3) { namaFeedback.style.display = 'none'; return; }
+
+    namaTimer = setTimeout(() => {
+        fetch(`{{ route('coach.check-nama') }}?nama=${encodeURIComponent(val)}&ignore_id=${coachId ?? ''}`)
+            .then(r => r.json())
+            .then(data => {
+                namaFeedback.style.display = 'block';
+                if (data.exists) {
+                    namaFeedback.innerHTML = '<i class="fas fa-times-circle text-danger me-1"></i><span class="text-danger">Nama coach ini sudah terdaftar.</span>';
+                    namaEl.classList.add('is-invalid');
+                } else {
+                    namaFeedback.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i><span class="text-success">Nama tersedia.</span>';
+                    namaEl.classList.remove('is-invalid');
+                }
+            });
+    }, 500);
+});
 
     // Format NPWP
     document.getElementById('npwp').addEventListener('input', function (e) {

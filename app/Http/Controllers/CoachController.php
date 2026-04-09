@@ -66,7 +66,7 @@ class CoachController extends Controller
         $buatAkun = $request->has('buat_akun');
 
         $rules = [
-            'nama'           => 'required|string|max:200',
+            'nama' => 'required|string|max:200|unique:coaches,nama',
             'nip'            => 'nullable|string|max:200|unique:coaches,nip',
             'jabatan'        => 'nullable|string|max:200',
             'nomor_rekening' => 'nullable|string|max:200',
@@ -84,6 +84,7 @@ class CoachController extends Controller
         }
 
         $request->validate($rules, array_merge($this->messages('coach'), [
+            'nama.unique'      => 'Nama coach "' . $request->nama . '" sudah terdaftar.',
             'nip.unique'       => 'NIP "' . $request->nip . '" sudah terdaftar pada coach lain.',
             'email.unique'     => 'Email sudah digunakan, gunakan email lain.',
             'password.required'   => 'Password wajib diisi jika membuat akun.',
@@ -140,7 +141,7 @@ class CoachController extends Controller
         $buatAkun = $request->has('buat_akun');
 
         $rules = [
-            'nama'           => 'required|string|max:200',
+            'nama' => 'required|string|max:200|unique:coaches,nama,' . $id, 
             'nip'            => 'nullable|string|max:200|unique:coaches,nip,' . $id,
             'jabatan'        => 'nullable|string|max:200',
             'nomor_rekening' => 'nullable|string|max:200',
@@ -165,6 +166,7 @@ class CoachController extends Controller
         }
 
         $request->validate($rules, array_merge($this->messages('coach'), [
+            'nama.unique'      => 'Nama coach "' . $request->nama . '" sudah terdaftar.',
             'nip.unique'      => 'NIP "' . $request->nip . '" sudah terdaftar pada coach lain.',
             'email.unique'    => 'Email sudah digunakan, gunakan email lain.',
             'password.min'       => 'Password minimal 8 karakter.',
@@ -278,6 +280,17 @@ class CoachController extends Controller
                 ->with('error', 'Gagal menghapus coach: ' . $e->getMessage());
         }
     }
+
+    public function checkNama(Request $request)
+{
+    $query = Coach::where('nama', $request->nama);
+    
+    if ($request->filled('ignore_id')) {
+        $query->where('id', '!=', $request->ignore_id);
+    }
+
+    return response()->json(['exists' => $query->exists()]);
+}
 
     private function messages(string $role): array
     {

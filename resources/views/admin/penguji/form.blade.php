@@ -85,6 +85,7 @@
                                 value="{{ old('nama', $isEdit ? $penguji->nama : '') }}"
                                 placeholder="Masukkan nama lengkap penguji" required>
                             @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div id="namaFeedback" class="mt-1" style="font-size:.85rem;display:none;"></div> {{-- ✅ tambah ini --}}
                             <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>Nama lengkap sesuai dokumen resmi</small>
                         </div>
 
@@ -347,6 +348,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const passEl  = document.getElementById('password');
     const confEl  = document.getElementById('password_confirmation');
     const emailEl = document.getElementById('email');
+
+    // Cek duplikat nama via AJAX
+    const namaEl       = document.getElementById('nama');
+    const namaFeedback = document.getElementById('namaFeedback');
+    const pengujiId    = {{ $isEdit ? $penguji->id : 'null' }};
+
+    let namaTimer;
+    namaEl.addEventListener('input', function () {
+        clearTimeout(namaTimer);
+        const val = namaEl.value.trim();
+        if (val.length < 3) { namaFeedback.style.display = 'none'; return; }
+
+        namaTimer = setTimeout(() => {
+            fetch(`{{ route('penguji.check-nama') }}?nama=${encodeURIComponent(val)}&ignore_id=${pengujiId ?? ''}`)
+                .then(r => r.json())
+                .then(data => {
+                    namaFeedback.style.display = 'block';
+                    if (data.exists) {
+                        namaFeedback.innerHTML = '<i class="fas fa-times-circle text-danger me-1"></i><span class="text-danger">Nama penguji ini sudah terdaftar.</span>';
+                        namaEl.classList.add('is-invalid');
+                    } else {
+                        namaFeedback.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i><span class="text-success">Nama tersedia.</span>';
+                        namaEl.classList.remove('is-invalid');
+                    }
+                });
+        }, 500);
+    });
 
     // Auto-hide alerts
     document.querySelectorAll('.alert').forEach(a => {

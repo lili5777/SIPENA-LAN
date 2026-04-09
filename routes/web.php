@@ -229,6 +229,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Master Coach Routes
+    Route::get('coach/check-nama', [CoachController::class, 'checkNama'])->name('coach.check-nama');
     Route::prefix('coach')->name('coach.')->group(function () {
         Route::get('/', [CoachController::class, 'index'])->name('index')->middleware('permission:coach.read');
         Route::get('/create', [CoachController::class, 'create'])->name('create')->middleware('permission:coach.create');
@@ -243,6 +244,7 @@ Route::middleware('auth')->group(function () {
     Route::get('penguji/export', [PengujiController::class, 'export'])->name('penguji.export');
     Route::get('penguji/{id}/whatsapp', [PengujiController::class, 'sendWhatsapp'])->name('penguji.whatsapp');
     Route::post('penguji/{id}/generate-password', [PengujiController::class, 'generatePassword'])->name('penguji.generate-password');
+    Route::get('penguji/check-nama', [PengujiController::class, 'checkNama'])->name('penguji.check-nama');
     // Master Penguji Routes
     Route::prefix('penguji')->name('penguji.')->group(function () {
         Route::get('/', [PengujiController::class, 'index'])->name('index')->middleware('permission:penguji.read');

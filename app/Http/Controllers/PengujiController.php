@@ -68,7 +68,7 @@ class PengujiController extends Controller
         $buatAkun = $request->has('buat_akun');
 
         $rules = [
-            'nama'           => 'required|string|max:200',
+            'nama' => 'required|string|max:200|unique:pengujis,nama',
             'nip'            => 'nullable|string|max:200|unique:pengujis,nip',
             'jabatan'        => 'nullable|string|max:200',
             'nomor_rekening' => 'nullable|string|max:200',
@@ -86,6 +86,7 @@ class PengujiController extends Controller
         }
 
         $request->validate($rules, array_merge($this->messages('penguji'), [
+            'nama.unique'         => 'Nama penguji "' . $request->nama . '" sudah terdaftar.',
             'nip.unique'          => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
             'email.unique'        => 'Email sudah digunakan, gunakan email lain.',
             'password.required'   => 'Password wajib diisi jika membuat akun.',
@@ -143,7 +144,7 @@ class PengujiController extends Controller
         $buatAkun = $request->has('buat_akun');
 
         $rules = [
-            'nama'           => 'required|string|max:200',
+            'nama' => 'required|string|max:200|unique:pengujis,nama,' . $id,
             'nip'            => 'nullable|string|max:200|unique:pengujis,nip,' . $id,
             'jabatan'        => 'nullable|string|max:200',
             'nomor_rekening' => 'nullable|string|max:200',
@@ -166,6 +167,7 @@ class PengujiController extends Controller
         }
 
         $request->validate($rules, array_merge($this->messages('penguji'), [
+            'nama.unique'         => 'Nama penguji "' . $request->nama . '" sudah terdaftar.',
             'nip.unique'         => 'NIP "' . $request->nip . '" sudah terdaftar pada penguji lain.',
             'email.unique'       => 'Email sudah digunakan, gunakan email lain.',
             'password.min'       => 'Password minimal 5 karakter.',
@@ -369,5 +371,16 @@ class PengujiController extends Controller
             'golongan.max'          => 'Golongan maksimal 50 karakter.',
             'pangkat.max'           => 'Pangkat maksimal 100 karakter.',
         ];
+    }
+
+    public function checkNama(Request $request)
+    {
+        $query = Penguji::where('nama', $request->nama);
+
+        if ($request->filled('ignore_id')) {
+            $query->where('id', '!=', $request->ignore_id);
+        }
+
+        return response()->json(['exists' => $query->exists()]);
     }
 }

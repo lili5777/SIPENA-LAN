@@ -184,8 +184,9 @@
         </div>
     </div>
 
-    {{-- Info prioritas (tampil untuk penguji dan pic) --}}
+    {{-- ── Info prioritas & keterangan kolom terbatas ── --}}
     @php $roleName = auth()->user()->role->name ?? ''; @endphp
+
     @if($roleName === 'penguji')
         <div class="alert alert-info d-flex align-items-center shadow-sm mb-3 py-2" role="alert">
             <i class="fas fa-info-circle me-2 flex-shrink-0"></i>
@@ -193,6 +194,15 @@
                 Baris dengan strip <span class="badge bg-primary" style="font-size:.7rem;">Kelompok Anda</span>
                 adalah peserta dari kelompok yang Anda tangani, ditampilkan di bagian atas.
                 Peserta lainnya juga ditampilkan untuk referensi.
+                <strong class="ms-1">Kolom yang ditampilkan hanya nilai yang sesuai dengan wewenang Anda.</strong>
+            </small>
+        </div>
+    @elseif($roleName === 'coach')
+        <div class="alert alert-info d-flex align-items-center shadow-sm mb-3 py-2" role="alert">
+            <i class="fas fa-info-circle me-2 flex-shrink-0"></i>
+            <small>
+                Rekap nilai ditampilkan sesuai dengan wewenang penilaian Anda.
+                <strong>Kolom yang ditampilkan hanya nilai yang sesuai dengan wewenang Anda.</strong>
             </small>
         </div>
     @elseif($roleName === 'pic')
@@ -230,16 +240,23 @@
                             <th style="min-width:200px">Peserta</th>
                             <th style="min-width:55px">NDH</th>
                             <th style="min-width:140px">Kelompok</th>
+
+                            {{-- Kolom jenis nilai — sudah terfilter dari controller --}}
                             @foreach($jenisNilaiList as $jn)
                                 <th class="text-center" style="min-width:120px">
                                     <div class="fw-semibold">{{ $jn->name }}</div>
                                     <small class="text-muted fw-normal">Bobot {{ $jn->bobot }}%</small>
                                 </th>
                             @endforeach
-                            <th class="text-center" style="min-width:100px">
-                                <div class="fw-semibold">Total</div>
-                                <small class="text-muted fw-normal">Maks. 100</small>
-                            </th>
+
+                            {{-- Kolom Total: hanya tampil jika $showTotal = true --}}
+                            @if($showTotal)
+                                <th class="text-center" style="min-width:100px">
+                                    <div class="fw-semibold">Total</div>
+                                    <small class="text-muted fw-normal">Maks. 100</small>
+                                </th>
+                            @endif
+
                             <th class="text-center" style="min-width:100px">Kelengkapan</th>
                         </tr>
                     </thead>
@@ -247,11 +264,7 @@
                         @forelse($rekapData as $index => $row)
                             <tr class="{{ $row['is_prioritas_user'] ? 'row-prioritas' : '' }}">
                                 <td class="ps-4 fw-semibold">
-                                    {{-- Nomor urut global berdasarkan paginasi --}}
                                     {{ $pesertaPaginated->firstItem() + $index }}
-                                    @if($row['is_prioritas_user'])
-                                        {{-- Strip prioritas di kiri --}}
-                                    @endif
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
@@ -273,6 +286,7 @@
                                     <small class="fw-semibold">{{ $row['kelompok'] ?? '-' }}</small>
                                 </td>
 
+                                {{-- Sel nilai per jenis — sudah terfilter dari controller --}}
                                 @foreach($jenisNilaiList as $jn)
                                     @php
                                         $nilaiJn     = $row['nilai_per_jenis'][$jn->id] ?? null;
@@ -304,36 +318,39 @@
                                     </td>
                                 @endforeach
 
-                                <td class="text-center">
-                                    @php
-                                        $total   = $row['total_nilai'];
-                                        $bgClass = $total >= 80
-                                            ? 'bg-success'
-                                            : ($total >= 60 ? 'bg-warning text-dark' : ($total > 0 ? 'bg-danger' : 'bg-secondary'));
+                                {{-- Sel Total: hanya tampil jika $showTotal = true --}}
+                                @if($showTotal)
+                                    <td class="text-center">
+                                        @php
+                                            $total   = $row['total_nilai'];
+                                            $bgClass = $total >= 80
+                                                ? 'bg-success'
+                                                : ($total >= 60 ? 'bg-warning text-dark' : ($total > 0 ? 'bg-danger' : 'bg-secondary'));
 
-                                        $nilaiPerJenisJson = json_encode(
-                                            collect($row['nilai_per_jenis'])->map(fn($v) => [
-                                                'sum_konversi'     => $v['sum_konversi'],
-                                                'detail_indikator' => $v['detail_indikator'] ?? [],
-                                            ])
-                                        );
-                                        $jenisListJson = json_encode(
-                                            $jenisNilaiList->map(fn($jn) => [
-                                                'id'    => $jn->id,
-                                                'name'  => $jn->name,
-                                                'bobot' => $jn->bobot,
-                                            ])->values()
-                                        );
-                                    @endphp
-                                    <button type="button"
-                                        class="btn-total-detail {{ $bgClass }}"
-                                        data-peserta="{{ $row['nama'] }}"
-                                        data-total="{{ number_format($total, 2) }}"
-                                        data-nilai-per-jenis="{{ htmlspecialchars($nilaiPerJenisJson, ENT_QUOTES) }}"
-                                        data-jenis-list="{{ htmlspecialchars($jenisListJson, ENT_QUOTES) }}">
-                                        {{ number_format($total, 2) }}
-                                    </button>
-                                </td>
+                                            $nilaiPerJenisJson = json_encode(
+                                                collect($row['nilai_per_jenis'])->map(fn($v) => [
+                                                    'sum_konversi'     => $v['sum_konversi'],
+                                                    'detail_indikator' => $v['detail_indikator'] ?? [],
+                                                ])
+                                            );
+                                            $jenisListJson = json_encode(
+                                                $jenisNilaiList->map(fn($jn) => [
+                                                    'id'    => $jn->id,
+                                                    'name'  => $jn->name,
+                                                    'bobot' => $jn->bobot,
+                                                ])->values()
+                                            );
+                                        @endphp
+                                        <button type="button"
+                                            class="btn-total-detail {{ $bgClass }}"
+                                            data-peserta="{{ $row['nama'] }}"
+                                            data-total="{{ number_format($total, 2) }}"
+                                            data-nilai-per-jenis="{{ htmlspecialchars($nilaiPerJenisJson, ENT_QUOTES) }}"
+                                            data-jenis-list="{{ htmlspecialchars($jenisListJson, ENT_QUOTES) }}">
+                                            {{ number_format($total, 2) }}
+                                        </button>
+                                    </td>
+                                @endif
 
                                 <td class="text-center">
                                     @php
@@ -350,7 +367,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ 5 + $jenisNilaiList->count() }}" class="text-center py-5">
+                                {{-- Sesuaikan colspan: +2 (no, peserta, ndh, kelompok) + jenis + total (jika ada) + kelengkapan --}}
+                                <td colspan="{{ 5 + $jenisNilaiList->count() + ($showTotal ? 1 : 0) }}" class="text-center py-5">
                                     <i class="fas fa-chart-bar fa-4x mb-3" style="color: #e9ecef;"></i>
                                     <h5 class="text-muted mb-2">Belum ada data nilai</h5>
                                     <p class="text-muted">Belum ada peserta yang dinilai</p>
@@ -371,10 +389,12 @@
                                     <span class="text-primary fw-bold">{{ number_format($avgJn, 2) }}</span>
                                 </td>
                             @endforeach
-                            @php $avgTotal = $rekapData->avg('total_nilai'); @endphp
-                            <td class="text-center">
-                                <span class="badge bg-primary px-2 py-1">{{ number_format($avgTotal, 2) }}</span>
-                            </td>
+                            @if($showTotal)
+                                @php $avgTotal = $rekapData->avg('total_nilai'); @endphp
+                                <td class="text-center">
+                                    <span class="badge bg-primary px-2 py-1">{{ number_format($avgTotal, 2) }}</span>
+                                </td>
+                            @endif
                             <td></td>
                         </tr>
                     </tfoot>
@@ -489,7 +509,8 @@
         </div>
     </div>
 
-    {{-- ===== MODAL TOTAL NILAI ===== --}}
+    {{-- ===== MODAL TOTAL NILAI (hanya untuk admin/pic) ===== --}}
+    @if($showTotal)
     <div class="modal fade" id="modalTotal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg overflow-hidden">
@@ -514,6 +535,7 @@
             </div>
         </div>
     </div>
+    @endif
 
 @endsection
 
@@ -566,9 +588,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ── Modal detail & total ──────────────────────────────────
+    // ── Modal detail nilai ────────────────────────────────────
     const modalDetail = new bootstrap.Modal(document.getElementById('modalDetail'));
-    const modalTotal  = new bootstrap.Modal(document.getElementById('modalTotal'));
 
     document.querySelectorAll('.btn-nilai-detail').forEach(btn => {
         btn.addEventListener('click', function () {
@@ -587,21 +608,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    document.querySelectorAll('.btn-total-detail').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const peserta = this.dataset.peserta;
-            const total   = this.dataset.total;
-            const decodeHTML = str => { const txt = document.createElement('textarea'); txt.innerHTML = str; return txt.value; };
-            const nilaiPerJenis = JSON.parse(decodeHTML(this.dataset.nilaiPerJenis || '{}'));
-            const jenisList     = JSON.parse(decodeHTML(this.dataset.jenisList     || '[]'));
+    // ── Modal total (hanya ada di DOM jika showTotal = true) ──
+    const elModalTotal = document.getElementById('modalTotal');
+    if (elModalTotal) {
+        const modalTotal = new bootstrap.Modal(elModalTotal);
 
-            document.getElementById('modalTotalTitle').textContent    = 'Rincian Total Nilai';
-            document.getElementById('modalTotalSubtitle').textContent = peserta;
-            document.getElementById('modalTotalBody').innerHTML       = buildTotalHTML(nilaiPerJenis, jenisList, total);
-            modalTotal.show();
+        document.querySelectorAll('.btn-total-detail').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const peserta = this.dataset.peserta;
+                const total   = this.dataset.total;
+                const decodeHTML = str => { const txt = document.createElement('textarea'); txt.innerHTML = str; return txt.value; };
+                const nilaiPerJenis = JSON.parse(decodeHTML(this.dataset.nilaiPerJenis || '{}'));
+                const jenisList     = JSON.parse(decodeHTML(this.dataset.jenisList     || '[]'));
+
+                document.getElementById('modalTotalTitle').textContent    = 'Rincian Total Nilai';
+                document.getElementById('modalTotalSubtitle').textContent = peserta;
+                document.getElementById('modalTotalBody').innerHTML       = buildTotalHTML(nilaiPerJenis, jenisList, total);
+                modalTotal.show();
+            });
         });
-    });
+    }
 
+    // ── Builder HTML modal detail indikator ──────────────────
     function buildDetailHTML(detail, sum, bobot, catatan, jenisNama) {
         if (!detail || detail.length === 0) {
             return `<div class="text-center py-4 text-muted">
@@ -696,6 +724,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return html;
     }
 
+    // ── Builder HTML modal total ──────────────────────────────
     function buildTotalHTML(nilaiPerJenis, jenisList, total) {
         let html = `
             <div class="text-center mb-4">

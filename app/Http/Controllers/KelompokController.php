@@ -20,30 +20,55 @@ use Illuminate\Validation\Rule;
 class KelompokController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Kelompok::with(['jenisPelatihan', 'angkatan', 'mentor', 'coach', 'penguji', 'evaluator']);
+{
+    $query = Kelompok::with(['jenisPelatihan', 'angkatan', 'mentor', 'coach', 'penguji', 'evaluator']);
 
-        if ($request->filled('jenis_pelatihan')) {
-            $query->where('id_jenis_pelatihan', $request->jenis_pelatihan);
-        }
-        if ($request->filled('angkatan')) {
-            $query->where('id_angkatan', $request->angkatan);
-        }
-        if ($request->filled('tahun')) {
-            $query->where('tahun', $request->tahun);
-        }
-        if ($request->filled('search')) {
-            $query->where('nama_kelompok', 'like', '%' . $request->search . '%');
-        }
-
-        $kelompok = $query->orderBy('tahun', 'desc')->orderBy('nama_kelompok')->paginate(10)->withQueryString();
-
-        $jenisPelatihan = JenisPelatihan::where('aktif', true)->get();
-        $angkatanList   = $this->sortAngkatan(Angkatan::orderBy('tahun', 'desc')->get());
-        $tahunList      = Kelompok::distinct()->orderBy('tahun', 'desc')->pluck('tahun');
-
-        return view('admin.kelompok.index', compact('kelompok', 'jenisPelatihan', 'angkatanList', 'tahunList'));
+    if ($request->filled('jenis_pelatihan')) {
+        $query->where('id_jenis_pelatihan', $request->jenis_pelatihan);
     }
+    if ($request->filled('angkatan')) {
+        $query->where('id_angkatan', $request->angkatan);
+    }
+    if ($request->filled('tahun')) {
+        $query->where('tahun', $request->tahun);
+    }
+    if ($request->filled('search')) {
+        $query->where('nama_kelompok', 'like', '%' . $request->search . '%');
+    }
+
+    // Ambil semua data dulu tanpa paginate, lalu sort by angka romawi
+    $allData = $query->get(); 
+
+    $sorted = $allData->sortBy(function ($item) {
+    preg_match('/([IVXLCDM]+)$/i', trim($item->angkatan->nama_angkatan ?? ''), $m);
+    $angkatanOrder = $m ? $this->romanToInt($m[1]) : 9999;
+
+    // Ekstrak angka dari nama kelompok (misal "Kelompok 1" → 1)
+    preg_match('/(\d+)/', $item->nama_kelompok ?? '', $n);
+    $kelompokOrder = $n ? (int)$n[1] : 9999;
+
+    return [$item->tahun, $angkatanOrder, $kelompokOrder];
+})->values();
+
+    // Manual paginate setelah sort
+    $perPage     = 10;
+    $currentPage = $request->input('page', 1);
+    $paginatedItems = $sorted->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+    $kelompok = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedItems,
+        $sorted->count(),
+        $perPage,
+        $currentPage,
+        ['path' => $request->url(), 'query' => $request->query()]
+    );
+
+    $jenisPelatihan = JenisPelatihan::where('aktif', true)->get();
+    $angkatanList   = $this->sortAngkatan(Angkatan::orderBy('tahun', 'desc')->get());
+    $tahunList      = Kelompok::distinct()->orderBy('tahun', 'desc')->pluck('tahun');
+
+    return view('admin.kelompok.index', compact('kelompok', 'jenisPelatihan', 'angkatanList', 'tahunList'));
+}
 
     public function create()
     {
