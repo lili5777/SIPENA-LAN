@@ -73,6 +73,24 @@ class NilaiPesertaExport implements WithEvents, WithTitle
     // =========================================================
     // HELPER — kualifikasi
     // =========================================================
+    private function romawToInt(string $str): int
+{
+    // Ekstrak angka romawi dari string seperti "Angkatan XIV"
+    preg_match('/\b([IVXLCDM]+)\b/i', $str, $matches);
+    $roman = strtoupper($matches[1] ?? '');
+
+    $map    = ['I'=>1,'V'=>5,'X'=>10,'L'=>50,'C'=>100,'D'=>500,'M'=>1000];
+    $result = 0;
+    $len    = strlen($roman);
+
+    for ($i = 0; $i < $len; $i++) {
+        $curr = $map[$roman[$i]] ?? 0;
+        $next = $map[$roman[$i + 1] ?? ''] ?? 0;
+        $result += $curr < $next ? -$curr : $curr;
+    }
+
+    return $result;
+}
     private function getKualifikasi(float $total): array
     {
         if ($total > 100) {
@@ -118,7 +136,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
         if (!empty($this->angkatan)) {
             $namaAngkatan = 'Angkatan ' . $this->angkatan;
             $query->whereHas('pendaftaran.angkatan', fn($q) =>
-                $q->where('nama_angkatan', 'LIKE', "%{$namaAngkatan}%")
+                $q->where('nama_angkatan', $namaAngkatan)
             );
         }
 
@@ -163,7 +181,20 @@ class NilaiPesertaExport implements WithEvents, WithTitle
             );
         }
 
-        $pesertaList = $query->orderBy('ndh')->get();
+        $pesertaList = $query->with([
+    'pendaftaran.angkatan',
+    'kelompok' => fn($q) => $q->where('id_jenis_pelatihan', $this->jenisPelatihanId),
+])->get()->sortBy([
+    // 1. Urutkan angkatan: konversi romawi → integer dulu
+    fn($a, $b) => $this->romawToInt(
+        optional(optional($a->pendaftaran->first())->angkatan)->nama_angkatan ?? ''
+    ) <=> $this->romawToInt(
+        optional(optional($b->pendaftaran->first())->angkatan)->nama_angkatan ?? ''
+    ),
+    // 2. Urutkan NDH secara numerik
+    fn($a, $b) => (int) filter_var($a->ndh, FILTER_SANITIZE_NUMBER_INT)
+                  <=> (int) filter_var($b->ndh, FILTER_SANITIZE_NUMBER_INT),
+])->values();
 
         $rows = [];
         foreach ($pesertaList as $p) {
