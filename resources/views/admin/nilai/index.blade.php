@@ -4,7 +4,6 @@
 
 @section('content')
 
-    <!-- Page Header -->
     <div class="page-header rounded-3 mb-4"
         style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%); padding: 2rem;">
         <div class="row align-items-center">
@@ -30,7 +29,6 @@
         </div>
     </div>
 
-    <!-- Alert -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert">
             <i class="fas fa-check-circle fa-lg me-3"></i>
@@ -39,7 +37,6 @@
         </div>
     @endif
 
-    {{-- Info konteks role --}}
     @php $roleName = auth()->user()->role->name ?? ''; @endphp
     @if(in_array($roleName, ['coach', 'penguji']))
         <div class="alert alert-info d-flex align-items-center shadow-sm mb-4 py-2" role="alert">
@@ -56,7 +53,6 @@
         </div>
     @endif
 
-    {{-- Info bar link laporan --}}
     @if(isset($kelompokFilter) && $kelompokFilter && $kelompokFilter->link_laporan)
         <div class="card border-0 shadow-sm mb-4"
             style="border-left: 4px solid #285496 !important; border-radius: 10px !important;">
@@ -101,8 +97,6 @@
         <div class="card-body p-3">
             <form action="{{ route('nilai.index', ['jenis' => $jenis]) }}" method="GET">
                 <div class="row g-2 align-items-end">
-
-                    {{-- Angkatan --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-layer-group me-1"></i> Angkatan
@@ -116,8 +110,6 @@
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Tahun --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-calendar-alt me-1"></i> Tahun
@@ -131,8 +123,6 @@
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Kelompok --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-users me-1"></i> Kelompok
@@ -146,8 +136,6 @@
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Kategori --}}
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-tag me-1"></i> Kategori
@@ -158,8 +146,6 @@
                             <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>FASILITASI</option>
                         </select>
                     </div>
-
-                    {{-- Wilayah (muncul hanya jika FASILITASI) --}}
                     <div class="col-md-2 col-sm-6" id="filterWilayahWrapper"
                         style="{{ request('kategori') == 'FASILITASI' ? '' : 'display:none' }}">
                         <label class="form-label small text-muted mb-1">
@@ -178,8 +164,6 @@
                             @endforeach
                         </datalist>
                     </div>
-
-                    {{-- Cari Peserta --}}
                     <div class="col-md-2 col-sm-8">
                         <label class="form-label small text-muted mb-1">
                             <i class="fas fa-search me-1"></i> Cari Peserta
@@ -187,8 +171,6 @@
                         <input type="text" name="search" class="form-control form-control-sm"
                             placeholder="Nama atau NIP..." value="{{ request('search') }}">
                     </div>
-
-                    {{-- Tombol --}}
                     <div class="col-md-2 col-sm-4">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary btn-sm flex-fill">
@@ -200,10 +182,8 @@
                             </a>
                         </div>
                     </div>
-
                 </div>
 
-                {{-- Badge filter aktif --}}
                 @php
                     $activeFilters = array_filter([
                         'Angkatan'  => request('angkatan')  ? 'Angkatan ' . request('angkatan')  : null,
@@ -224,7 +204,6 @@
                         @endforeach
                     </div>
                 @endif
-
             </form>
         </div>
     </div>
@@ -263,7 +242,7 @@
                                 $persen          = $totalInd > 0 ? round(($sudahDinilai / $totalInd) * 100) : 0;
                                 $bisaDinilaiUser = $item->bisaDinilaiUser ?? true;
                             @endphp
-                            <tr>
+                            <tr data-peserta-row="{{ $item->id }}">
                                 <td class="ps-4 fw-semibold">{{ $peserta->firstItem() + $index }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -312,17 +291,23 @@
                                 </td>
                                 <td>
                                     @if($totalInd > 0)
-                                        <div class="d-flex align-items-center gap-2">
+                                        {{-- FIX #1: tambahkan data attributes dan id untuk update realtime --}}
+                                        <div class="d-flex align-items-center gap-2"
+                                            data-progress-peserta="{{ $item->id }}">
                                             <div class="flex-grow-1">
                                                 <div class="progress" style="height:6px; border-radius:4px;">
                                                     <div class="progress-bar
                                                         {{ $persen >= 100 ? 'bg-success' : ($persen > 0 ? 'bg-primary' : 'bg-secondary') }}"
+                                                        id="progressbar-{{ $item->id }}"
                                                         style="width:{{ $persen }}%"></div>
                                                 </div>
                                             </div>
-                                            <small class="text-muted fw-semibold" style="min-width:36px">{{ $persen }}%</small>
+                                            <small class="text-muted fw-semibold"
+                                                id="progresspct-{{ $item->id }}"
+                                                style="min-width:36px">{{ $persen }}%</small>
                                         </div>
-                                        <small class="text-muted">{{ $sudahDinilai }}/{{ $totalInd }} indikator</small>
+                                        <small class="text-muted"
+                                            id="progresslabel-{{ $item->id }}">{{ $sudahDinilai }}/{{ $totalInd }} indikator</small>
                                     @else
                                         <span class="text-muted small">-</span>
                                     @endif
@@ -332,6 +317,7 @@
                                         class="btn btn-sm btn-action btn-primary btn-nilai"
                                         data-peserta-id="{{ $item->id }}"
                                         data-peserta-nama="{{ $item->nama_lengkap }}"
+                                        data-total-indikator="{{ $totalInd }}"
                                         data-bisa-nilai="{{ $bisaDinilaiUser ? '1' : '0' }}"
                                         data-bs-toggle="tooltip"
                                         title="Input Nilai">
@@ -482,7 +468,7 @@
                     <div class="d-flex justify-content-between align-items-center w-100">
                         <small class="text-muted" id="modalFooterInfo">
                             <i class="fas fa-info-circle me-1"></i>
-                            Input nilai <strong>0–100</strong>, dikonversi ke bobot indikator.
+                            Isi semua nilai lalu klik <strong>Simpan Semua</strong> di bagian bawah.
                         </small>
                         <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
                             <i class="fas fa-times me-2"></i> Tutup
@@ -502,7 +488,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
-    // ── Toggle wilayah ────────────────────────────────────────
     const filterKategori       = document.getElementById('filterKategori');
     const filterWilayahWrapper = document.getElementById('filterWilayahWrapper');
     const filterWilayah        = document.getElementById('filterWilayah');
@@ -518,9 +503,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ── Modal Nilai ───────────────────────────────────────────
     const modalNilai       = new bootstrap.Modal(document.getElementById('modalNilai'));
     let currentPesertaId   = null;
+    let currentTotalInd    = 0;
     let nilaiData          = {};
     let catatanData        = {};
     let activeJenisNilaiId = null;
@@ -530,6 +515,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-nilai').forEach(btn => {
         btn.addEventListener('click', function () {
             currentPesertaId = this.dataset.pesertaId;
+            currentTotalInd  = parseInt(this.dataset.totalIndikator) || 0;
             const nama       = this.dataset.pesertaNama;
 
             document.getElementById('modalNilaiTitle').textContent    = 'Nilai: ' + nama;
@@ -544,13 +530,6 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('indikatorContent').innerHTML     = '';
             document.getElementById('totalProgressBar').style.width  = '0%';
             document.getElementById('totalNilaiLabel').textContent    = '0 / 100';
-
-            document.getElementById('modalHeader').style.background =
-                'linear-gradient(135deg, #285496 0%, #3a6bc7 100%)';
-            document.getElementById('modalHeaderIcon').style.color = '#285496';
-            document.getElementById('modalHeaderIcon').className   = 'fas fa-star';
-            document.getElementById('modalFooterInfo').innerHTML   =
-                '<i class="fas fa-info-circle me-1"></i> Input nilai <strong>0–100</strong>, dikonversi ke bobot indikator.';
 
             nilaiData = {}; catatanData = {}; activeJenisNilaiId = null;
             jenisNilaiCache = []; pesertaMilikUser = true;
@@ -674,6 +653,9 @@ document.addEventListener('DOMContentLoaded', function () {
         renderIndikatorPanel(jn);
     }
 
+    // =========================================================
+    // FIX #3 — Layout indikator: panduan & input sejajar
+    // =========================================================
     function renderIndikatorPanel(jn) {
         const container = document.getElementById('indikatorContent');
         const indList   = jn.indikator_nilai || [];
@@ -703,78 +685,120 @@ document.addEventListener('DOMContentLoaded', function () {
             indList.forEach((ind, idx) => {
                 const nilaiSaatIni = nilaiData[ind.id] ?? '';
                 const detailList   = ind.detail_indikator || [];
+                const hasDetail    = detailList.length > 0;
 
-                const konversiAwal = (nilaiSaatIni !== '' && nilaiSaatIni !== null)
-                    ? `<span class="preview-formula saved">
+                // Preview konversi awal jika nilai sudah ada
+                const konversiHtml = (nilaiSaatIni !== '' && nilaiSaatIni !== null)
+                    ? `<div class="preview-formula saved mt-1" id="preview-${ind.id}">
                             ${nilaiSaatIni} / 100 &times; ${ind.bobot}%
                             = <strong>${(parseFloat(nilaiSaatIni) / 100 * ind.bobot).toFixed(2)}</strong>
-                       </span>`
-                    : '';
+                            <i class="fas fa-check-circle text-success ms-1"></i>
+                       </div>`
+                    : `<div class="mt-1" id="preview-${ind.id}"></div>`;
 
-                html += `
-                <div class="indikator-card mb-4">
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="indikator-number me-3">${idx + 1}</div>
-                        <div class="flex-grow-1">
-                            <div class="fw-bold">${ind.name}</div>
-                            <small class="text-muted">Bobot: <strong>${ind.bobot}%</strong></small>
-                            ${ind.deskripsi ? `<p class="text-muted small mb-0 mt-1">${ind.deskripsi}</p>` : ''}
+                if (hasDetail) {
+                    // ── Layout 2 kolom: kiri panduan, kanan input nilai ──
+                    html += `
+                    <div class="indikator-card mb-3">
+                        <div class="d-flex align-items-start mb-2">
+                            <div class="indikator-number me-2">${idx + 1}</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold small">${ind.name}</div>
+                                <small class="text-muted">Bobot: <strong>${ind.bobot}%</strong></small>
+                                ${ind.deskripsi ? `<p class="text-muted small mb-0 mt-1">${ind.deskripsi}</p>` : ''}
+                            </div>
                         </div>
-                    </div>
 
-                    ${detailList.length > 0 ? `
-                    <div class="detail-wrapper mb-3">
-                        <small class="text-muted fw-semibold d-block mb-2" style="font-size:.72rem;">
-                            <i class="fas fa-list-ul me-1"></i> Panduan
-                            <span class="text-primary">— klik level untuk isi nilai</span>
-                        </small>
-                        <div class="row g-2">
-                            ${detailList.map(det => `
-                                <div class="col-md-6">
-                                    <div class="detail-level-card level-${det.level}"
-                                        onclick="pilihDariDetail(${ind.id}, ${ind.bobot}, '${(det.range || '').replace(/'/g, '')}', this)">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="level-badge">Level ${det.level ?? '-'}</span>
-                                            ${det.range ? `<span class="range-badge">${det.range}</span>` : ''}
+                        <div class="row g-3 align-items-start">
+                            {{-- Kolom kiri: panduan level --}}
+                            <div class="col-lg-7 col-12">
+                                <div class="panduan-header mb-2">
+                                    <small class="text-muted fw-semibold" style="font-size:.72rem;">
+                                        <i class="fas fa-list-ul me-1"></i> Panduan Level
+                                        <span class="text-primary">— klik level untuk isi nilai otomatis</span>
+                                    </small>
+                                </div>
+                                <div class="panduan-grid">
+                                    ${detailList.map(det => `
+                                        <div class="detail-level-card level-${det.level}"
+                                            onclick="pilihDariDetail(${ind.id}, ${ind.bobot}, '${(det.range || '').replace(/'/g, '')}', this)">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <span class="level-badge">Level ${det.level ?? '-'}</span>
+                                                ${det.range ? `<span class="range-badge">${det.range}</span>` : ''}
+                                            </div>
+                                            <p class="mb-0" style="font-size:.8rem; line-height:1.4;">${det.uraian ?? '-'}</p>
                                         </div>
-                                        <p class="mb-0 small">${det.uraian ?? '-'}</p>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            {{-- Kolom kanan: sticky input nilai --}}
+                            <div class="col-lg-5 col-12">
+                                <div class="nilai-sticky-box">
+                                    <div class="nilai-sticky-label mb-2">
+                                        <i class="fas fa-pencil-alt me-1" style="color:#285496"></i>
+                                        <span class="fw-semibold small">Input Nilai</span>
+                                        <span class="text-muted small ms-1">(0 – 100)</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                        <input type="number"
+                                            class="form-control nilai-input"
+                                            id="input-nilai-${ind.id}"
+                                            data-indikator-id="${ind.id}"
+                                            data-bobot="${ind.bobot}"
+                                            value="${nilaiSaatIni}"
+                                            min="0" max="100" step="1"
+                                            placeholder="0 – 100"
+                                            oninput="hitungPreview(${ind.id}, ${ind.bobot}, this.value)">
+                                        <span class="text-muted small fw-semibold">/ 100</span>
+                                    </div>
+                                    ${konversiHtml}
+                                    <div class="mt-2" id="status-${ind.id}"></div>
+                                    <div class="nilai-hint mt-2">
+                                        <i class="fas fa-lightbulb text-warning me-1"></i>
+                                        <small class="text-muted">Klik panduan level di kiri untuk isi otomatis</small>
                                     </div>
                                 </div>
-                            `).join('')}
+                            </div>
                         </div>
-                    </div>
-                    ` : ''}
-
-                    <div class="nilai-input-wrapper">
-                        <label class="form-label small fw-semibold mb-1">
-                            <i class="fas fa-pencil-alt me-1" style="color:#285496"></i>
-                            Nilai <span class="fw-normal">(0 – 100)</span>
-                        </label>
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <input type="number"
-                                class="form-control nilai-input"
-                                id="input-nilai-${ind.id}"
-                                data-indikator-id="${ind.id}"
-                                data-bobot="${ind.bobot}"
-                                value="${nilaiSaatIni}"
-                                min="0" max="100" step="1"
-                                placeholder="0 – 100"
-                                oninput="hitungPreview(${ind.id}, ${ind.bobot}, this.value)">
-                            <span class="text-muted small fw-semibold">/ 100</span>
-                            <button type="button" class="btn btn-sm btn-primary"
-                                onclick="simpanNilai(${ind.id}, ${currentPesertaId})">
-                                <i class="fas fa-save me-1"></i> Simpan
-                            </button>
-                            <span id="status-${ind.id}" class="simpan-status"></span>
+                    </div>`;
+                } else {
+                    // ── Layout tanpa panduan: sederhana 1 baris ──
+                    html += `
+                    <div class="indikator-card mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="indikator-number me-2">${idx + 1}</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold small mb-1">${ind.name}</div>
+                                <small class="text-muted">Bobot: <strong>${ind.bobot}%</strong></small>
+                                ${ind.deskripsi ? `<p class="text-muted small mb-2 mt-1">${ind.deskripsi}</p>` : ''}
+                                <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
+                                    <input type="number"
+                                        class="form-control nilai-input"
+                                        id="input-nilai-${ind.id}"
+                                        data-indikator-id="${ind.id}"
+                                        data-bobot="${ind.bobot}"
+                                        value="${nilaiSaatIni}"
+                                        min="0" max="100" step="1"
+                                        placeholder="0 – 100"
+                                        oninput="hitungPreview(${ind.id}, ${ind.bobot}, this.value)">
+                                    <span class="text-muted small fw-semibold">/ 100</span>
+                                    <div id="status-${ind.id}" class="simpan-status"></div>
+                                </div>
+                                ${konversiHtml}
+                            </div>
                         </div>
-                        <div class="mt-2" id="preview-${ind.id}">${konversiAwal}</div>
-                    </div>
-                </div>`;
+                    </div>`;
+                }
             });
         }
 
-        if (pesertaMilikUser) {
+        // =========================================================
+        // FIX #2 — Tombol simpan 1x per jenis nilai (batch)
+        // =========================================================
+        if (pesertaMilikUser && indList.length > 0) {
             const catatanSaatIni = catatanData[jn.id] ?? '';
+
             html += `
             <div class="catatan-wrapper mt-3 pt-3 border-top">
                 <label class="form-label fw-semibold small">
@@ -785,15 +809,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     id="catatan-${jn.id}" rows="3"
                     placeholder="Catatan penilaian..."
                 >${catatanSaatIni}</textarea>
-                <div class="d-flex justify-content-end mt-2 align-items-center gap-2">
-                    <span id="catatan-status-${jn.id}" class="simpan-status"></span>
-                    <button type="button" class="btn btn-sm btn-warning px-3"
-                        onclick="simpanCatatan(${jn.id}, ${currentPesertaId})">
-                        <i class="fas fa-save me-1"></i> Simpan Catatan
-                    </button>
-                </div>
             </div>
-            `;
+
+            <div class="simpan-batch-bar mt-3 p-3 rounded-3 border">
+                <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                    <div>
+                        <div class="fw-semibold small mb-0">
+                            <i class="fas fa-save me-1" style="color:#285496"></i>
+                            Simpan semua nilai — <em>${jn.name}</em>
+                        </div>
+                        <small class="text-muted">
+                            Semua nilai dan catatan di atas akan disimpan sekaligus.
+                        </small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="batch-status-${jn.id}" class="simpan-status"></span>
+                        <button type="button"
+                            class="btn btn-primary px-4 btn-simpan-batch"
+                            onclick="simpanBatch(${jn.id}, ${currentPesertaId})">
+                            <i class="fas fa-save me-2"></i>
+                            Simpan Semua
+                        </button>
+                    </div>
+                </div>
+            </div>`;
         }
 
         container.innerHTML = html;
@@ -820,6 +859,42 @@ document.addEventListener('DOMContentLoaded', function () {
             const t = document.querySelector(`.jenis-nilai-tab[data-id="${activeJenisNilaiId}"]`);
             if (t) t.classList.add('active');
         }
+    }
+
+    // =========================================================
+    // FIX #1 — Update progress bar di tabel index secara realtime
+    // =========================================================
+    function updateProgressBarIndex(pesertaId) {
+        if (!pesertaId) return;
+
+        // Hitung berapa indikator yang sudah terisi dari nilaiData saat ini
+        let terisiSekarang = 0;
+        jenisNilaiCache.forEach(jn => {
+            (jn.indikator_nilai || []).forEach(ind => {
+                if (nilaiData[ind.id] !== undefined &&
+                    nilaiData[ind.id] !== null &&
+                    nilaiData[ind.id] !== '') {
+                    terisiSekarang++;
+                }
+            });
+        });
+
+        const totalInd = currentTotalInd;
+        if (totalInd <= 0) return;
+
+        const persen = Math.round((terisiSekarang / totalInd) * 100);
+
+        const barEl   = document.getElementById(`progressbar-${pesertaId}`);
+        const pctEl   = document.getElementById(`progresspct-${pesertaId}`);
+        const lblEl   = document.getElementById(`progresslabel-${pesertaId}`);
+
+        if (barEl) {
+            barEl.style.width = persen + '%';
+            barEl.className = 'progress-bar ' +
+                (persen >= 100 ? 'bg-success' : persen > 0 ? 'bg-primary' : 'bg-secondary');
+        }
+        if (pctEl) pctEl.textContent = persen + '%';
+        if (lblEl) lblEl.textContent = terisiSekarang + '/' + totalInd + ' indikator';
     }
 
     window.hitungPreview = function(indId, bobot, val) {
@@ -856,65 +931,91 @@ document.addEventListener('DOMContentLoaded', function () {
         nilai = Math.max(0, Math.min(100, nilai));
         input.value = nilai;
         hitungPreview(indId, bobot, nilai);
-        el.closest('.detail-wrapper').querySelectorAll('.detail-level-card').forEach(c => c.classList.remove('selected'));
+        el.closest('.panduan-grid').querySelectorAll('.detail-level-card').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
     };
 
-    window.simpanNilai = async function(indId, pesertaId) {
-        const input      = document.getElementById(`input-nilai-${indId}`);
-        const status     = document.getElementById(`status-${indId}`);
-        const preview    = document.getElementById(`preview-${indId}`);
-        const nilaiInput = parseFloat(input.value);
-        const bobot      = parseFloat(input.dataset.bobot);
+    // =========================================================
+    // FIX #2 — Simpan batch: 1 tombol untuk semua indikator di jenis nilai ini
+    // =========================================================
+    window.simpanBatch = async function(jenisNilaiId, pesertaId) {
+        const statusEl = document.getElementById(`batch-status-${jenisNilaiId}`);
+        const btn      = document.querySelector('.btn-simpan-batch');
+        const jn       = jenisNilaiCache.find(j => j.id == jenisNilaiId);
+        if (!jn) return;
 
-        if (isNaN(nilaiInput) || nilaiInput < 0) { tampilStatus(status, 'error', 'Nilai tidak valid'); return; }
-        if (nilaiInput > 100)                     { tampilStatus(status, 'error', 'Maks. 100');         return; }
+        const indList  = jn.indikator_nilai || [];
+        const requests = [];
 
-        tampilStatus(status, 'loading', '');
+        // Kumpulkan semua indikator yang ada nilai-nya di form
+        indList.forEach(ind => {
+            const input = document.getElementById(`input-nilai-${ind.id}`);
+            if (!input) return;
+            const val = input.value.trim();
+            if (val === '') return; // skip yang kosong
+            const nilaiInput = parseFloat(val);
+            if (isNaN(nilaiInput) || nilaiInput < 0 || nilaiInput > 100) return;
+            requests.push({ indId: ind.id, bobot: ind.bobot, nilaiInput });
+        });
 
-        try {
-            const res  = await fetch('/nilai/simpan', {
-                method: 'POST',
-                headers: {
-                    'Content-Type':     'application/json',
-                    'X-CSRF-TOKEN':     document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify({
-                    peserta_id:         pesertaId,
-                    indikator_nilai_id: indId,
-                    nilai_input:        nilaiInput,
-                }),
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                nilaiData[indId] = nilaiInput;
-                tampilStatus(status, 'success', 'Tersimpan');
-                if (preview) {
-                    preview.innerHTML = `
-                        <span class="preview-formula saved">
-                            ${nilaiInput} / 100 &times; ${bobot}%
-                            = <strong>${data.nilai_konversi}</strong>
-                            <i class="fas fa-check-circle text-success ms-1"></i>
-                        </span>`;
-                }
-                updateTotalNilai();
-                refreshTabs();
-            } else {
-                tampilStatus(status, 'error', data.message || 'Gagal');
-            }
-        } catch (e) {
-            tampilStatus(status, 'error', 'Error jaringan');
+        if (requests.length === 0) {
+            tampilStatus(statusEl, 'error', 'Belum ada nilai yang diisi');
+            return;
         }
-    };
 
-    window.simpanCatatan = async function(jenisNilaiId, pesertaId) {
-        const textarea = document.getElementById(`catatan-${jenisNilaiId}`);
-        const status   = document.getElementById(`catatan-status-${jenisNilaiId}`);
-        tampilStatus(status, 'loading', '');
-        try {
-            const res  = await fetch('/nilai/simpan-catatan', {
+        // Simpan catatan sekaligus
+        const catatanEl  = document.getElementById(`catatan-${jenisNilaiId}`);
+        const catatanVal = catatanEl ? catatanEl.value : null;
+
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...'; }
+        tampilStatus(statusEl, 'loading', '');
+
+        let berhasil = 0;
+        let gagal    = 0;
+
+        // Kirim semua request nilai paralel
+        const nilaiPromises = requests.map(async ({ indId, bobot, nilaiInput }) => {
+            try {
+                const res  = await fetch('/nilai/simpan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':     'application/json',
+                        'X-CSRF-TOKEN':     document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({
+                        peserta_id:         pesertaId,
+                        indikator_nilai_id: indId,
+                        nilai_input:        nilaiInput,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    nilaiData[indId] = nilaiInput;
+                    // Update preview tiap indikator
+                    const preview = document.getElementById(`preview-${indId}`);
+                    if (preview) {
+                        const konversi = (nilaiInput / 100 * bobot).toFixed(2);
+                        preview.innerHTML = `
+                            <span class="preview-formula saved">
+                                ${nilaiInput} / 100 &times; ${bobot}%
+                                = <strong>${konversi}</strong>
+                                <i class="fas fa-check-circle text-success ms-1"></i>
+                            </span>`;
+                    }
+                    berhasil++;
+                } else {
+                    gagal++;
+                }
+            } catch {
+                gagal++;
+            }
+        });
+
+        // Kirim catatan jika ada
+        let catatanPromise = Promise.resolve();
+        if (catatanVal !== null) {
+            catatanPromise = fetch('/nilai/simpan-catatan', {
                 method: 'POST',
                 headers: {
                     'Content-Type':     'application/json',
@@ -924,19 +1025,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify({
                     peserta_id:     pesertaId,
                     jenis_nilai_id: jenisNilaiId,
-                    catatan:        textarea.value,
+                    catatan:        catatanVal,
                 }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                catatanData[jenisNilaiId] = textarea.value;
-                tampilStatus(status, 'success', 'Catatan tersimpan');
-            } else {
-                tampilStatus(status, 'error', data.message || 'Gagal');
-            }
-        } catch (e) {
-            tampilStatus(status, 'error', 'Error jaringan');
+            }).then(r => r.json()).then(d => {
+                if (d.success) catatanData[jenisNilaiId] = catatanVal;
+            }).catch(() => {});
         }
+
+        await Promise.all([...nilaiPromises, catatanPromise]);
+
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan Semua'; }
+
+        if (gagal === 0) {
+            tampilStatus(statusEl, 'success', `${berhasil} nilai & catatan tersimpan`);
+        } else {
+            tampilStatus(statusEl, 'error', `${berhasil} berhasil, ${gagal} gagal`);
+        }
+
+        updateTotalNilai();
+        refreshTabs();
+
+        // FIX #1 — Update progress bar di tabel index
+        updateProgressBarIndex(currentPesertaId);
     };
 
     function tampilStatus(el, type, msg) {
@@ -946,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', function () {
             error:   `<i class="fas fa-times-circle text-danger"></i> <small class="text-danger">${msg}</small>`,
         };
         el.innerHTML = map[type] || '';
-        if (type !== 'loading') setTimeout(() => { el.innerHTML = ''; }, 3500);
+        if (type !== 'loading') setTimeout(() => { el.innerHTML = ''; }, 4000);
     }
 
     document.querySelectorAll('.alert').forEach(a => {
@@ -976,8 +1086,6 @@ document.addEventListener('DOMContentLoaded', function () {
     .btn-action:hover { transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,.1); }
     .pagination-sm .page-link { padding:.375rem .625rem; border-radius:6px; color:#285496; }
     .pagination-sm .page-item.active .page-link { background-color:#285496; border-color:#285496; }
-
-    /* Filter wilayah input */
     #filterWilayahWrapper .form-control-sm { border-color: rgba(40,84,150,.35); }
     #filterWilayahWrapper .form-control-sm:focus { border-color: #285496; box-shadow: 0 0 0 .15rem rgba(40,84,150,.15); }
 
@@ -998,17 +1106,24 @@ document.addEventListener('DOMContentLoaded', function () {
     .jn-dot { width:8px; height:8px; border-radius:50%; background:#dee2e6; flex-shrink:0; }
     .jn-dot.done { background:#28a745; }
 
-    .indikator-card { background:#fff; border:1px solid #e9ecef; border-radius:12px; padding:1.25rem; transition:box-shadow .2s; }
+    /* ===== FIX #3 — Indikator card redesign ===== */
+    .indikator-card { background:#fff; border:1px solid #e9ecef; border-radius:12px; padding:1rem 1.25rem; transition:box-shadow .2s; }
     .indikator-card:hover { box-shadow:0 4px 16px rgba(40,84,150,.1); }
     .indikator-number {
-        width:32px; height:32px; border-radius:8px; flex-shrink:0;
+        width:28px; height:28px; border-radius:6px; flex-shrink:0;
         background:linear-gradient(135deg,#285496,#3a6bc7);
         color:white; display:flex; align-items:center; justify-content:center;
-        font-weight:700; font-size:.85rem;
+        font-weight:700; font-size:.8rem;
     }
-    .detail-level-card { border:1.5px solid #e9ecef; border-radius:10px; padding:.7rem; cursor:pointer; transition:all .2s; background:#f8fafc; font-size:.82rem; user-select:none; }
-    .detail-level-card:hover { border-color:#285496; background:#f0f4ff; transform:translateY(-2px); box-shadow:0 4px 10px rgba(40,84,150,.1); }
-    .detail-level-card.selected { border-color:#285496; background:rgba(40,84,150,.07); box-shadow:0 4px 12px rgba(40,84,150,.15); }
+
+    /* Panduan level grid — compact, tidak bertumpuk */
+    .panduan-grid { display:flex; flex-direction:column; gap:.5rem; }
+    .detail-level-card {
+        border:1.5px solid #e9ecef; border-radius:8px; padding:.6rem .75rem;
+        cursor:pointer; transition:all .2s; background:#f8fafc; user-select:none;
+    }
+    .detail-level-card:hover { border-color:#285496; background:#f0f4ff; }
+    .detail-level-card.selected { border-color:#285496; background:rgba(40,84,150,.07); box-shadow:0 2px 8px rgba(40,84,150,.15); }
     .level-badge { display:inline-block; background:#285496; color:white; font-size:.65rem; font-weight:700; padding:.15rem .45rem; border-radius:4px; }
     .range-badge { display:inline-block; background:#f0f4ff; color:#285496; border:1px solid #285496; font-size:.65rem; font-weight:700; padding:.15rem .45rem; border-radius:4px; }
     .level-1 .level-badge { background:#28a745; }
@@ -1017,11 +1132,21 @@ document.addEventListener('DOMContentLoaded', function () {
     .level-4 .level-badge { background:#fd7e14; }
     .level-5 .level-badge { background:#dc3545; }
 
-    .nilai-input-wrapper { background:#f8fafc; border-radius:8px; padding:.75rem; border:1px dashed #dee2e6; }
-    .nilai-input { max-width:90px; font-weight:700; font-size:1rem; text-align:center; border-radius:8px; }
+    /* Sticky input nilai di kanan */
+    .nilai-sticky-box {
+        background:#f8fafc; border:1.5px solid rgba(40,84,150,.2);
+        border-radius:10px; padding:1rem; position:sticky; top:1rem;
+    }
+    .nilai-sticky-label { color:#285496; }
+    .nilai-hint { background:rgba(255,193,7,.08); border-radius:6px; padding:.4rem .6rem; }
+    .nilai-input { max-width:100px; font-weight:700; font-size:1rem; text-align:center; border-radius:8px; }
+
     .preview-formula { display:inline-block; background:rgba(40,84,150,.08); border:1px solid rgba(40,84,150,.15); border-radius:6px; padding:.2rem .6rem; font-size:.78rem; color:#285496; font-family:monospace; }
     .preview-formula.saved { background:rgba(40,167,69,.08); border-color:rgba(40,167,69,.2); color:#28a745; }
+
+    /* Catatan & batch bar */
     .catatan-wrapper { background:rgba(245,158,11,.05); border-radius:10px; padding:1rem; border:1px solid rgba(245,158,11,.2); }
+    .simpan-batch-bar { background:rgba(40,84,150,.04); border-color:rgba(40,84,150,.2) !important; }
     .simpan-status { font-size:.8rem; }
 </style>
 @endsection
