@@ -4,481 +4,487 @@
 
 @section('content')
 
-    <div class="page-header rounded-3 mb-4"
-        style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%); padding: 2rem;">
-        <div class="row align-items-center">
-            <div class="col">
-                <div class="d-flex align-items-center">
-                    <div class="icon-wrapper bg-white rounded-circle p-3 me-3 shadow">
-                        <i class="fas fa-star fa-lg" style="color: #285496;"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-white mb-1">Penilaian Peserta</h1>
-                        <p class="text-white-50 mb-0">
-                            <span class="badge bg-white text-primary fw-semibold me-2">{{ $jenisPelatihan->kode_pelatihan }}</span>
-                            {{ $jenisPelatihan->nama_pelatihan }}
-                        </p>
-                    </div>
+<div class="page-header rounded-3 mb-4"
+    style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%); padding: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <div class="d-flex align-items-center">
+                <div class="icon-wrapper bg-white rounded-circle p-3 me-3 shadow">
+                    <i class="fas fa-table fa-lg" style="color: #285496;"></i>
+                </div>
+                <div>
+                    <h1 class="text-white mb-1">Penilaian Peserta</h1>
+                    <p class="text-white-50 mb-0">
+                        <span class="badge bg-white text-primary fw-semibold me-2">{{ $jenisPelatihan->kode_pelatihan }}</span>
+                        {{ $jenisPelatihan->nama_pelatihan }}
+                    </p>
                 </div>
             </div>
-            <div class="col-auto">
-                <a href="{{ route('nilai.rekap', ['jenis' => $jenis]) }}" class="btn btn-light shadow-sm">
-                    <i class="fas fa-chart-bar me-2"></i> Rekapan Nilai
-                </a>
-            </div>
+        </div>
+        <div class="col-auto d-flex gap-2">
+            <a href="{{ route('nilai.rekap', ['jenis' => $jenis]) }}" class="btn btn-light shadow-sm">
+                <i class="fas fa-chart-bar me-2"></i> Rekapan Nilai
+            </a>
         </div>
     </div>
+</div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert">
-            <i class="fas fa-check-circle fa-lg me-3"></i>
-            <div class="flex-grow-1"><strong>Sukses!</strong> {{ session('success') }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert">
+        <i class="fas fa-check-circle fa-lg me-3"></i>
+        <div class="flex-grow-1"><strong>Sukses!</strong> {{ session('success') }}</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
 
-    @php $roleName = auth()->user()->role->name ?? ''; @endphp
-    @if(in_array($roleName, ['coach', 'penguji']))
-        <div class="alert alert-info d-flex align-items-center shadow-sm mb-4 py-2" role="alert">
-            <i class="fas fa-info-circle me-2 flex-shrink-0"></i>
-            <small>
-                Menampilkan peserta dari kelompok Anda.
-                Gunakan filter <strong>Kelompok</strong> untuk melihat nilai peserta kelompok lain (view only).
-            </small>
-        </div>
-    @elseif($roleName === 'pic')
-        <div class="alert alert-info d-flex align-items-center shadow-sm mb-4 py-2" role="alert">
-            <i class="fas fa-info-circle me-2 flex-shrink-0"></i>
-            <small>Menampilkan peserta dari angkatan yang Anda tangani.</small>
-        </div>
-    @endif
+@php $roleName = auth()->user()->role->name ?? ''; @endphp
+@if(in_array($roleName, ['coach', 'penguji']))
+    <div class="alert alert-info d-flex align-items-center shadow-sm mb-4 py-2" role="alert">
+        <i class="fas fa-info-circle me-2 flex-shrink-0"></i>
+        <small>Menampilkan peserta dari kelompok Anda. Gunakan filter <strong>Kelompok</strong> untuk melihat kelompok lain (view only).</small>
+    </div>
+@elseif($roleName === 'pic')
+    <div class="alert alert-info d-flex align-items-center shadow-sm mb-4 py-2" role="alert">
+        <i class="fas fa-info-circle me-2 flex-shrink-0"></i>
+        <small>Menampilkan peserta dari angkatan yang Anda tangani.</small>
+    </div>
+@endif
 
-    @if(isset($kelompokFilter) && $kelompokFilter && $kelompokFilter->link_laporan)
-        <div class="card border-0 shadow-sm mb-4"
-            style="border-left: 4px solid #285496 !important; border-radius: 10px !important;">
-            <div class="card-body py-3 px-4">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div class="d-flex align-items-center">
-                        <div class="rounded-circle p-2 me-3 flex-shrink-0"
-                            style="background:rgba(40,84,150,.1);">
-                            <i class="fas fa-folder-open" style="color:#285496; font-size:1.1rem;"></i>
-                        </div>
-                        <div>
-                            <div class="fw-semibold" style="color:#285496;">
-                                Dokumen Laporan — {{ $kelompokFilter->nama_kelompok }}
-                            </div>
-                            <small class="text-muted">
-                                {{ $kelompokFilter->angkatan->nama_angkatan ?? '' }}
-                                · {{ $kelompokFilter->jenisPelatihan->nama_pelatihan ?? '' }}
-                            </small>
-                        </div>
-                    </div>
-                    <a href="{{ $kelompokFilter->link_laporan }}"
-                        target="_blank" rel="noopener"
-                        class="btn btn-primary btn-sm px-4 shadow-sm flex-shrink-0">
-                        <i class="fas fa-external-link-alt me-2"></i>
-                        Buka Dokumen Laporan
-                    </a>
-                </div>
-            </div>
-        </div>
-    @elseif(isset($kelompokFilter) && $kelompokFilter && !$kelompokFilter->link_laporan)
-        <div class="alert alert-warning d-flex align-items-center shadow-sm mb-4 py-2" role="alert">
-            <i class="fas fa-folder-open me-2 flex-shrink-0"></i>
-            <small>
-                <strong>{{ $kelompokFilter->nama_kelompok }}</strong>
-                — belum ada link laporan yang ditambahkan untuk kelompok ini.
-            </small>
-        </div>
-    @endif
+<!-- Legend & Info Bar -->
+<div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+    <div class="d-flex align-items-center gap-2">
+        <div class="legend-swatch swatch-saved">85</div>
+        <small class="text-muted">Tersimpan</small>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="legend-swatch swatch-pending">72</div>
+        <small class="text-muted">Belum disimpan</small>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="legend-swatch swatch-empty">—</div>
+        <small class="text-muted">Kosong</small>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <small class="text-muted">
+            <i class="fas fa-info-circle me-1 text-primary"></i>
+            Klik nama indikator di header untuk melihat rubrik penilaian
+        </small>
+    </div>
+    <div class="ms-auto d-flex align-items-center gap-2">
+        <span class="text-muted small"><i class="fas fa-keyboard me-1"></i>Enter / Tab untuk pindah cell</span>
+        <span class="badge bg-primary" id="badge-unsaved" style="display:none !important;">
+            <i class="fas fa-circle me-1" style="font-size:.5rem;"></i>
+            <span id="count-unsaved">0</span> perubahan belum disimpan
+        </span>
+    </div>
+</div>
 
-    <!-- Filter & Search -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body p-3">
-            <form action="{{ route('nilai.index', ['jenis' => $jenis]) }}" method="GET">
-                <div class="row g-2 align-items-end">
-                    <div class="col-md-2 col-sm-6">
-                        <label class="form-label small text-muted mb-1">
-                            <i class="fas fa-layer-group me-1"></i> Angkatan
-                        </label>
-                        <select name="angkatan" class="form-select form-select-sm">
-                            <option value="">Semua Angkatan</option>
-                            @foreach($angkatanRomawi as $romawi)
-                                <option value="{{ $romawi }}" {{ request('angkatan') == $romawi ? 'selected' : '' }}>
-                                    Angkatan {{ $romawi }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2 col-sm-6">
-                        <label class="form-label small text-muted mb-1">
-                            <i class="fas fa-calendar-alt me-1"></i> Tahun
-                        </label>
-                        <select name="tahun" class="form-select form-select-sm">
-                            <option value="">Semua Tahun</option>
-                            @foreach(array_reverse($tahunList) as $tahun)
-                                <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
-                                    {{ $tahun }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2 col-sm-6">
-                        <label class="form-label small text-muted mb-1">
-                            <i class="fas fa-users me-1"></i> Kelompok
-                        </label>
-                        <select name="kelompok" class="form-select form-select-sm">
-                            <option value="">Semua Kelompok</option>
-                            @foreach($kelompokList as $k)
-                                <option value="{{ $k }}" {{ request('kelompok') == $k ? 'selected' : '' }}>
-                                    Kelompok {{ $k }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2 col-sm-6">
-                        <label class="form-label small text-muted mb-1">
-                            <i class="fas fa-tag me-1"></i> Kategori
-                        </label>
-                        <select name="kategori" class="form-select form-select-sm" id="filterKategori">
-                            <option value="">Semua Kategori</option>
-                            <option value="PNBP"       {{ request('kategori') == 'PNBP'       ? 'selected' : '' }}>PNBP</option>
-                            <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>FASILITASI</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 col-sm-6" id="filterWilayahWrapper"
-                        style="{{ request('kategori') == 'FASILITASI' ? '' : 'display:none' }}">
-                        <label class="form-label small text-muted mb-1">
-                            <i class="fas fa-map-marker-alt me-1"></i> Wilayah
-                        </label>
-                        <input type="text"
-                            name="wilayah"
-                            id="filterWilayah"
-                            class="form-control form-control-sm"
-                            list="wilayahDatalistIndex"
-                            placeholder="Ketik wilayah..."
-                            value="{{ request('wilayah') }}">
-                        <datalist id="wilayahDatalistIndex">
-                            @foreach($wilayahList as $w)
-                                <option value="{{ $w }}">
-                            @endforeach
-                        </datalist>
-                    </div>
-                    <div class="col-md-2 col-sm-8">
-                        <label class="form-label small text-muted mb-1">
-                            <i class="fas fa-search me-1"></i> Cari Peserta
-                        </label>
-                        <input type="text" name="search" class="form-control form-control-sm"
-                            placeholder="Nama atau NIP..." value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-2 col-sm-4">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary btn-sm flex-fill">
-                                <i class="fas fa-filter me-1"></i> Filter
-                            </button>
-                            <a href="{{ route('nilai.index', ['jenis' => $jenis]) }}"
-                                class="btn btn-outline-secondary btn-sm flex-fill">
-                                <i class="fas fa-redo me-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                @php
-                    $activeFilters = array_filter([
-                        'Angkatan'  => request('angkatan')  ? 'Angkatan ' . request('angkatan')  : null,
-                        'Tahun'     => request('tahun'),
-                        'Kelompok'  => request('kelompok')  ? 'Kelompok ' . request('kelompok')  : null,
-                        'Kategori'  => request('kategori'),
-                        'Wilayah'   => request('wilayah'),
-                        'Cari'      => request('search'),
-                    ]);
-                @endphp
-                @if(count($activeFilters))
-                    <div class="d-flex flex-wrap gap-1 mt-2">
-                        @foreach($activeFilters as $label => $val)
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-normal" style="font-size:.78rem;">
-                                <i class="fas fa-check-circle me-1" style="font-size:.65rem;"></i>
-                                {{ $label }}: {{ $val }}
-                            </span>
+<!-- Filter & Search -->
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body p-3">
+        <form action="{{ route('nilai.index', ['jenis' => $jenis]) }}" method="GET">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2 col-sm-6">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-layer-group me-1"></i> Angkatan</label>
+                    <select name="angkatan" class="form-select form-select-sm">
+                        <option value="">Semua Angkatan</option>
+                        @foreach($angkatanRomawi as $romawi)
+                            <option value="{{ $romawi }}" {{ request('angkatan') == $romawi ? 'selected' : '' }}>
+                                Angkatan {{ $romawi }}
+                            </option>
                         @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-calendar-alt me-1"></i> Tahun</label>
+                    <select name="tahun" class="form-select form-select-sm">
+                        <option value="">Semua Tahun</option>
+                        @foreach(array_reverse($tahunList) as $tahun)
+                            <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>{{ $tahun }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-users me-1"></i> Kelompok</label>
+                    <select name="kelompok" class="form-select form-select-sm">
+                        <option value="">Semua Kelompok</option>
+                        @foreach($kelompokList as $k)
+                            <option value="{{ $k }}" {{ request('kelompok') == $k ? 'selected' : '' }}>Kelompok {{ $k }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-tag me-1"></i> Kategori</label>
+                    <select name="kategori" class="form-select form-select-sm" id="filterKategori">
+                        <option value="">Semua Kategori</option>
+                        <option value="PNBP"       {{ request('kategori') == 'PNBP'       ? 'selected' : '' }}>PNBP</option>
+                        <option value="FASILITASI" {{ request('kategori') == 'FASILITASI' ? 'selected' : '' }}>FASILITASI</option>
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6" id="filterWilayahWrapper"
+                    style="{{ request('kategori') == 'FASILITASI' ? '' : 'display:none' }}">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i> Wilayah</label>
+                    <input type="text" name="wilayah" id="filterWilayah" class="form-control form-control-sm"
+                        list="wilayahDatalist" placeholder="Ketik wilayah..." value="{{ request('wilayah') }}">
+                    <datalist id="wilayahDatalist">
+                        @foreach($wilayahList as $w)
+                            <option value="{{ $w }}">
+                        @endforeach
+                    </datalist>
+                </div>
+                <div class="col-md-2 col-sm-8">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-search me-1"></i> Cari</label>
+                    <input type="text" name="search" class="form-control form-control-sm"
+                        placeholder="Nama atau NIP..." value="{{ request('search') }}">
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                            <i class="fas fa-filter me-1"></i> Filter
+                        </button>
+                        <a href="{{ route('nilai.index', ['jenis' => $jenis]) }}"
+                            class="btn btn-outline-secondary btn-sm flex-fill">
+                            <i class="fas fa-redo"></i>
+                        </a>
                     </div>
-                @endif
-            </form>
-        </div>
-    </div>
+                </div>
+            </div>
 
-    <!-- Table -->
-    <div class="card border-0 shadow-lg overflow-hidden">
-        <div class="card-header bg-white py-3 border-0 d-flex align-items-center justify-content-between">
-            <h5 class="card-title mb-0 fw-semibold">
-                <i class="fas fa-list me-2" style="color: #285496;"></i> Daftar Peserta
-                <span class="badge bg-primary ms-2">{{ $peserta->total() }}</span>
-            </h5>
+            @php
+                $activeFilters = array_filter([
+                    'Angkatan' => request('angkatan') ? 'Angkatan ' . request('angkatan') : null,
+                    'Tahun'    => request('tahun'),
+                    'Kelompok' => request('kelompok') ? 'Kelompok ' . request('kelompok') : null,
+                    'Kategori' => request('kategori'),
+                    'Wilayah'  => request('wilayah'),
+                    'Cari'     => request('search'),
+                ]);
+            @endphp
+            @if(count($activeFilters))
+                <div class="d-flex flex-wrap gap-1 mt-2">
+                    @foreach($activeFilters as $label => $val)
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-normal" style="font-size:.78rem;">
+                            <i class="fas fa-check-circle me-1" style="font-size:.65rem;"></i>
+                            {{ $label }}: {{ $val }}
+                        </span>
+                    @endforeach
+                </div>
+            @endif
+        </form>
+    </div>
+</div>
+
+<!-- Spreadsheet Container -->
+<div class="card border-0 shadow-lg overflow-hidden mb-3">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+        <h5 class="card-title mb-0 fw-semibold">
+            <i class="fas fa-table me-2" style="color:#285496;"></i>
+            Spreadsheet Penilaian
+            <span class="badge bg-primary ms-2">{{ $peserta->total() }}</span>
+        </h5>
+        <div class="d-flex align-items-center gap-2">
             <small class="text-muted">
                 Menampilkan {{ $peserta->count() }} dari {{ $peserta->total() }} peserta
             </small>
+            <button type="button" class="btn btn-success btn-sm px-3" id="btnSimpanSemua" style="display:none;">
+                <i class="fas fa-save me-1"></i> Simpan Semua (<span id="countSimpan">0</span>)
+            </button>
         </div>
+    </div>
 
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr class="table-light">
-                            <th width="4%" class="ps-4">No</th>
-                            <th width="30%">Nama Peserta</th>
-                            <th width="7%">NDH</th>
-                            <th width="20%">Kelompok</th>
-                            <th width="22%">Progress Nilai</th>
-                            <th width="17%" class="text-center pe-4">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($peserta as $index => $item)
-                            @php
-                                $kelompok        = $item->kelompokInfo ?? null;
-                                $totalInd        = $item->totalIndikator ?? 0;
-                                $sudahDinilai    = $item->sudahDinilai ?? 0;
-                                $persen          = $totalInd > 0 ? round(($sudahDinilai / $totalInd) * 100) : 0;
-                                $bisaDinilaiUser = $item->bisaDinilaiUser ?? true;
-                            @endphp
-                            <tr data-peserta-row="{{ $item->id }}">
-                                <td class="ps-4 fw-semibold">{{ $peserta->firstItem() + $index }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="peserta-avatar me-2">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold small">{{ $item->nama_lengkap }}</div>
-                                            <small class="text-muted">
-                                                <i class="fas fa-id-card me-1"></i>{{ $item->nip_nrp ?? '-' }}
-                                            </small>
+    <div class="spreadsheet-wrapper">
+        <div class="spreadsheet-scroll">
+            <table class="spreadsheet-table" id="spreadsheetTable">
+                <thead>
+                    <!-- Baris 1: Group header jenis nilai -->
+                    <tr class="thead-group">
+                        <th class="sticky-col sticky-col-1 sticky-header" rowspan="2">No</th>
+                        <th class="sticky-col sticky-col-2 sticky-header" rowspan="2">Nama Peserta</th>
+                        <th class="sticky-col sticky-col-3 sticky-header" rowspan="2">NDH</th>
+                        <th class="sticky-col sticky-col-4 sticky-header" rowspan="2">Kelompok</th>
+                        @foreach($jenisNilaiList as $jnLoop => $jn)
+                            <th colspan="{{ $jn->indikatorNilai->count() }}"
+                                class="jenis-nilai-header text-center jenis-group-border"
+                                style="--jn-color: {{ $jnColors[$jnLoop % count($jnColors)] }}">
+                                <div class="jn-label">
+                                    <span class="jn-name">{{ $jn->name }}</span>
+                                    <span class="jn-bobot">{{ $jn->bobot }}%</span>
+                                </div>
+                            </th>
+                        @endforeach
+                        <th class="sticky-col-right sticky-header total-header" rowspan="2">
+                            <div>Total</div>
+                            <small style="font-weight:400; font-size:.65rem; opacity:.7;">/ 100</small>
+                        </th>
+                    </tr>
+                    <!-- Baris 2: Nama indikator — klik untuk buka modal -->
+                    <tr class="thead-indikator">
+                        @foreach($jenisNilaiList as $jn)
+                            @foreach($jn->indikatorNilai as $indLoop => $ind)
+                                @php
+                                    $isLastInd = $indLoop === $jn->indikatorNilai->count() - 1;
+                                    $detailJson = json_encode(
+                                        $ind->detailIndikator->map(fn($d) => [
+                                            'level'  => $d->level,
+                                            'uraian' => $d->uraian,
+                                            'range'  => $d->range,
+                                        ])->values()->toArray()
+                                    );
+                                    $rolesStr = $ind->roles->isEmpty()
+                                        ? 'Admin'
+                                        : $ind->roles->pluck('name')->map(fn($r) => ucfirst($r))->implode(', ');
+                                @endphp
+                                <th class="indikator-header ind-clickable {{ $isLastInd ? 'jenis-border-right' : '' }}"
+                                    data-indikator-id="{{ $ind->id }}"
+                                    data-bobot="{{ $ind->bobot }}"
+                                    data-jenis-id="{{ $jn->id }}"
+                                    data-ind-name="{{ $ind->name }}"
+                                    data-jenis-name="{{ $jn->name }}"
+                                    data-roles="{{ $rolesStr }}"
+                                    data-detail='{{ $detailJson }}'>
+                                    <div class="ind-inner">
+                                        <div class="ind-name">{{ Str::limit($ind->name, 22) }}</div>
+                                        <div class="ind-bobot">
+                                            {{ $ind->bobot }}%
+                                            <i class="fas fa-info-circle ind-icon-info"></i>
                                         </div>
                                     </div>
-                                </td>
-                                <td>
-                                    @if($item->ndh)
-                                        <span class="badge bg-light text-dark border fw-bold">{{ $item->ndh }}</span>
-                                    @else
-                                        <span class="text-muted small">-</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($kelompok)
-                                        <div class="d-flex align-items-center">
-                                            <div class="kelompok-dot me-2"></div>
-                                            <div>
-                                                <div class="small fw-semibold d-flex align-items-center gap-1">
-                                                    {{ $kelompok->nama_kelompok }}
-                                                    @if(!request()->filled('kelompok') && $kelompok->link_laporan)
-                                                        <a href="{{ $kelompok->link_laporan }}"
-                                                            target="_blank" rel="noopener"
-                                                            class="link-laporan-icon"
-                                                            data-bs-toggle="tooltip"
-                                                            title="Buka Dokumen Laporan {{ $kelompok->nama_kelompok }}"
-                                                            onclick="event.stopPropagation()">
-                                                            <i class="fas fa-file-alt"></i>
-                                                        </a>
-                                                    @endif
-                                                </div>
-                                                <small class="text-muted">{{ $kelompok->angkatan->nama_angkatan ?? '-' }}</small>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <span class="text-muted small">-</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($totalInd > 0)
-                                        {{-- FIX #1: tambahkan data attributes dan id untuk update realtime --}}
-                                        <div class="d-flex align-items-center gap-2"
-                                            data-progress-peserta="{{ $item->id }}">
-                                            <div class="flex-grow-1">
-                                                <div class="progress" style="height:6px; border-radius:4px;">
-                                                    <div class="progress-bar
-                                                        {{ $persen >= 100 ? 'bg-success' : ($persen > 0 ? 'bg-primary' : 'bg-secondary') }}"
-                                                        id="progressbar-{{ $item->id }}"
-                                                        style="width:{{ $persen }}%"></div>
-                                                </div>
-                                            </div>
-                                            <small class="text-muted fw-semibold"
-                                                id="progresspct-{{ $item->id }}"
-                                                style="min-width:36px">{{ $persen }}%</small>
-                                        </div>
-                                        <small class="text-muted"
-                                            id="progresslabel-{{ $item->id }}">{{ $sudahDinilai }}/{{ $totalInd }} indikator</small>
-                                    @else
-                                        <span class="text-muted small">-</span>
-                                    @endif
-                                </td>
-                                <td class="text-center pe-4">
-                                    <button type="button"
-                                        class="btn btn-sm btn-action btn-primary btn-nilai"
-                                        data-peserta-id="{{ $item->id }}"
-                                        data-peserta-nama="{{ $item->nama_lengkap }}"
-                                        data-total-indikator="{{ $totalInd }}"
-                                        data-bisa-nilai="{{ $bisaDinilaiUser ? '1' : '0' }}"
-                                        data-bs-toggle="tooltip"
-                                        title="Input Nilai">
-                                        <i class="fas fa-star me-1"></i> Nilai
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5">
-                                    <i class="fas fa-users fa-4x mb-3" style="color: #e9ecef;"></i>
-                                    <h5 class="text-muted mb-2">Belum ada peserta</h5>
-                                    <p class="text-muted">Tidak ada peserta yang ditemukan</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                                </th>
+                            @endforeach
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($peserta as $index => $item)
+                        @php
+                            $bisaDinilai = $item->bisaDinilaiUser ?? true;
+                        @endphp
+                        <tr class="peserta-row {{ !$bisaDinilai ? 'row-readonly' : '' }}"
+                            data-peserta-id="{{ $item->id }}"
+                            data-bisa-nilai="{{ $bisaDinilai ? '1' : '0' }}">
 
-        @if($peserta->count() > 0)
-            <div class="card-footer bg-white py-3 border-0">
-                <div class="row align-items-center">
-                    <div class="col-md-6 mb-2 mb-md-0">
-                        <small class="text-muted">
-                            Menampilkan <strong>{{ $peserta->firstItem() }}</strong>
-                            sampai <strong>{{ $peserta->lastItem() }}</strong>
-                            dari <strong>{{ $peserta->total() }}</strong> peserta
-                        </small>
-                    </div>
-                    <div class="col-md-6">
-                        @if($peserta->hasPages())
-                            <nav>
-                                <ul class="pagination pagination-sm justify-content-md-end justify-content-center mb-0">
-                                    @if($peserta->onFirstPage())
-                                        <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>
-                                    @else
-                                        <li class="page-item"><a class="page-link" href="{{ $peserta->previousPageUrl() }}"><i class="fas fa-chevron-left"></i></a></li>
-                                    @endif
+                            <td class="sticky-col sticky-col-1 td-no">
+                                {{ $peserta->firstItem() + $index }}
+                            </td>
+
+                            <td class="sticky-col sticky-col-2 td-nama">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="peserta-avatar-sm">
+                                        {{ strtoupper(substr($item->nama_lengkap, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold small peserta-nama-text">{{ $item->nama_lengkap }}</div>
+                                        <small class="text-muted" style="font-size:.68rem;">{{ $item->nip_nrp ?? '-' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="sticky-col sticky-col-3 td-ndh text-center">
+                                @if($item->ndh)
+                                    <span class="badge bg-light text-dark border fw-bold">{{ $item->ndh }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+
+                            <td class="sticky-col sticky-col-4 td-kelompok">
+                                @if($item->kelompokInfo)
+                                    <div class="small fw-semibold">{{ $item->kelompokInfo->nama_kelompok }}</div>
+                                    <small class="text-muted" style="font-size:.68rem;">{{ $item->kelompokInfo->angkatan->nama_angkatan ?? '-' }}</small>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+
+                            <!-- Nilai Cells -->
+                            @foreach($jenisNilaiList as $jn)
+                                @foreach($jn->indikatorNilai as $indLoop => $ind)
                                     @php
-                                        $start = max($peserta->currentPage() - 2, 1);
-                                        $end   = min($start + 4, $peserta->lastPage());
-                                        $start = max($end - 4, 1);
+                                        $existingNilai = $item->nilaiMap[$ind->id] ?? null;
+                                        $canEdit = $bisaDinilai && ($ind->userDapatNilai ?? false);
+                                        $isLastInd = $indLoop === $jn->indikatorNilai->count() - 1;
                                     @endphp
-                                    @if($start > 1)
-                                        <li class="page-item"><a class="page-link" href="{{ $peserta->url(1) }}">1</a></li>
-                                        @if($start > 2)<li class="page-item disabled"><span class="page-link">...</span></li>@endif
-                                    @endif
-                                    @for($i = $start; $i <= $end; $i++)
-                                        <li class="page-item {{ $i == $peserta->currentPage() ? 'active' : '' }}">
-                                            <a class="page-link" href="{{ $peserta->url($i) }}">{{ $i }}</a>
-                                        </li>
-                                    @endfor
-                                    @if($end < $peserta->lastPage())
-                                        @if($end < $peserta->lastPage() - 1)<li class="page-item disabled"><span class="page-link">...</span></li>@endif
-                                        <li class="page-item"><a class="page-link" href="{{ $peserta->url($peserta->lastPage()) }}">{{ $peserta->lastPage() }}</a></li>
-                                    @endif
-                                    @if($peserta->hasMorePages())
-                                        <li class="page-item"><a class="page-link" href="{{ $peserta->nextPageUrl() }}"><i class="fas fa-chevron-right"></i></a></li>
-                                    @else
-                                        <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>
-                                    @endif
-                                </ul>
-                            </nav>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        @endif
+                                    <td class="nilai-cell {{ $canEdit ? 'editable' : 'readonly' }} {{ $existingNilai !== null ? 'status-saved' : '' }} {{ $isLastInd ? 'jenis-border-right' : '' }}"
+                                        data-peserta-id="{{ $item->id }}"
+                                        data-indikator-id="{{ $ind->id }}"
+                                        data-bobot="{{ $ind->bobot }}"
+                                        data-jenis-id="{{ $jn->id }}"
+                                        data-saved="{{ $existingNilai ?? '' }}"
+                                        data-current="{{ $existingNilai ?? '' }}">
+
+                                        @if($canEdit)
+                                            <div class="cell-display">
+                                                @if($existingNilai !== null)
+                                                    <span class="cell-value">{{ $existingNilai }}</span>
+                                                @else
+                                                    <span class="cell-empty">—</span>
+                                                @endif
+                                            </div>
+                                            <input type="number"
+                                                class="cell-input"
+                                                min="0" max="100" step="1"
+                                                value="{{ $existingNilai ?? '' }}"
+                                                placeholder="0–100"
+                                                autocomplete="off"
+                                                style="display:none;">
+                                        @else
+                                            <div class="cell-display readonly-display">
+                                                @if($existingNilai !== null)
+                                                    <span class="cell-value">{{ $existingNilai }}</span>
+                                                @else
+                                                    <span class="cell-empty text-muted">—</span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </td>
+                                @endforeach
+                            @endforeach
+
+                            <!-- Total -->
+                            <td class="sticky-col-right td-total" data-peserta-id="{{ $item->id }}">
+                                <span class="total-value" id="total-{{ $item->id }}">
+                                    {{ number_format($item->totalNilai ?? 0, 1) }}
+                                </span>
+                                <div class="total-bar">
+                                    <div class="total-bar-fill" style="width:{{ min($item->totalNilai ?? 0, 100) }}%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ 4 + $jenisNilaiList->sum(fn($jn) => $jn->indikatorNilai->count()) + 1 }}"
+                                class="text-center py-5">
+                                <i class="fas fa-users fa-4x mb-3 d-block" style="color:#e9ecef;"></i>
+                                <h5 class="text-muted">Belum ada peserta</h5>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    {{-- ===== MODAL PENILAIAN ===== --}}
-    <div class="modal fade" id="modalNilai" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg overflow-hidden" style="max-height:90vh; display:flex; flex-direction:column;">
+    <!-- Pagination -->
+    @if($peserta->count() > 0)
+        <div class="card-footer bg-white py-3 border-top">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <small class="text-muted">
+                        Menampilkan <strong>{{ $peserta->firstItem() }}</strong>
+                        sampai <strong>{{ $peserta->lastItem() }}</strong>
+                        dari <strong>{{ $peserta->total() }}</strong> peserta
+                    </small>
+                </div>
+                <div class="col-md-6">
+                    @if($peserta->hasPages())
+                        <nav>
+                            <ul class="pagination pagination-sm justify-content-md-end justify-content-center mb-0">
+                                @if($peserta->onFirstPage())
+                                    <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>
+                                @else
+                                    <li class="page-item"><a class="page-link" href="{{ $peserta->previousPageUrl() }}"><i class="fas fa-chevron-left"></i></a></li>
+                                @endif
+                                @php
+                                    $start = max($peserta->currentPage() - 2, 1);
+                                    $end   = min($start + 4, $peserta->lastPage());
+                                    $start = max($end - 4, 1);
+                                @endphp
+                                @if($start > 1)
+                                    <li class="page-item"><a class="page-link" href="{{ $peserta->url(1) }}">1</a></li>
+                                    @if($start > 2)<li class="page-item disabled"><span class="page-link">...</span></li>@endif
+                                @endif
+                                @for($i = $start; $i <= $end; $i++)
+                                    <li class="page-item {{ $i == $peserta->currentPage() ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $peserta->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+                                @if($end < $peserta->lastPage())
+                                    @if($end < $peserta->lastPage() - 1)<li class="page-item disabled"><span class="page-link">...</span></li>@endif
+                                    <li class="page-item"><a class="page-link" href="{{ $peserta->url($peserta->lastPage()) }}">{{ $peserta->lastPage() }}</a></li>
+                                @endif
+                                @if($peserta->hasMorePages())
+                                    <li class="page-item"><a class="page-link" href="{{ $peserta->nextPageUrl() }}"><i class="fas fa-chevron-right"></i></a></li>
+                                @else
+                                    <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>
+                                @endif
+                            </ul>
+                        </nav>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+</div>
 
-                <div class="modal-header p-0 border-0 flex-shrink-0">
-                    <div class="w-100" id="modalHeader"
-                        style="background: linear-gradient(135deg, #285496 0%, #3a6bc7 100%); padding: 1.25rem 1.5rem;">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-white rounded-circle p-2 me-3 shadow-sm">
-                                    <i class="fas fa-star" id="modalHeaderIcon" style="color:#285496; font-size:1rem;"></i>
-                                </div>
-                                <div>
-                                    <h5 class="text-white mb-0 fw-bold" id="modalNilaiTitle">Input Nilai Peserta</h5>
-                                    <small class="text-white-50" id="modalNilaiSubtitle">—</small>
-                                </div>
-                            </div>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+{{-- MODAL DETAIL INDIKATOR --}}
+<div class="modal fade" id="modalDetailIndikator" tabindex="-1"
+    aria-labelledby="modalDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:.75rem; overflow:hidden;">
+            <div class="modal-header-custom">
+                <div class="d-flex align-items-start gap-3 w-100">
+                    <div class="modal-header-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="flex-grow-1 min-w-0">
+                        <h5 class="modal-title text-white fw-bold mb-1 lh-sm" id="modalDetailLabel"
+                            style="word-break:break-word;">—</h5>
+                        <div class="d-flex flex-wrap gap-2" id="modalBadgeArea"></div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white flex-shrink-0 mt-1"
+                        data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-4">
+                    <div class="col-4">
+                        <div class="minfo-card">
+                            <div class="minfo-label">Bobot</div>
+                            <div class="minfo-value" id="mBobot">—</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="minfo-card">
+                            <div class="minfo-label">Jenis Penilaian</div>
+                            <div class="minfo-value text-truncate" id="mJenis" title="">—</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="minfo-card">
+                            <div class="minfo-label">Penilai</div>
+                            <div class="minfo-value" id="mPenilai">—</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-body p-0 flex-grow-1 overflow-hidden d-flex flex-column">
-                    <div class="text-center py-5" id="nilaiLoading">
-                        <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div>
-                        <p class="mt-3 text-muted">Memuat data penilaian...</p>
-                    </div>
-
-                    <div id="nilaiNoAccess" class="d-none flex-grow-1 d-flex align-items-center justify-content-center">
-                        <div class="text-center py-5 px-4">
-                            <div class="mb-3" style="font-size:3rem;">🔒</div>
-                            <h5 class="fw-bold text-muted mb-2">Tidak Ada Akses</h5>
-                            <p class="text-muted mb-0">Anda tidak memiliki akses untuk menilai peserta ini.</p>
-                        </div>
-                    </div>
-
-                    <div id="nilaiContent" class="d-none flex-grow-1 overflow-hidden" style="display:flex !important; flex-direction:column;">
-                        <div class="d-flex flex-grow-1 overflow-hidden" style="min-height:0;">
-
-                            <!-- Panel Kiri -->
-                            <div class="border-end bg-light d-flex flex-column flex-shrink-0" style="width:260px; overflow:hidden;">
-                                <div class="p-3 border-bottom flex-shrink-0">
-                                    <small class="text-muted fw-semibold text-uppercase" style="font-size:.7rem; letter-spacing:.5px;">
-                                        <i class="fas fa-layer-group me-1"></i> Jenis Nilai
-                                    </small>
-                                </div>
-                                <div id="jenisNilaiTabs" class="p-2 flex-grow-1" style="overflow-y:auto;"></div>
-                                <div class="p-3 border-top flex-shrink-0">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small class="text-muted fw-semibold">Total Nilai</small>
-                                        <small class="fw-bold text-primary" id="totalNilaiLabel">0 / 100</small>
-                                    </div>
-                                    <div class="progress" style="height:8px; border-radius:4px;">
-                                        <div class="progress-bar bg-success" id="totalProgressBar"
-                                            style="width:0%; transition:width .4s ease;"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Panel Kanan -->
-                            <div class="flex-grow-1" style="overflow-y:auto; overflow-x:hidden;">
-                                <div id="indikatorContent" class="p-4">
-                                    <div class="text-center py-5 text-muted">
-                                        <i class="fas fa-arrow-left fa-2x mb-2 d-block"></i>
-                                        <p>Pilih jenis nilai di sebelah kiri</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div style="width:4px;height:18px;background:#285496;border-radius:2px;flex-shrink:0;"></div>
+                    <h6 class="mb-0 fw-semibold" style="color:#285496;">Rubrik / Level Penilaian</h6>
                 </div>
 
-                <div class="modal-footer bg-light border-top py-2 px-4 flex-shrink-0">
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <small class="text-muted" id="modalFooterInfo">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Isi semua nilai lalu klik <strong>Simpan Semua</strong> di bagian bawah.
-                        </small>
-                        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-2"></i> Tutup
-                        </button>
-                    </div>
-                </div>
+                <div id="modalRubrikBody"></div>
+            </div>
 
+            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-4"
+                    data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Tutup
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Toast Notifikasi -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
+    <div id="toastNilai" class="toast align-items-center border-0 shadow" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toastBody"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -486,667 +492,571 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    // ── MODAL DETAIL INDIKATOR ────────────────────────────────
+    const bsModal = new bootstrap.Modal(document.getElementById('modalDetailIndikator'));
 
+    const LEVEL_COLORS = [
+        { bg:'#fff3e0', border:'#ff9800', text:'#7a3b00', badge:'#ff9800' },
+        { bg:'#e3f2fd', border:'#2196f3', text:'#0d47a1', badge:'#2196f3' },
+        { bg:'#e8f5e9', border:'#4caf50', text:'#1b5e20', badge:'#4caf50' },
+        { bg:'#f3e5f5', border:'#9c27b0', text:'#4a148c', badge:'#9c27b0' },
+        { bg:'#fce4ec', border:'#e91e63', text:'#880e4f', badge:'#e91e63' },
+        { bg:'#e0f7fa', border:'#00bcd4', text:'#006064', badge:'#00bcd4' },
+    ];
+
+    document.querySelectorAll('.ind-clickable').forEach(th => {
+        th.addEventListener('click', function () {
+            const name   = this.dataset.indName   ?? '—';
+            const jenis  = this.dataset.jenisName ?? '—';
+            const bobot  = this.dataset.bobot     ?? '—';
+            const roles  = this.dataset.roles     ?? '—';
+            let   detail = [];
+            try { detail = JSON.parse(this.dataset.detail || '[]'); } catch(e) {}
+
+            document.getElementById('modalDetailLabel').textContent = name;
+            document.getElementById('mBobot').textContent           = bobot + '%';
+            document.getElementById('mJenis').textContent           = jenis;
+            document.getElementById('mJenis').title                 = jenis;
+            document.getElementById('mPenilai').textContent         = roles;
+
+            document.getElementById('modalBadgeArea').innerHTML =
+                `<span class="badge bg-white bg-opacity-25 text-white fw-normal" style="font-size:.72rem;">
+                    <i class="fas fa-percentage me-1"></i>Bobot ${bobot}%
+                 </span>
+                 <span class="badge bg-white bg-opacity-25 text-white fw-normal" style="font-size:.72rem;">
+                    <i class="fas fa-user-check me-1"></i>${roles}
+                 </span>`;
+
+            const rubrikEl = document.getElementById('modalRubrikBody');
+            if (!detail.length) {
+                rubrikEl.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-folder-open fa-3x mb-3 d-block" style="opacity:.2;"></i>
+                        <p class="mb-0">Belum ada rubrik penilaian untuk indikator ini.</p>
+                    </div>`;
+            } else {
+                const rows = detail.map((d, i) => {
+                    const c = LEVEL_COLORS[i % LEVEL_COLORS.length];
+                    return `
+                        <tr>
+                            <td class="text-center py-3" style="width:80px;">
+                                <span style="display:inline-block;background:${c.badge};color:#fff;
+                                    padding:.25rem .65rem;border-radius:20px;font-size:.72rem;
+                                    font-weight:700;white-space:nowrap;">Level ${d.level}</span>
+                            </td>
+                            <td class="py-3" style="font-size:.83rem;color:#333;line-height:1.6;">
+                                ${d.uraian ? d.uraian : '<em class="text-muted">—</em>'}
+                            </td>
+                            <td class="text-center py-3" style="width:120px;">
+                                <span style="display:inline-block;background:${c.bg};color:${c.text};
+                                    border:1px solid ${c.border};padding:.2rem .6rem;border-radius:6px;
+                                    font-size:.8rem;font-weight:600;white-space:nowrap;">
+                                    ${d.range ? d.range : '—'}
+                                </span>
+                            </td>
+                        </tr>`;
+                }).join('');
+
+                rubrikEl.innerHTML = `
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table mb-0" style="font-size:.83rem;">
+                            <thead style="background:#f0f4ff;">
+                                <tr>
+                                    <th class="text-center py-2 px-3"
+                                        style="color:#285496;font-size:.72rem;font-weight:700;
+                                               text-transform:uppercase;letter-spacing:.05em;
+                                               border-bottom:2px solid #d0dff5;width:80px;">Level</th>
+                                    <th class="py-2 px-3"
+                                        style="color:#285496;font-size:.72rem;font-weight:700;
+                                               text-transform:uppercase;letter-spacing:.05em;
+                                               border-bottom:2px solid #d0dff5;">Uraian / Deskripsi Kinerja</th>
+                                    <th class="text-center py-2 px-3"
+                                        style="color:#285496;font-size:.72rem;font-weight:700;
+                                               text-transform:uppercase;letter-spacing:.05em;
+                                               border-bottom:2px solid #d0dff5;width:120px;">Range Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>`;
+            }
+
+            bsModal.show();
+        });
+    });
+
+    // ── FILTER WILAYAH ────────────────────────────────────────
     const filterKategori       = document.getElementById('filterKategori');
     const filterWilayahWrapper = document.getElementById('filterWilayahWrapper');
     const filterWilayah        = document.getElementById('filterWilayah');
-
     if (filterKategori) {
         filterKategori.addEventListener('change', function () {
-            if (this.value === 'FASILITASI') {
-                filterWilayahWrapper.style.display = '';
-            } else {
-                filterWilayahWrapper.style.display = 'none';
-                filterWilayah.value = '';
-            }
+            filterWilayahWrapper.style.display = this.value === 'FASILITASI' ? '' : 'none';
+            if (this.value !== 'FASILITASI') filterWilayah.value = '';
         });
     }
 
-    const modalNilai       = new bootstrap.Modal(document.getElementById('modalNilai'));
-    let currentPesertaId   = null;
-    let currentTotalInd    = 0;
-    let nilaiData          = {};
-    let catatanData        = {};
-    let activeJenisNilaiId = null;
-    let jenisNilaiCache    = [];
-    let pesertaMilikUser   = true;
+    // ── SPREADSHEET NILAI ─────────────────────────────────────
+    const pendingChanges = new Map();
+    const csrfToken      = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    const toastEl        = document.getElementById('toastNilai');
+    const bsToast        = new bootstrap.Toast(toastEl, { delay: 3000 });
 
-    document.querySelectorAll('.btn-nilai').forEach(btn => {
-        btn.addEventListener('click', function () {
-            currentPesertaId = this.dataset.pesertaId;
-            currentTotalInd  = parseInt(this.dataset.totalIndikator) || 0;
-            const nama       = this.dataset.pesertaNama;
+    function showToast(msg, type = 'success') {
+        toastEl.className = `toast align-items-center border-0 shadow text-white bg-${type}`;
+        document.getElementById('toastBody').innerHTML =
+            `<i class="fas fa-${type === 'success' ? 'check-circle' : 'times-circle'} me-2"></i>${msg}`;
+        bsToast.show();
+    }
 
-            document.getElementById('modalNilaiTitle').textContent    = 'Nilai: ' + nama;
-            document.getElementById('modalNilaiSubtitle').textContent = 'Memuat...';
-            document.getElementById('nilaiLoading').classList.remove('d-none');
-            document.getElementById('nilaiLoading').style.display    = '';
-            document.getElementById('nilaiContent').classList.add('d-none');
-            document.getElementById('nilaiContent').style.display    = 'none';
-            document.getElementById('nilaiNoAccess').classList.add('d-none');
-            document.getElementById('nilaiNoAccess').style.display   = 'none';
-            document.getElementById('jenisNilaiTabs').innerHTML       = '';
-            document.getElementById('indikatorContent').innerHTML     = '';
-            document.getElementById('totalProgressBar').style.width  = '0%';
-            document.getElementById('totalNilaiLabel').textContent    = '0 / 100';
+    function updatePendingUI() {
+        const n       = pendingChanges.size;
+        const badge   = document.getElementById('badge-unsaved');
+        const btn     = document.getElementById('btnSimpanSemua');
+        const cBtn    = document.getElementById('countSimpan');
+        const cBadge  = document.getElementById('count-unsaved');
+        if (n > 0) {
+            badge.style.removeProperty('display');
+            btn.style.removeProperty('display');
+        } else {
+            badge.style.setProperty('display','none','important');
+            btn.style.display = 'none';
+        }
+        if (cBtn)   cBtn.textContent   = n;
+        if (cBadge) cBadge.textContent = n;
+    }
 
-            nilaiData = {}; catatanData = {}; activeJenisNilaiId = null;
-            jenisNilaiCache = []; pesertaMilikUser = true;
+    function recalcTotal(pesertaId) {
+        let total = 0;
+        document.querySelectorAll(`.nilai-cell[data-peserta-id="${pesertaId}"]`).forEach(td => {
+            const cur   = td.dataset.current;
+            const bobot = parseFloat(td.dataset.bobot) || 0;
+            if (cur !== '' && cur !== undefined) {
+                const v = parseFloat(cur);
+                if (!isNaN(v)) total += (v / 100) * bobot;
+            }
+        });
+        const el = document.getElementById(`total-${pesertaId}`);
+        if (el) {
+            el.textContent = total.toFixed(1);
+            const fill = el.closest('td')?.querySelector('.total-bar-fill');
+            if (fill) fill.style.width = Math.min(total, 100) + '%';
+        }
+    }
 
-            modalNilai.show();
-            loadNilaiData(currentPesertaId);
+    function renderDisplay(td, val) {
+        const display = td.querySelector('.cell-display');
+        const input   = td.querySelector('.cell-input');
+
+        if (display) display.style.display = '';
+        if (input)   input.style.display   = 'none';
+
+        td.classList.remove('status-saved', 'status-pending');
+
+        const hasVal = val !== null && val !== undefined && val !== '';
+        if (hasVal) {
+            display.innerHTML = `<span class="cell-value">${val}</span>`;
+            td.classList.add(td.classList.contains('pending') ? 'status-pending' : 'status-saved');
+        } else {
+            display.innerHTML = `<span class="cell-empty">—</span>`;
+        }
+    }
+
+    function activateCell(td) {
+        if (!td.classList.contains('editable') || td.classList.contains('editing')) return;
+
+        document.querySelectorAll('.nilai-cell.editing').forEach(other => {
+            if (other !== td) deactivateCell(other, true);
+        });
+
+        const display = td.querySelector('.cell-display');
+        const input   = td.querySelector('.cell-input');
+
+        if (display) display.style.display = 'none';
+        if (input) {
+            input.style.display = 'block';
+            input.value = td.dataset.current !== undefined ? td.dataset.current : '';
+            requestAnimationFrame(() => { input.focus(); input.select(); });
+        }
+
+        td.classList.add('editing');
+    }
+
+    function deactivateCell(td, save = true) {
+        if (!td.classList.contains('editing')) return;
+
+        const display  = td.querySelector('.cell-display');
+        const input    = td.querySelector('.cell-input');
+        if (!input || !display) { td.classList.remove('editing'); return; }
+
+        td.classList.remove('editing');
+
+        input.style.display   = 'none';
+        display.style.display = '';
+
+        const rawVal   = input.value.trim();
+        const savedVal = td.dataset.saved ?? '';
+
+        let newVal = null;
+        if (rawVal !== '') {
+            const n = parseFloat(rawVal);
+            if (!isNaN(n) && n >= 0 && n <= 100) {
+                newVal = n;
+            } else {
+                input.value        = savedVal;
+                td.dataset.current = savedVal;
+                renderDisplay(td, savedVal !== '' ? parseFloat(savedVal) : null);
+                recalcTotal(td.dataset.pesertaId);
+                return;
+            }
+        }
+
+        const newValStr = newVal !== null ? String(newVal) : '';
+        const key       = `${td.dataset.pesertaId}-${td.dataset.indikatorId}`;
+        const changed   = newValStr !== String(savedVal);
+
+        if (changed) {
+            td.dataset.current = newValStr;
+            pendingChanges.set(key, { pesertaId: td.dataset.pesertaId, indikatorId: td.dataset.indikatorId, nilai: newVal, td });
+            td.classList.add('pending');
+            renderDisplay(td, newVal);
+            updatePendingUI();
+        } else {
+            td.dataset.current = savedVal;
+            if (pendingChanges.has(key)) {
+                pendingChanges.delete(key);
+                td.classList.remove('pending');
+                updatePendingUI();
+            }
+            renderDisplay(td, savedVal !== '' ? parseFloat(savedVal) : null);
+        }
+
+        recalcTotal(td.dataset.pesertaId);
+
+        if (save && changed) simpanSatuNilai(td, key, newVal);
+    }
+
+    async function simpanSatuNilai(td, key, val) {
+        td.classList.add('saving');
+        try {
+            const body = {
+                peserta_id:         td.dataset.pesertaId,
+                indikator_nilai_id: td.dataset.indikatorId,
+            };
+            if (val !== null) body.nilai_input = val;
+
+            const res  = await fetch('/nilai/simpan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type'    : 'application/json',
+                    'X-CSRF-TOKEN'    : csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify(body),
+            });
+            const data = await res.json();
+            td.classList.remove('saving');
+
+            if (data.success) {
+                const finalStr     = val !== null ? String(val) : '';
+                td.dataset.saved   = finalStr;
+                td.dataset.current = finalStr;
+                td.classList.remove('pending');
+                pendingChanges.delete(key);
+                renderDisplay(td, val);
+                updatePendingUI();
+                showToast(data.deleted ? 'Nilai dihapus.' : 'Nilai tersimpan.', 'success');
+            } else {
+                td.classList.add('error');
+                showToast('Gagal: ' + (data.message ?? ''), 'danger');
+                setTimeout(() => td.classList.remove('error'), 3000);
+            }
+        } catch {
+            td.classList.remove('saving');
+            td.classList.add('error');
+            showToast('Gagal (error jaringan)', 'danger');
+            setTimeout(() => td.classList.remove('error'), 3000);
+        }
+    }
+
+    // ── Simpan semua pending ──────────────────────────────────
+    document.getElementById('btnSimpanSemua')?.addEventListener('click', async function () {
+        if (!pendingChanges.size) return;
+        this.disabled  = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
+        await Promise.all([...pendingChanges.entries()].map(([k, item]) =>
+            simpanSatuNilai(item.td, k, item.nilai)
+        ));
+        this.disabled  = false;
+        this.innerHTML = '<i class="fas fa-save me-1"></i> Simpan Semua (<span id="countSimpan">0</span>)';
+        if (!pendingChanges.size) showToast('Semua nilai berhasil disimpan.', 'success');
+    });
+
+    // ── Klik cell → edit ─────────────────────────────────────
+    document.querySelectorAll('.nilai-cell.editable').forEach(td => {
+        td.addEventListener('click', function (e) {
+            if (e.target.tagName === 'INPUT') return;
+            activateCell(this);
         });
     });
 
-    async function loadNilaiData(pesertaId) {
-        try {
-            const res  = await fetch(`/nilai/get-data/${pesertaId}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const data = await res.json();
+    // ── Keyboard ─────────────────────────────────────────────
+    document.querySelectorAll('.cell-input').forEach(input => {
+        input.addEventListener('keydown', function (e) {
+            const td       = this.closest('.nilai-cell');
+            const allCells = [...document.querySelectorAll('.nilai-cell.editable')];
 
-            if (!data.success) throw new Error(data.message);
-
-            nilaiData        = data.existing_nilai   || {};
-            catatanData      = data.existing_catatan || {};
-            pesertaMilikUser = data.peserta_milik_user !== false;
-
-            const rawJenisNilai = data.jenis_nilai || [];
-
-            jenisNilaiCache = rawJenisNilai
-                .map(jn => {
-                    const indikatorBisaDinilai = (jn.indikator_nilai || []).filter(
-                        ind => ind.user_dapat_nilai !== false
-                    );
-                    return { ...jn, indikator_nilai: indikatorBisaDinilai };
-                })
-                .filter(jn => jn.indikator_nilai.length > 0);
-
-            const loadingEl   = document.getElementById('nilaiLoading');
-            const contentEl   = document.getElementById('nilaiContent');
-            const noAccessEl  = document.getElementById('nilaiNoAccess');
-
-            loadingEl.classList.add('d-none');
-            loadingEl.style.display = 'none';
-
-            if (jenisNilaiCache.length === 0) {
-                noAccessEl.classList.remove('d-none');
-                noAccessEl.style.display = 'flex';
-                document.getElementById('modalNilaiSubtitle').textContent = 'Tidak ada akses';
-                return;
-            }
-
-            contentEl.classList.remove('d-none');
-            contentEl.style.display = 'flex';
-
-            const aksi = data.aksi_perubahan;
-            let subtitle = jenisNilaiCache.length + ' Jenis Nilai';
-            if (aksi && aksi.judul) {
-                subtitle += ' · 📄 ' + aksi.judul;
-                if (aksi.kategori_aksatika) {
-                    subtitle += ' (' + aksi.kategori_aksatika + ')';
-                }
-            }
-            document.getElementById('modalNilaiSubtitle').textContent = subtitle;
-
-            renderJenisNilaiTabs(jenisNilaiCache);
-            updateTotalNilai(jenisNilaiCache);
-            selectJenisNilai(jenisNilaiCache[0]);
-
-        } catch (err) {
-            document.getElementById('nilaiLoading').innerHTML = `
-                <div class="text-center py-5">
-                    <i class="fas fa-exclamation-circle fa-3x text-danger mb-3 d-block"></i>
-                    <p class="text-muted">Gagal memuat: ${err.message}</p>
-                </div>`;
-        }
-    }
-
-    function renderJenisNilaiTabs(list) {
-        const container = document.getElementById('jenisNilaiTabs');
-        container.innerHTML = '';
-
-        list.forEach(jn => {
-            const indList = jn.indikator_nilai || [];
-            const terisi  = indList.filter(ind =>
-                nilaiData[ind.id] !== undefined &&
-                nilaiData[ind.id] !== null &&
-                nilaiData[ind.id] !== ''
-            ).length;
-            const total   = indList.length;
-            const selesai = total > 0 && terisi === total;
-            const persen  = total > 0 ? Math.round((terisi / total) * 100) : 0;
-
-            const btn = document.createElement('button');
-            btn.type       = 'button';
-            btn.className  = 'jenis-nilai-tab w-100 text-start mb-1' +
-                (activeJenisNilaiId == jn.id ? ' active' : '');
-            btn.dataset.id = jn.id;
-            btn.innerHTML  = `
-                <div class="d-flex align-items-center justify-content-between mb-1">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="jn-dot ${selesai ? 'done' : ''}"></div>
-                        <span class="fw-semibold small">${jn.name}</span>
-                    </div>
-                    <span class="badge ${selesai ? 'bg-success' : 'bg-secondary bg-opacity-25 text-dark'} small">
-                        ${jn.bobot}%
-                    </span>
-                </div>
-                <div class="progress" style="height:3px; border-radius:2px; background:rgba(0,0,0,.1);">
-                    <div class="progress-bar bg-primary" style="width:${persen}%; transition:width .3s;"></div>
-                </div>
-                <small style="font-size:.68rem; color:rgba(0,0,0,.45);">
-                    ${terisi}/${total} terisi
-                </small>
-            `;
-            btn.addEventListener('click', () => selectJenisNilai(jn));
-            container.appendChild(btn);
-        });
-    }
-
-    function selectJenisNilai(jn) {
-        activeJenisNilaiId = jn.id;
-        document.querySelectorAll('.jenis-nilai-tab').forEach(t => t.classList.remove('active'));
-        const tab = document.querySelector(`.jenis-nilai-tab[data-id="${jn.id}"]`);
-        if (tab) tab.classList.add('active');
-        renderIndikatorPanel(jn);
-    }
-
-    // =========================================================
-    // FIX #3 — Layout indikator: panduan & input sejajar
-    // =========================================================
-    function renderIndikatorPanel(jn) {
-        const container = document.getElementById('indikatorContent');
-        const indList   = jn.indikator_nilai || [];
-
-        let html = `
-            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
-                <div>
-                    <h6 class="fw-bold mb-0">
-                        <i class="fas fa-star me-2" style="color:#285496"></i>${jn.name}
-                    </h6>
-                    <small class="text-muted">
-                        Bobot: <strong>${jn.bobot}%</strong>
-                        &nbsp;·&nbsp;
-                        <span class="text-success">${indList.length} indikator</span>
-                    </small>
-                </div>
-                <span class="badge bg-primary">${indList.length} Indikator</span>
-            </div>
-        `;
-
-        if (indList.length === 0) {
-            html += `<div class="text-center py-4 text-muted">
-                        <i class="fas fa-tasks fa-2x mb-2 d-block"></i>
-                        <p>Belum ada indikator</p>
-                     </div>`;
-        } else {
-            indList.forEach((ind, idx) => {
-                const nilaiSaatIni = nilaiData[ind.id] ?? '';
-                const detailList   = ind.detail_indikator || [];
-                const hasDetail    = detailList.length > 0;
-
-                // Preview konversi awal jika nilai sudah ada
-                const konversiHtml = (nilaiSaatIni !== '' && nilaiSaatIni !== null)
-                    ? `<div class="preview-formula saved mt-1" id="preview-${ind.id}">
-                            ${nilaiSaatIni} / 100 &times; ${ind.bobot}%
-                            = <strong>${(parseFloat(nilaiSaatIni) / 100 * ind.bobot).toFixed(2)}</strong>
-                            <i class="fas fa-check-circle text-success ms-1"></i>
-                       </div>`
-                    : `<div class="mt-1" id="preview-${ind.id}"></div>`;
-
-                if (hasDetail) {
-                    // ── Layout 2 kolom: kiri panduan, kanan input nilai ──
-                    html += `
-                    <div class="indikator-card mb-3">
-                        <div class="d-flex align-items-start mb-2">
-                            <div class="indikator-number me-2">${idx + 1}</div>
-                            <div class="flex-grow-1">
-                                <div class="fw-bold small">${ind.name}</div>
-                                <small class="text-muted">Bobot: <strong>${ind.bobot}%</strong></small>
-                                ${ind.deskripsi ? `<p class="text-muted small mb-0 mt-1">${ind.deskripsi}</p>` : ''}
-                            </div>
-                        </div>
-
-                        <div class="row g-3 align-items-start">
-                            {{-- Kolom kiri: panduan level --}}
-                            <div class="col-lg-7 col-12">
-                                <div class="panduan-header mb-2">
-                                    <small class="text-muted fw-semibold" style="font-size:.72rem;">
-                                        <i class="fas fa-list-ul me-1"></i> Panduan Level
-                                        <span class="text-primary">— klik level untuk isi nilai otomatis</span>
-                                    </small>
-                                </div>
-                                <div class="panduan-grid">
-                                    ${detailList.map(det => `
-                                        <div class="detail-level-card level-${det.level}"
-                                            onclick="pilihDariDetail(${ind.id}, ${ind.bobot}, '${(det.range || '').replace(/'/g, '')}', this)">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <span class="level-badge">Level ${det.level ?? '-'}</span>
-                                                ${det.range ? `<span class="range-badge">${det.range}</span>` : ''}
-                                            </div>
-                                            <p class="mb-0" style="font-size:.8rem; line-height:1.4;">${det.uraian ?? '-'}</p>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-
-                            {{-- Kolom kanan: sticky input nilai --}}
-                            <div class="col-lg-5 col-12">
-                                <div class="nilai-sticky-box">
-                                    <div class="nilai-sticky-label mb-2">
-                                        <i class="fas fa-pencil-alt me-1" style="color:#285496"></i>
-                                        <span class="fw-semibold small">Input Nilai</span>
-                                        <span class="text-muted small ms-1">(0 – 100)</span>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                                        <input type="number"
-                                            class="form-control nilai-input"
-                                            id="input-nilai-${ind.id}"
-                                            data-indikator-id="${ind.id}"
-                                            data-bobot="${ind.bobot}"
-                                            value="${nilaiSaatIni}"
-                                            min="0" max="100" step="1"
-                                            placeholder="0 – 100"
-                                            oninput="hitungPreview(${ind.id}, ${ind.bobot}, this.value)">
-                                        <span class="text-muted small fw-semibold">/ 100</span>
-                                    </div>
-                                    ${konversiHtml}
-                                    <div class="mt-2" id="status-${ind.id}"></div>
-                                    <div class="nilai-hint mt-2">
-                                        <i class="fas fa-lightbulb text-warning me-1"></i>
-                                        <small class="text-muted">Klik panduan level di kiri untuk isi otomatis</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                } else {
-                    // ── Layout tanpa panduan: sederhana 1 baris ──
-                    html += `
-                    <div class="indikator-card mb-3">
-                        <div class="d-flex align-items-start">
-                            <div class="indikator-number me-2">${idx + 1}</div>
-                            <div class="flex-grow-1">
-                                <div class="fw-bold small mb-1">${ind.name}</div>
-                                <small class="text-muted">Bobot: <strong>${ind.bobot}%</strong></small>
-                                ${ind.deskripsi ? `<p class="text-muted small mb-2 mt-1">${ind.deskripsi}</p>` : ''}
-                                <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
-                                    <input type="number"
-                                        class="form-control nilai-input"
-                                        id="input-nilai-${ind.id}"
-                                        data-indikator-id="${ind.id}"
-                                        data-bobot="${ind.bobot}"
-                                        value="${nilaiSaatIni}"
-                                        min="0" max="100" step="1"
-                                        placeholder="0 – 100"
-                                        oninput="hitungPreview(${ind.id}, ${ind.bobot}, this.value)">
-                                    <span class="text-muted small fw-semibold">/ 100</span>
-                                    <div id="status-${ind.id}" class="simpan-status"></div>
-                                </div>
-                                ${konversiHtml}
-                            </div>
-                        </div>
-                    </div>`;
-                }
-            });
-        }
-
-        // =========================================================
-        // FIX #2 — Tombol simpan 1x per jenis nilai (batch)
-        // =========================================================
-        if (pesertaMilikUser && indList.length > 0) {
-            const catatanSaatIni = catatanData[jn.id] ?? '';
-
-            html += `
-            <div class="catatan-wrapper mt-3 pt-3 border-top">
-                <label class="form-label fw-semibold small">
-                    <i class="fas fa-sticky-note me-1 text-warning"></i>
-                    Catatan <span class="text-muted fw-normal">— ${jn.name}</span>
-                </label>
-                <textarea class="form-control form-control-sm"
-                    id="catatan-${jn.id}" rows="3"
-                    placeholder="Catatan penilaian..."
-                >${catatanSaatIni}</textarea>
-            </div>
-
-            <div class="simpan-batch-bar mt-3 p-3 rounded-3 border">
-                <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                    <div>
-                        <div class="fw-semibold small mb-0">
-                            <i class="fas fa-save me-1" style="color:#285496"></i>
-                            Simpan semua nilai — <em>${jn.name}</em>
-                        </div>
-                        <small class="text-muted">
-                            Semua nilai dan catatan di atas akan disimpan sekaligus.
-                        </small>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span id="batch-status-${jn.id}" class="simpan-status"></span>
-                        <button type="button"
-                            class="btn btn-primary px-4 btn-simpan-batch"
-                            onclick="simpanBatch(${jn.id}, ${currentPesertaId})">
-                            <i class="fas fa-save me-2"></i>
-                            Simpan Semua
-                        </button>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        container.innerHTML = html;
-    }
-
-    function updateTotalNilai(jnList) {
-        const list = jnList || jenisNilaiCache;
-        let total  = 0;
-        list.forEach(jn => {
-            (jn.indikator_nilai || []).forEach(ind => {
-                const val   = parseFloat(nilaiData[ind.id]);
-                const bobot = parseFloat(ind.bobot);
-                if (!isNaN(val) && !isNaN(bobot)) total += (val / 100) * bobot;
-            });
-        });
-        const persen = Math.min(Math.round(total), 100);
-        document.getElementById('totalProgressBar').style.width = persen + '%';
-        document.getElementById('totalNilaiLabel').textContent  = total.toFixed(2) + ' / 100';
-    }
-
-    function refreshTabs() {
-        renderJenisNilaiTabs(jenisNilaiCache);
-        if (activeJenisNilaiId) {
-            const t = document.querySelector(`.jenis-nilai-tab[data-id="${activeJenisNilaiId}"]`);
-            if (t) t.classList.add('active');
-        }
-    }
-
-    // =========================================================
-    // FIX #1 — Update progress bar di tabel index secara realtime
-    // =========================================================
-    function updateProgressBarIndex(pesertaId) {
-        if (!pesertaId) return;
-
-        // Hitung berapa indikator yang sudah terisi dari nilaiData saat ini
-        let terisiSekarang = 0;
-        jenisNilaiCache.forEach(jn => {
-            (jn.indikator_nilai || []).forEach(ind => {
-                if (nilaiData[ind.id] !== undefined &&
-                    nilaiData[ind.id] !== null &&
-                    nilaiData[ind.id] !== '') {
-                    terisiSekarang++;
-                }
-            });
-        });
-
-        const totalInd = currentTotalInd;
-        if (totalInd <= 0) return;
-
-        const persen = Math.round((terisiSekarang / totalInd) * 100);
-
-        const barEl   = document.getElementById(`progressbar-${pesertaId}`);
-        const pctEl   = document.getElementById(`progresspct-${pesertaId}`);
-        const lblEl   = document.getElementById(`progresslabel-${pesertaId}`);
-
-        if (barEl) {
-            barEl.style.width = persen + '%';
-            barEl.className = 'progress-bar ' +
-                (persen >= 100 ? 'bg-success' : persen > 0 ? 'bg-primary' : 'bg-secondary');
-        }
-        if (pctEl) pctEl.textContent = persen + '%';
-        if (lblEl) lblEl.textContent = terisiSekarang + '/' + totalInd + ' indikator';
-    }
-
-    window.hitungPreview = function(indId, bobot, val) {
-        const preview = document.getElementById(`preview-${indId}`);
-        if (!preview) return;
-        const v = parseFloat(val);
-        if (isNaN(v) || String(val).trim() === '') { preview.innerHTML = ''; return; }
-        const k = (v / 100 * bobot).toFixed(2);
-        preview.innerHTML = `<span class="preview-formula">${v} / 100 &times; ${bobot}% = <strong>${k}</strong></span>`;
-    };
-
-    window.pilihDariDetail = function(indId, bobot, range, el) {
-        const input = document.getElementById(`input-nilai-${indId}`);
-        if (!input || input.readOnly) return;
-        let nilai = null;
-        if (range && range.trim() !== '') {
-            const clean = range.replace(/\s+/g, '');
-            const parts = clean.split('-');
-            if (parts.length === 2) {
-                const a = parseFloat(parts[0]);
-                const b = parseFloat(parts[1]);
-                if (!isNaN(a) && !isNaN(b)) nilai = Math.round((a + b) / 2);
-            } else if (parts.length === 1) {
-                const a = parseFloat(parts[0]);
-                if (!isNaN(a)) nilai = a;
-            }
-        }
-        if (nilai === null) {
-            const levelEl  = el.querySelector('.level-badge');
-            const levelTxt = levelEl ? levelEl.textContent.replace(/[^0-9]/g, '').trim() : '';
-            const levelNum = parseInt(levelTxt);
-            nilai = !isNaN(levelNum) ? Math.min(levelNum * 20, 100) : 50;
-        }
-        nilai = Math.max(0, Math.min(100, nilai));
-        input.value = nilai;
-        hitungPreview(indId, bobot, nilai);
-        el.closest('.panduan-grid').querySelectorAll('.detail-level-card').forEach(c => c.classList.remove('selected'));
-        el.classList.add('selected');
-    };
-
-    // =========================================================
-    // FIX #2 — Simpan batch: 1 tombol untuk semua indikator di jenis nilai ini
-    // =========================================================
-    window.simpanBatch = async function(jenisNilaiId, pesertaId) {
-        const statusEl = document.getElementById(`batch-status-${jenisNilaiId}`);
-        const btn      = document.querySelector('.btn-simpan-batch');
-        const jn       = jenisNilaiCache.find(j => j.id == jenisNilaiId);
-        if (!jn) return;
-
-        const indList  = jn.indikator_nilai || [];
-        const requests = [];
-
-        // Kumpulkan semua indikator yang ada nilai-nya di form
-        indList.forEach(ind => {
-            const input = document.getElementById(`input-nilai-${ind.id}`);
-            if (!input) return;
-            const val = input.value.trim();
-            if (val === '') return; // skip yang kosong
-            const nilaiInput = parseFloat(val);
-            if (isNaN(nilaiInput) || nilaiInput < 0 || nilaiInput > 100) return;
-            requests.push({ indId: ind.id, bobot: ind.bobot, nilaiInput });
-        });
-
-        if (requests.length === 0) {
-            tampilStatus(statusEl, 'error', 'Belum ada nilai yang diisi');
-            return;
-        }
-
-        // Simpan catatan sekaligus
-        const catatanEl  = document.getElementById(`catatan-${jenisNilaiId}`);
-        const catatanVal = catatanEl ? catatanEl.value : null;
-
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...'; }
-        tampilStatus(statusEl, 'loading', '');
-
-        let berhasil = 0;
-        let gagal    = 0;
-
-        // Kirim semua request nilai paralel
-        const nilaiPromises = requests.map(async ({ indId, bobot, nilaiInput }) => {
-            try {
-                const res  = await fetch('/nilai/simpan', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type':     'application/json',
-                        'X-CSRF-TOKEN':     document.querySelector('meta[name="csrf-token"]').content,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: JSON.stringify({
-                        peserta_id:         pesertaId,
-                        indikator_nilai_id: indId,
-                        nilai_input:        nilaiInput,
-                    }),
-                });
-                const data = await res.json();
-                if (data.success) {
-                    nilaiData[indId] = nilaiInput;
-                    // Update preview tiap indikator
-                    const preview = document.getElementById(`preview-${indId}`);
-                    if (preview) {
-                        const konversi = (nilaiInput / 100 * bobot).toFixed(2);
-                        preview.innerHTML = `
-                            <span class="preview-formula saved">
-                                ${nilaiInput} / 100 &times; ${bobot}%
-                                = <strong>${konversi}</strong>
-                                <i class="fas fa-check-circle text-success ms-1"></i>
-                            </span>`;
-                    }
-                    berhasil++;
-                } else {
-                    gagal++;
-                }
-            } catch {
-                gagal++;
+            switch(e.key) {
+                case 'Enter':
+                    e.preventDefault();
+                    deactivateCell(td, true);
+                    { const ni = nextInCol(allCells, td, 1); if (ni !== -1) activateCell(allCells[ni]); }
+                    break;
+                case 'Tab':
+                    e.preventDefault();
+                    deactivateCell(td, true);
+                    { const idx = allCells.indexOf(td); const next = allCells[idx + (e.shiftKey ? -1 : 1)]; if (next) activateCell(next); }
+                    break;
+                case 'Escape':
+                    this.value = td.dataset.saved ?? '';
+                    deactivateCell(td, false);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    deactivateCell(td, true);
+                    { const ni = nextInCol(allCells, td, 1); if (ni !== -1) activateCell(allCells[ni]); }
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    deactivateCell(td, true);
+                    { const ni = nextInCol(allCells, td, -1); if (ni !== -1) activateCell(allCells[ni]); }
+                    break;
             }
         });
 
-        // Kirim catatan jika ada
-        let catatanPromise = Promise.resolve();
-        if (catatanVal !== null) {
-            catatanPromise = fetch('/nilai/simpan-catatan', {
-                method: 'POST',
-                headers: {
-                    'Content-Type':     'application/json',
-                    'X-CSRF-TOKEN':     document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify({
-                    peserta_id:     pesertaId,
-                    jenis_nilai_id: jenisNilaiId,
-                    catatan:        catatanVal,
-                }),
-            }).then(r => r.json()).then(d => {
-                if (d.success) catatanData[jenisNilaiId] = catatanVal;
-            }).catch(() => {});
-        }
+        input.addEventListener('blur', function () {
+            const td = this.closest('.nilai-cell');
+            setTimeout(() => { if (td.classList.contains('editing')) deactivateCell(td, true); }, 150);
+        });
+    });
 
-        await Promise.all([...nilaiPromises, catatanPromise]);
-
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan Semua'; }
-
-        if (gagal === 0) {
-            tampilStatus(statusEl, 'success', `${berhasil} nilai & catatan tersimpan`);
-        } else {
-            tampilStatus(statusEl, 'error', `${berhasil} berhasil, ${gagal} gagal`);
-        }
-
-        updateTotalNilai();
-        refreshTabs();
-
-        // FIX #1 — Update progress bar di tabel index
-        updateProgressBarIndex(currentPesertaId);
-    };
-
-    function tampilStatus(el, type, msg) {
-        const map = {
-            loading: `<i class="fas fa-spinner fa-spin text-muted"></i>`,
-            success: `<i class="fas fa-check-circle text-success"></i> <small class="text-success">${msg}</small>`,
-            error:   `<i class="fas fa-times-circle text-danger"></i> <small class="text-danger">${msg}</small>`,
-        };
-        el.innerHTML = map[type] || '';
-        if (type !== 'loading') setTimeout(() => { el.innerHTML = ''; }, 4000);
+    function nextInCol(allCells, currentTd, dir) {
+        const id       = currentTd.dataset.indikatorId;
+        const colCells = allCells.filter(c => c.dataset.indikatorId === id);
+        const idx      = colCells.indexOf(currentTd) + dir;
+        if (idx < 0 || idx >= colCells.length) return -1;
+        return allCells.indexOf(colCells[idx]);
     }
 
+    // ── Klik luar → tutup editing ─────────────────────────────
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('#modalDetailIndikator')) return;
+        if (!e.target.closest('.nilai-cell')) {
+            document.querySelectorAll('.nilai-cell.editing').forEach(td => deactivateCell(td, true));
+        }
+    });
+
+    // ── Alert auto-close ──────────────────────────────────────
     document.querySelectorAll('.alert').forEach(a => {
         setTimeout(() => bootstrap.Alert.getOrCreateInstance(a)?.close(), 5000);
     });
+
+    // ── Init recalc semua row ─────────────────────────────────
+    document.querySelectorAll('.peserta-row').forEach(row => recalcTotal(row.dataset.pesertaId));
 });
 </script>
 
 <style>
-    .table th { border-bottom:2px solid rgba(40,84,150,.1); font-weight:600; color:#285496; background-color:#f8fafc; padding:.75rem 1rem; }
-    .table td { padding:.75rem 1rem; vertical-align:middle; border-bottom:1px solid #e9ecef; }
-    .peserta-avatar {
-        width:36px; height:36px; border-radius:8px; flex-shrink:0;
-        background:linear-gradient(135deg,#285496,#3a6bc7);
-        display:flex; align-items:center; justify-content:center;
-        color:white; font-size:.9rem; box-shadow:0 4px 8px rgba(40,84,150,.2);
-    }
-    .kelompok-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,#285496,#3a6bc7); }
-    .link-laporan-icon {
-        display:inline-flex; align-items:center; justify-content:center;
-        width:18px; height:18px; border-radius:4px;
-        background:rgba(40,84,150,.1); color:#285496;
-        font-size:.65rem; transition:all .2s; text-decoration:none; flex-shrink:0;
-    }
-    .link-laporan-icon:hover { background:#285496; color:white; transform:translateY(-1px); box-shadow:0 2px 6px rgba(40,84,150,.3); }
-    .btn-action { border-radius:8px; padding:.375rem .75rem; transition:all .2s; border-width:2px; }
-    .btn-action:hover { transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,.1); }
-    .pagination-sm .page-link { padding:.375rem .625rem; border-radius:6px; color:#285496; }
-    .pagination-sm .page-item.active .page-link { background-color:#285496; border-color:#285496; }
-    #filterWilayahWrapper .form-control-sm { border-color: rgba(40,84,150,.35); }
-    #filterWilayahWrapper .form-control-sm:focus { border-color: #285496; box-shadow: 0 0 0 .15rem rgba(40,84,150,.15); }
+/* ════════════════════════════════════════════
+   SPREADSHEET LAYOUT
+════════════════════════════════════════════ */
+.spreadsheet-wrapper { overflow: hidden; position: relative; }
+.spreadsheet-scroll  {
+    overflow-x: auto; overflow-y: auto;
+    max-height: calc(100vh - 380px); min-height: 300px;
+}
+.spreadsheet-table {
+    border-collapse: separate; border-spacing: 0;
+    width: max-content; min-width: 100%; font-size: .82rem;
+}
 
-    /* ===== MODAL LAYOUT ===== */
-    #modalNilai .modal-content { max-height:90vh; display:flex; flex-direction:column; }
-    #modalNilai .modal-body { flex:1 1 auto; overflow:hidden; display:flex; flex-direction:column; padding:0; }
-    #nilaiContent { flex:1 1 auto; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
-    #nilaiContent > .d-flex { flex:1 1 auto; min-height:0; overflow:hidden; }
-    #nilaiNoAccess { flex:1 1 auto; }
+/* Sticky kiri */
+.sticky-col          { position: sticky; background: white; z-index: 3; }
+.sticky-header       { z-index: 5 !important; }
+.sticky-col-1        { left: 0;     min-width: 48px;  max-width: 48px;  border-right: 1px solid #dee2e6; }
+.sticky-col-2        { left: 48px;  min-width: 220px; max-width: 220px; border-right: 1px solid #dee2e6; }
+.sticky-col-3        { left: 268px; min-width: 60px;  max-width: 60px;  border-right: 1px solid #dee2e6; }
+.sticky-col-4        { left: 328px; min-width: 140px; max-width: 140px; border-right: 2px solid #285496; }
 
-    .jenis-nilai-tab { background:white; border:1.5px solid #e9ecef; border-radius:10px; padding:.6rem .75rem; cursor:pointer; transition:all .2s; }
-    .jenis-nilai-tab:hover { background:#f0f4ff; border-color:#285496; }
-    .jenis-nilai-tab.active { background:linear-gradient(135deg,#285496,#3a6bc7); border-color:#285496; color:white; }
-    .jenis-nilai-tab.active small, .jenis-nilai-tab.active .text-muted { color:rgba(255,255,255,.65) !important; }
-    .jenis-nilai-tab.active .badge { background:rgba(255,255,255,.25) !important; color:white !important; }
-    .jenis-nilai-tab.active .progress { background:rgba(255,255,255,.25); }
-    .jenis-nilai-tab.active .progress-bar { background:white !important; }
-    .jn-dot { width:8px; height:8px; border-radius:50%; background:#dee2e6; flex-shrink:0; }
-    .jn-dot.done { background:#28a745; }
+/* Sticky kanan */
+.sticky-col-right {
+    position: sticky; right: 0; background: white; z-index: 3;
+    border-left: 2px solid #285496; min-width: 90px; max-width: 90px; text-align: center;
+}
 
-    /* ===== FIX #3 — Indikator card redesign ===== */
-    .indikator-card { background:#fff; border:1px solid #e9ecef; border-radius:12px; padding:1rem 1.25rem; transition:box-shadow .2s; }
-    .indikator-card:hover { box-shadow:0 4px 16px rgba(40,84,150,.1); }
-    .indikator-number {
-        width:28px; height:28px; border-radius:6px; flex-shrink:0;
-        background:linear-gradient(135deg,#285496,#3a6bc7);
-        color:white; display:flex; align-items:center; justify-content:center;
-        font-weight:700; font-size:.8rem;
-    }
+/* Header */
+.spreadsheet-table thead tr th {
+    position: sticky; top: 0; z-index: 4;
+    background: #f8fafc; padding: .5rem .6rem;
+    font-size: .75rem; font-weight: 600; color: #285496;
+    white-space: nowrap; border-bottom: 2px solid rgba(40,84,150,.15);
+}
+.spreadsheet-table thead tr.thead-indikator th {
+    top: 48px; z-index: 4;
+    background: #f0f4ff; color: #444; font-weight: 500;
+    border-bottom: 2px solid #dee2e6;
+}
 
-    /* Panduan level grid — compact, tidak bertumpuk */
-    .panduan-grid { display:flex; flex-direction:column; gap:.5rem; }
-    .detail-level-card {
-        border:1.5px solid #e9ecef; border-radius:8px; padding:.6rem .75rem;
-        cursor:pointer; transition:all .2s; background:#f8fafc; user-select:none;
-    }
-    .detail-level-card:hover { border-color:#285496; background:#f0f4ff; }
-    .detail-level-card.selected { border-color:#285496; background:rgba(40,84,150,.07); box-shadow:0 2px 8px rgba(40,84,150,.15); }
-    .level-badge { display:inline-block; background:#285496; color:white; font-size:.65rem; font-weight:700; padding:.15rem .45rem; border-radius:4px; }
-    .range-badge { display:inline-block; background:#f0f4ff; color:#285496; border:1px solid #285496; font-size:.65rem; font-weight:700; padding:.15rem .45rem; border-radius:4px; }
-    .level-1 .level-badge { background:#28a745; }
-    .level-2 .level-badge { background:#17a2b8; }
-    .level-3 .level-badge { background:#ffc107; color:#212529; }
-    .level-4 .level-badge { background:#fd7e14; }
-    .level-5 .level-badge { background:#dc3545; }
+/* ── Garis pemisah antar jenis nilai ── */
+.jenis-group-border {
+    border-right: 2px solid #285496 !important;
+}
+.jenis-border-right {
+    border-right: 2px solid #285496 !important;
+}
+/* Pastikan sticky header punya z-index lebih tinggi agar garis tidak tertutup */
+.spreadsheet-table thead tr th.jenis-border-right {
+    border-right: 2px solid #285496 !important;
+}
 
-    /* Sticky input nilai di kanan */
-    .nilai-sticky-box {
-        background:#f8fafc; border:1.5px solid rgba(40,84,150,.2);
-        border-radius:10px; padding:1rem; position:sticky; top:1rem;
-    }
-    .nilai-sticky-label { color:#285496; }
-    .nilai-hint { background:rgba(255,193,7,.08); border-radius:6px; padding:.4rem .6rem; }
-    .nilai-input { max-width:100px; font-weight:700; font-size:1rem; text-align:center; border-radius:8px; }
+.jenis-nilai-header { border-bottom: 2px solid rgba(40,84,150,.15) !important; padding: .4rem .6rem !important; }
+.jn-label { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.jn-name  { font-weight: 700; font-size: .78rem; color: #285496; }
+.jn-bobot { font-size: .65rem; font-weight: 500; background: rgba(40,84,150,.12); color: #285496; border-radius: 4px; padding: .05rem .35rem; }
 
-    .preview-formula { display:inline-block; background:rgba(40,84,150,.08); border:1px solid rgba(40,84,150,.15); border-radius:6px; padding:.2rem .6rem; font-size:.78rem; color:#285496; font-family:monospace; }
-    .preview-formula.saved { background:rgba(40,167,69,.08); border-color:rgba(40,167,69,.2); color:#28a745; }
+/* Indikator header — klikable */
+.indikator-header { max-width: 100px; min-width: 80px; }
+.ind-clickable    { cursor: pointer; transition: background .12s; }
+.ind-clickable:hover { background: #e4ecff !important; }
+.ind-clickable:hover .ind-icon-info { opacity: 1; color: #285496; }
+.ind-inner  { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ind-name   {
+    font-size: .72rem; color: #333; text-align: center; white-space: normal;
+    line-height: 1.3; max-width: 90px; overflow: hidden;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.ind-bobot      { font-size: .65rem; color: #888; display: flex; align-items: center; gap: 3px; }
+.ind-icon-info  { font-size: .6rem; opacity: .35; transition: opacity .15s, color .15s; }
 
-    /* Catatan & batch bar */
-    .catatan-wrapper { background:rgba(245,158,11,.05); border-radius:10px; padding:1rem; border:1px solid rgba(245,158,11,.2); }
-    .simpan-batch-bar { background:rgba(40,84,150,.04); border-color:rgba(40,84,150,.2) !important; }
-    .simpan-status { font-size:.8rem; }
+/* Body rows */
+.peserta-row td { padding: .4rem .6rem; border-bottom: 1px solid #e9ecef; vertical-align: middle; background: white; }
+.peserta-row:hover td { background: #f8faff; }
+.peserta-row:hover .sticky-col,
+.peserta-row:hover .sticky-col-right { background: #f8faff !important; }
+.peserta-row.row-readonly td { opacity: .65; }
+.peserta-row .sticky-col { background: white; }
+
+/* Pastikan garis tetap tampil saat hover */
+.peserta-row td.jenis-border-right,
+.peserta-row:hover td.jenis-border-right {
+    border-right: 2px solid #285496 !important;
+}
+
+/* ════════════════════════════════════════
+   CELL NILAI
+════════════════════════════════════════ */
+.nilai-cell {
+    min-width: 80px; max-width: 100px;
+    text-align: center; cursor: default;
+    transition: background .12s;
+    padding: .3rem .4rem !important;
+    position: relative;
+}
+.nilai-cell.editable               { cursor: pointer; }
+.nilai-cell.editable:hover:not(.editing) { background: #eef2ff !important; }
+
+/* Status warna */
+.nilai-cell.status-saved   { background: #edf7ee !important; }
+.nilai-cell.status-pending { background: #e8f0fe !important; outline: 1px solid #a8c4f8; outline-offset: -1px; }
+.nilai-cell.editing        { background: #fffbeb !important; box-shadow: inset 0 0 0 2px #285496; }
+.nilai-cell.saving         { opacity: .55; pointer-events: none; }
+.nilai-cell.error          { background: rgba(220,53,69,.08) !important; box-shadow: inset 0 0 0 2px #dc3545 !important; }
+
+/* Jaga border kanan tetap tampil meski ada status lain */
+.nilai-cell.jenis-border-right,
+.nilai-cell.jenis-border-right.status-saved,
+.nilai-cell.jenis-border-right.status-pending,
+.nilai-cell.jenis-border-right.editing {
+    border-right: 2px solid #285496 !important;
+}
+
+/* Display wrapper */
+.cell-display {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 28px; width: 100%;
+}
+
+.cell-value { font-weight: 700; font-size: .88rem; color: #1a1a2e; line-height: 1; }
+.nilai-cell.status-saved   .cell-value { color: #1e5c22; }
+.nilai-cell.status-pending .cell-value { color: #1a3c8e; }
+
+.cell-empty      { color: #ccc; font-size: .8rem; }
+.readonly-display { opacity: .7; cursor: default; }
+
+.cell-input {
+    width: 100%; border: none; outline: none; background: transparent;
+    text-align: center; font-weight: 700; font-size: .9rem;
+    color: #285496; padding: 0; min-height: 28px;
+    -moz-appearance: textfield;
+}
+.cell-input::-webkit-outer-spin-button,
+.cell-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Total */
+.total-header   { background: #f0f4ff !important; color: #285496 !important; }
+.td-total       { background: #f8fafc; }
+.total-value    { font-weight: 700; font-size: .9rem; color: #285496; display: block; }
+.total-bar      { height: 4px; border-radius: 2px; background: #e9ecef; margin-top: 3px; overflow: hidden; }
+.total-bar-fill { height: 100%; background: linear-gradient(90deg, #285496, #3a6bc7); border-radius: 2px; transition: width .4s ease; }
+
+/* Legend */
+.legend-swatch  { display:inline-flex; align-items:center; justify-content:center; min-width:36px; height:22px; border-radius:5px; font-size:.72rem; font-weight:700; padding:0 6px; }
+.swatch-saved   { background:#edf7ee; color:#1e5c22; border:1px solid #b7debb; }
+.swatch-pending { background:#e8f0fe; color:#1a3c8e; border:1px solid #a8c4f8; }
+.swatch-empty   { background:#f8f9fa; color:#aaa;    border:1px solid #dee2e6; }
+
+/* Peserta */
+.peserta-avatar-sm {
+    width:30px; height:30px; border-radius:8px;
+    background:linear-gradient(135deg,#285496,#3a6bc7);
+    color:white; font-size:.75rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.peserta-nama-text { max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Pagination */
+.pagination-sm .page-link { padding:.375rem .625rem; border-radius:6px; color:#285496; }
+.pagination-sm .page-item.active .page-link { background-color:#285496; border-color:#285496; }
+
+/* Scrollbar */
+.spreadsheet-scroll::-webkit-scrollbar       { height:8px; width:8px; }
+.spreadsheet-scroll::-webkit-scrollbar-track { background:#f1f1f1; }
+.spreadsheet-scroll::-webkit-scrollbar-thumb { background:#c1c1c1; border-radius:4px; }
+.spreadsheet-scroll::-webkit-scrollbar-thumb:hover { background:#285496; }
+
+/* ════════════════════════════════════════
+   MODAL DETAIL INDIKATOR
+════════════════════════════════════════ */
+.modal-header-custom {
+    background: linear-gradient(135deg, #285496, #3a6bc7);
+    padding: 1.25rem 1.5rem 1rem;
+}
+.modal-header-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.modal-header-icon i { color: #fff; font-size: 1.1rem; }
+
+.minfo-card {
+    background: #f8fafc; border: 1px solid #e4ecf7;
+    border-radius: 10px; padding: .7rem .9rem; text-align: center;
+}
+.minfo-label {
+    font-size: .68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: #999; margin-bottom: 4px;
+}
+.minfo-value { font-size: .95rem; font-weight: 700; color: #285496; line-height: 1.2; }
 </style>
 @endsection
