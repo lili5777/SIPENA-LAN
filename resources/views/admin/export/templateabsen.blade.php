@@ -13,7 +13,7 @@
             font-family: Arial, sans-serif;
             font-size: 10pt;
             margin: 0;
-            padding-top: 45mm;
+            padding-top: 53mm;
         }
 
         .header {
@@ -127,12 +127,12 @@
         }
 
         table.peserta td.nama {
-            width: 35%;
+            width: 25%;
             text-align: left;
         }
 
         table.peserta td.instansi {
-            width: 30%;
+            width: 25%;
             text-align: center;
         }
 
@@ -145,7 +145,7 @@
         }
 
         table.peserta td.ket {
-            width: 8%;
+            width: 20%;
             text-align: center;
         }
 
@@ -211,11 +211,10 @@
                 <h4>{{ strtoupper($jenis_pelatihan) }} ANGKATAN {{ $angkatan }}</h4>
                 <p>PUSAT PEMBELAJARAN DAN STRATEGI KEBIJAKAN MANAJEMEN PEMERINTAHAN</p>
                 <p><strong>LEMBAGA ADMINISTRASI NEGARA</strong></p>
-                <p>MAKASSAR</p>
+                <p>MAKASSAR</p> 
             </div>
         </div>
     </div>
-
     <div class="content">
         <!-- Informasi Sesi -->
         <div class="info-section">
@@ -245,6 +244,7 @@
                 <span class="info-value">.........................................................</span>
             </div>
         </div>
+        <br>
 
         <!-- Tabel Peserta — satu tabel penuh, DomPDF urus page break -->
         <table class="peserta">
@@ -286,10 +286,10 @@
                         ..............................
                     </td>
                     <td style="width: 25%;">
-                        <strong>Evaluator Pembelajaran</strong><br>
-                        1. ..............................<br>
-                        2. ..............................<br>
-                        3. ..............................<br>
+                        <strong>Evaluator Pembelajaran</strong><br><br>
+                        1. ..............................<br><br>
+                        2. ..............................<br><br>
+                        3. ..............................<br><br>
                         4. ..............................
                     </td>
                     <td style="width: 25%;">
@@ -301,8 +301,8 @@
                     </td>
                     <td style="width: 25%;">
                         <div class="signature-box">
-                            Makassar, <br><br>
-                            <strong>Ketua Squad {{ $jenis_pelatihan }} ANG {{ $angkatan }}</strong>
+                            Makassar,..............<br><br>
+                            <strong>Ketua Squad {{ $jenis_pelatihan }} ANG. {{ $angkatan }}</strong>
                             <br><br><br><br>
                             ..............................
                         </div>
