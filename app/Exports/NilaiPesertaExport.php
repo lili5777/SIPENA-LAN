@@ -26,8 +26,8 @@ class NilaiPesertaExport implements WithEvents, WithTitle
     protected ?string $tahun;
     protected ?string $kelompok;
     protected ?string $search;
-    protected ?string $kategori;   // ← baru
-    protected ?string $wilayah;    // ← baru
+    protected ?string $kategori;
+    protected ?string $wilayah;
 
     // ── Warna header ──────────────────────────────────────────
     const COLOR_HEADER_JENIS  = '285496';
@@ -52,8 +52,8 @@ class NilaiPesertaExport implements WithEvents, WithTitle
         ?string $tahun    = null,
         ?string $kelompok = null,
         ?string $search   = null,
-        ?string $kategori = null,   // ← baru
-        ?string $wilayah  = null    // ← baru
+        ?string $kategori = null,
+        ?string $wilayah  = null
     ) {
         $this->jenisPelatihanId = $jenisPelatihanId;
         $this->angkatan         = $angkatan;
@@ -71,26 +71,26 @@ class NilaiPesertaExport implements WithEvents, WithTitle
     }
 
     // =========================================================
-    // HELPER — kualifikasi
+    // HELPER — kualifikasi & romawi
     // =========================================================
     private function romawToInt(string $str): int
-{
-    // Ekstrak angka romawi dari string seperti "Angkatan XIV"
-    preg_match('/\b([IVXLCDM]+)\b/i', $str, $matches);
-    $roman = strtoupper($matches[1] ?? '');
+    {
+        preg_match('/\b([IVXLCDM]+)\b/i', $str, $matches);
+        $roman = strtoupper($matches[1] ?? '');
 
-    $map    = ['I'=>1,'V'=>5,'X'=>10,'L'=>50,'C'=>100,'D'=>500,'M'=>1000];
-    $result = 0;
-    $len    = strlen($roman);
+        $map    = ['I'=>1,'V'=>5,'X'=>10,'L'=>50,'C'=>100,'D'=>500,'M'=>1000];
+        $result = 0;
+        $len    = strlen($roman);
 
-    for ($i = 0; $i < $len; $i++) {
-        $curr = $map[$roman[$i]] ?? 0;
-        $next = $map[$roman[$i + 1] ?? ''] ?? 0;
-        $result += $curr < $next ? -$curr : $curr;
+        for ($i = 0; $i < $len; $i++) {
+            $curr = $map[$roman[$i]] ?? 0;
+            $next = $map[$roman[$i + 1] ?? ''] ?? 0;
+            $result += $curr < $next ? -$curr : $curr;
+        }
+
+        return $result;
     }
 
-    return $result;
-}
     private function getKualifikasi(float $total): array
     {
         if ($total > 100) {
@@ -165,7 +165,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
             );
         }
 
-        // ── Filter kategori (via relasi pendaftaran → angkatan) ───
+        // Filter kategori
         if (!empty($this->kategori)) {
             $kategori = $this->kategori;
             $query->whereHas('pendaftaran.angkatan', fn($q) =>
@@ -173,7 +173,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
             );
         }
 
-        // ── Filter wilayah (hanya aktif saat kategori FASILITASI) ─
+        // Filter wilayah
         if (!empty($this->wilayah)) {
             $wilayah = $this->wilayah;
             $query->whereHas('pendaftaran.angkatan', fn($q) =>
@@ -182,19 +182,17 @@ class NilaiPesertaExport implements WithEvents, WithTitle
         }
 
         $pesertaList = $query->with([
-    'pendaftaran.angkatan',
-    'kelompok' => fn($q) => $q->where('id_jenis_pelatihan', $this->jenisPelatihanId),
-])->get()->sortBy([
-    // 1. Urutkan angkatan: konversi romawi → integer dulu
-    fn($a, $b) => $this->romawToInt(
-        optional(optional($a->pendaftaran->first())->angkatan)->nama_angkatan ?? ''
-    ) <=> $this->romawToInt(
-        optional(optional($b->pendaftaran->first())->angkatan)->nama_angkatan ?? ''
-    ),
-    // 2. Urutkan NDH secara numerik
-    fn($a, $b) => (int) filter_var($a->ndh, FILTER_SANITIZE_NUMBER_INT)
-                  <=> (int) filter_var($b->ndh, FILTER_SANITIZE_NUMBER_INT),
-])->values();
+            'pendaftaran.angkatan',
+            'kelompok' => fn($q) => $q->where('id_jenis_pelatihan', $this->jenisPelatihanId),
+        ])->get()->sortBy([
+            fn($a, $b) => $this->romawToInt(
+                optional(optional($a->pendaftaran->first())->angkatan)->nama_angkatan ?? ''
+            ) <=> $this->romawToInt(
+                optional(optional($b->pendaftaran->first())->angkatan)->nama_angkatan ?? ''
+            ),
+            fn($a, $b) => (int) filter_var($a->ndh, FILTER_SANITIZE_NUMBER_INT)
+                          <=> (int) filter_var($b->ndh, FILTER_SANITIZE_NUMBER_INT),
+        ])->values();
 
         $rows = [];
         foreach ($pesertaList as $p) {
@@ -203,6 +201,10 @@ class NilaiPesertaExport implements WithEvents, WithTitle
             $kelompok = Kelompok::whereHas('peserta', fn($q) => $q->where('peserta.id', $p->id))
                 ->where('id_jenis_pelatihan', $this->jenisPelatihanId)
                 ->first();
+
+            // Ambil nama penguji dan coach dari relasi kelompok
+            $namaPenguji = $kelompok?->penguji?->nama ?? '-';
+            $namaCoach   = $kelompok?->coach?->nama ?? '-';
 
             $nilaiList = NilaiPeserta::where('id_peserta', $p->id)
                 ->with('indikatorNilai.jenisNilai')
@@ -255,6 +257,8 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                 'nilai_per_jenis' => $nilaiPerJenis,
                 'total_nilai'     => round($totalNilai, 2),
                 'catatan'         => $catatanGabung,
+                'nama_penguji'    => $namaPenguji,
+                'nama_coach'      => $namaCoach,
             ];
         }
 
@@ -290,6 +294,8 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                     $totalCols += $jn->indikatorNilai->count();
                 }
                 $totalCols += 3; // Total + Kualifikasi + Catatan
+                $totalCols += 2; // + Penguji + Coach (di paling akhir)
+
                 $lastColLetter = Coordinate::stringFromColumnIndex($totalCols);
 
                 // ── JUDUL SHEET (baris 1) ─────────────────────────────
@@ -376,6 +382,18 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                 $sheet->mergeCells("{$catatanColLetter}{$headerRow1}:{$catatanColLetter}{$headerRow2}");
                 $sheet->setCellValue("{$catatanColLetter}{$headerRow1}", "CATATAN");
 
+                // ── HEADER PENGUJI & COACH (paling akhir) ─────────────
+                $pengujiColIdx = $currentCol + 3;
+                $coachColIdx   = $currentCol + 4;
+                $pengujiColLetter = Coordinate::stringFromColumnIndex($pengujiColIdx);
+                $coachColLetter   = Coordinate::stringFromColumnIndex($coachColIdx);
+
+                $sheet->mergeCells("{$pengujiColLetter}{$headerRow1}:{$pengujiColLetter}{$headerRow2}");
+                $sheet->setCellValue("{$pengujiColLetter}{$headerRow1}", "PENGUJI");
+
+                $sheet->mergeCells("{$coachColLetter}{$headerRow1}:{$coachColLetter}{$headerRow2}");
+                $sheet->setCellValue("{$coachColLetter}{$headerRow1}", "COACH");
+
                 // ── STYLE HEADER ──────────────────────────────────────
                 $lastBaseCol = Coordinate::stringFromColumnIndex($baseCount);
                 $sheet->getStyle("A{$headerRow1}:{$lastBaseCol}{$headerRow2}")->applyFromArray([
@@ -386,7 +404,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
 
                 if ($totalCols > $baseCount + 3) {
                     $jenisStartLetter = Coordinate::stringFromColumnIndex($baseCount + 1);
-                    $jenisEndLetter   = Coordinate::stringFromColumnIndex($totalCols - 2);
+                    $jenisEndLetter   = Coordinate::stringFromColumnIndex($catatanColIdx);
                     $sheet->getStyle("{$jenisStartLetter}{$headerRow1}:{$jenisEndLetter}{$headerRow1}")->applyFromArray([
                         'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 10],
                         'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => self::COLOR_HEADER_JENIS]],
@@ -414,6 +432,18 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                 $sheet->getStyle("{$catatanColLetter}{$headerRow1}:{$catatanColLetter}{$headerRow2}")->applyFromArray([
                     'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 10],
                     'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '6B5E8C']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+                ]);
+
+                $sheet->getStyle("{$pengujiColLetter}{$headerRow1}:{$pengujiColLetter}{$headerRow2}")->applyFromArray([
+                    'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 10],
+                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '8B5CF6']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+                ]);
+
+                $sheet->getStyle("{$coachColLetter}{$headerRow1}:{$coachColLetter}{$headerRow2}")->applyFromArray([
+                    'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 10],
+                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'A855F7']],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
                 ]);
 
@@ -467,14 +497,14 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                         }
                     }
 
-                    // ① Zebra
-                    $lastDataCol = Coordinate::stringFromColumnIndex($currentCol + 2);
+                    // ① Zebra untuk semua kolom termasuk penguji & coach
+                    $lastDataCol = $coachColLetter;
                     $sheet->getStyle("A{$rowNum}:{$lastDataCol}{$rowNum}")->applyFromArray([
                         'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
                     ]);
 
                     // ② Total
-                    $totalColLetterData = Coordinate::stringFromColumnIndex($currentCol);
+                    $totalColLetterData = Coordinate::stringFromColumnIndex($totalColIdx);
                     $total              = $row['total_nilai'];
                     $totalBg = $total >= 80 ? '28a745' : ($total >= 60 ? 'ffc107' : ($total > 0 ? 'dc3545' : 'adb5bd'));
                     $totalFg = ($total >= 60 && $total < 80) ? '212529' : 'FFFFFF';
@@ -486,7 +516,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                     ]);
 
                     // ③ Kualifikasi
-                    $kualifikasiColLetterData = Coordinate::stringFromColumnIndex($currentCol + 1);
+                    $kualifikasiColLetterData = Coordinate::stringFromColumnIndex($kualifikasiColIdx);
                     $kualifikasi              = $this->getKualifikasi($total);
                     $sheet->setCellValue("{$kualifikasiColLetterData}{$rowNum}", $kualifikasi['label']);
                     $sheet->getStyle("{$kualifikasiColLetterData}{$rowNum}")->applyFromArray([
@@ -496,7 +526,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                     ]);
 
                     // ④ Catatan
-                    $catatanColLetterData = Coordinate::stringFromColumnIndex($currentCol + 2);
+                    $catatanColLetterData = Coordinate::stringFromColumnIndex($catatanColIdx);
                     $catatanText          = $row['catatan'] ?? '';
                     $sheet->setCellValue("{$catatanColLetterData}{$rowNum}", $catatanText);
                     if (!empty($catatanText)) {
@@ -507,7 +537,19 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                         ]);
                     }
 
-                    // ⑤ Tinggi baris
+                    // ⑤ Penguji
+                    $sheet->setCellValue("{$pengujiColLetter}{$rowNum}", $row['nama_penguji']);
+                    $sheet->getStyle("{$pengujiColLetter}{$rowNum}")->applyFromArray([
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                    ]);
+
+                    // ⑥ Coach
+                    $sheet->setCellValue("{$coachColLetter}{$rowNum}", $row['nama_coach']);
+                    $sheet->getStyle("{$coachColLetter}{$rowNum}")->applyFromArray([
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                    ]);
+
+                    // ⑦ Tinggi baris
                     $lineCount = !empty($catatanText)
                         ? max(1, substr_count($catatanText, "\n") + 1,
                               (int) ceil(mb_strlen($catatanText) / 55))
@@ -545,7 +587,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                         }
                     }
 
-                    $avgTotalLetter = Coordinate::stringFromColumnIndex($currentCol);
+                    $avgTotalLetter = Coordinate::stringFromColumnIndex($totalColIdx);
                     $avgTotal       = round(array_sum(array_column($rows, 'total_nilai')) / count($rows), 2);
                     $sheet->setCellValue("{$avgTotalLetter}{$avgRow}", $avgTotal);
                     $sheet->getStyle("{$avgTotalLetter}{$avgRow}")->applyFromArray([
@@ -554,7 +596,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                         'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                     ]);
 
-                    $kualifikasiAvgLetter = Coordinate::stringFromColumnIndex($currentCol + 1);
+                    $kualifikasiAvgLetter = Coordinate::stringFromColumnIndex($kualifikasiColIdx);
                     $kualifikasiAvg       = $this->getKualifikasi($avgTotal);
                     $sheet->setCellValue("{$kualifikasiAvgLetter}{$avgRow}", $kualifikasiAvg['label']);
                     $sheet->getStyle("{$kualifikasiAvgLetter}{$avgRow}")->applyFromArray([
@@ -563,9 +605,24 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                         'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                     ]);
 
-                    $catatanAvgLetter = Coordinate::stringFromColumnIndex($currentCol + 2);
+                    $catatanAvgLetter = Coordinate::stringFromColumnIndex($catatanColIdx);
                     $sheet->setCellValue("{$catatanAvgLetter}{$avgRow}", '—');
                     $sheet->getStyle("{$catatanAvgLetter}{$avgRow}")->applyFromArray([
+                        'font'      => ['color' => ['rgb' => 'AAAAAA']],
+                        'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EDE9F5']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+
+                    // Rata-rata untuk Penguji & Coach (kosong)
+                    $sheet->setCellValue("{$pengujiColLetter}{$avgRow}", '—');
+                    $sheet->getStyle("{$pengujiColLetter}{$avgRow}")->applyFromArray([
+                        'font'      => ['color' => ['rgb' => 'AAAAAA']],
+                        'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EDE9F5']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+
+                    $sheet->setCellValue("{$coachColLetter}{$avgRow}", '—');
+                    $sheet->getStyle("{$coachColLetter}{$avgRow}")->applyFromArray([
                         'font'      => ['color' => ['rgb' => 'AAAAAA']],
                         'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EDE9F5']],
                         'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
@@ -594,16 +651,18 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
                 $jenisStartLetter2 = Coordinate::stringFromColumnIndex($baseCount + 1);
-                $nilaiEndLetter    = Coordinate::stringFromColumnIndex($totalCols - 2);
+                $nilaiEndLetter    = Coordinate::stringFromColumnIndex($catatanColIdx);
                 $sheet->getStyle("{$jenisStartLetter2}{$dataStartRow}:{$nilaiEndLetter}{$lastRow}")->applyFromArray([
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
                 $sheet->getStyle("{$kualifikasiColLetter}{$dataStartRow}:{$kualifikasiColLetter}{$lastRow}")->applyFromArray([
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
                 ]);
-                $catatanColFinal = Coordinate::stringFromColumnIndex($totalCols);
-                $sheet->getStyle("{$catatanColFinal}{$dataStartRow}:{$catatanColFinal}{$lastRow}")->applyFromArray([
+                $sheet->getStyle("{$catatanColLetter}{$dataStartRow}:{$catatanColLetter}{$lastRow}")->applyFromArray([
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_TOP, 'wrapText' => true],
+                ]);
+                $sheet->getStyle("{$pengujiColLetter}{$dataStartRow}:{$coachColLetter}{$lastRow}")->applyFromArray([
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
 
                 // ── FREEZE PANES ──────────────────────────────────────
@@ -619,24 +678,28 @@ class NilaiPesertaExport implements WithEvents, WithTitle
                 $sheet->getColumnDimension('G')->setWidth(18);
                 $sheet->getColumnDimension('H')->setWidth(12);
 
-                for ($c = $baseCount + 1; $c <= $totalCols - 2; $c++) {
+                for ($c = $baseCount + 1; $c <= $catatanColIdx; $c++) {
                     $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($c))->setWidth(14);
                 }
-                $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($totalCols - 1))->setWidth(22);
-                $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($totalCols))->setWidth(45);
+                $sheet->getColumnDimension($kualifikasiColLetter)->setWidth(22);
+                $sheet->getColumnDimension($catatanColLetter)->setWidth(45);
+                $sheet->getColumnDimension($pengujiColLetter)->setWidth(25);
+                $sheet->getColumnDimension($coachColLetter)->setWidth(25);
 
                 // ── FORMAT NUMBER ─────────────────────────────────────
                 $sheet->getStyle("B{$dataStartRow}:B{$lastRow}")->getNumberFormat()->setFormatCode('@');
                 $sheet->getStyle("D{$dataStartRow}:D{$lastRow}")->getNumberFormat()->setFormatCode('@');
 
                 $jenisStartLetter3 = Coordinate::stringFromColumnIndex($baseCount + 1);
-                $nilaiEndLetter2   = Coordinate::stringFromColumnIndex($totalCols - 2);
+                $nilaiEndLetter2   = Coordinate::stringFromColumnIndex($catatanColIdx);
                 $sheet->getStyle("{$jenisStartLetter3}{$dataStartRow}:{$nilaiEndLetter2}{$lastRow}")
                     ->getNumberFormat()->setFormatCode('0.00');
 
                 $sheet->getStyle("{$kualifikasiColLetter}{$dataStartRow}:{$kualifikasiColLetter}{$lastRow}")
                     ->getNumberFormat()->setFormatCode('@');
-                $sheet->getStyle("{$catatanColFinal}{$dataStartRow}:{$catatanColFinal}{$lastRow}")
+                $sheet->getStyle("{$catatanColLetter}{$dataStartRow}:{$catatanColLetter}{$lastRow}")
+                    ->getNumberFormat()->setFormatCode('@');
+                $sheet->getStyle("{$pengujiColLetter}{$dataStartRow}:{$coachColLetter}{$lastRow}")
                     ->getNumberFormat()->setFormatCode('@');
             },
         ];

@@ -301,7 +301,7 @@
                     </td>
                     <td style="width: 25%;">
                         <div class="signature-box">
-                            Makassar, {{ $tanggal_ttd }}<br><br>
+                            Makassar, <br><br>
                             <strong>Ketua Squad {{ $jenis_pelatihan }} ANG {{ $angkatan }}</strong>
                             <br><br><br><br>
                             ..............................

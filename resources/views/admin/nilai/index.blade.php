@@ -64,6 +64,19 @@
         <div class="legend-swatch swatch-empty">—</div>
         <small class="text-muted">Kosong</small>
     </div>
+    {{-- [BARU] legend catatan --}}
+    <div class="d-flex align-items-center gap-2">
+        <span class="catatan-icon-legend catatan-icon-filled">
+            <i class="fas fa-comment-dots"></i>
+        </span>
+        <small class="text-muted">Ada catatan</small>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="catatan-icon-legend catatan-icon-empty">
+            <i class="fas fa-comment"></i>
+        </span>
+        <small class="text-muted">Belum ada catatan</small>
+    </div>
     <div class="d-flex align-items-center gap-2">
         <small class="text-muted">
             <i class="fas fa-info-circle me-1 text-primary"></i>
@@ -174,6 +187,78 @@
     </div>
 </div>
 
+{{-- ── SECTION LAPORAN KELOMPOK ──────────────────────────────────────── --}}
+@if(isset($kelompokLaporan) && $kelompokLaporan->isNotEmpty())
+<div class="card border-0 shadow-sm mb-3" id="sectionLaporan">
+    <div class="card-body p-3">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <div style="width:4px;height:18px;background:#285496;border-radius:2px;flex-shrink:0;"></div>
+            <span class="fw-semibold small" style="color:#285496;">
+                <i class="fas fa-folder-open me-1"></i> Laporan Kelompok
+            </span>
+            <span class="text-muted small">
+                —
+                @if(request('kelompok') && request('angkatan') && request('tahun'))
+                    Kelompok {{ request('kelompok') }}, Angkatan {{ request('angkatan') }} / {{ request('tahun') }}
+                @elseif(request('kelompok') && request('angkatan'))
+                    Kelompok {{ request('kelompok') }}, Angkatan {{ request('angkatan') }}
+                @elseif(request('kelompok') && request('tahun'))
+                    Kelompok {{ request('kelompok') }}, Tahun {{ request('tahun') }}
+                @elseif(request('kelompok'))
+                    Kelompok {{ request('kelompok') }}
+                @elseif(request('angkatan') && request('tahun'))
+                    Angkatan {{ request('angkatan') }} / {{ request('tahun') }}
+                @elseif(request('angkatan'))
+                    Angkatan {{ request('angkatan') }}
+                @elseif(request('tahun'))
+                    Tahun {{ request('tahun') }}
+                @endif
+            </span>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-normal ms-1" style="font-size:.72rem;">
+                {{ $kelompokLaporan->count() }} kelompok
+            </span>
+        </div>
+
+        <div class="laporan-grid" id="laporanGrid">
+            @foreach($kelompokLaporan as $klp)
+                @php
+                    $hasLink       = !empty($klp->link_laporan);
+                    $angkatanLabel = $klp->angkatan->nama_angkatan ?? '-';
+                    $tahunLabel    = $klp->angkatan->tahun ?? '';
+                @endphp
+                <div class="laporan-card {{ $hasLink ? 'laporan-card-has-link' : 'laporan-card-no-link' }}">
+                    <div class="laporan-card-icon {{ $hasLink ? '' : 'laporan-card-icon-empty' }}">
+                        <i class="fas fa-file-alt" style="font-size:.8rem;"></i>
+                    </div>
+                    <div class="laporan-card-info">
+                        <div class="laporan-card-name" title="{{ $klp->nama_kelompok }}">{{ $klp->nama_kelompok }}</div>
+                        <div class="laporan-card-meta">{{ $angkatanLabel }}{{ $tahunLabel ? ' · ' . $tahunLabel : '' }}</div>
+                    </div>
+                    @if($hasLink)
+                        <a href="{{ $klp->link_laporan }}" target="_blank" rel="noopener noreferrer"
+                           class="laporan-btn" title="Buka laporan {{ $klp->nama_kelompok }}">
+                            Buka <i class="fas fa-external-link-alt" style="font-size:.6rem;"></i>
+                        </a>
+                    @else
+                        <span class="laporan-btn-empty">Belum tersedia</span>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+
+        @if($kelompokLaporan->count() > 6)
+            <button class="laporan-toggle-btn mt-2" id="laporanToggle"
+                onclick="toggleLaporan({{ $kelompokLaporan->count() }})"
+                data-count="{{ $kelompokLaporan->count() }}" data-open="0">
+                <i class="fas fa-chevron-down me-1 laporan-toggle-icon"></i>
+                Lihat semua ({{ $kelompokLaporan->count() }})
+            </button>
+        @endif
+    </div>
+</div>
+@endif
+{{-- ── END SECTION LAPORAN KELOMPOK ──────────────────────────────────── --}}
+
 <!-- Spreadsheet Container -->
 <div class="card border-0 shadow-lg overflow-hidden mb-3">
     <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
@@ -203,7 +288,8 @@
                         <th class="sticky-col sticky-col-3 sticky-header" rowspan="2">NDH</th>
                         <th class="sticky-col sticky-col-4 sticky-header" rowspan="2">Kelompok</th>
                         @foreach($jenisNilaiList as $jnLoop => $jn)
-                            <th colspan="{{ $jn->indikatorNilai->count() }}"
+                            {{-- +1 untuk kolom catatan --}}
+                            <th colspan="{{ $jn->indikatorNilai->count() + 1 }}"
                                 class="jenis-nilai-header text-center jenis-group-border"
                                 style="--jn-color: {{ $jnColors[$jnLoop % count($jnColors)] }}">
                                 <div class="jn-label">
@@ -217,12 +303,11 @@
                             <small style="font-weight:400; font-size:.65rem; opacity:.7;">/ 100</small>
                         </th>
                     </tr>
-                    <!-- Baris 2: Nama indikator — klik untuk buka modal -->
+                    <!-- Baris 2: Nama indikator + kolom catatan -->
                     <tr class="thead-indikator">
                         @foreach($jenisNilaiList as $jn)
                             @foreach($jn->indikatorNilai as $indLoop => $ind)
                                 @php
-                                    $isLastInd = $indLoop === $jn->indikatorNilai->count() - 1;
                                     $detailJson = json_encode(
                                         $ind->detailIndikator->map(fn($d) => [
                                             'level'  => $d->level,
@@ -234,7 +319,7 @@
                                         ? 'Admin'
                                         : $ind->roles->pluck('name')->map(fn($r) => ucfirst($r))->implode(', ');
                                 @endphp
-                                <th class="indikator-header ind-clickable {{ $isLastInd ? 'jenis-border-right' : '' }}"
+                                <th class="indikator-header ind-clickable"
                                     data-indikator-id="{{ $ind->id }}"
                                     data-bobot="{{ $ind->bobot }}"
                                     data-jenis-id="{{ $jn->id }}"
@@ -251,6 +336,16 @@
                                     </div>
                                 </th>
                             @endforeach
+                            {{-- [BARU] Header kolom catatan per jenis nilai --}}
+                            <th class="indikator-header catatan-col-header jenis-group-border"
+                                data-jenis-id="{{ $jn->id }}">
+                                <div class="ind-inner">
+                                    <div class="ind-name" style="color:#64748b;">
+                                        <i class="fas fa-comment-dots" style="font-size:.7rem;"></i>
+                                        Catatan
+                                    </div>
+                                </div>
+                            </th>
                         @endforeach
                     </tr>
                 </thead>
@@ -296,22 +391,20 @@
                                 @endif
                             </td>
 
-                            <!-- Nilai Cells -->
+                            <!-- Nilai Cells + Catatan Cell per jenis nilai -->
                             @foreach($jenisNilaiList as $jn)
                                 @foreach($jn->indikatorNilai as $indLoop => $ind)
                                     @php
                                         $existingNilai = $item->nilaiMap[$ind->id] ?? null;
                                         $canEdit = $bisaDinilai && ($ind->userDapatNilai ?? false);
-                                        $isLastInd = $indLoop === $jn->indikatorNilai->count() - 1;
                                     @endphp
-                                    <td class="nilai-cell {{ $canEdit ? 'editable' : 'readonly' }} {{ $existingNilai !== null ? 'status-saved' : '' }} {{ $isLastInd ? 'jenis-border-right' : '' }}"
+                                    <td class="nilai-cell {{ $canEdit ? 'editable' : 'readonly' }} {{ $existingNilai !== null ? 'status-saved' : '' }}"
                                         data-peserta-id="{{ $item->id }}"
                                         data-indikator-id="{{ $ind->id }}"
                                         data-bobot="{{ $ind->bobot }}"
                                         data-jenis-id="{{ $jn->id }}"
                                         data-saved="{{ $existingNilai ?? '' }}"
                                         data-current="{{ $existingNilai ?? '' }}">
-
                                         @if($canEdit)
                                             <div class="cell-display">
                                                 @if($existingNilai !== null)
@@ -338,6 +431,25 @@
                                         @endif
                                     </td>
                                 @endforeach
+
+                                {{-- [BARU] Cell catatan per jenis nilai --}}
+                                @php
+                                    $existingCatatan = $item->catatanMap[$jn->id] ?? null;
+                                    $hasCatatan      = !empty($existingCatatan);
+                                @endphp
+                                <td class="catatan-cell jenis-group-border {{ $hasCatatan ? 'catatan-has-value' : '' }}"
+                                    data-peserta-id="{{ $item->id }}"
+                                    data-jenis-id="{{ $jn->id }}"
+                                    data-jenis-nama="{{ $jn->name }}"
+                                    data-catatan="{{ $existingCatatan ?? '' }}"
+                                    data-bisa-edit="{{ $bisaDinilai ? '1' : '0' }}"
+                                    title="{{ $hasCatatan ? 'Ada catatan — klik untuk edit' : 'Klik untuk tambah catatan' }}">
+                                    <button type="button"
+                                        class="catatan-trigger-btn {{ $hasCatatan ? 'catatan-trigger-filled' : 'catatan-trigger-empty' }}"
+                                        {{ !$bisaDinilai ? 'disabled' : '' }}>
+                                        <i class="fas {{ $hasCatatan ? 'fa-comment-dots' : 'fa-comment' }}"></i>
+                                    </button>
+                                </td>
                             @endforeach
 
                             <!-- Total -->
@@ -352,7 +464,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ 4 + $jenisNilaiList->sum(fn($jn) => $jn->indikatorNilai->count()) + 1 }}"
+                            <td colspan="{{ 4 + $jenisNilaiList->sum(fn($jn) => $jn->indikatorNilai->count() + 1) + 1 }}"
                                 class="text-center py-5">
                                 <i class="fas fa-users fa-4x mb-3 d-block" style="color:#e9ecef;"></i>
                                 <h5 class="text-muted">Belum ada peserta</h5>
@@ -415,6 +527,44 @@
         </div>
     @endif
 </div>
+
+{{-- ═══════════════════════════════════════════════════════════════
+     [BARU] CATATAN POPOVER — floating div
+════════════════════════════════════════════════════════════════ --}}
+<div id="catatanPopover" class="catatan-popover" style="display:none;" role="dialog" aria-label="Catatan Penilaian">
+    <div class="catatan-popover-arrow"></div>
+    <div class="catatan-popover-header">
+        <div class="catatan-popover-title">
+            <i class="fas fa-comment-dots me-2" style="font-size:.85rem;"></i>
+            <span id="catatanPopoverTitle">Catatan</span>
+        </div>
+        <button type="button" class="catatan-popover-close" id="btnCatatanClose" aria-label="Tutup">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="catatan-popover-body">
+        <textarea id="catatanTextarea"
+            class="catatan-textarea"
+            placeholder="Tulis catatan untuk peserta ini..."
+            maxlength="2000"
+            rows="4"></textarea>
+        <div class="catatan-char-count">
+            <span id="catatanCharCount">0</span> / 2000
+        </div>
+    </div>
+    <div class="catatan-popover-footer">
+        <button type="button" class="btn-catatan-batal" id="btnCatatanBatal">
+            <i class="fas fa-times me-1"></i>Batal
+        </button>
+        <button type="button" class="btn-catatan-hapus" id="btnCatatanHapus">
+            <i class="fas fa-trash me-1"></i>Hapus
+        </button>
+        <button type="button" class="btn-catatan-simpan" id="btnCatatanSimpan">
+            <i class="fas fa-check me-1"></i>Simpan
+        </button>
+    </div>
+</div>
+{{-- ── END CATATAN POPOVER ──────────────────────────────────────── --}}
 
 {{-- MODAL DETAIL INDIKATOR --}}
 <div class="modal fade" id="modalDetailIndikator" tabindex="-1"
@@ -491,6 +641,26 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    // ── TOGGLE LAPORAN ────────────────────────────────────────
+    window.toggleLaporan = function (totalCount) {
+        const grid   = document.getElementById('laporanGrid');
+        const btn    = document.getElementById('laporanToggle');
+        const icon   = btn ? btn.querySelector('.laporan-toggle-icon') : null;
+        const isOpen = btn && btn.dataset.open === '1';
+
+        if (isOpen) {
+            grid.classList.remove('laporan-grid-expanded');
+            if (btn)  { btn.dataset.open = '0'; }
+            if (icon) { icon.classList.replace('fa-chevron-up', 'fa-chevron-down'); }
+            if (btn)  { btn.childNodes[btn.childNodes.length - 1].textContent = ' Lihat semua (' + totalCount + ')'; }
+        } else {
+            grid.classList.add('laporan-grid-expanded');
+            if (btn)  { btn.dataset.open = '1'; }
+            if (icon) { icon.classList.replace('fa-chevron-down', 'fa-chevron-up'); }
+            if (btn)  { btn.childNodes[btn.childNodes.length - 1].textContent = ' Sembunyikan'; }
+        }
+    };
 
     // ── MODAL DETAIL INDIKATOR ────────────────────────────────
     const bsModal = new bootstrap.Modal(document.getElementById('modalDetailIndikator'));
@@ -851,6 +1021,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Klik luar → tutup editing ─────────────────────────────
     document.addEventListener('click', function (e) {
         if (e.target.closest('#modalDetailIndikator')) return;
+        if (e.target.closest('#catatanPopover'))       return;
+        if (e.target.closest('.catatan-cell'))         return;
         if (!e.target.closest('.nilai-cell')) {
             document.querySelectorAll('.nilai-cell.editing').forEach(td => deactivateCell(td, true));
         }
@@ -863,24 +1035,284 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Init recalc semua row ─────────────────────────────────
     document.querySelectorAll('.peserta-row').forEach(row => recalcTotal(row.dataset.pesertaId));
-});
+
+
+    // ════════════════════════════════════════════════════════
+    // [BARU] CATATAN POPOVER LOGIC
+    // ════════════════════════════════════════════════════════
+    const popover        = document.getElementById('catatanPopover');
+    const popoverTitle   = document.getElementById('catatanPopoverTitle');
+    const textarea       = document.getElementById('catatanTextarea');
+    const charCount      = document.getElementById('catatanCharCount');
+    const btnClose       = document.getElementById('btnCatatanClose');
+    const btnBatal       = document.getElementById('btnCatatanBatal');
+    const btnHapus       = document.getElementById('btnCatatanHapus');
+    const btnSimpan      = document.getElementById('btnCatatanSimpan');
+
+    let activeCatatanCell = null; // TD yang sedang aktif
+
+    // Hitung karakter
+    textarea.addEventListener('input', function () {
+        charCount.textContent = this.value.length;
+    });
+
+    // Buka popover
+    function openCatatanPopover(td) {
+        // Tutup cell nilai yang sedang editing
+        document.querySelectorAll('.nilai-cell.editing').forEach(c => deactivateCell(c, true));
+
+        activeCatatanCell = td;
+
+        const jenisNama       = td.dataset.jenisNama  ?? 'Catatan';
+        const existingCatatan = td.dataset.catatan     ?? '';
+
+        popoverTitle.textContent  = jenisNama;
+        textarea.value            = existingCatatan;
+        charCount.textContent     = existingCatatan.length;
+
+        // Hapus highlight sebelumnya
+        document.querySelectorAll('.catatan-cell.catatan-active').forEach(c => c.classList.remove('catatan-active'));
+        td.classList.add('catatan-active');
+
+        // Tampilkan popover dulu agar bisa diukur posisinya
+        popover.style.display = 'block';
+        positionPopover(td);
+
+        textarea.focus();
+    }
+
+    // Posisikan popover relatif terhadap td
+    function positionPopover(td) {
+        const rect        = td.getBoundingClientRect();
+        const scrollTop   = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollLeft  = window.pageXOffset || document.documentElement.scrollLeft;
+        const popW        = popover.offsetWidth  || 320;
+        const popH        = popover.offsetHeight || 220;
+        const vw          = window.innerWidth;
+        const vh          = window.innerHeight;
+
+        // Coba muncul di bawah cell
+        let top  = rect.bottom + scrollTop  + 8;
+        let left = rect.left   + scrollLeft + (rect.width / 2) - (popW / 2);
+
+        // Kalau ke kanan layar → geser kiri
+        if (left + popW + 16 > scrollLeft + vw) left = scrollLeft + vw - popW - 16;
+        // Kalau ke kiri layar → geser kanan
+        if (left < scrollLeft + 8) left = scrollLeft + 8;
+
+        // Kalau bawah terpotong → muncul di atas cell
+        const spaceBelow = vh - rect.bottom;
+        if (spaceBelow < popH + 20 && rect.top > popH + 20) {
+            top = rect.top + scrollTop - popH - 8;
+            popover.classList.add('popover-above');
+            popover.classList.remove('popover-below');
+        } else {
+            popover.classList.add('popover-below');
+            popover.classList.remove('popover-above');
+        }
+
+        popover.style.top  = top  + 'px';
+        popover.style.left = left + 'px';
+
+        // Posisi panah relatif ke popover
+        const arrowLeft = rect.left + scrollLeft + (rect.width / 2) - left;
+        const arrow     = popover.querySelector('.catatan-popover-arrow');
+        if (arrow) arrow.style.left = Math.max(16, Math.min(arrowLeft, popW - 16)) + 'px';
+    }
+
+    // Tutup popover
+    function closeCatatanPopover() {
+        popover.style.display = 'none';
+        if (activeCatatanCell) {
+            activeCatatanCell.classList.remove('catatan-active');
+            activeCatatanCell = null;
+        }
+    }
+
+    // Simpan catatan ke server
+    async function simpanCatatan(pesertaId, jenisNilaiId, catatan) {
+        btnSimpan.disabled = true;
+        btnSimpan.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Menyimpan...';
+
+        try {
+            const res = await fetch('/nilai/catatan/simpan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type'    : 'application/json',
+                    'X-CSRF-TOKEN'    : csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                    peserta_id    : pesertaId,
+                    jenis_nilai_id: jenisNilaiId,
+                    catatan       : catatan,
+                }),
+            });
+            const data = await res.json();
+
+            btnSimpan.disabled = false;
+            btnSimpan.innerHTML = '<i class="fas fa-check me-1"></i>Simpan';
+
+            if (data.success) {
+                // Update data-catatan di cell
+                if (activeCatatanCell) {
+                    activeCatatanCell.dataset.catatan = catatan;
+
+                    const btn = activeCatatanCell.querySelector('.catatan-trigger-btn');
+                    if (catatan.trim()) {
+                        activeCatatanCell.classList.add('catatan-has-value');
+                        activeCatatanCell.title = 'Ada catatan — klik untuk edit';
+                        if (btn) {
+                            btn.classList.remove('catatan-trigger-empty');
+                            btn.classList.add('catatan-trigger-filled');
+                            btn.innerHTML = '<i class="fas fa-comment-dots"></i>';
+                        }
+                    } else {
+                        activeCatatanCell.classList.remove('catatan-has-value');
+                        activeCatatanCell.title = 'Klik untuk tambah catatan';
+                        if (btn) {
+                            btn.classList.remove('catatan-trigger-filled');
+                            btn.classList.add('catatan-trigger-empty');
+                            btn.innerHTML = '<i class="fas fa-comment"></i>';
+                        }
+                    }
+                }
+
+                showToast('Catatan berhasil disimpan.', 'success');
+                closeCatatanPopover();
+            } else {
+                showToast('Gagal menyimpan catatan: ' + (data.message ?? ''), 'danger');
+            }
+        } catch (err) {
+            btnSimpan.disabled = false;
+            btnSimpan.innerHTML = '<i class="fas fa-check me-1"></i>Simpan';
+            showToast('Gagal (error jaringan)', 'danger');
+        }
+    }
+
+    // Event: klik tombol pada cell catatan
+    document.querySelectorAll('.catatan-cell').forEach(td => {
+        td.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (this.dataset.bisaEdit === '0') return;
+            // Kalau popover sudah terbuka untuk cell ini → tutup
+            if (activeCatatanCell === this) {
+                closeCatatanPopover();
+                return;
+            }
+            openCatatanPopover(this);
+        });
+    });
+
+    // Event: tombol simpan
+    btnSimpan.addEventListener('click', function () {
+        if (!activeCatatanCell) return;
+        const pesertaId    = activeCatatanCell.dataset.pesertaId;
+        const jenisNilaiId = activeCatatanCell.dataset.jenisId;
+        const catatan      = textarea.value.trim();
+        simpanCatatan(pesertaId, jenisNilaiId, catatan);
+    });
+
+    // Event: tombol hapus (kirim catatan kosong)
+    btnHapus.addEventListener('click', function () {
+        if (!activeCatatanCell) return;
+        if (!confirm('Hapus catatan ini?')) return;
+        const pesertaId    = activeCatatanCell.dataset.pesertaId;
+        const jenisNilaiId = activeCatatanCell.dataset.jenisId;
+        textarea.value = '';
+        simpanCatatan(pesertaId, jenisNilaiId, '');
+    });
+
+    // Event: tombol batal & close
+    btnBatal.addEventListener('click', closeCatatanPopover);
+    btnClose.addEventListener('click', closeCatatanPopover);
+
+    // Event: klik luar popover → tutup
+    document.addEventListener('click', function (e) {
+        if (!popover || popover.style.display === 'none') return;
+        if (popover.contains(e.target)) return;
+        if (e.target.closest('.catatan-cell'))   return;
+        closeCatatanPopover();
+    });
+
+    // Event: Escape → tutup popover
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && popover.style.display !== 'none') {
+            closeCatatanPopover();
+        }
+    });
+
+    // Re-posisi saat scroll / resize
+    let reposTimeout;
+    document.querySelector('.spreadsheet-scroll')?.addEventListener('scroll', function () {
+        if (popover.style.display === 'none' || !activeCatatanCell) return;
+        clearTimeout(reposTimeout);
+        reposTimeout = setTimeout(() => positionPopover(activeCatatanCell), 50);
+    });
+    window.addEventListener('resize', function () {
+        if (popover.style.display === 'none' || !activeCatatanCell) return;
+        clearTimeout(reposTimeout);
+        reposTimeout = setTimeout(() => positionPopover(activeCatatanCell), 50);
+    });
+
+}); // end DOMContentLoaded
 </script>
 
 <style>
 /* ════════════════════════════════════════════
+   LAPORAN KELOMPOK SECTION
+════════════════════════════════════════════ */
+.laporan-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.laporan-grid:not(.laporan-grid-expanded) .laporan-card:nth-child(n+7) { display: none; }
+
+.laporan-card {
+    display: flex; align-items: center; gap: 10px;
+    background: #f8fafc; border: 1px solid #e4ecf7;
+    border-radius: 10px; padding: 10px 12px;
+    flex: 1 1 190px; max-width: 270px; min-width: 190px;
+    transition: border-color .15s, box-shadow .15s;
+}
+.laporan-card-has-link:hover { border-color: #285496; box-shadow: 0 2px 8px rgba(40,84,150,.09); }
+.laporan-card-no-link { opacity: .8; }
+
+.laporan-card-icon {
+    width: 32px; height: 32px; border-radius: 7px;
+    background: #dbeafe; color: #285496;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.laporan-card-icon.laporan-card-icon-empty { background: #f1f5f9; color: #94a3b8; }
+.laporan-card-info { flex: 1; min-width: 0; }
+.laporan-card-name { font-size: .8rem; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.laporan-card-meta { font-size: .7rem; color: #64748b; margin-top: 1px; }
+
+.laporan-btn {
+    font-size: .72rem; font-weight: 600; padding: 4px 10px;
+    border-radius: 6px; background: #285496; color: #fff !important;
+    text-decoration: none; white-space: nowrap; flex-shrink: 0;
+    transition: background .12s; display: inline-flex; align-items: center; gap: 4px;
+}
+.laporan-btn:hover { background: #1d3d70; color: #fff !important; }
+.laporan-btn-empty {
+    font-size: .7rem; padding: 4px 8px; border-radius: 6px;
+    background: #f1f5f9; color: #94a3b8; border: 1px dashed #cbd5e1; white-space: nowrap; flex-shrink: 0;
+}
+.laporan-toggle-btn {
+    font-size: .75rem; color: #285496; background: none; border: none;
+    cursor: pointer; padding: 0; display: inline-flex; align-items: center; gap: 3px;
+}
+.laporan-toggle-btn:hover { text-decoration: underline; }
+
+/* ════════════════════════════════════════════
    SPREADSHEET LAYOUT
 ════════════════════════════════════════════ */
 .spreadsheet-wrapper { overflow: hidden; position: relative; }
-.spreadsheet-scroll  {
-    overflow-x: auto; overflow-y: auto;
-    max-height: calc(100vh - 380px); min-height: 300px;
-}
-.spreadsheet-table {
-    border-collapse: separate; border-spacing: 0;
-    width: max-content; min-width: 100%; font-size: .82rem;
-}
+.spreadsheet-scroll  { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 380px); min-height: 300px; }
+.spreadsheet-table   { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; font-size: .82rem; }
 
-/* Sticky kiri */
 .sticky-col          { position: sticky; background: white; z-index: 3; }
 .sticky-header       { z-index: 5 !important; }
 .sticky-col-1        { left: 0;     min-width: 48px;  max-width: 48px;  border-right: 1px solid #dee2e6; }
@@ -888,13 +1320,11 @@ document.addEventListener('DOMContentLoaded', function () {
 .sticky-col-3        { left: 268px; min-width: 60px;  max-width: 60px;  border-right: 1px solid #dee2e6; }
 .sticky-col-4        { left: 328px; min-width: 140px; max-width: 140px; border-right: 2px solid #285496; }
 
-/* Sticky kanan */
 .sticky-col-right {
     position: sticky; right: 0; background: white; z-index: 3;
     border-left: 2px solid #285496; min-width: 90px; max-width: 90px; text-align: center;
 }
 
-/* Header */
 .spreadsheet-table thead tr th {
     position: sticky; top: 0; z-index: 4;
     background: #f8fafc; padding: .5rem .6rem;
@@ -907,38 +1337,24 @@ document.addEventListener('DOMContentLoaded', function () {
     border-bottom: 2px solid #dee2e6;
 }
 
-/* ── Garis pemisah antar jenis nilai ── */
-.jenis-group-border {
-    border-right: 2px solid #285496 !important;
-}
-.jenis-border-right {
-    border-right: 2px solid #285496 !important;
-}
-/* Pastikan sticky header punya z-index lebih tinggi agar garis tidak tertutup */
-.spreadsheet-table thead tr th.jenis-border-right {
-    border-right: 2px solid #285496 !important;
-}
+.jenis-group-border  { border-right: 2px solid #285496 !important; }
+.jenis-border-right  { border-right: 2px solid #285496 !important; }
+.spreadsheet-table thead tr th.jenis-group-border { border-right: 2px solid #285496 !important; }
 
-.jenis-nilai-header { border-bottom: 2px solid rgba(40,84,150,.15) !important; padding: .4rem .6rem !important; }
+.jenis-nilai-header  { border-bottom: 2px solid rgba(40,84,150,.15) !important; padding: .4rem .6rem !important; }
 .jn-label { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .jn-name  { font-weight: 700; font-size: .78rem; color: #285496; }
 .jn-bobot { font-size: .65rem; font-weight: 500; background: rgba(40,84,150,.12); color: #285496; border-radius: 4px; padding: .05rem .35rem; }
 
-/* Indikator header — klikable */
 .indikator-header { max-width: 100px; min-width: 80px; }
 .ind-clickable    { cursor: pointer; transition: background .12s; }
 .ind-clickable:hover { background: #e4ecff !important; }
 .ind-clickable:hover .ind-icon-info { opacity: 1; color: #285496; }
 .ind-inner  { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.ind-name   {
-    font-size: .72rem; color: #333; text-align: center; white-space: normal;
-    line-height: 1.3; max-width: 90px; overflow: hidden;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-}
-.ind-bobot      { font-size: .65rem; color: #888; display: flex; align-items: center; gap: 3px; }
-.ind-icon-info  { font-size: .6rem; opacity: .35; transition: opacity .15s, color .15s; }
+.ind-name   { font-size: .72rem; color: #333; text-align: center; white-space: normal; line-height: 1.3; max-width: 90px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ind-bobot  { font-size: .65rem; color: #888; display: flex; align-items: center; gap: 3px; }
+.ind-icon-info { font-size: .6rem; opacity: .35; transition: opacity .15s, color .15s; }
 
-/* Body rows */
 .peserta-row td { padding: .4rem .6rem; border-bottom: 1px solid #e9ecef; vertical-align: middle; background: white; }
 .peserta-row:hover td { background: #f8faff; }
 .peserta-row:hover .sticky-col,
@@ -946,11 +1362,8 @@ document.addEventListener('DOMContentLoaded', function () {
 .peserta-row.row-readonly td { opacity: .65; }
 .peserta-row .sticky-col { background: white; }
 
-/* Pastikan garis tetap tampil saat hover */
-.peserta-row td.jenis-border-right,
-.peserta-row:hover td.jenis-border-right {
-    border-right: 2px solid #285496 !important;
-}
+.peserta-row td.jenis-group-border,
+.peserta-row:hover td.jenis-group-border { border-right: 2px solid #285496 !important; }
 
 /* ════════════════════════════════════════
    CELL NILAI
@@ -964,32 +1377,19 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 .nilai-cell.editable               { cursor: pointer; }
 .nilai-cell.editable:hover:not(.editing) { background: #eef2ff !important; }
+.nilai-cell.status-saved           { background: #edf7ee !important; }
+.nilai-cell.status-pending         { background: #e8f0fe !important; outline: 1px solid #a8c4f8; outline-offset: -1px; }
+.nilai-cell.editing                { background: #fffbeb !important; box-shadow: inset 0 0 0 2px #285496; }
+.nilai-cell.saving                 { opacity: .55; pointer-events: none; }
+.nilai-cell.error                  { background: rgba(220,53,69,.08) !important; box-shadow: inset 0 0 0 2px #dc3545 !important; }
 
-/* Status warna */
-.nilai-cell.status-saved   { background: #edf7ee !important; }
-.nilai-cell.status-pending { background: #e8f0fe !important; outline: 1px solid #a8c4f8; outline-offset: -1px; }
-.nilai-cell.editing        { background: #fffbeb !important; box-shadow: inset 0 0 0 2px #285496; }
-.nilai-cell.saving         { opacity: .55; pointer-events: none; }
-.nilai-cell.error          { background: rgba(220,53,69,.08) !important; box-shadow: inset 0 0 0 2px #dc3545 !important; }
-
-/* Jaga border kanan tetap tampil meski ada status lain */
-.nilai-cell.jenis-border-right,
-.nilai-cell.jenis-border-right.status-saved,
-.nilai-cell.jenis-border-right.status-pending,
-.nilai-cell.jenis-border-right.editing {
-    border-right: 2px solid #285496 !important;
-}
-
-/* Display wrapper */
 .cell-display {
     display: flex; align-items: center; justify-content: center;
     min-height: 28px; width: 100%;
 }
-
 .cell-value { font-weight: 700; font-size: .88rem; color: #1a1a2e; line-height: 1; }
-.nilai-cell.status-saved   .cell-value { color: #1e5c22; }
+.nilai-cell.status-saved  .cell-value { color: #1e5c22; }
 .nilai-cell.status-pending .cell-value { color: #1a3c8e; }
-
 .cell-empty      { color: #ccc; font-size: .8rem; }
 .readonly-display { opacity: .7; cursor: default; }
 
@@ -1044,19 +1444,223 @@ document.addEventListener('DOMContentLoaded', function () {
 .modal-header-icon {
     width: 44px; height: 44px; border-radius: 50%;
     background: rgba(255,255,255,.2);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .modal-header-icon i { color: #fff; font-size: 1.1rem; }
-
 .minfo-card {
     background: #f8fafc; border: 1px solid #e4ecf7;
     border-radius: 10px; padding: .7rem .9rem; text-align: center;
 }
-.minfo-label {
-    font-size: .68rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .05em; color: #999; margin-bottom: 4px;
-}
+.minfo-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #999; margin-bottom: 4px; }
 .minfo-value { font-size: .95rem; font-weight: 700; color: #285496; line-height: 1.2; }
+
+/* ════════════════════════════════════════
+   [BARU] CATATAN CELL & BUTTON
+════════════════════════════════════════ */
+.catatan-col-header {
+    min-width: 54px;
+    max-width: 54px;
+    text-align: center;
+    background: #f8faff !important;
+    cursor: default !important;
+}
+.catatan-col-header .ind-name { color: #64748b !important; }
+
+.catatan-cell {
+    min-width: 54px;
+    max-width: 54px;
+    text-align: center;
+    padding: .3rem .25rem !important;
+    cursor: pointer;
+    transition: background .12s;
+    position: relative;
+}
+.catatan-cell:hover { background: #f0f4ff !important; }
+.catatan-cell.catatan-has-value { background: #eff8ff !important; }
+.catatan-cell.catatan-active {
+    background: #dbeafe !important;
+    box-shadow: inset 0 0 0 2px #285496;
+}
+
+.catatan-trigger-btn {
+    background: none;
+    border: none;
+    padding: 4px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform .12s, color .12s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.catatan-trigger-btn:disabled { cursor: not-allowed; opacity: .4; }
+.catatan-trigger-btn:not(:disabled):hover { transform: scale(1.15); }
+
+.catatan-trigger-empty  { color: #cbd5e1; }
+.catatan-trigger-filled { color: #285496; }
+.catatan-cell.catatan-has-value .catatan-trigger-filled { color: #285496; }
+
+/* Legend icon */
+.catatan-icon-legend {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 5px; font-size: .72rem;
+}
+.catatan-icon-filled { background: #dbeafe; color: #285496; }
+.catatan-icon-empty  { background: #f1f5f9; color: #cbd5e1; }
+
+/* ════════════════════════════════════════
+   [BARU] CATATAN POPOVER
+════════════════════════════════════════ */
+.catatan-popover {
+    position: absolute;
+    z-index: 1080;
+    width: 320px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(40,84,150,.18), 0 2px 8px rgba(0,0,0,.08);
+    overflow: hidden;
+    animation: popoverFadeIn .15s ease;
+}
+@keyframes popoverFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.catatan-popover.popover-above { animation: popoverFadeInUp .15s ease; }
+@keyframes popoverFadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Panah */
+.catatan-popover-arrow {
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 7px;
+    overflow: hidden;
+}
+.catatan-popover-arrow::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 0 0 0 transparent;
+}
+.catatan-popover.popover-above .catatan-popover-arrow {
+    top: auto;
+    bottom: -7px;
+    transform: translateX(-50%) rotate(180deg);
+}
+
+/* Header */
+.catatan-popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .6rem .85rem .55rem;
+    background: linear-gradient(135deg, #285496, #3a6bc7);
+    gap: 8px;
+}
+.catatan-popover-title {
+    font-size: .8rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.catatan-popover-close {
+    background: rgba(255,255,255,.2);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .12s;
+}
+.catatan-popover-close:hover { background: rgba(255,255,255,.35); }
+
+/* Body */
+.catatan-popover-body { padding: .75rem .85rem .5rem; }
+
+.catatan-textarea {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: .55rem .7rem;
+    font-size: .82rem;
+    color: #1e293b;
+    resize: vertical;
+    min-height: 80px;
+    max-height: 180px;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    font-family: inherit;
+    line-height: 1.55;
+}
+.catatan-textarea:focus {
+    border-color: #285496;
+    box-shadow: 0 0 0 3px rgba(40,84,150,.1);
+}
+.catatan-textarea::placeholder { color: #b0bec5; }
+
+.catatan-char-count {
+    font-size: .68rem;
+    color: #94a3b8;
+    text-align: right;
+    margin-top: 4px;
+}
+
+/* Footer */
+.catatan-popover-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: .5rem .85rem .7rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-catatan-batal,
+.btn-catatan-hapus,
+.btn-catatan-simpan {
+    border: none;
+    border-radius: 7px;
+    font-size: .76rem;
+    font-weight: 600;
+    padding: .35rem .75rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: background .12s, transform .08s;
+}
+.btn-catatan-batal:active,
+.btn-catatan-hapus:active,
+.btn-catatan-simpan:active { transform: scale(.97); }
+
+.btn-catatan-batal  { background: #f1f5f9; color: #64748b; margin-right: auto; }
+.btn-catatan-batal:hover  { background: #e2e8f0; }
+
+.btn-catatan-hapus  { background: #fee2e2; color: #dc2626; }
+.btn-catatan-hapus:hover  { background: #fecaca; }
+
+.btn-catatan-simpan { background: #285496; color: #fff; }
+.btn-catatan-simpan:hover { background: #1d3d70; }
+.btn-catatan-simpan:disabled { opacity: .65; cursor: not-allowed; }
 </style>
 @endsection

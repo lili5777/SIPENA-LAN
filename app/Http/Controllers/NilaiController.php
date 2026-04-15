@@ -148,59 +148,56 @@ class NilaiController extends Controller
     }
 
     private function getRekapIzin($jenisNilaiList, string $roleName, int $roleId): array
-{
-    // Admin: semua tampil, total tampil
-    if ($roleName === 'admin') {
-        $izinPerJenis = $jenisNilaiList->mapWithKeys(fn($jn) => [
-            $jn->id => $jn->indikatorNilai->pluck('id')->toArray()
-        ])->toArray();
+    {
+        if ($roleName === 'admin') {
+            $izinPerJenis = $jenisNilaiList->mapWithKeys(fn($jn) => [
+                $jn->id => $jn->indikatorNilai->pluck('id')->toArray()
+            ])->toArray();
+            return [
+                'jenisNilaiTerfilter'   => $jenisNilaiList,
+                'izinIndikatorPerJenis' => $izinPerJenis,
+                'showTotal'             => true,
+            ];
+        }
+
+        $izinPerJenis = [];
+        $jenisNilaiTerfilter = $jenisNilaiList->filter(function ($jn) use ($roleId, &$izinPerJenis) {
+            $diizinkan = $jn->indikatorNilai->filter(
+                fn($ind) => $ind->roles->isNotEmpty() && $ind->roles->contains('id', $roleId)
+            );
+            if ($diizinkan->isEmpty()) return false;
+            $izinPerJenis[$jn->id] = $diizinkan->pluck('id')->toArray();
+            return true;
+        })->values();
+
         return [
-            'jenisNilaiTerfilter'   => $jenisNilaiList,
+            'jenisNilaiTerfilter'   => $jenisNilaiTerfilter,
             'izinIndikatorPerJenis' => $izinPerJenis,
-            'showTotal'             => true,
+            'showTotal'             => false,
         ];
     }
 
-    // PIC, Coach, Penguji: hanya indikator yang memiliki akses role tersebut
-    $izinPerJenis = [];
-    $jenisNilaiTerfilter = $jenisNilaiList->filter(function ($jn) use ($roleId, &$izinPerJenis) {
-        $diizinkan = $jn->indikatorNilai->filter(
-            fn($ind) => $ind->roles->isNotEmpty() && $ind->roles->contains('id', $roleId)
-        );
-        if ($diizinkan->isEmpty()) return false;
-        $izinPerJenis[$jn->id] = $diizinkan->pluck('id')->toArray();
-        return true;
-    })->values();
-
-    return [
-        'jenisNilaiTerfilter'   => $jenisNilaiTerfilter,
-        'izinIndikatorPerJenis' => $izinPerJenis,
-        'showTotal'             => false, // total disembunyikan untuk non-admin
-    ];
-}
     // =========================================================
-// INDEX — Spreadsheet full page
-// =========================================================
-// =========================================================
-// INDEX — Spreadsheet full page
-// =========================================================
+    // INDEX — Spreadsheet full page
+    // =========================================================
+    
 public function index(Request $request, $jenis)
 {
     $jenisData        = $this->getJenisData($jenis);
     $jenisPelatihanId = $jenisData['id'];
     $jenisPelatihan   = JenisPelatihan::findOrFail($jenisPelatihanId);
-
+ 
     $ctx      = $this->getUserContext($jenisPelatihanId);
     $roleName = $ctx['roleName'];
     $roleId   = $ctx['roleId'];
-
+ 
     $angkatanRomawi = $this->getRomawList();
     $tahunList      = $this->getTahunList();
     $kelompokList   = range(1, 10);
     $wilayahList    = $this->getWilayahList();
-
+ 
     $jnColors = ['#285496', '#2d7dd2', '#1b998b', '#e84855', '#ff9f1c', '#3d405b'];
-
+ 
     // Ambil semua jenis nilai beserta indikator
     $jenisNilaiAll = JenisNilai::where('id_jenis_pelatihan', $jenisPelatihanId)
         ->with([
@@ -210,45 +207,35 @@ public function index(Request $request, $jenis)
         ])
         ->orderBy('id')
         ->get();
-
-    // ── FILTER BERDASARKAN ROLE ─────────────────────────────────────
-    // Admin: semua tampil dan bisa diedit
-    // PIC, Coach, Penguji: hanya indikator yang memiliki akses role tersebut yang tampil
-    // ==================================================================
-    
+ 
     if ($roleName === 'admin') {
-        // Admin: semua indikator tampil dan bisa diedit
         $jenisNilaiList = $jenisNilaiAll;
         foreach ($jenisNilaiList as $jn) {
             foreach ($jn->indikatorNilai as $ind) {
                 $ind->userDapatNilai = true;
             }
         }
-    } 
-    else {
-        // PIC, Coach, Penguji: HANYA indikator yang diizinkan yang TAMPIL
+    } else {
         $jenisNilaiList = $jenisNilaiAll->filter(function ($jn) use ($roleId) {
-            // Cek apakah jenis nilai ini memiliki setidaknya 1 indikator yang diizinkan role ini
             $hasAllowed = $jn->indikatorNilai->contains(function ($ind) use ($roleId) {
                 return $ind->roles->isNotEmpty() && $ind->roles->contains('id', $roleId);
             });
             return $hasAllowed;
         })->values();
-        
-        // Filter indikator dalam setiap jenis nilai (hanya yang diizinkan)
+ 
         foreach ($jenisNilaiList as $jn) {
             $allowedIndicators = $jn->indikatorNilai->filter(function ($ind) use ($roleId) {
                 return $ind->roles->isNotEmpty() && $ind->roles->contains('id', $roleId);
             })->values();
-            
+ 
             $jn->setRelation('indikatorNilai', $allowedIndicators);
-            
+ 
             foreach ($allowedIndicators as $ind) {
                 $ind->userDapatNilai = true;
             }
         }
     }
-
+ 
     // ── QUERY PESERTA ────────────────────────────────────────────────
     $query = Peserta::query()
         ->whereHas('pendaftaran', fn($q) =>
@@ -258,8 +245,7 @@ public function index(Request $request, $jenis)
             $q->where('id_jenis_pelatihan', $jenisPelatihanId)
         )
         ->with(['pendaftaran' => fn($q) => $q->where('id_jenis_pelatihan', $jenisPelatihanId)]);
-
-    // Filter berdasarkan role (akses ke peserta)
+ 
     if (in_array($roleName, ['coach', 'penguji'])) {
         if ($ctx['kelompokIds']->isNotEmpty()) {
             $kelompokTarget = $ctx['kelompokIds'];
@@ -287,8 +273,7 @@ public function index(Request $request, $jenis)
             $query->whereRaw('1 = 0');
         }
     }
-
-    // Filter lainnya (angkatan, tahun, kelompok, kategori, wilayah, search)
+ 
     if ($request->filled('angkatan')) {
         $query->whereHas('pendaftaran.angkatan', fn($q) =>
             $q->where('nama_angkatan', 'Angkatan ' . $request->angkatan)
@@ -304,9 +289,9 @@ public function index(Request $request, $jenis)
             $q->where('nama_kelompok', 'LIKE', "%Kelompok {$request->kelompok}%")
         );
     }
-
+ 
     $this->applyKategoriWilayahFilter($query, $request);
-
+ 
     if ($request->filled('search')) {
         $term = $request->search;
         $query->where(fn($q) =>
@@ -314,13 +299,12 @@ public function index(Request $request, $jenis)
               ->orWhere('nip_nrp', 'LIKE', "%{$term}%")
         );
     }
-
+ 
     $query->orderBy('ndh');
     $pesertaRaw = $query->paginate(20)->withQueryString();
-
+ 
     $pesertaIds = $pesertaRaw->pluck('id');
-
-    // Kumpulkan ID indikator yang ditampilkan (untuk efisiensi query nilai)
+ 
     $allowedIndikatorIds = collect();
     foreach ($jenisNilaiList as $jn) {
         foreach ($jn->indikatorNilai as $ind) {
@@ -328,14 +312,21 @@ public function index(Request $request, $jenis)
         }
     }
     $allowedIndikatorIds = $allowedIndikatorIds->unique();
-
-    // Ambil nilai hanya untuk indikator yang ditampilkan
+ 
     $semuaNilai = NilaiPeserta::whereIn('id_peserta', $pesertaIds)
         ->whereIn('id_indikator_nilai', $allowedIndikatorIds)
         ->get()
         ->groupBy('id_peserta');
-
-    // Ambil kelompok peserta
+ 
+    // ── [BARU] QUERY CATATAN ─────────────────────────────────────────
+    $semuaCatatan = CatatanNilai::whereIn('id_peserta', $pesertaIds)
+        ->whereHas('jenisNilai', fn($q) =>
+            $q->where('id_jenis_pelatihan', $jenisPelatihanId)
+        )
+        ->get()
+        ->groupBy('id_peserta');
+    // ── END QUERY CATATAN ────────────────────────────────────────────
+ 
     $kelompokRows = Kelompok::with([
             'angkatan',
             'peserta' => fn($q) => $q->whereIn('peserta.id', $pesertaIds)->select('peserta.id'),
@@ -343,7 +334,7 @@ public function index(Request $request, $jenis)
         ->where('id_jenis_pelatihan', $jenisPelatihanId)
         ->whereHas('peserta', fn($q) => $q->whereIn('peserta.id', $pesertaIds))
         ->get();
-
+ 
     $semuaKelompok = collect();
     foreach ($kelompokRows as $kelompok) {
         foreach ($kelompok->peserta as $p) {
@@ -355,18 +346,18 @@ public function index(Request $request, $jenis)
             }
         }
     }
-
-    // Mapping nilai ke peserta
+ 
     $peserta = $pesertaRaw->through(function ($p) use (
-        $semuaNilai, $semuaKelompok, $jenisNilaiList, $ctx, $roleName
+        $semuaNilai, $semuaKelompok, $jenisNilaiList,
+        $ctx, $roleName,
+        $semuaCatatan   // [BARU] tambah ke use()
     ) {
         $nilaiRows   = $semuaNilai->get($p->id, collect());
         $kelompokRow = $semuaKelompok->get($p->id);
-
+ 
         $nilaiMap = $nilaiRows->keyBy('id_indikator_nilai')
             ->map(fn($n) => $n->nilai !== null ? (float)$n->nilai : null);
-
-        // Hitung total hanya dari indikator yang ditampilkan
+ 
         $totalNilai = 0;
         foreach ($jenisNilaiList as $jn) {
             foreach ($jn->indikatorNilai as $ind) {
@@ -376,31 +367,72 @@ public function index(Request $request, $jenis)
                 }
             }
         }
-
-        // Cek apakah user bisa menilai peserta ini
+ 
         $bisaDinilaiUser = true;
         if (in_array($roleName, ['coach', 'penguji'])) {
             $bisaDinilaiUser = $ctx['pesertaKelompokIds']->contains($p->id);
         } elseif ($roleName === 'pic') {
             $bisaDinilaiUser = $ctx['pesertaPicIds']->contains($p->id);
         }
-
+ 
         $p->kelompokInfo = $kelompokRow ? (object)[
             'nama_kelompok' => $kelompokRow->nama_kelompok,
             'angkatan'      => (object)['nama_angkatan' => $kelompokRow->nama_angkatan ?? '-'],
         ] : null;
-
+ 
         $p->nilaiMap        = $nilaiMap;
         $p->totalNilai      = round($totalNilai, 2);
         $p->bisaDinilaiUser = $bisaDinilaiUser;
-
+ 
+        // ── [BARU] Map catatan per jenis nilai ───────────────────────
+        $p->catatanMap = $semuaCatatan->get($p->id, collect())
+            ->keyBy('id_jenis_nilai')
+            ->map(fn($c) => $c->catatan);
+        // ── END CATATAN ───────────────────────────────────────────────
+ 
         return $p;
     });
-
+ 
+    // ── LAPORAN KELOMPOK ─────────────────────────────────────────────
+    $kelompokLaporan = collect();
+    $hasFilterLaporan = $request->filled('angkatan')
+        || $request->filled('tahun')
+        || $request->filled('kelompok');
+ 
+    if ($hasFilterLaporan) {
+        $qKelompok = Kelompok::with(['angkatan'])
+            ->where('id_jenis_pelatihan', $jenisPelatihanId)
+            ->whereNotNull('id_angkatan');
+ 
+        if (in_array($roleName, ['coach', 'penguji']) && $ctx['kelompokIds']->isNotEmpty()) {
+            $qKelompok->whereIn('id', $ctx['kelompokIds']);
+        } elseif ($roleName === 'pic' && $ctx['angkatanIds']->isNotEmpty()) {
+            $qKelompok->whereIn('id_angkatan', $ctx['angkatanIds']);
+        }
+ 
+        if ($request->filled('angkatan')) {
+            $qKelompok->whereHas('angkatan', fn($q) =>
+                $q->where('nama_angkatan', 'Angkatan ' . $request->angkatan)
+            );
+        }
+        if ($request->filled('tahun')) {
+            $qKelompok->whereHas('angkatan', fn($q) =>
+                $q->where('tahun', 'LIKE', "%{$request->tahun}%")
+            );
+        }
+        if ($request->filled('kelompok')) {
+            $qKelompok->where('nama_kelompok', 'LIKE', "%Kelompok {$request->kelompok}%");
+        }
+ 
+        $kelompokLaporan = $qKelompok->orderBy('nama_kelompok')->get();
+    }
+    // ── END LAPORAN KELOMPOK ─────────────────────────────────────────
+ 
     return view('admin.nilai.index', compact(
         'jenis', 'jenisPelatihan', 'peserta',
         'angkatanRomawi', 'tahunList', 'kelompokList',
-        'wilayahList', 'jenisNilaiList', 'jnColors'
+        'wilayahList', 'jenisNilaiList', 'jnColors',
+        'kelompokLaporan'
     ));
 }
 
@@ -513,7 +545,6 @@ public function index(Request $request, $jenis)
 
             $nilaiInput = $request->input('nilai_input');
 
-            // Jika kosong/null → hapus nilai (cell dikosongkan user)
             if ($nilaiInput === null || $nilaiInput === '') {
                 NilaiPeserta::where('id_peserta', $request->peserta_id)
                     ->where('id_indikator_nilai', $request->indikator_nilai_id)
@@ -589,216 +620,217 @@ public function index(Request $request, $jenis)
     }
 
     // =========================================================
-// REKAP
-// =========================================================
-public function rekap(Request $request, $jenis)
-{
-    $jenisData        = $this->getJenisData($jenis);
-    $jenisPelatihanId = $jenisData['id'];
-    $jenisPelatihan   = JenisPelatihan::findOrFail($jenisPelatihanId);
+    // REKAP
+    // =========================================================
+    public function rekap(Request $request, $jenis)
+    {
+        $jenisData        = $this->getJenisData($jenis);
+        $jenisPelatihanId = $jenisData['id'];
+        $jenisPelatihan   = JenisPelatihan::findOrFail($jenisPelatihanId);
 
-    $ctx      = $this->getUserContext($jenisPelatihanId);
-    $roleName = $ctx['roleName'];
-    $roleId   = $ctx['roleId'];
+        $ctx      = $this->getUserContext($jenisPelatihanId);
+        $roleName = $ctx['roleName'];
+        $roleId   = $ctx['roleId'];
 
-    $angkatanRomawi = $this->getRomawList();
-    $tahunList      = $this->getTahunList();
-    $kelompokList   = range(1, 10);
-    $wilayahList    = $this->getWilayahList();
+        $angkatanRomawi = $this->getRomawList();
+        $tahunList      = $this->getTahunList();
+        $kelompokList   = range(1, 10);
+        $wilayahList    = $this->getWilayahList();
 
-    $pengujiList = Penguji::whereHas('kelompok', fn($q) =>
-        $q->where('id_jenis_pelatihan', $jenisPelatihanId)
-    )->orderBy('nama')->get(['id','nama','nip']);
+        $pengujiList = Penguji::whereHas('kelompok', fn($q) =>
+            $q->where('id_jenis_pelatihan', $jenisPelatihanId)
+        )->orderBy('nama')->get(['id','nama','nip']);
 
-    // Ambil semua jenis nilai beserta indikator
-    $jenisNilaiAll = JenisNilai::where('id_jenis_pelatihan', $jenisPelatihanId)
-        ->withCount('indikatorNilai')
-        ->with([
-            'indikatorNilai'       => fn($q) => $q->orderBy('id'),
-            'indikatorNilai.roles' => fn($q) => $q->select('roles.id', 'roles.name'),
-        ])
-        ->orderBy('id')->get();
+        $jenisNilaiAll = JenisNilai::where('id_jenis_pelatihan', $jenisPelatihanId)
+            ->withCount('indikatorNilai')
+            ->with([
+                'indikatorNilai'       => fn($q) => $q->orderBy('id'),
+                'indikatorNilai.roles' => fn($q) => $q->select('roles.id', 'roles.name'),
+            ])
+            ->orderBy('id')->get();
 
-    // Filter berdasarkan role
-    $rekapIzin             = $this->getRekapIzin($jenisNilaiAll, $roleName, $roleId);
-    $jenisNilaiList        = $rekapIzin['jenisNilaiTerfilter'];
-    $izinIndikatorPerJenis = $rekapIzin['izinIndikatorPerJenis'];
-    $showTotal             = $rekapIzin['showTotal'];
+        $rekapIzin             = $this->getRekapIzin($jenisNilaiAll, $roleName, $roleId);
+        $jenisNilaiList        = $rekapIzin['jenisNilaiTerfilter'];
+        $izinIndikatorPerJenis = $rekapIzin['izinIndikatorPerJenis'];
+        $showTotal             = $rekapIzin['showTotal'];
 
-    // ── KRUSIAL: Kumpulkan ID indikator yang diizinkan ─────────────
-    $allowedIndikatorIds = collect();
-    foreach ($izinIndikatorPerJenis as $jnId => $indIds) {
-        foreach ($indIds as $indId) {
-            $allowedIndikatorIds->push($indId);
+        $allowedIndikatorIds = collect();
+        foreach ($izinIndikatorPerJenis as $jnId => $indIds) {
+            foreach ($indIds as $indId) {
+                $allowedIndikatorIds->push($indId);
+            }
         }
-    }
-    $allowedIndikatorIds = $allowedIndikatorIds->unique()->values();
+        $allowedIndikatorIds = $allowedIndikatorIds->unique()->values();
 
-    $indikatorPerJenis = $jenisNilaiList->mapWithKeys(fn($jn) => [
-        $jn->id => $jn->indikator_nilai_count
-    ]);
+        $indikatorPerJenis = $jenisNilaiList->mapWithKeys(fn($jn) => [
+            $jn->id => $jn->indikator_nilai_count
+        ]);
 
-    $query = Peserta::query()
-        ->whereHas('pendaftaran', fn($q) =>
-            $q->where('id_jenis_pelatihan', $jenisPelatihanId)->whereNotNull('id_angkatan')
-        )
-        ->whereHas('kelompok', fn($q) =>
-            $q->where('id_jenis_pelatihan', $jenisPelatihanId)
-        );
+        $query = Peserta::query()
+            ->whereHas('pendaftaran', fn($q) =>
+                $q->where('id_jenis_pelatihan', $jenisPelatihanId)->whereNotNull('id_angkatan')
+            )
+            ->whereHas('kelompok', fn($q) =>
+                $q->where('id_jenis_pelatihan', $jenisPelatihanId)
+            );
 
-    if ($request->filled('angkatan')) {
-        $query->whereHas('pendaftaran.angkatan', fn($q) =>
-            $q->where('nama_angkatan', 'Angkatan ' . $request->angkatan)
-        );
-    }
-    if ($request->filled('tahun')) {
-        $query->whereHas('pendaftaran.angkatan', fn($q) =>
-            $q->where('tahun', 'LIKE', "%{$request->tahun}%")
-        );
-    }
-    if ($request->filled('kelompok')) {
-        $query->whereHas('kelompok', fn($q) =>
-            $q->where('nama_kelompok', 'LIKE', "%Kelompok {$request->kelompok}%")
-              ->where('id_jenis_pelatihan', $jenisPelatihanId)
-        );
-    }
-    if ($request->filled('penguji')) {
-        $query->whereHas('kelompok', fn($q) =>
-            $q->where('id_penguji', $request->penguji)
-              ->where('id_jenis_pelatihan', $jenisPelatihanId)
-        );
-    }
+        if ($request->filled('angkatan')) {
+            $query->whereHas('pendaftaran.angkatan', fn($q) =>
+                $q->where('nama_angkatan', 'Angkatan ' . $request->angkatan)
+            );
+        }
+        if ($request->filled('tahun')) {
+            $query->whereHas('pendaftaran.angkatan', fn($q) =>
+                $q->where('tahun', 'LIKE', "%{$request->tahun}%")
+            );
+        }
+        if ($request->filled('kelompok')) {
+            $query->whereHas('kelompok', fn($q) =>
+                $q->where('nama_kelompok', 'LIKE', "%Kelompok {$request->kelompok}%")
+                  ->where('id_jenis_pelatihan', $jenisPelatihanId)
+            );
+        }
+        if ($request->filled('penguji')) {
+            $query->whereHas('kelompok', fn($q) =>
+                $q->where('id_penguji', $request->penguji)
+                  ->where('id_jenis_pelatihan', $jenisPelatihanId)
+            );
+        }
 
-    $this->applyKategoriWilayahFilter($query, $request);
+        $this->applyKategoriWilayahFilter($query, $request);
 
-    if ($request->filled('search')) {
-        $term = $request->search;
-        $query->where(fn($q) =>
-            $q->where('nama_lengkap', 'LIKE', "%{$term}%")
-              ->orWhere('nip_nrp', 'LIKE', "%{$term}%")
-        );
-    }
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(fn($q) =>
+                $q->where('nama_lengkap', 'LIKE', "%{$term}%")
+                  ->orWhere('nip_nrp', 'LIKE', "%{$term}%")
+            );
+        }
 
-    if ($roleName === 'penguji' && $ctx['pesertaKelompokIds']->isNotEmpty()) {
-        $ids = $ctx['pesertaKelompokIds']->toArray();
-        $query->selectRaw('peserta.*, CASE WHEN peserta.id IN ('.implode(',',array_map('intval',$ids)).') THEN 0 ELSE 1 END AS prioritas_urut')
-            ->orderBy('prioritas_urut')->orderBy('ndh');
-    } elseif ($roleName === 'pic' && $ctx['pesertaPicIds']->isNotEmpty()) {
-        $ids = $ctx['pesertaPicIds']->toArray();
-        $query->selectRaw('peserta.*, CASE WHEN peserta.id IN ('.implode(',',array_map('intval',$ids)).') THEN 0 ELSE 1 END AS prioritas_urut')
-            ->orderBy('prioritas_urut')->orderBy('ndh');
-    } else {
-        $query->orderBy('ndh');
-    }
+        if ($roleName === 'penguji' && $ctx['pesertaKelompokIds']->isNotEmpty()) {
+            $ids = $ctx['pesertaKelompokIds']->toArray();
+            $query->selectRaw('peserta.*, CASE WHEN peserta.id IN ('.implode(',',array_map('intval',$ids)).') THEN 0 ELSE 1 END AS prioritas_urut')
+                ->orderBy('prioritas_urut')->orderBy('ndh');
+        } elseif ($roleName === 'pic' && $ctx['pesertaPicIds']->isNotEmpty()) {
+            $ids = $ctx['pesertaPicIds']->toArray();
+            $query->selectRaw('peserta.*, CASE WHEN peserta.id IN ('.implode(',',array_map('intval',$ids)).') THEN 0 ELSE 1 END AS prioritas_urut')
+                ->orderBy('prioritas_urut')->orderBy('ndh');
+        } else {
+            $query->orderBy('ndh');
+        }
 
-    $pesertaPaginated = $query->paginate(20)->withQueryString();
-    $pesertaIds       = $pesertaPaginated->pluck('id');
+        $pesertaPaginated = $query->paginate(20)->withQueryString();
+        $pesertaIds       = $pesertaPaginated->pluck('id');
 
-    // ── FIX: Ambil nilai HANYA untuk indikator yang diizinkan ─────────
-    $semuaNilai = NilaiPeserta::with([
-            'indikatorNilai',
-            'indikatorNilai.jenisNilai',
-        ])
-        ->whereIn('id_peserta', $pesertaIds)
-        ->whereIn('id_indikator_nilai', $allowedIndikatorIds)  // ← KRUSIAL: hanya indikator yang diizinkan
-        ->whereHas('indikatorNilai.jenisNilai', fn($q) =>
-            $q->where('id_jenis_pelatihan', $jenisPelatihanId)
-        )
-        ->get()
-        ->groupBy('id_peserta');
+        $semuaNilai = NilaiPeserta::with([
+                'indikatorNilai',
+                'indikatorNilai.jenisNilai',
+            ])
+            ->whereIn('id_peserta', $pesertaIds)
+            ->whereIn('id_indikator_nilai', $allowedIndikatorIds)
+            ->whereHas('indikatorNilai.jenisNilai', fn($q) =>
+                $q->where('id_jenis_pelatihan', $jenisPelatihanId)
+            )
+            ->get()
+            ->groupBy('id_peserta');
 
-    $semuaCatatan = CatatanNilai::whereIn('id_peserta', $pesertaIds)
-        ->whereHas('jenisNilai', fn($q) => $q->where('id_jenis_pelatihan', $jenisPelatihanId))
-        ->get()->groupBy('id_peserta');
+        $semuaCatatan = CatatanNilai::whereIn('id_peserta', $pesertaIds)
+            ->whereHas('jenisNilai', fn($q) => $q->where('id_jenis_pelatihan', $jenisPelatihanId))
+            ->get()->groupBy('id_peserta');
 
-    $semuaKelompok = DB::table('kelompok_pesertas')
-        ->join('kelompoks','kelompoks.id','=','kelompok_pesertas.id_kelompok')
+        $semuaKelompok = DB::table('kelompok_pesertas')
+        ->join('kelompoks', 'kelompoks.id', '=', 'kelompok_pesertas.id_kelompok')
+        ->leftJoin('angkatan', 'angkatan.id', '=', 'kelompoks.id_angkatan')
         ->whereIn('kelompok_pesertas.id_peserta', $pesertaIds)
         ->where('kelompoks.id_jenis_pelatihan', $jenisPelatihanId)
-        ->select('kelompok_pesertas.id_peserta','kelompoks.id','kelompoks.nama_kelompok','kelompoks.id_penguji')
+        ->select(
+            'kelompok_pesertas.id_peserta',
+            'kelompoks.id',
+            'kelompoks.nama_kelompok',
+            'kelompoks.id_penguji',
+            'angkatan.nama_angkatan',
+            'angkatan.tahun'
+        )
         ->get()->keyBy('id_peserta');
 
-    $rekapData = $pesertaPaginated->map(function ($p) use (
-        $jenisPelatihanId, $jenisNilaiList, $indikatorPerJenis,
-        $semuaNilai, $semuaCatatan, $semuaKelompok,
-        $ctx, $roleName, $izinIndikatorPerJenis, $showTotal
-    ) {
-        $kelompokRow = $semuaKelompok->get($p->id);
-        $nilaiList   = $semuaNilai->get($p->id, collect());
-        $catatanList = $semuaCatatan->get($p->id, collect())
-            ->keyBy('id_jenis_nilai')->map(fn($c) => $c->catatan);
+        $rekapData = $pesertaPaginated->map(function ($p) use (
+            $jenisPelatihanId, $jenisNilaiList, $indikatorPerJenis,
+            $semuaNilai, $semuaCatatan, $semuaKelompok,
+            $ctx, $roleName, $izinIndikatorPerJenis, $showTotal
+        ) {
+            $kelompokRow = $semuaKelompok->get($p->id);
+            $nilaiList   = $semuaNilai->get($p->id, collect());
+            $catatanList = $semuaCatatan->get($p->id, collect())
+                ->keyBy('id_jenis_nilai')->map(fn($c) => $c->catatan);
 
-        $nilaiPerJenis  = [];
-        $totalNilai     = 0;
-        $totalTerisi    = 0;
-        $totalIndikator = 0;
+            $nilaiPerJenis  = [];
+            $totalNilai     = 0;
+            $totalTerisi    = 0;
+            $totalIndikator = 0;
 
-        foreach ($jenisNilaiList as $jn) {
-            $indikatorDiizinkan = $izinIndikatorPerJenis[$jn->id] ?? [];
+            foreach ($jenisNilaiList as $jn) {
+                $indikatorDiizinkan = $izinIndikatorPerJenis[$jn->id] ?? [];
 
-            // ── Filter nilai hanya untuk indikator yang diizinkan ──
-            $nilaiJn = $nilaiList->filter(function ($n) use ($jn, $indikatorDiizinkan) {
-                // Cek apakah indikator ini termasuk dalam jenis nilai yang sesuai
-                if ((int)($n->indikatorNilai?->jenisNilai?->id) !== (int)$jn->id) {
-                    return false;
-                }
-                // Cek apakah indikator ini diizinkan untuk role ini
-                return in_array($n->id_indikator_nilai, $indikatorDiizinkan);
-            });
+                $nilaiJn = $nilaiList->filter(function ($n) use ($jn, $indikatorDiizinkan) {
+                    if ((int)($n->indikatorNilai?->jenisNilai?->id) !== (int)$jn->id) {
+                        return false;
+                    }
+                    return in_array($n->id_indikator_nilai, $indikatorDiizinkan);
+                });
 
-            $sumKonversi = round($nilaiJn->sum(fn($n) => ($n->nilai / 100) * ($n->indikatorNilai->bobot ?? 0)), 2);
-            $avgInput    = $nilaiJn->count() > 0 ? round($nilaiJn->avg('nilai'), 2) : null;
-            $terisi      = $nilaiJn->whereNotNull('nilai')->count();
+                $sumKonversi = round($nilaiJn->sum(fn($n) => ($n->nilai / 100) * ($n->indikatorNilai->bobot ?? 0)), 2);
+                $avgInput    = $nilaiJn->count() > 0 ? round($nilaiJn->avg('nilai'), 2) : null;
+                $terisi      = $nilaiJn->whereNotNull('nilai')->count();
 
-            // Detail indikator hanya untuk yang diizinkan
-            $detailIndikator = $jn->indikatorNilai
-                ->filter(fn($ind) => in_array($ind->id, $indikatorDiizinkan))
-                ->map(function ($ind) use ($nilaiJn) {
-                    $nilaiRecord = $nilaiJn->first(fn($n) => (int)$n->id_indikator_nilai === (int)$ind->id);
-                    return [
-                        'nama_indikator'  => $ind->name,
-                        'bobot_indikator' => $ind->bobot,
-                        'nilai_input'     => $nilaiRecord ? $nilaiRecord->nilai : null,
-                    ];
-                })->values()->toArray();
+                $detailIndikator = $jn->indikatorNilai
+                    ->filter(fn($ind) => in_array($ind->id, $indikatorDiizinkan))
+                    ->map(function ($ind) use ($nilaiJn) {
+                        $nilaiRecord = $nilaiJn->first(fn($n) => (int)$n->id_indikator_nilai === (int)$ind->id);
+                        return [
+                            'nama_indikator'  => $ind->name,
+                            'bobot_indikator' => $ind->bobot,
+                            'nilai_input'     => $nilaiRecord ? $nilaiRecord->nilai : null,
+                        ];
+                    })->values()->toArray();
 
-            $nilaiPerJenis[$jn->id] = [
-                'sum_konversi'     => $sumKonversi,
-                'avg_input'        => $avgInput,
-                'terisi'           => $terisi,
-                'max_jenis'        => $jn->bobot,
-                'detail_indikator' => $detailIndikator,
+                $nilaiPerJenis[$jn->id] = [
+                    'sum_konversi'     => $sumKonversi,
+                    'avg_input'        => $avgInput,
+                    'terisi'           => $terisi,
+                    'max_jenis'        => $jn->bobot,
+                    'detail_indikator' => $detailIndikator,
+                ];
+
+                $totalNilai     += $sumKonversi;
+                $totalTerisi    += $terisi;
+                $totalIndikator += count($indikatorDiizinkan);
+            }
+
+            $isPrioritasUser = match($roleName) {
+                'penguji' => $ctx['pesertaKelompokIds']->contains($p->id),
+                'pic'     => $ctx['pesertaPicIds']->contains($p->id),
+                default   => false,
+            };
+
+            return [
+                'peserta_id'        => $p->id,
+                'nama'              => $p->nama_lengkap,
+                'nip'               => $p->nip_nrp,
+                'ndh'               => $p->ndh,
+                'kelompok'          => $kelompokRow?->nama_kelompok,
+                'nilai_per_jenis'   => $nilaiPerJenis,
+                'angkatan'          => $kelompokRow ? trim(($kelompokRow->nama_angkatan ?? '') . ' ' . ($kelompokRow->tahun ?? '')) : null,
+                'catatan'           => $catatanList,
+                'total_nilai'       => round($totalNilai, 2),
+                'kelengkapan'       => $totalIndikator > 0 ? round(($totalTerisi / $totalIndikator) * 100) : 0,
+                'is_prioritas_user' => $isPrioritasUser,
             ];
+        });
 
-            $totalNilai     += $sumKonversi;
-            $totalTerisi    += $terisi;
-            $totalIndikator += count($indikatorDiizinkan);
-        }
-
-        $isPrioritasUser = match($roleName) {
-            'penguji' => $ctx['pesertaKelompokIds']->contains($p->id),
-            'pic'     => $ctx['pesertaPicIds']->contains($p->id),
-            default   => false,
-        };
-
-        return [
-            'peserta_id'        => $p->id,
-            'nama'              => $p->nama_lengkap,
-            'nip'               => $p->nip_nrp,
-            'ndh'               => $p->ndh,
-            'kelompok'          => $kelompokRow?->nama_kelompok,
-            'nilai_per_jenis'   => $nilaiPerJenis,
-            'catatan'           => $catatanList,
-            'total_nilai'       => round($totalNilai, 2),
-            'kelengkapan'       => $totalIndikator > 0 ? round(($totalTerisi / $totalIndikator) * 100) : 0,
-            'is_prioritas_user' => $isPrioritasUser,
-        ];
-    });
-
-    return view('admin.nilai.rekap', compact(
-        'jenis','jenisPelatihan','rekapData',
-        'jenisNilaiList','angkatanRomawi','tahunList','kelompokList',
-        'wilayahList','pengujiList','pesertaPaginated','showTotal'
-    ));
-}
+        return view('admin.nilai.rekap', compact(
+            'jenis','jenisPelatihan','rekapData',
+            'jenisNilaiList','angkatanRomawi','tahunList','kelompokList',
+            'wilayahList','pengujiList','pesertaPaginated','showTotal'
+        ));
+    }
 }
