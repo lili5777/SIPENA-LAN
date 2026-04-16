@@ -1601,6 +1601,7 @@
                     'IV/b': { pangkat: 'Pembina Tingkat I',        description: 'Golongan IVb - Pembina Tingkat I' },
                     'IV/c': { pangkat: 'Pembina Muda',             description: 'Golongan IVc - Pembina Muda' },
                     'IV/d': { pangkat: 'Pembina Madya',            description: 'Golongan IVd - Pembina Madya' },
+                    'IV/e': { pangkat: 'Pembina Utama',            description: 'Golongan IVe - Pembina Utama' },
                 };
 
                 function updatePangkat() {
@@ -1631,6 +1632,7 @@
                     'II/a':'Pengatur Muda','II/b':'Pengatur Muda Tingkat I','II/c':'Pengatur','II/d':'Pengatur Tingkat I',
                     'III/a':'Penata Muda','III/b':'Penata Muda Tingkat I','III/c':'Penata','III/d':'Penata Tingkat I',
                     'IV/a':'Pembina','IV/b':'Pembina Tingkat I','IV/c':'Pembina Utama Muda','IV/d':'Pembina Utama Madya',
+                    'IV/e':'Pembina Utama',
                 };
 
                 if (golonganMentorBaru.value) pangkatMentorBaru.value = map[golonganMentorBaru.value] || '';

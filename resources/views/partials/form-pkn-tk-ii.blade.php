@@ -405,6 +405,7 @@
             <option value="IV/b" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'IV/b' ? 'selected' : '' }}>IV/b</option>
             <option value="IV/c" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'IV/c' ? 'selected' : '' }}>IV/c</option>
             <option value="IV/d" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'IV/d' ? 'selected' : '' }}>IV/d</option>
+            <option value="IV/e" {{ ($peserta['kepegawaian']['golongan_ruang'] ?? old('golongan_ruang')) == 'IV/e' ? 'selected' : '' }}>IV/e</option>
         </select>
         @error('golongan_ruang')
             <div class="error-message">
@@ -1242,7 +1243,7 @@
                 <select name="golongan_mentor_baru" id="golongan_mentor_baru"
                     class="form-select @error('golongan_mentor_baru') error @enderror">
                     <option value="">-- Pilih Golongan Ruang --</option>
-                    @foreach(['II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d'] as $gol)
+                    @foreach(['II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d','IV/e'] as $gol)
                         <option value="{{ $gol }}"
                             {{ ($peserta['golongan_mentor_baru'] ?? old('golongan_mentor_baru')) == $gol ? 'selected' : '' }}>
                             {{ $gol }}
