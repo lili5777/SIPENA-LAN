@@ -119,7 +119,7 @@
                             </label>
                             <select class="form-select @error('golongan') is-invalid @enderror" id="golongan" name="golongan">
                                 <option value="">-- Pilih Golongan Ruang --</option>
-                                @foreach(['II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d'] as $gol)
+                                @foreach(['II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d','IV/e'] as $gol)
                                     <option value="{{ $gol }}"
                                         {{ old('golongan', $isEdit ? $penguji->golongan : '') == $gol ? 'selected' : '' }}>
                                         {{ $gol }}
@@ -548,6 +548,7 @@ document.addEventListener('DOMContentLoaded', function () {
         'III/c':'Penata','III/d':'Penata Tingkat I',
         'IV/a':'Pembina','IV/b':'Pembina Tingkat I',
         'IV/c':'Pembina Utama Muda','IV/d':'Pembina Utama Madya',
+        'IV/e':'Pembina Utama'
     };
     const golSel       = document.getElementById('golongan');
     const pangkatInput = document.getElementById('pangkat');

@@ -302,7 +302,11 @@
                     <td style="width: 25%;">
                         <div class="signature-box">
                             Makassar,..............<br><br>
-                            <strong>Ketua Squad {{ $jenis_pelatihan }} ANG. {{ $angkatan }}</strong>
+                            <strong>
+                                Ketua Squad 
+                                {{ $jenis_pelatihan == 'LATSAR' ? 'Latsar' : $jenis_pelatihan }} 
+                                Angk. {{ $angkatan }}
+                            </strong>
                             <br><br><br><br>
                             ..............................
                         </div>
