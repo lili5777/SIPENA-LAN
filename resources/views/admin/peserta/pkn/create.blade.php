@@ -572,6 +572,7 @@ $isPKN = $jenis === 'pkn';
                                         <option value="IV/b" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/b') || old('golongan_ruang') == 'IV/b' ? 'selected' : '' }}>IV/b</option>
                                         <option value="IV/c" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/c') || old('golongan_ruang') == 'IV/c' ? 'selected' : '' }}>IV/c</option>
                                         <option value="IV/d" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/d') || old('golongan_ruang') == 'IV/d' ? 'selected' : '' }}>IV/d</option>
+                                        <option value="IV/e" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/e') || old('golongan_ruang') == 'IV/e' ? 'selected' : '' }}>IV/e</option>
                                     </select>
                                     @error('golongan_ruang')
                                         <small class="text-danger">{{ $message }}</small>
@@ -2790,7 +2791,8 @@ $isPKN = $jenis === 'pkn';
                 'IV/a': { pangkat: 'Pembina', description: 'Golongan IVa - Pembina' },
                 'IV/b': { pangkat: 'Pembina Tingkat I', description: 'Golongan IVb - Pembina Tingkat I' },
                 'IV/c': { pangkat: 'Pembina Muda', description: 'Golongan IVc - Pembina Muda' },
-                'IV/d': { pangkat: 'Pembina Madya', description: 'Golongan IVd - Pembina Madya' }
+                'IV/d': { pangkat: 'Pembina Madya', description: 'Golongan IVd - Pembina Madya' },
+                'IV/e': { pangkat: 'Pembina Utama', description: 'Golongan IVe - Pembina Utama' }
             };
 
             // Mentor elements

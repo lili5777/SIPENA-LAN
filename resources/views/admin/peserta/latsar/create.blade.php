@@ -617,6 +617,7 @@ $isPKN = $jenis === 'pkn';
                                         <option value="IV/b" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/b') || old('golongan_ruang') == 'IV/b' ? 'selected' : '' }}>IV/b</option>
                                         <option value="IV/c" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/c') || old('golongan_ruang') == 'IV/c' ? 'selected' : '' }}>IV/c</option>
                                         <option value="IV/d" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/d') || old('golongan_ruang') == 'IV/d' ? 'selected' : '' }}>IV/d</option>
+                                        <option value="IV/e" {{ ($kepegawaianData && $kepegawaianData->golongan_ruang == 'IV/e') || old('golongan_ruang') == 'IV/e' ? 'selected' : '' }}>IV/e</option>
                                     </select>
                                     @error('golongan_ruang')
                                         <small class="text-danger">{{ $message }}</small>
@@ -965,6 +966,7 @@ $isPKN = $jenis === 'pkn';
                                                 <option value="IV/b">IV/b</option>
                                                 <option value="IV/c">IV/c</option>
                                                 <option value="IV/d">IV/d</option>
+                                                <option value="IV/e">IV/e</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -1885,7 +1887,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const pangkatMapping = {
         'II/a':'Pengatur Muda','II/b':'Pengatur Muda Tingkat I','II/c':'Pengatur','II/d':'Pengatur Tingkat I',
         'III/a':'Penata Muda','III/b':'Penata Muda Tingkat I','III/c':'Penata','III/d':'Penata Tingkat I',
-        'IV/a':'Pembina','IV/b':'Pembina Tingkat I','IV/c':'Pembina Muda','IV/d':'Pembina Madya'
+        'IV/a':'Pembina','IV/b':'Pembina Tingkat I','IV/c':'Pembina Muda','IV/d':'Pembina Madya','IV/e':'Pembina Utama'
     };
 
     // File inputs
