@@ -330,7 +330,8 @@ Route::middleware('auth')->group(function () {
     
 
     // Export routes
-
+    Route::get('admin/export/nilai/preview', [ExportNilaiController::class, 'previewData'])
+    ->name('admin.export.nilai.preview');
     // Export Nilai Peserta
     Route::get('/admin/export/nilai-peserta',          [ExportNilaiController::class, 'index'])
         ->name('admin.export.nilaipeserta');

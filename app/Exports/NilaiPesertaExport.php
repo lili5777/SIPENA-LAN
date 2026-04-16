@@ -111,7 +111,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
     // =========================================================
     // AMBIL DATA PESERTA + NILAI
     // =========================================================
-    private function getData(): array
+    public function getDataPublic(): array
     {
         $jenisNilaiList = JenisNilai::where('id_jenis_pelatihan', $this->jenisPelatihanId)
             ->with(['indikatorNilai' => fn($q) => $q->orderBy('id')])
@@ -276,7 +276,7 @@ class NilaiPesertaExport implements WithEvents, WithTitle
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet          = $event->sheet->getDelegate();
-                $data           = $this->getData();
+                $data = $this->getDataPublic();
                 $jenisNilaiList = $data['jenisNilaiList'];
                 $rows           = $data['rows'];
                 $jp             = JenisPelatihan::find($this->jenisPelatihanId);

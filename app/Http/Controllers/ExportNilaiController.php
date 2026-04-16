@@ -131,4 +131,102 @@ class ExportNilaiController extends Controller
             $fileName
         );
     }
+
+    // =========================================================
+    // PREVIEW DATA — AJAX, return JSON untuk tabel inline
+    // =========================================================
+    public function previewData(Request $request)
+    {
+        $request->validate([
+            'jenis_pelatihan' => 'required|exists:jenis_pelatihan,id',
+        ]);
+
+        // Reuse logic getData() dari Export class
+        $export = new \App\Exports\NilaiPesertaExport(
+            (int) $request->jenis_pelatihan,
+            $request->input('angkatan'),
+            $request->input('tahun'),
+            $request->input('kelompok'),
+            $request->input('search'),
+            $request->input('kategori'),
+            ($request->input('kategori') === 'FASILITASI') ? $request->input('wilayah') : null,
+        );
+
+        // getData() perlu dijadikan public — lihat langkah 3
+        $data           = $export->getDataPublic();
+        $jenisNilaiList = $data['jenisNilaiList'];
+        $rows           = $data['rows'];
+
+        $result = [];
+        foreach ($rows as $idx => $row) {
+            $p   = $row['peserta'];
+            $kep = $row['kepegawaian'];
+
+            $indikatorValues = [];
+            foreach ($jenisNilaiList as $jn) {
+                foreach ($jn->indikatorNilai as $ind) {
+                    $val = $row['nilai_per_jenis'][$jn->id][$ind->id] ?? null;
+                    $indikatorValues[] = [
+                        'jenis_id'   => $jn->id,
+                        'jenis_nama' => $jn->name,
+                        'jenis_bobot'=> $jn->bobot,
+                        'ind_id'     => $ind->id,
+                        'ind_nama'   => $ind->name,
+                        'ind_bobot'  => $ind->bobot,
+                        'nilai'      => $val,
+                    ];
+                }
+            }
+
+            $result[] = [
+                'no'           => $idx + 1,
+                'ndh'          => $p->ndh ?? '-',
+                'nama'         => $p->nama_lengkap ?? '-',
+                'nip'          => $p->nip_nrp ?? '-',
+                'jabatan'      => $kep->jabatan ?? '-',
+                'instansi'     => $kep->asal_instansi ?? '-',
+                'pangkat'      => $kep->pangkat ?? '-',
+                'golongan'     => $kep->golongan_ruang ?? '-',
+                'indikator'    => $indikatorValues,
+                'total'        => $row['total_nilai'],
+                'kualifikasi'  => $this->getKualifikasiLabel($row['total_nilai']),
+                'catatan'      => $row['catatan'] ?? '',
+                'penguji'      => $row['nama_penguji'],
+                'coach'        => $row['nama_coach'],
+            ];
+        }
+
+        // Bangun struktur header jenis+indikator untuk frontend
+        $headers = [];
+        foreach ($jenisNilaiList as $jn) {
+            $headers[] = [
+                'id'       => $jn->id,
+                'nama'     => $jn->name,
+                'bobot'    => $jn->bobot,
+                'indikator'=> $jn->indikatorNilai->map(fn($i) => [
+                    'id'    => $i->id,
+                    'nama'  => $i->name,
+                    'bobot' => $i->bobot,
+                ])->values(),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'total'   => count($result),
+            'headers' => $headers,
+            'rows'    => $result,
+        ]);
+    }
+
+    // Helper kualifikasi label saja (tanpa warna, warna di JS)
+    private function getKualifikasiLabel(float $total): string
+    {
+        if ($total > 100) return 'Salah';
+        if ($total > 90)  return 'Sangat Memuaskan';
+        if ($total > 80)  return 'Memuaskan';
+        if ($total > 70)  return 'Cukup Memuaskan';
+        if ($total > 60)  return 'Kurang Memuaskan';
+        return 'Tidak Memuaskan';
+    }
 }

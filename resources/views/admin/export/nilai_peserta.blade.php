@@ -169,6 +169,23 @@
         cursor: not-allowed; transform: none; box-shadow: none;
     }
 
+    .btn-preview-main {
+    display: inline-flex; align-items: center; gap: .6rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-lt));
+    color: #fff; border: none; border-radius: 8px;
+    padding: .7rem 2rem; font-size: .95rem; font-weight: 700;
+    cursor: pointer; transition: all .25s; min-width: 180px;
+    justify-content: center;
+}
+.btn-preview-main:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(40,84,150,.3);
+}
+.btn-preview-main:disabled {
+    background: linear-gradient(135deg, #94A3B8, #CBD5E1);
+    cursor: not-allowed; transform: none; box-shadow: none;
+}
+
     /* ── Info card ───────────────────────────────────── */
     .info-grid {
         display: grid;
@@ -384,7 +401,11 @@
                     </div>
 
                     {{-- Tombol --}}
+                    {{-- Ganti bagian tombol yang lama dengan ini --}}
                     <div class="full-row" style="display:flex; align-items:flex-end; justify-content:flex-end; gap:1rem; flex-wrap:wrap;">
+                        <button type="button" class="btn-preview-main" id="previewBtn" disabled>
+                            <i class="fas fa-eye"></i> Preview Data
+                        </button>
                         <button type="submit" class="btn-export-main" id="exportBtn" disabled>
                             <i class="fas fa-file-excel"></i> Download Excel
                         </button>
@@ -400,7 +421,33 @@
             </div>
         </div>
     </div>
-
+    {{-- ===== SECTION PREVIEW ===== --}}
+<div id="previewSection" style="display:none; animation: fadeUp .4s ease both;">
+    <div class="ex-card">
+        <div class="ex-card-header" style="background: linear-gradient(135deg, #1B3A6B 0%, #285496 100%);">
+            <div class="icon-wrap"><i class="fas fa-table"></i></div>
+            <div style="flex:1;">
+                <h5>Preview Data Export</h5>
+                <small id="previewSubtitle">— peserta ditemukan</small>
+            </div>
+            {{-- Tombol download ada di sini juga --}}
+            <button type="button" id="exportBtnPreview"
+                onclick="document.getElementById('exportForm').submit()"
+                style="
+                    display:inline-flex; align-items:center; gap:.5rem;
+                    background:linear-gradient(135deg,#10B981,#34D399);
+                    color:#fff; border:none; border-radius:8px;
+                    padding:.6rem 1.4rem; font-size:.9rem; font-weight:700;
+                    cursor:pointer; transition:all .25s;
+                ">
+                <i class="fas fa-file-excel"></i> Download Excel
+            </button>
+        </div>
+        <div class="ex-card-body" style="padding:0; overflow-x:auto;">
+            <div id="previewTableWrap" style="min-width:100%;"></div>
+        </div>
+    </div>
+</div>
     {{-- ===== INFO CARD ===== --}}
     <div class="ex-card">
         <div class="ex-card-header">
@@ -535,12 +582,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const wilayahGrp  = document.getElementById('wilayahGroup');
     const wilayahInp  = document.getElementById('wilayah');
     const exportBtn   = document.getElementById('exportBtn');
-    const previewBox  = document.getElementById('previewBox');
+    const previewBtn  = document.getElementById('previewBtn');
+    const previewSection = document.getElementById('previewSection');
+    const previewSubtitle = document.getElementById('previewSubtitle');
+    const previewTableWrap = document.getElementById('previewTableWrap');
     const form        = document.getElementById('exportForm');
 
-    const serverJenisNilai = @json($jenisNilaiList);
-
-    // ── Toggle wilayah field ──────────────────────────
+    // ── Toggle wilayah ────────────────────────────────
     function toggleWilayah() {
         if (kategoriSel.value === 'FASILITASI') {
             wilayahGrp.classList.add('show');
@@ -550,46 +598,211 @@ document.addEventListener('DOMContentLoaded', function () {
             wilayahInp.classList.remove('is-active');
         }
     }
-    toggleWilayah(); // jalankan saat load
+    toggleWilayah();
     kategoriSel.addEventListener('change', toggleWilayah);
 
-    // ── Enable/disable export button ──────────────────
-    function checkExportReady() {
-        if (jenisSel.value) {
-            exportBtn.disabled = false;
+    // ── Enable/disable tombol ─────────────────────────
+    function checkReady() {
+        const ok = !!jenisSel.value;
+        exportBtn.disabled  = !ok;
+        previewBtn.disabled = !ok;
+        if (ok) {
             jenisSel.classList.add('is-active');
             jenisSel.classList.remove('is-required');
         } else {
-            exportBtn.disabled = true;
             jenisSel.classList.remove('is-active');
         }
     }
-    checkExportReady();
+    checkReady();
     jenisSel.addEventListener('change', function () {
-        checkExportReady();
-        previewBox.classList.remove('show');
+        checkReady();
+        // Reset preview kalau jenis pelatihan berubah
+        previewSection.style.display = 'none';
     });
 
-    // ── Highlight filter aktif ────────────────────────
-    ['angkatan', 'tahun', 'kelompok', 'search', 'kategori'].forEach(id => {
+    // Sembunyikan preview juga kalau filter lain berubah
+    ['angkatan','tahun','kelompok','search','kategori'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         const check = () => {
-            if (el.value && el.value !== '') el.classList.add('is-active');
+            if (el.value) el.classList.add('is-active');
             else el.classList.remove('is-active');
+            previewSection.style.display = 'none';
         };
         check();
         el.addEventListener('change', check);
-        el.addEventListener('input', check);
+        el.addEventListener('input',  check);
     });
-
-    // Highlight wilayah input secara terpisah
     wilayahInp.addEventListener('input', function () {
-        if (this.value.trim()) this.classList.add('is-active');
-        else this.classList.remove('is-active');
+        this.classList.toggle('is-active', !!this.value.trim());
+        previewSection.style.display = 'none';
     });
 
-    // ── Form submit ───────────────────────────────────
+    // ── Warna kualifikasi (mirror PHP) ────────────────
+    function kualifikasiStyle(total) {
+        if (total > 90) return { bg: '#1B6B3A', fg: '#fff' };
+        if (total > 80) return { bg: '#28a745', fg: '#fff' };
+        if (total > 70) return { bg: '#1A6EA8', fg: '#fff' };
+        if (total > 60) return { bg: '#E07B00', fg: '#fff' };
+        return { bg: '#C0392B', fg: '#fff' };
+    }
+    function totalStyle(total) {
+        if (total >= 80) return { bg: '#28a745', fg: '#fff' };
+        if (total >= 60) return { bg: '#ffc107', fg: '#212529' };
+        if (total > 0)   return { bg: '#dc3545', fg: '#fff' };
+        return { bg: '#adb5bd', fg: '#fff' };
+    }
+
+    // ── Klik Preview ──────────────────────────────────
+    previewBtn.addEventListener('click', function () {
+        if (!jenisSel.value) {
+            jenisSel.classList.add('is-required');
+            jenisSel.focus();
+            return;
+        }
+
+        // Ambil semua params filter
+        const params = new URLSearchParams({
+            jenis_pelatihan: jenisSel.value,
+            angkatan:  document.getElementById('angkatan').value,
+            tahun:     document.getElementById('tahun').value,
+            kelompok:  document.getElementById('kelompok').value,
+            search:    document.getElementById('search').value,
+            kategori:  kategoriSel.value,
+            wilayah:   wilayahInp.value,
+        });
+
+        // Loading state
+        previewBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat...';
+        previewBtn.disabled  = true;
+        previewSection.style.display = 'none';
+
+        fetch('{{ route("admin.export.nilai.preview") }}?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            previewBtn.innerHTML = '<i class="fas fa-eye"></i> Preview Data';
+            previewBtn.disabled  = false;
+
+            if (!data.success) {
+                alert('Gagal memuat preview.');
+                return;
+            }
+
+            // ── Subtitle ──────────────────────────────
+            previewSubtitle.textContent = data.total + ' peserta ditemukan';
+
+            // ── Bangun tabel ──────────────────────────
+            let html = `
+            <table style="
+                border-collapse:collapse; font-size:.78rem;
+                white-space:nowrap; width:100%;
+            ">
+            <thead>`;
+
+            // Baris header 1 — identitas + jenis nilai
+            html += `<tr>`;
+            const identCols = ['No','NDH','Nama Peserta','NIP/NRP','Jabatan','Instansi','Pangkat','Golongan'];
+            identCols.forEach(h => {
+                html += `<th rowspan="2" style="
+                    background:#1B3A6B; color:#fff; border:1px solid #CBD5E1;
+                    padding:.45rem .6rem; text-align:center; vertical-align:middle;
+                ">${h}</th>`;
+            });
+            data.headers.forEach(jn => {
+                html += `<th colspan="${jn.indikator.length}" style="
+                    background:#285496; color:#fff; border:1px solid #CBD5E1;
+                    padding:.45rem .6rem; text-align:center;
+                ">${jn.nama}<br><small style="font-weight:400;opacity:.85;">(Bobot ${jn.bobot}%)</small></th>`;
+            });
+            html += `<th rowspan="2" style="background:#10803B;color:#fff;border:1px solid #CBD5E1;padding:.45rem .6rem;text-align:center;vertical-align:middle;">TOTAL</th>`;
+            html += `<th rowspan="2" style="background:#5B2D8E;color:#fff;border:1px solid #CBD5E1;padding:.45rem .6rem;text-align:center;vertical-align:middle;">KUALIFIKASI</th>`;
+            html += `<th rowspan="2" style="background:#6B5E8C;color:#fff;border:1px solid #CBD5E1;padding:.45rem .6rem;text-align:center;vertical-align:middle;">CATATAN</th>`;
+            html += `<th rowspan="2" style="background:#8B5CF6;color:#fff;border:1px solid #CBD5E1;padding:.45rem .6rem;text-align:center;vertical-align:middle;">PENGUJI</th>`;
+            html += `<th rowspan="2" style="background:#A855F7;color:#fff;border:1px solid #CBD5E1;padding:.45rem .6rem;text-align:center;vertical-align:middle;">COACH</th>`;
+            html += `</tr>`;
+
+            // Baris header 2 — indikator
+            html += `<tr>`;
+            data.headers.forEach(jn => {
+                jn.indikator.forEach(ind => {
+                    html += `<th style="
+                        background:#3A6BC7; color:#fff; border:1px solid #CBD5E1;
+                        padding:.4rem .55rem; text-align:center; max-width:120px;
+                        white-space:normal; vertical-align:middle;
+                    ">${ind.nama}<br><small style="font-weight:400;opacity:.85;">(${ind.bobot}%)</small></th>`;
+                });
+            });
+            html += `</tr></thead><tbody>`;
+
+            // Baris data
+            if (data.rows.length === 0) {
+                const totalHeaderCols = 8 + data.headers.reduce((s,jn) => s + jn.indikator.length, 0) + 5;
+                html += `<tr><td colspan="${totalHeaderCols}" style="text-align:center;padding:2rem;color:#64748B;font-style:italic;">
+                    <i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
+                    Tidak ada data peserta dengan filter tersebut
+                </td></tr>`;
+            } else {
+                data.rows.forEach((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    const rowBg  = isEven ? '#EEF3FB' : '#FFFFFF';
+
+                    html += `<tr style="background:${rowBg};">`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .5rem;text-align:center;">${row.no}</td>`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .5rem;text-align:center;font-family:monospace;">${row.ndh}</td>`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .6rem;max-width:200px;white-space:normal;">${row.nama}</td>`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .5rem;font-family:monospace;">${row.nip}</td>`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .6rem;max-width:180px;white-space:normal;">${row.jabatan}</td>`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .6rem;max-width:180px;white-space:normal;">${row.instansi}</td>`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .5rem;text-align:center;">${row.pangkat}</td>`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .5rem;text-align:center;">${row.golongan}</td>`;
+
+                    // Kolom nilai indikator
+                    row.indikator.forEach(ind => {
+                        if (ind.nilai !== null) {
+                            html += `<td style="border:1px solid #E2E8F0;padding:.35rem .5rem;text-align:center;">${parseFloat(ind.nilai).toFixed(2)}</td>`;
+                        } else {
+                            html += `<td style="border:1px solid #E2E8F0;padding:.35rem .5rem;text-align:center;background:#FFF3CD;color:#92400E;font-style:italic;font-size:.72rem;">belum</td>`;
+                        }
+                    });
+
+                    // Total
+                    const ts = totalStyle(row.total);
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .5rem;text-align:center;font-weight:700;background:${ts.bg};color:${ts.fg};">${row.total.toFixed(2)}</td>`;
+
+                    // Kualifikasi
+                    const ks = kualifikasiStyle(row.total);
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .55rem;text-align:center;font-weight:600;background:${ks.bg};color:${ks.fg};white-space:normal;max-width:110px;">${row.kualifikasi}</td>`;
+
+                    // Catatan
+                    const cat = row.catatan ? row.catatan.replace(/\n/g, '<br>') : '—';
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .6rem;background:#F3F0FA;color:#4A3B6B;max-width:200px;white-space:normal;font-size:.75rem;">${cat}</td>`;
+
+                    // Penguji & Coach
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .6rem;text-align:center;max-width:160px;white-space:normal;">${row.penguji}</td>`;
+                    html += `<td style="border:1px solid #E2E8F0;padding:.35rem .6rem;text-align:center;max-width:160px;white-space:normal;">${row.coach}</td>`;
+
+                    html += `</tr>`;
+                });
+            }
+            html += `</tbody></table>`;
+
+            previewTableWrap.innerHTML = html;
+            previewSection.style.display = 'block';
+
+            // Scroll smooth ke preview
+            previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        })
+        .catch(err => {
+            console.error(err);
+            previewBtn.innerHTML = '<i class="fas fa-eye"></i> Preview Data';
+            previewBtn.disabled  = false;
+            alert('Terjadi kesalahan saat memuat preview. Coba lagi.');
+        });
+    });
+
+    // ── Submit form (download) ────────────────────────
     form.addEventListener('submit', function (e) {
         if (!jenisSel.value) {
             e.preventDefault();
@@ -597,18 +810,23 @@ document.addEventListener('DOMContentLoaded', function () {
             jenisSel.focus();
             return false;
         }
-
-        // Jika kategori bukan FASILITASI, pastikan wilayah dikosongkan
         if (kategoriSel.value !== 'FASILITASI') {
             wilayahInp.value = '';
         }
-
         exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
         exportBtn.disabled  = true;
-
+        const btnPreview = document.getElementById('exportBtnPreview');
+        if (btnPreview) {
+            btnPreview.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            btnPreview.disabled = true;
+        }
         setTimeout(() => {
             exportBtn.innerHTML = '<i class="fas fa-file-excel"></i> Download Excel';
             exportBtn.disabled  = false;
+            if (btnPreview) {
+                btnPreview.innerHTML = '<i class="fas fa-file-excel"></i> Download Excel';
+                btnPreview.disabled = false;
+            }
         }, 12000);
     });
 });
