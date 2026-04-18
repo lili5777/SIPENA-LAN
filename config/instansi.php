@@ -92,6 +92,7 @@ return [
     'Pemerintah Provinsi Kepulauan Riau',
     'Pemerintah Provinsi Sulawesi Barat',
     'Pemerintah Provinsi Papua Barat',
+    'Pemerintah Provinsi Papua Selatan',
     'Kementerian Pendayagunaan Aparatur Negara dan Reformasi Birokrasi',
     'Badan Pengawas Pasar modal dan Lembaga Keuangan',
     'Badan Pengkajian Ekonomi, Keuangan dan Kerjasama Internasional',
