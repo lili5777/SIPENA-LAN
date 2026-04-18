@@ -2632,7 +2632,7 @@
 
         if (isset($jenisPelatihanData->kode_pelatihan) && $jenisPelatihanData->kode_pelatihan == "LATSAR") {
             $dokumenPendaftaran = array_filter($dokumenPendaftaran, function ($dokumen) {
-                return !in_array($dokumen['field'], ['file_pakta_integritas', 'file_surat_komitmen', 'file_surat_kelulusan_seleksi', 'file_surat_bebas_narkoba', 'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan', 'file_persetujuan_mentor']);
+                return !in_array($dokumen['field'], ['file_surat_kesediaan','file_pakta_integritas', 'file_surat_komitmen', 'file_surat_kelulusan_seleksi', 'file_surat_bebas_narkoba', 'file_surat_pernyataan_administrasi', 'file_sertifikat_penghargaan', 'file_persetujuan_mentor']);
             });
         }
 

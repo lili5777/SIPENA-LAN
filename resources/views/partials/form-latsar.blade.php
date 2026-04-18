@@ -876,7 +876,7 @@
 </div>
 
 <!-- Unggah scan Surat Penyataan Kesediaan -->
-<div class="form-group">
+{{-- <div class="form-group">
     <label class="form-label required">Unggah scan Surat Penyataan Kesediaan</label>
     <div class="form-file">
         <input type="file" name="file_surat_kesediaan" class="form-file-input @error('file_surat_kesediaan') error @enderror" accept=".pdf">
@@ -901,7 +901,7 @@
     @error('file_surat_kesediaan')
         <small class="text-danger">{{ $message }}</small>
     @enderror
-</div>
+</div> --}}
 
 <!-- Unggah Scan Surat Tugas -->
 <div class="form-group">

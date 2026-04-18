@@ -1223,7 +1223,7 @@ $isPKN = $jenis === 'pkn';
                             </div>
 
                             <!-- Surat Kesediaan -->
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label class="form-label">Unggah Scan Formulir Kesediaan (file dapat diunduh di <a href="https://bit.ly/3VtcljN" target="_blank">Disini</a>)</label>
                                 <div class="form-file">
                                     <input type="file" name="file_surat_kesediaan" id="file_surat_kesediaan"
@@ -1243,7 +1243,7 @@ $isPKN = $jenis === 'pkn';
                                 @error('file_surat_kesediaan')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
-                            </div>
+                            </div> --}}
 
                             <!-- Surat Sehat -->
                             <div class="form-row">
@@ -1894,7 +1894,8 @@ document.addEventListener('DOMContentLoaded', function () {
     [
         {input:'file_ktp',display:'fileKtpName'},{input:'file_sk_cpns',display:'fileSkCpnsName'},
         {input:'file_spmt',display:'fileSpmtName'},{input:'file_skp',display:'fileSkpName'},
-        {input:'file_surat_tugas',display:'fileSuratTugasName'},{input:'file_surat_kesediaan',display:'fileSuratKesediaanName'},
+        {input:'file_surat_tugas',display:'fileSuratTugasName'},
+        // {input:'file_surat_kesediaan',display:'fileSuratKesediaanName'},
         {input:'file_surat_sehat',display:'fileSuratSehatName'}
     ].forEach(({input,display})=>{
         const el=document.getElementById(input), dl=document.getElementById(display);

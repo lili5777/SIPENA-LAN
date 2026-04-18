@@ -421,10 +421,10 @@ public function getAvailableNdh(Request $request)
                     $additionalRules['file_spmt'] = 'required|file|mimes:pdf|max:1024';
                     $additionalMessages['file_spmt.required'] = 'File SPMT wajib diunggah';
                 }
-                if (!$pendaftaran->file_surat_kesediaan) {
-                    $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:1024';
-                    $additionalMessages['file_surat_kesediaan.required'] = 'File Surat Kesediaan wajib diunggah';
-                }
+                // if (!$pendaftaran->file_surat_kesediaan) {
+                //     $additionalRules['file_surat_kesediaan'] = 'required|file|mimes:pdf|max:1024';
+                //     $additionalMessages['file_surat_kesediaan.required'] = 'File Surat Kesediaan wajib diunggah';
+                // }
                 if (!$peserta->file_pas_foto) {
                     $additionalRules['file_pas_foto_cropped'] = 'required|string';
                     $additionalMessages['file_pas_foto_cropped.required'] = 'Foto peserta wajib diunggah ';

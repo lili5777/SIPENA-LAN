@@ -1245,7 +1245,7 @@
                             ['name' => 'file_toefl',      'label' => 'Sertifikat TOEFL',                                      'wajib' => '-'],
                         ];
                         if ($jenisPelatihanData->kode_pelatihan == "LATSAR") {
-                            $kepegawaianDocs = array_filter($kepegawaianDocs, fn($d) => !in_array($d['name'], ['file_sk_jabatan','file_sk_pangkat']));
+                            $kepegawaianDocs = array_filter($kepegawaianDocs, fn($d) => !in_array($d['name'], ['file_sk_jabatan','file_sk_pangkat','file_toefl']));
                         }
                         if (in_array($jenisPelatihanData->kode_pelatihan, ["PKN_TK_II","PKA","PKP"])) {
                             $kepegawaianDocs = array_filter($kepegawaianDocs, fn($d) => !in_array($d['name'], ['file_sk_cpns','file_spmt','file_skp']));
@@ -1303,7 +1303,7 @@
                             ['name' => 'file_persetujuan_mentor',                  'label' => 'Surat Persetujuan Mentor',                                                           'wajib' => 'required'],
                         ];
                         if ($jenisPelatihanData->kode_pelatihan == "LATSAR") {
-                            $pendaftaranDocs = array_filter($pendaftaranDocs, fn($d) => !in_array($d['name'], ['file_pakta_integritas','file_surat_komitmen','file_surat_kelulusan_seleksi','file_surat_bebas_narkoba','file_surat_pernyataan_administrasi','file_persetujuan_mentor']));
+                            $pendaftaranDocs = array_filter($pendaftaranDocs, fn($d) => !in_array($d['name'], ['file_pakta_integritas','file_surat_komitmen','file_surat_kelulusan_seleksi','file_surat_bebas_narkoba','file_surat_pernyataan_administrasi','file_persetujuan_mentor','file_surat_kesediaan']));
                         }
                         if ($jenisPelatihanData->kode_pelatihan == "PKN_TK_II") {
                             $pendaftaranDocs = array_filter($pendaftaranDocs, fn($d) => !in_array($d['name'], ['file_surat_pernyataan_administrasi','file_persetujuan_mentor','file_surat_kesediaan']));

@@ -1303,7 +1303,7 @@ document.addEventListener('DOMContentLoaded', function () {
             { title: 'SPMT',            icon: 'fa-award',         color: 'warning', file: kepegawaian?.file_spmt,              description: 'Surat Pernyataan Melaksanakan Tugas' },
             { title: 'SKP',             icon: 'fa-handshake',     color: 'info',    file: kepegawaian?.file_skp,               description: 'Sasaran Kinerja Pegawai' },
             { title: 'Surat Tugas',     icon: 'fa-tasks',         color: 'primary', file: pendaftaran.file_surat_tugas,        description: 'Surat tugas dari instansi asal' },
-            { title: 'Surat Kesediaan', icon: 'fa-graduation-cap',color: 'success', file: pendaftaran.file_surat_kesediaan,    description: 'Surat kesediaan mengikuti pelatihan' },
+            // { title: 'Surat Kesediaan', icon: 'fa-graduation-cap',color: 'success', file: pendaftaran.file_surat_kesediaan,    description: 'Surat kesediaan mengikuti pelatihan' }, 
             { title: 'Surat Sehat',     icon: 'fa-heartbeat',     color: 'warning', file: pendaftaran.file_surat_sehat,        description: 'Surat keterangan sehat dari dokter' },
         ];
 
